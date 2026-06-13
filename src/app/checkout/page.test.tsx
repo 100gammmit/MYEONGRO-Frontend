@@ -41,4 +41,11 @@ describe("CheckoutPage", () => {
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
+
+  it("keeps payment deferred without an active checkout action", async () => {
+    await renderCheckoutPage({ kind: "tarot" });
+
+    expect(screen.getByText("심층 리딩은 준비 중입니다")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /결제 계속/ })).not.toBeInTheDocument();
+  });
 });

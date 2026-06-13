@@ -1,5 +1,24 @@
 import type { ReactElement } from "react";
 import { render, screen } from "@testing-library/react";
+import { vi } from "vitest";
+
+const mocks = vi.hoisted(() => ({
+  getUserId: vi.fn(),
+  listByUser: vi.fn(),
+}));
+
+vi.mock("@/infrastructure/supabase/auth", () => ({
+  getAuthenticatedUserId: mocks.getUserId,
+}));
+vi.mock("@/infrastructure/supabase/admin-client", () => ({
+  createAdminSupabaseClient: vi.fn(() => ({})),
+}));
+vi.mock("@/infrastructure/supabase/reading-repository", () => ({
+  SupabaseReadingRepository: class {
+    listByUser = mocks.listByUser;
+  },
+}));
+
 import RecordsPage from "./page";
 
 type RecordsSearchParams = {
@@ -15,25 +34,54 @@ async function renderRecordsPage(searchParams: RecordsSearchParams = {}) {
 }
 
 describe("RecordsPage", () => {
+  beforeEach(() => {
+    mocks.getUserId.mockResolvedValue("user-1");
+    mocks.listByUser.mockResolvedValue([]);
+  });
+
   it("shows a safe alert when guest transfer failed", async () => {
     await renderRecordsPage({ guestTransfer: "failed" });
 
     const alert = screen.getByRole("alert");
     expect(alert).toHaveAttribute("aria-live", "assertive");
     expect(alert).toHaveTextContent("로그인은 완료했지만 이전 기록 연결에 실패했어요.");
-    expect(alert).toHaveTextContent("다시 로그인");
-    expect(alert).toHaveTextContent("잠시 후 재시도");
   });
 
-  it("stays quiet when guest transfer is absent", async () => {
+  it("renders active owner readings with status and detail links", async () => {
+    mocks.listByUser.mockResolvedValue([
+      {
+        id: "reading-1",
+        kind: "tarot",
+        status: "completed",
+        title: "관계의 흐름",
+        input: { question: "앞으로의 관계 흐름이 궁금해요." },
+        createdAt: "2026-06-12T00:00:00.000Z",
+      },
+      {
+        id: "reading-2",
+        kind: "saju",
+        status: "failed",
+        title: "Generating...",
+        input: { question: "올해 일의 흐름이 궁금해요." },
+        createdAt: "2026-06-11T00:00:00.000Z",
+      },
+    ]);
+
     await renderRecordsPage();
 
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(mocks.listByUser).toHaveBeenCalledWith("user-1");
+    expect(screen.getByRole("link", { name: /관계의 흐름/ })).toHaveAttribute(
+      "href",
+      "/records/reading-1",
+    );
+    expect(screen.getByText("완료")).toBeInTheDocument();
+    expect(screen.getByText("재시도 필요")).toBeInTheDocument();
   });
 
-  it("stays quiet for non-failed guest transfer values", async () => {
-    await renderRecordsPage({ guestTransfer: "success" });
+  it("shows an authenticated empty state without another login prompt", async () => {
+    await renderRecordsPage();
 
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("아직 저장된 이야기가 없어요")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /로그인/ })).not.toBeInTheDocument();
   });
 });

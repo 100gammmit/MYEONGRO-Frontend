@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { parseFreeReadingRequest } from "./input";
+import {
+  parseFreeReadingRequest,
+  restoreGenerationInput,
+} from "./input";
 
 const requestId = "11111111-1111-4111-8111-111111111111";
 
@@ -98,5 +101,62 @@ describe("parseFreeReadingRequest", () => {
         ],
       }),
     ).toThrow();
+  });
+});
+
+describe("restoreGenerationInput", () => {
+  it("restores canonical tarot cards from persisted card ids", () => {
+    const input = restoreGenerationInput("tarot", {
+      question: "관계의 흐름이 궁금해요.",
+      cards: [
+        { cardId: "major-00-fool", position: "past", reversed: false },
+        { cardId: "major-17-star", position: "present", reversed: false },
+        { cardId: "major-21-world", position: "guidance", reversed: false },
+      ],
+    });
+
+    expect(input).toMatchObject({
+      kind: "tarot",
+      tier: "free",
+      question: "관계의 흐름이 궁금해요.",
+      cards: [
+        { name: "바보", position: "past", reversed: false },
+        { name: "별", position: "present", reversed: false },
+        { name: "세계", position: "guidance", reversed: false },
+      ],
+    });
+  });
+
+  it("restores the server-calculated saju profile without recalculation", () => {
+    const profile = {
+      calendarType: "solar" as const,
+      birthDate: "1995-04-21",
+      birthTime: "14:30",
+      gender: "female" as const,
+      pillars: {
+        year: "乙亥",
+        month: "庚辰",
+        day: "壬午",
+        hour: "丁未",
+      },
+    };
+
+    expect(restoreGenerationInput("saju", {
+      question: "올해의 흐름이 궁금해요.",
+      profile,
+    })).toEqual({
+      kind: "saju",
+      tier: "free",
+      locale: "ko-KR",
+      question: "올해의 흐름이 궁금해요.",
+      profile,
+    });
+  });
+
+  it("rejects malformed persisted input", () => {
+    expect(() => restoreGenerationInput("tarot", {
+      question: "질문",
+      cards: [{ cardId: "unknown" }],
+    })).toThrow();
   });
 });

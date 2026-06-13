@@ -29,6 +29,7 @@ export interface PersistedFreeReading {
   kind: ReadingKind;
   tier: "free";
   status: PersistedFreeReadingStatus;
+  title: string;
   input: Record<string, unknown>;
   result?: ReadingGenerationOutput;
   errorCode?: SafeReadingFailureCode;

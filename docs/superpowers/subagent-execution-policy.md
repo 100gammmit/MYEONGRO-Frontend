@@ -1,9 +1,13 @@
 # Subagent Execution Policy
 
-This policy applies while executing the FortuneReading implementation plan
-with Superpowers subagent-driven development.
+This policy applies only when `AGENTS.md` permits subagent use. The repository
+policy in `AGENTS.md` takes precedence over this document and older
+implementation plans.
 
 ## Core Rule
+
+A subagent may be used only when there are at least three independent tasks.
+Small features and sequential work are implemented directly by the main agent.
 
 A `wait_agent` timeout means only that the agent has not completed yet. It is
 not evidence of a deadlock. Do not interrupt, close, or replace an agent solely
@@ -66,42 +70,29 @@ Treat an agent as genuinely stuck only when:
    the delay.
 
 Only then may the task be resized or reassigned. Preserve any existing edits
-and record the reason in the Notion order/report log.
+and retain the reason for the milestone-level Notion report.
 
 ## Review Flow
 
-For each implementation task:
+- Do not assign a dedicated specification reviewer and code-quality reviewer
+  to every implementation agent.
+- The main agent reviews integrated changes according to risk and scope.
+- Use a separate review agent only when the user requests it or when a
+  milestone-level review is independently useful.
+- Do not run overlapping implementation agents against shared files.
 
-1. Let the implementer finish.
-2. Run local verification.
-3. Dispatch a fresh specification reviewer.
-4. Return valid findings to the same implementer.
-5. Dispatch a fresh code-quality reviewer.
-6. Move to the next task only after both reviews approve.
+## Verification Flow
 
-Do not run overlapping implementation agents against shared files.
+- Run focused tests after each implementation step.
+- Run the full test suite and other repository-wide checks once at the end of
+  the milestone.
+- Broaden verification earlier only for high-risk changes or when explicitly
+  requested.
 
 ## Notion Logging
 
-Create one page per subagent in the `오더/보고 로그` database.
-
-- Record the Korean task order when dispatching.
-- Keep status as `진행` while the agent is running.
-- Update the same page with the Korean result when it finishes.
-- A tool timeout is not a failed result and must not be logged as one.
-- Use database properties only for metadata such as title, category, status,
-  order ID, agent names, execution time, and links.
-- Use `구분` for the primary work type, not for order/report state. Choose one
-  of `기획`, `구현`, `리뷰`, `보안`, `테스트`, `문서`, or `운영·설정`.
-- When work overlaps multiple types, select the type that best represents the
-  main objective. For example, a security vulnerability fix is `보안`, while a
-  routine feature addition is `구현`.
-- Write the full Korean order and result only in the page body with clear sections
-  such as `작업 오더`, `수행 결과`, `검증`, and `참고 사항`.
-- Record usage in the database `사용량` property, not in the page body.
-- Record the exact token count only when the agent tool exposes it. Otherwise,
-  label the value as an estimate and use a range rather than a precise number.
-- Include the assigned model and measurement status in the property, for
-  example: `GPT-5.4 mini · 약 5K-10K tokens · 추정값`.
-- Base estimates on task scope, context size, tool activity, and review depth.
-  Never present an estimated value as billing or API usage data.
+- Do not create one page per task or subagent.
+- Create one Notion page when a milestone is complete.
+- Summarize the milestone goal, major changes, verification, unresolved items,
+  and next milestone on that page.
+- A tool timeout is not a failed result and must not be reported as one.

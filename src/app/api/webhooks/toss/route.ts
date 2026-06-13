@@ -1,13 +1,6 @@
-import { PaymentWebhookService } from "@/domain/payments/payment-webhook-service";
-import { createAdminSupabaseClient } from "@/infrastructure/supabase/admin-client";
-import { SupabasePaymentWebhookRepository } from "@/infrastructure/supabase/payment-webhook-repository";
-import { createTossWebhookPostHandler } from "./handler";
-
-export async function POST(request: Request) {
-  const service = new PaymentWebhookService(
-    new SupabasePaymentWebhookRepository(createAdminSupabaseClient()),
+export async function POST() {
+  return Response.json(
+    { error: "결제 기능은 준비 중입니다." },
+    { status: 410 },
   );
-  return createTossWebhookPostHandler({
-    handle: (input) => service.handle(input),
-  })(request);
 }

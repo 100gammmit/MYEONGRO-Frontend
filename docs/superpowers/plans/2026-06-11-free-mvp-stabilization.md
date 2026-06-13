@@ -1,6 +1,8 @@
 # Free MVP Stabilization Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Follow TDD and complete spec and quality review before moving to the next task.
+> **Current execution policy:** Follow repository `AGENTS.md`. This historical
+> plan does not require task-by-task subagents or dedicated reviewers for each
+> implementation task.
 >
 > **Execution policy:** Follow
 > `docs/superpowers/subagent-execution-policy.md`. In particular, a
@@ -86,6 +88,15 @@
 - Replace checkout/payment CTAs with a clear “준비 중” state.
 - Remove active Google and paid/follow-up entry points for this release.
 - Test empty, completed, failed, deleted, and foreign-owner behavior.
+
+**Status (2026-06-13): Complete.**
+
+- Added authenticated reading list, detail, retry, and soft-delete routes and UI.
+- Added an owner-scoped atomic retry RPC and persisted-input reconstruction.
+- Disabled checkout actions, Toss confirmation, and Toss webhook entry points
+  with explicit preparation-state responses.
+- Applied the retry migration to remote Supabase and verified that only
+  `service_role` can execute it.
 
 ### Task 6: Final security and release verification
 - Verify no public paid/follow-up generation path remains.

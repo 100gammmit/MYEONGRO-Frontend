@@ -25,6 +25,7 @@ function createExistingReading(
     kind: "tarot",
     tier: "free",
     status: "completed",
+    title: "Today",
     input: { kind: "tarot", question: "normalized question" },
     result: {
       title: "Today",

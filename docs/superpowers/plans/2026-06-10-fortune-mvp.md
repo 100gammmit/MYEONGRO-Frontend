@@ -1,6 +1,7 @@
 # Fortune Reading MVP Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Follow TDD for domain behavior.
+> **Current execution policy:** Follow repository `AGENTS.md`. This historical
+> plan does not require task-by-task subagent execution.
 
 **Goal:** Build a mobile-first Korean AI tarot and saju MVP with guest previews, consent, paid deep readings, and two follow-up questions.
 

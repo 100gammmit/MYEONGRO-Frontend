@@ -1,6 +1,8 @@
 # 명로 서비스 리브랜딩 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Current execution policy:** Follow repository `AGENTS.md`. This historical
+> plan does not require task-by-task subagent execution. Steps use checkbox
+> (`- [ ]`) syntax for tracking.
 
 **Goal:** 임시 브랜드 `운담`을 공식 브랜드 `명로`로 교체하고 기존 게스트 세션을 유지한다.
 

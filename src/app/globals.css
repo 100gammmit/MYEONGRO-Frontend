@@ -186,6 +186,33 @@ h1, h2, h3, blockquote { font-family: Georgia, "Noto Serif KR", serif; font-weig
 .danger-zone h2 { font-size: 20px; }
 .danger-zone p { color: #8f98a7; font-size: 13px; }
 .danger-zone button { background: transparent; border: 1px solid rgba(231,164,151,.55); color: var(--danger); padding: 11px 16px; }
+.records-alert { max-width: 760px; margin-bottom: 24px; padding: 18px; border: 1px solid rgba(231,164,151,.4); color: var(--danger); }
+.records-list { display: grid; gap: 14px; max-width: 860px; }
+.record-card { display: flex; justify-content: space-between; gap: 30px; padding: 28px; border: 1px solid var(--line); background: rgba(18,29,49,.65); }
+.record-card:hover { border-color: var(--gold); }
+.record-kind { color: var(--gold-bright); font-size: 11px; letter-spacing: .14em; }
+.record-card h2 { margin: 10px 0; font-size: 24px; }
+.record-card p { margin: 0; color: #959eac; }
+.record-meta { display: flex; min-width: 120px; flex-direction: column; align-items: flex-end; justify-content: space-between; color: #8993a3; font-size: 12px; }
+.record-status { padding: 6px 9px; border: 1px solid var(--line); }
+.record-status.completed { color: var(--gold-bright); }
+.record-status.failed { color: var(--danger); border-color: rgba(231,164,151,.4); }
+.record-detail { max-width: 900px; }
+.record-detail > .eyebrow { margin-top: 55px; }
+.record-detail-header { padding-bottom: 34px; border-bottom: 1px solid var(--line); }
+.record-detail-header h1, .record-state h1 { font-size: clamp(38px, 6vw, 64px); margin-bottom: 18px; }
+.record-detail-header > p, .record-state p { color: #aeb5c0; line-height: 1.8; }
+.record-detail-header blockquote { margin: 30px 0 0; padding-left: 20px; border-left: 2px solid var(--gold); color: var(--gold-bright); }
+.reading-sections { display: grid; gap: 14px; margin: 36px 0; }
+.reading-sections section, .reading-sections article, .reading-guidance { padding: 28px; border: 1px solid var(--line); background: rgba(255,255,255,.02); }
+.reading-sections h2, .reading-sections h3, .reading-guidance h2, .reading-guidance h3 { margin-top: 0; }
+.reading-sections p, .reading-guidance li, .reading-disclaimer { color: #a4acb8; line-height: 1.8; }
+.record-state { margin-top: 35px; padding: 38px; border: 1px solid var(--line); background: rgba(18,29,49,.65); }
+.record-actions { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--line); }
+.record-actions > p { color: var(--danger); }
+.record-actions > div { display: flex; gap: 12px; }
+.record-delete-button { padding: 14px 18px; background: transparent; border: 1px solid rgba(231,164,151,.5); color: var(--danger); }
+.record-delete-button:disabled { opacity: .5; }
 .social-button { border: 0; padding: 16px; font-weight: 700; }
 .kakao { background: #fee500; color: #191919; }
 .auth-card small { color: #7f8997; margin-top: 15px; }
@@ -224,4 +251,6 @@ h1, h2, h3, blockquote { font-family: Georgia, "Noto Serif KR", serif; font-weig
   .saju-insights article { align-items: flex-start; padding: 22px; }
   .saju-insights article > span { width: 52px; height: 52px; }
   .empty-state, .auth-card { padding: 34px 22px; }
+  .record-card { flex-direction: column; padding: 22px; }
+  .record-meta { min-width: 0; flex-direction: row; align-items: center; }
 }

@@ -4,6 +4,7 @@ import type { ReadingGenerationOutput } from "@/domain/generation/contracts";
 import {
   FreeReadingIdempotencyConflictError,
   FreeReadingQuotaExceededError,
+  type FreeReadingGenerationMeta,
   type FreeReadingRepository,
   type FreeReadingRepositoryCreateInput,
   type PersistedFreeReading,
@@ -31,6 +32,7 @@ interface ReadingRow {
   kind: ReadingKind;
   tier: "free";
   status: PersistedFreeReading["status"];
+  title: string;
   input: Record<string, unknown>;
   result: ReadingGenerationOutput | null;
   created_at: string;
@@ -39,7 +41,7 @@ interface ReadingRow {
 }
 
 const readingSelect =
-  "id,user_id,guest_session_id,request_id,input_hash,kind,tier,status,input,result,created_at,updated_at,generation_records(id,provider,model,prompt_version,status,error_code,created_at,updated_at)";
+  "id,user_id,guest_session_id,request_id,input_hash,kind,tier,status,title,input,result,created_at,updated_at,generation_records(id,provider,model,prompt_version,status,error_code,created_at,updated_at)";
 
 export class SupabaseReadingRepository implements FreeReadingRepository {
   constructor(private readonly client: SupabaseClient) {}
@@ -55,6 +57,10 @@ export class SupabaseReadingRepository implements FreeReadingRepository {
       .eq(subjectColumn, subjectValue)
       .eq("request_id", requestId)
       .is("deleted_at", null)
+      .order("created_at", {
+        referencedTable: "generation_records",
+        ascending: false,
+      })
       .maybeSingle();
     if (error) throw new Error(`Failed to read existing reading: ${error.message}`);
     return data ? toPersistedReading(data as ReadingRow) : null;
@@ -133,12 +139,87 @@ export class SupabaseReadingRepository implements FreeReadingRepository {
     return this.findById(input.readingId);
   }
 
+  async listByUser(userId: string): Promise<PersistedFreeReading[]> {
+    const { data, error } = await this.client
+      .from("readings")
+      .select(readingSelect)
+      .eq("user_id", userId)
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .order("created_at", {
+        referencedTable: "generation_records",
+        ascending: false,
+      });
+    if (error) throw new Error(`Failed to list readings: ${error.message}`);
+    return (data as ReadingRow[] | null)?.map(toPersistedReading) ?? [];
+  }
+
+  async findByUserAndId(
+    userId: string,
+    readingId: string,
+  ): Promise<PersistedFreeReading | null> {
+    const { data, error } = await this.client
+      .from("readings")
+      .select(readingSelect)
+      .eq("user_id", userId)
+      .eq("id", readingId)
+      .is("deleted_at", null)
+      .order("created_at", {
+        referencedTable: "generation_records",
+        ascending: false,
+      })
+      .maybeSingle();
+    if (error) throw new Error(`Failed to read owned reading: ${error.message}`);
+    return data ? toPersistedReading(data as ReadingRow) : null;
+  }
+
+  async softDeleteByUserAndId(
+    userId: string,
+    readingId: string,
+  ): Promise<boolean> {
+    const { data, error } = await this.client
+      .from("readings")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("user_id", userId)
+      .eq("id", readingId)
+      .is("deleted_at", null)
+      .select("id")
+      .maybeSingle();
+    if (error) throw new Error(`Failed to delete reading: ${error.message}`);
+    return Boolean(data);
+  }
+
+  async startFailedRetry(
+    userId: string,
+    readingId: string,
+    generation: FreeReadingGenerationMeta,
+  ): Promise<PersistedFreeReading> {
+    const { data, error } = await this.client.rpc("start_failed_reading_retry", {
+      requested_user_id: userId,
+      requested_reading_id: readingId,
+      requested_provider: generation.provider,
+      requested_model: generation.model,
+      requested_prompt_version: generation.promptVersion,
+    });
+    if (error || !(data as Array<{ generation_id: string }> | null)?.[0]) {
+      throw new Error("Failed to start reading retry.");
+    }
+
+    const reading = await this.findByUserAndId(userId, readingId);
+    if (!reading) throw new Error("Retried reading was not found.");
+    return reading;
+  }
+
   private async findById(readingId: string): Promise<PersistedFreeReading> {
     const { data, error } = await this.client
       .from("readings")
       .select(readingSelect)
       .eq("id", readingId)
       .is("deleted_at", null)
+      .order("created_at", {
+        referencedTable: "generation_records",
+        ascending: false,
+      })
       .maybeSingle();
     if (error) throw new Error(`Failed to read reading: ${error.message}`);
     if (!data) throw new Error("Reading state was not found after transition.");
@@ -163,6 +244,7 @@ function toPersistedReading(row: ReadingRow): PersistedFreeReading {
     kind: row.kind,
     tier: row.tier,
     status: row.status,
+    title: row.title,
     input: row.input,
     result: row.result ?? undefined,
     errorCode: generation.errorCode,

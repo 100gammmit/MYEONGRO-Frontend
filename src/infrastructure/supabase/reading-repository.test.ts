@@ -21,6 +21,7 @@ function row(status: "generating" | "completed" | "failed" = "generating") {
     kind: "tarot",
     tier: "free",
     status,
+    title: "Today",
     input: { question: "normalized question" },
     result: status === "completed" ? {
       title: "Today",
@@ -51,7 +52,12 @@ class QueryStub {
   select = vi.fn(() => this);
   eq = vi.fn(() => this);
   is = vi.fn(() => this);
+  order = vi.fn(() => this);
+  update = vi.fn(() => this);
   maybeSingle = vi.fn(async () => this.result);
+  then = (
+    resolve: (value: typeof this.result) => unknown,
+  ) => Promise.resolve(this.result).then(resolve);
 }
 
 function input(): FreeReadingRepositoryCreateInput {
@@ -193,5 +199,76 @@ describe("SupabaseReadingRepository", () => {
     await repository.findByOwnerAndRequestId({ userId }, requestId);
 
     expect(query.is).toHaveBeenCalledWith("deleted_at", null);
+  });
+
+  it("lists only active readings owned by the authenticated user", async () => {
+    const query = new QueryStub();
+    query.result = { data: [row("completed")], error: null };
+    const { client } = clientWith({ data: null, error: null }, query);
+    const repository = new SupabaseReadingRepository(client as never);
+
+    const readings = await repository.listByUser(userId);
+
+    expect(query.eq).toHaveBeenCalledWith("user_id", userId);
+    expect(query.is).toHaveBeenCalledWith("deleted_at", null);
+    expect(query.order).toHaveBeenCalledWith("created_at", { ascending: false });
+    expect(readings).toHaveLength(1);
+    expect(readings[0]).toMatchObject({ id: readingId, status: "completed" });
+  });
+
+  it("returns null for a missing or foreign reading", async () => {
+    const query = new QueryStub();
+    query.result = { data: null, error: null };
+    const { client } = clientWith({ data: null, error: null }, query);
+    const repository = new SupabaseReadingRepository(client as never);
+
+    const reading = await repository.findByUserAndId(userId, "foreign");
+
+    expect(query.eq).toHaveBeenCalledWith("user_id", userId);
+    expect(query.eq).toHaveBeenCalledWith("id", "foreign");
+    expect(query.is).toHaveBeenCalledWith("deleted_at", null);
+    expect(reading).toBeNull();
+  });
+
+  it("soft deletes only an active reading owned by the user", async () => {
+    const query = new QueryStub();
+    query.result = { data: { id: readingId }, error: null };
+    const { client } = clientWith({ data: null, error: null }, query);
+    const repository = new SupabaseReadingRepository(client as never);
+
+    const deleted = await repository.softDeleteByUserAndId(userId, readingId);
+
+    expect(query.update).toHaveBeenCalledWith({
+      deleted_at: expect.any(String),
+    });
+    expect(query.eq).toHaveBeenCalledWith("user_id", userId);
+    expect(query.eq).toHaveBeenCalledWith("id", readingId);
+    expect(query.is).toHaveBeenCalledWith("deleted_at", null);
+    expect(deleted).toBe(true);
+  });
+
+  it("starts a failed reading retry through an owner-scoped atomic RPC", async () => {
+    const query = new QueryStub();
+    query.result = { data: row("generating"), error: null };
+    const { client } = clientWith({
+      data: [{ generation_id: generationId }],
+      error: null,
+    }, query);
+    const repository = new SupabaseReadingRepository(client as never);
+
+    const reading = await repository.startFailedRetry(userId, readingId, {
+      provider: "openai",
+      model: "gpt-test",
+      promptVersion: "2026-06-13.v1",
+    });
+
+    expect(client.rpc).toHaveBeenCalledWith("start_failed_reading_retry", {
+      requested_user_id: userId,
+      requested_reading_id: readingId,
+      requested_provider: "openai",
+      requested_model: "gpt-test",
+      requested_prompt_version: "2026-06-13.v1",
+    });
+    expect(reading.status).toBe("generating");
   });
 });

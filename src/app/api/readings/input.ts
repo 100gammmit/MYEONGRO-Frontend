@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import type { ReadingGenerationInput } from "@/domain/generation/contracts";
+import {
+  readingGenerationInputSchema,
+  type ReadingGenerationInput,
+} from "@/domain/generation/contracts";
 import { calculateFourPillars } from "@/domain/saju";
 import { createThreeCardSpread, type TarotSpreadCard } from "@/domain/tarot";
 
@@ -105,4 +108,62 @@ export function parseFreeReadingRequest(input: unknown): ParsedFreeReadingReques
       profile,
     },
   };
+}
+
+const storedTarotInputSchema = z.object({
+  question: z.string().trim().min(1).max(300),
+  cards: z.array(z.object({
+    cardId: z.string().min(1),
+    position: z.enum(["past", "present", "guidance"]),
+    reversed: z.boolean(),
+  }).strict()).length(3),
+}).strict();
+
+const storedSajuInputSchema = z.object({
+  question: z.string().trim().min(1).max(300),
+  profile: z.object({
+    calendarType: z.literal("solar"),
+    birthDate: z.string().min(1),
+    birthTime: z.string().min(1).optional(),
+    gender: z.enum(["female", "male", "unspecified"]),
+    pillars: z.object({
+      year: z.string().min(1),
+      month: z.string().min(1),
+      day: z.string().min(1),
+      hour: z.string().min(1),
+    }).strict(),
+  }).strict(),
+}).strict();
+
+export function restoreGenerationInput(
+  kind: "tarot" | "saju",
+  input: Record<string, unknown>,
+): ReadingGenerationInput {
+  if (kind === "tarot") {
+    const stored = storedTarotInputSchema.parse(input);
+    const spread = createThreeCardSpread(
+      stored.cards.map(({ cardId, reversed }) => ({ cardId, reversed })),
+    );
+
+    return readingGenerationInputSchema.parse({
+      kind,
+      tier: "free",
+      locale: "ko-KR",
+      question: stored.question,
+      cards: spread.map(({ card, position, reversed }) => ({
+        name: card.name,
+        position,
+        reversed,
+      })),
+    });
+  }
+
+  const stored = storedSajuInputSchema.parse(input);
+  return readingGenerationInputSchema.parse({
+    kind,
+    tier: "free",
+    locale: "ko-KR",
+    question: stored.question,
+    profile: stored.profile,
+  });
 }
