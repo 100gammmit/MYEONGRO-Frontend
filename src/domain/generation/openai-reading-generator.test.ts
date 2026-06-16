@@ -16,26 +16,14 @@ const parsedOutput: ReadingGenerationOutput = {
   disclaimer: "오락과 자기성찰을 위한 참고 자료입니다.",
 };
 
-function tarotInput(
-  tier: ReadingGenerationInput["tier"],
-): ReadingGenerationInput {
-  const base = {
+function tarotInput(): ReadingGenerationInput {
+  return {
     kind: "tarot" as const,
+    tier: "free" as const,
     locale: "ko-KR",
     question: "앞으로의 흐름은 어떤가요?",
     cards: [{ name: "The Star", position: "guidance", reversed: false }],
   };
-
-  return tier === "followup"
-    ? {
-        ...base,
-        tier,
-        previousReading: {
-          title: "이전 리딩",
-          summary: "새로운 가능성을 살펴보세요.",
-        },
-      }
-    : { ...base, tier };
 }
 
 function createGenerator() {
@@ -48,10 +36,7 @@ function createGenerator() {
     parse,
     generator: new OpenAIReadingGenerator({
       client,
-      models: {
-        free: "free-model",
-        paid: "paid-model",
-      },
+      model: "free-model",
     }),
   };
 }
@@ -60,7 +45,7 @@ describe("OpenAIReadingGenerator", () => {
   it("uses the configured free model for free readings", async () => {
     const { generator, parse } = createGenerator();
 
-    const output = await generator.generate(tarotInput("free"));
+    const output = await generator.generate(tarotInput());
 
     expect(output).toEqual(parsedOutput);
     expect(parse).toHaveBeenCalledWith(
@@ -72,27 +57,10 @@ describe("OpenAIReadingGenerator", () => {
     );
   });
 
-  it.each(["paid", "followup"] as const)(
-    "uses the configured paid model for %s readings",
-    async (tier) => {
-      const { generator, parse } = createGenerator();
-
-      await generator.generate(tarotInput(tier));
-
-      expect(parse).toHaveBeenCalledWith(
-        expect.objectContaining({ model: "paid-model" }),
-        expect.objectContaining({
-          timeout: 30_000,
-          maxRetries: 2,
-        }),
-      );
-    },
-  );
-
   it("sends the structured output format and request limits to OpenAI", async () => {
     const { generator, parse } = createGenerator();
 
-    await generator.generate(tarotInput("free"));
+    await generator.generate(tarotInput());
 
     expect(parse).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -116,10 +84,10 @@ describe("OpenAIReadingGenerator", () => {
     } as unknown as Pick<OpenAI, "responses">;
     const generator = new OpenAIReadingGenerator({
       client,
-      models: { free: "free-model", paid: "paid-model" },
+      model: "free-model",
     });
 
-    await expect(generator.generate(tarotInput("free"))).rejects.toMatchObject({
+    await expect(generator.generate(tarotInput())).rejects.toMatchObject({
       code: "OPENAI_READING_GENERATION_FAILED",
       message: "OpenAI reading generation failed",
     });
@@ -134,10 +102,10 @@ describe("OpenAIReadingGenerator", () => {
     } as unknown as Pick<OpenAI, "responses">;
     const generator = new OpenAIReadingGenerator({
       client,
-      models: { free: "free-model", paid: "paid-model" },
+      model: "free-model",
     });
 
-    await expect(generator.generate(tarotInput("free"))).rejects.toMatchObject({
+    await expect(generator.generate(tarotInput())).rejects.toMatchObject({
       code: "OPENAI_READING_GENERATION_FAILED",
       message: "OpenAI reading generation failed",
     });
@@ -154,14 +122,14 @@ describe("OpenAIReadingGenerator", () => {
     } as unknown as Pick<OpenAI, "responses">;
     const generator = new OpenAIReadingGenerator({
       client,
-      models: { free: "free-model", paid: "paid-model" },
+      model: "free-model",
     });
 
-    await expect(generator.generate(tarotInput("free"))).rejects.toMatchObject({
+    await expect(generator.generate(tarotInput())).rejects.toMatchObject({
       code: "OPENAI_READING_TIMEOUT",
       message: "OpenAI reading generation timed out",
     });
-    await expect(generator.generate(tarotInput("free"))).rejects.not.toThrow(
+    await expect(generator.generate(tarotInput())).rejects.not.toThrow(
       "internal provider details",
     );
   });

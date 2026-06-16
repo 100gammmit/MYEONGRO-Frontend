@@ -20,10 +20,7 @@ export function createReadingRuntime(): {
   if (apiKey) {
     generator = new OpenAIReadingGenerator({
       apiKey,
-      models: {
-        free: model,
-        paid: process.env.OPENAI_PAID_MODEL || "gpt-5.4",
-      },
+      model,
     });
     provider = "openai";
     runtimeModel = model;

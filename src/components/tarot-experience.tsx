@@ -1,9 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { MAJOR_ARCANA } from "@/domain/tarot";
 import { ConsentGate } from "./consent-gate";
-import { DeepReadingCta } from "./deep-reading-cta";
 import { ReadingShell } from "./reading-shell";
 
 type TarotReadingSection = {
@@ -280,17 +280,13 @@ export function TarotExperience() {
             </ul>
           </div>
           <p className="reading-disclaimer">{result.disclaimer}</p>
-          <div className="deep-reading">
-            <div>
-              <p className="eyebrow">DEEP READING</p>
-              <h2>더 깊은 해석이 필요하다면</h2>
-              <p>선택한 카드가 남긴 질문을 더 길게 풀어보는 유료 해석으로 이어갈 수 있습니다.</p>
-            </div>
-            <div className="price-box">
-              <strong>3,900원</strong>
-              <span>상세 해설 + 연속 질문 2개</span>
-              <DeepReadingCta kind="tarot" />
-            </div>
+          <div className="result-actions">
+            <Link className="primary-button" href="/tarot">
+              새 타로 리딩 시작
+            </Link>
+            <Link className="secondary-button" href="/records">
+              내 기록 보기
+            </Link>
           </div>
         </>
       ) : null}

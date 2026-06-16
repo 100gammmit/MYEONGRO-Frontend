@@ -154,12 +154,7 @@ h1, h2, h3, blockquote { font-family: Georgia, "Noto Serif KR", serif; font-weig
 .revealed-card strong { font-family: Georgia,serif; font-size: 26px; }
 .revealed-card i { color: var(--gold); font-style: normal; }
 .result-cards article > p { color: #a9b0bb; line-height: 1.7; font-size: 14px; }
-.deep-reading { margin-top: 54px; padding: 35px; border: 1px solid var(--gold); display: flex; align-items: center; justify-content: space-between; gap: 35px; background: rgba(202,169,106,.055); }
-.deep-reading h2 { margin: 0 0 12px; font-size: 28px; }
-.deep-reading p:last-child { color: #9fa7b4; }
-.price-box { min-width: 220px; display: flex; flex-direction: column; gap: 10px; }
-.price-box strong { font-family: Georgia,serif; font-size: 31px; color: var(--gold-bright); }
-.price-box span { color: #9099a8; font-size: 12px; }
+.result-actions { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
 .pillars { display: grid; grid-template-columns: repeat(4,1fr); max-width: 650px; margin: 40px auto; border: 1px solid var(--line); }
 .pillars div { text-align: center; padding: 25px 10px; border-right: 1px solid var(--line); }
 .pillars div:last-child { border: 0; }
@@ -177,11 +172,6 @@ h1, h2, h3, blockquote { font-family: Georgia, "Noto Serif KR", serif; font-weig
 .empty-state h2 { font-size: 27px; }
 .empty-state p, .auth-page > p, .legal p { color: #9ea7b4; line-height: 1.8; margin-bottom: 28px; }
 .auth-card { display: grid; gap: 12px; }
-.checkout-card { max-width: 620px; padding: 36px; border: 1px solid var(--line); background: rgba(18,29,49,.65); }
-.checkout-card > strong { display: block; color: var(--gold-bright); font: 38px Georgia,serif; margin: 30px 0; }
-.checkout-card p { color: #9ea7b4; line-height: 1.7; }
-.checkout-notice { color: #aeb6c2; background: rgba(202,169,106,.08); border: 1px solid var(--line); padding: 18px; line-height: 1.7; font-size: 13px; margin-bottom: 18px; }
-.checkout-card .secondary-button { margin-top: 10px; }
 .danger-zone { max-width: 620px; margin-top: 60px; padding-top: 28px; border-top: 1px solid rgba(231,164,151,.3); }
 .danger-zone h2 { font-size: 20px; }
 .danger-zone p { color: #8f98a7; font-size: 13px; }
@@ -236,7 +226,7 @@ h1, h2, h3, blockquote { font-family: Georgia, "Noto Serif KR", serif; font-weig
   .reading-card { padding: 32px 26px; min-height: auto; }
   .reading-card h3 { font-size: 38px; }
   .feature { border-right: 0; border-bottom: 1px solid var(--line); padding-inline: 10px; }
-  .site-footer, .deep-reading { flex-direction: column; align-items: flex-start; }
+  .site-footer { flex-direction: column; align-items: flex-start; }
   .site-footer { padding-bottom: 30px; }
   .reading-shell { padding-top: 28px; }
   .wizard-heading { margin-top: 45px; }

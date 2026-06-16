@@ -2,7 +2,7 @@
 
 `명로`는 사주의 **명(命)**과 타로가 비추는 **길(路)**을 결합한 이름입니다.
 
-한국어 사용자를 위한 모바일 우선 AI 타로·사주 MVP입니다. 비회원은 동의 후 무료 데모 리딩을 체험하고, Supabase·OpenAI·토스페이먼츠 환경을 연결하면 로그인, 구조화 AI 생성, 저장, 3,900원 심층 리딩 결제를 사용할 수 있습니다.
+한국어 사용자를 위한 모바일 우선 AI 타로·사주 MVP입니다. 비회원은 동의 후 무료 데모 리딩을 체험하고, Supabase와 OpenAI 환경을 연결하면 로그인, 구조화 AI 생성과 기록 저장을 사용할 수 있습니다.
 
 ## 로컬 실행
 
@@ -12,7 +12,7 @@ Copy-Item .env.example .env.local
 npm run dev
 ```
 
-`http://localhost:3000`에서 홈, 타로, 사주, 기록, 로그인 화면을 확인할 수 있습니다. 외부 서비스 키가 없으면 AI 생성 API는 결정적인 데모 생성기를 사용하며 OAuth·결제는 설정 안내를 반환합니다.
+`http://localhost:3000`에서 홈, 타로, 사주, 기록, 로그인 화면을 확인할 수 있습니다. OpenAI 키가 없으면 AI 생성 API는 결정적인 데모 생성기를 사용합니다.
 
 ## 환경 변수
 
@@ -22,16 +22,13 @@ npm run dev
 - `SUPABASE_SERVICE_ROLE_KEY`: 서버 전용 secret key
 - `OPENAI_API_KEY`: 서버 전용 OpenAI 프로젝트 API key
 - `OPENAI_FREE_MODEL`: 기본값 `gpt-5.4-mini`
-- `OPENAI_PAID_MODEL`: 기본값 `gpt-5.4`
-- `NEXT_PUBLIC_TOSS_CLIENT_KEY`: 브라우저용 토스 테스트 클라이언트 키
-- `TOSS_SECRET_KEY`: 서버 전용 토스 테스트 시크릿 키
 
-키 발급 위치, OAuth 리디렉션, 토스 웹훅과 로컬 테스트 가능 범위는
+키 발급 위치, OAuth 리디렉션과 로컬 테스트 가능 범위는
 [`docs/local-integrations.md`](docs/local-integrations.md)를 참고하세요.
 
 ## 데이터베이스
 
-`supabase/migrations/20260610120000_initial_persistence.sql`을 Supabase 프로젝트에 적용합니다. 마이그레이션은 리딩, 동의, 구매, 후속 질문, 생성 기록과 RLS 정책을 생성합니다.
+기존 Supabase 마이그레이션은 현재 리딩 저장 계약을 유지하기 위한 과거 스키마 이력입니다. 신규 데이터베이스 변경은 백엔드 마이그레이션 작업에서 관리합니다.
 
 ## 검증
 

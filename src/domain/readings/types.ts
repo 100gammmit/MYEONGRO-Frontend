@@ -1,5 +1,5 @@
 export type ReadingKind = "tarot" | "saju";
-export type ReadingTier = "free" | "paid";
+export type ReadingTier = "free";
 export type ReadingStatus = "draft" | "generating" | "completed" | "failed";
 
 export interface Reading {
@@ -48,26 +48,6 @@ export interface Consent {
   documentType: "terms" | "privacy" | "sensitive-data";
   documentVersion: string;
   acceptedAt: string;
-}
-
-export interface Purchase {
-  id: string;
-  readingId: string;
-  userId: string;
-  orderId: string;
-  paymentKey?: string;
-  amount: 3900;
-  status: "pending" | "paid" | "cancelled" | "failed";
-}
-
-export interface FollowUp {
-  id: string;
-  readingId: string;
-  userId: string;
-  question: string;
-  answer?: string;
-  sequence: 1 | 2;
-  status: "pending" | "completed" | "failed";
 }
 
 export interface GenerationRecord {

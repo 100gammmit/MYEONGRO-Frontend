@@ -107,6 +107,16 @@ describe("TarotExperience", () => {
     expect(screen.getByText("다음의 선택")).toBeInTheDocument();
     expect(screen.getByText("선택을 너무 미루지 마세요.")).toBeInTheDocument();
     expect(screen.getByText("이 리딩은 오락과 자기성찰을 위한 참고 자료입니다.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "새 타로 리딩 시작" })).toHaveAttribute(
+      "href",
+      "/tarot",
+    );
+    expect(screen.getByRole("link", { name: "내 기록 보기" })).toHaveAttribute(
+      "href",
+      "/records",
+    );
+    expect(screen.queryByText("3,900원")).not.toBeInTheDocument();
+    expect(screen.queryByText(/심층|유료|후속 질문/)).not.toBeInTheDocument();
 
     for (const card of MAJOR_ARCANA.slice(0, 3)) {
       expect(screen.getByText(card.name)).toBeInTheDocument();

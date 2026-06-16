@@ -15,13 +15,8 @@ const STABLE_ERROR_MESSAGE = "OpenAI reading generation failed";
 const TIMEOUT_ERROR_CODE = "OPENAI_READING_TIMEOUT";
 const TIMEOUT_ERROR_MESSAGE = "OpenAI reading generation timed out";
 
-interface OpenAIModelConfig {
-  free: string;
-  paid: string;
-}
-
 interface OpenAIReadingGeneratorConfig {
-  models: OpenAIModelConfig;
+  model: string;
   client?: Pick<OpenAI, "responses">;
   apiKey?: string;
 }
@@ -38,7 +33,7 @@ class OpenAIReadingGeneratorError extends Error {
 
 export class OpenAIReadingGenerator implements ReadingGenerator {
   private readonly client: Pick<OpenAI, "responses">;
-  private readonly models: OpenAIModelConfig;
+  private readonly model: string;
 
   constructor(config: OpenAIReadingGeneratorConfig) {
     if (!config.client && !config.apiKey) {
@@ -52,14 +47,14 @@ export class OpenAIReadingGenerator implements ReadingGenerator {
         timeout: REQUEST_TIMEOUT_MS,
         maxRetries: MAX_RETRIES,
       });
-    this.models = config.models;
+    this.model = config.model;
   }
 
   async generate(input: ReadingGenerationInput): Promise<ReadingGenerationOutput> {
     try {
       const response = await this.client.responses.parse(
         {
-          model: input.tier === "free" ? this.models.free : this.models.paid,
+          model: this.model,
           max_output_tokens: MAX_OUTPUT_TOKENS,
           instructions: [
             "You create Korean tarot and saju readings for entertainment and self-reflection.",

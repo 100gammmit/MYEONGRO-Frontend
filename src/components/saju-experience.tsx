@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState, type MutableRefObject } from "react";
 import { ConsentGate } from "./consent-gate";
 import { ReadingShell } from "./reading-shell";
@@ -127,19 +128,13 @@ function SajuResult({ reading }: { reading: SajuReadingResponse["reading"] }) {
         <p className="muted">{reading.result.disclaimer}</p>
       </section>
 
-      <div className="deep-reading">
-        <div>
-          <p className="eyebrow">DEEP SAJU</p>
-          <h2>심층 리딩은 준비중입니다</h2>
-          <p>무료 베타에서는 구조화된 결과만 먼저 보여드리고 있어요.</p>
-        </div>
-        <div className="price-box">
-          <strong>3,900원</strong>
-          <span>사후 해석 + 후속 질문 2회</span>
-          <button type="button" className="primary-button" disabled>
-            준비중
-          </button>
-        </div>
+      <div className="result-actions">
+        <Link className="primary-button" href="/saju">
+          새 사주 리딩 시작
+        </Link>
+        <Link className="secondary-button" href="/records">
+          내 기록 보기
+        </Link>
       </div>
     </>
   );

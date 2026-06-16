@@ -241,6 +241,16 @@ describe("SajuExperience", () => {
     expect(screen.getByText("흐름")).toBeInTheDocument();
     expect(screen.getByText("이번 달엔 먼저 기준을 세워두세요.")).toBeInTheDocument();
     expect(screen.getByText("이 결과는 무료 베타용 참고 해석입니다.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "새 사주 리딩 시작" })).toHaveAttribute(
+      "href",
+      "/saju",
+    );
+    expect(screen.getByRole("link", { name: "내 기록 보기" })).toHaveAttribute(
+      "href",
+      "/records",
+    );
+    expect(screen.queryByText("3,900원")).not.toBeInTheDocument();
+    expect(screen.queryByText(/심층|후속 질문/)).not.toBeInTheDocument();
     expect(requestIdSpy).toHaveBeenCalledTimes(1);
 
     const firstPost = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body));

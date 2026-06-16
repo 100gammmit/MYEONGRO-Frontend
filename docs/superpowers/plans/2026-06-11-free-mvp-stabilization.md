@@ -4,10 +4,8 @@
 > plan does not require task-by-task subagents or dedicated reviewers for each
 > implementation task.
 >
-> **Execution policy:** Follow
-> `docs/superpowers/subagent-execution-policy.md`. In particular, a
-> `wait_agent` timeout or unchanged files do not prove a deadlock and must not
-> trigger an interrupt or reassignment.
+> Detailed subagent execution rules have since been consolidated into the
+> repository `AGENTS.md`.
 
 **Goal:** Complete a Kakao-authenticated free tarot and saju MVP with safe guest identity, persisted AI readings, records, deletion, quotas, and cost controls.
 

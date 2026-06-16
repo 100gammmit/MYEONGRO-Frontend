@@ -58,42 +58,6 @@ describe("DemoReadingGenerator", () => {
     expect(output.guidance.length).toBeGreaterThan(0);
   });
 
-  it("supports saju paid and follow-up inputs without concrete calculators", async () => {
-    const generator = new DemoReadingGenerator();
-    const paid = await generator.generate({
-      kind: "saju",
-      tier: "paid",
-      locale: "ko-KR",
-      question: "올해 직업운의 흐름이 궁금해요.",
-      profile: {
-        birthDate: "1990-01-02",
-        birthTime: "13:30",
-        calendarType: "solar",
-        gender: "unspecified",
-        pillars: {
-          year: "경오",
-          month: "정축",
-          day: "을해",
-          hour: "계미",
-        },
-      },
-    });
-    const followup = await generator.generate({
-      kind: "tarot",
-      tier: "followup",
-      locale: "ko-KR",
-      question: "구체적으로 무엇부터 준비할까요?",
-      previousReading: {
-        title: paid.title,
-        summary: paid.summary,
-      },
-      cards: [{ name: "The Magician", position: "guidance", reversed: false }],
-    });
-
-    expect(readingGenerationOutputSchema.safeParse(paid).success).toBe(true);
-    expect(readingGenerationOutputSchema.safeParse(followup).success).toBe(true);
-  });
-
   it("returns readable Korean copy for the local demo", async () => {
     const output = await new DemoReadingGenerator().generate({
       kind: "tarot",
@@ -104,6 +68,7 @@ describe("DemoReadingGenerator", () => {
     });
 
     expect(output.title).toContain("타로");
+    expect(output.title).toContain("간단");
     expect(output.summary).toContain("선택");
     expect(output.disclaimer).toMatch(/자기\s?성찰/);
   });

@@ -38,25 +38,13 @@ const sajuSubjectSchema = z.object({
     .strict(),
 });
 
-const initialTierSchema = z.object({
-  tier: z.enum(["free", "paid"]),
-});
-
-const followUpTierSchema = z.object({
-  tier: z.literal("followup"),
-  previousReading: z
-    .object({
-      title: z.string().min(1),
-      summary: z.string().min(1),
-    })
-    .strict(),
+const freeTierSchema = z.object({
+  tier: z.literal("free"),
 });
 
 export const readingGenerationInputSchema = z.union([
-  baseInputSchema.merge(tarotSubjectSchema).merge(initialTierSchema).strict(),
-  baseInputSchema.merge(sajuSubjectSchema).merge(initialTierSchema).strict(),
-  baseInputSchema.merge(tarotSubjectSchema).merge(followUpTierSchema).strict(),
-  baseInputSchema.merge(sajuSubjectSchema).merge(followUpTierSchema).strict(),
+  baseInputSchema.merge(tarotSubjectSchema).merge(freeTierSchema).strict(),
+  baseInputSchema.merge(sajuSubjectSchema).merge(freeTierSchema).strict(),
 ]);
 
 export const readingGenerationOutputSchema = z

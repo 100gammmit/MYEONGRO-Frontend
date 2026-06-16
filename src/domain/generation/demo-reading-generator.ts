@@ -7,15 +7,9 @@ import type {
 export class DemoReadingGenerator implements ReadingGenerator {
   async generate(input: ReadingGenerationInput): Promise<ReadingGenerationOutput> {
     const subject = input.kind === "tarot" ? "타로" : "사주";
-    const depth =
-      input.tier === "paid"
-        ? "심층"
-        : input.tier === "followup"
-          ? "후속"
-          : "간단";
 
     return {
-      title: `${subject} ${depth} 데모 리딩`,
+      title: `${subject} 간단 데모 리딩`,
       summary:
         "현재의 선택지를 차분히 살피고, 통제할 수 있는 작은 행동부터 시작해 보세요.",
       sections: [

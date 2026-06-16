@@ -15,7 +15,6 @@
   "dependencies": {
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.52.0",
-    "@tosspayments/payment-widget-sdk": "^0.12.1",
     "next": "^15.3.4",
     "openai": "^5.8.2",
     "react": "^19.1.0",
