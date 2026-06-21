@@ -4,7 +4,8 @@ import { vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getUserId: vi.fn(),
-  findByUserAndId: vi.fn(),
+  getAccessToken: vi.fn(),
+  get: vi.fn(),
   notFound: vi.fn(() => {
     throw new Error("NOT_FOUND");
   }),
@@ -19,13 +20,11 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/infrastructure/supabase/auth", () => ({
   getAuthenticatedUserId: mocks.getUserId,
+  getAuthenticatedAccessToken: mocks.getAccessToken,
 }));
-vi.mock("@/infrastructure/supabase/admin-client", () => ({
-  createAdminSupabaseClient: vi.fn(() => ({})),
-}));
-vi.mock("@/infrastructure/supabase/reading-repository", () => ({
-  SupabaseReadingRepository: class {
-    findByUserAndId = mocks.findByUserAndId;
+vi.mock("@/infrastructure/backend/reading-records-client", () => ({
+  BackendReadingRecordsClient: class {
+    get = mocks.get;
   },
 }));
 
@@ -43,10 +42,11 @@ async function renderPage() {
 describe("ReadingDetailPage", () => {
   beforeEach(() => {
     mocks.getUserId.mockResolvedValue("user-1");
+    mocks.getAccessToken.mockResolvedValue("access-token");
   });
 
   it("renders a completed structured reading", async () => {
-    mocks.findByUserAndId.mockResolvedValue({
+    mocks.get.mockResolvedValue({
       id: "reading-1",
       kind: "tarot",
       status: "completed",
@@ -72,7 +72,7 @@ describe("ReadingDetailPage", () => {
   });
 
   it("shows retry only for failed readings", async () => {
-    mocks.findByUserAndId.mockResolvedValue({
+    mocks.get.mockResolvedValue({
       id: "reading-1",
       kind: "saju",
       status: "failed",
@@ -89,7 +89,7 @@ describe("ReadingDetailPage", () => {
   });
 
   it("returns not found for a foreign or deleted reading", async () => {
-    mocks.findByUserAndId.mockResolvedValue(null);
+    mocks.get.mockResolvedValue(null);
 
     await expect(renderPage()).rejects.toThrow("NOT_FOUND");
   });

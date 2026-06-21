@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ReadingRecordActions } from "@/components/reading-record-actions";
-import { getAuthenticatedUserId } from "@/infrastructure/supabase/auth";
-import { createAdminSupabaseClient } from "@/infrastructure/supabase/admin-client";
-import { SupabaseReadingRepository } from "@/infrastructure/supabase/reading-repository";
+import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
+import {
+  getAuthenticatedAccessToken,
+  getAuthenticatedUserId,
+} from "@/infrastructure/supabase/auth";
 
 export default async function ReadingDetailPage({
   params,
@@ -15,9 +17,13 @@ export default async function ReadingDetailPage({
   const { readingId } = await params;
   if (!userId) notFound();
 
-  const reading = await new SupabaseReadingRepository(
-    createAdminSupabaseClient(),
-  ).findByUserAndId(userId, readingId);
+  const accessToken = await getAuthenticatedAccessToken();
+  if (!accessToken) notFound();
+
+  const reading = await new BackendReadingRecordsClient().get(
+    accessToken,
+    readingId,
+  );
   if (!reading) notFound();
 
   const question = typeof reading.input.question === "string"

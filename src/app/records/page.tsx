@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 import { AccountDeleteButton } from "@/components/account-delete-button";
-import { getAuthenticatedUserId } from "@/infrastructure/supabase/auth";
-import { createAdminSupabaseClient } from "@/infrastructure/supabase/admin-client";
-import { SupabaseReadingRepository } from "@/infrastructure/supabase/reading-repository";
+import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
+import {
+  getAuthenticatedAccessToken,
+  getAuthenticatedUserId,
+} from "@/infrastructure/supabase/auth";
 
 interface RecordsPageProps {
   searchParams: Promise<{ guestTransfer?: string | string[] }>;
@@ -26,10 +28,9 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
     : params.guestTransfer;
   const showGuestTransferFailure = guestTransfer === "failed";
   const userId = await getAuthenticatedUserId();
-  const readings = userId
-    ? await new SupabaseReadingRepository(
-        createAdminSupabaseClient(),
-      ).listByUser(userId)
+  const accessToken = userId ? await getAuthenticatedAccessToken() : null;
+  const readings = accessToken
+    ? await new BackendReadingRecordsClient().list(accessToken)
     : [];
 
   return (

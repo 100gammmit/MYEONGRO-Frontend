@@ -1,12 +1,16 @@
 import { ConsentService } from "@/domain/consent/consent-service";
 import { FreeReadingService } from "@/domain/readings/reading-service";
 import { requireAppSigningSecret } from "@/infrastructure/auth/guest-identity";
-import { getAuthenticatedUserId } from "@/infrastructure/supabase/auth";
+import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
+import {
+  getAuthenticatedAccessToken,
+  getAuthenticatedUserId,
+} from "@/infrastructure/supabase/auth";
 import { createAdminSupabaseClient } from "@/infrastructure/supabase/admin-client";
 import { SupabaseConsentRepository } from "@/infrastructure/supabase/consent-repository";
 import { SupabaseReadingRepository } from "@/infrastructure/supabase/reading-repository";
 import { createReadingPostHandler } from "./handler";
-import { createReadingListHandler, toPublicReadingRecord } from "./records-handler";
+import { createReadingListHandler } from "./records-handler";
 import { createReadingRuntime } from "./runtime";
 
 const consentVersions = {
@@ -58,11 +62,14 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const repository = new SupabaseReadingRepository(createAdminSupabaseClient());
+  const client = new BackendReadingRecordsClient();
   return createReadingListHandler({
     getUserId: getAuthenticatedUserId,
-    listReadings: async (userId) =>
-      (await repository.listByUser(userId)).map(toPublicReadingRecord),
+    listReadings: async () => {
+      const accessToken = await getAuthenticatedAccessToken();
+      if (!accessToken) throw new Error("Missing Supabase access token.");
+      return client.list(accessToken);
+    },
     getReading: async () => null,
     deleteReading: async () => false,
     retryReading: async () => {

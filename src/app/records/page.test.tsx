@@ -4,18 +4,17 @@ import { vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getUserId: vi.fn(),
-  listByUser: vi.fn(),
+  getAccessToken: vi.fn(),
+  list: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/supabase/auth", () => ({
   getAuthenticatedUserId: mocks.getUserId,
+  getAuthenticatedAccessToken: mocks.getAccessToken,
 }));
-vi.mock("@/infrastructure/supabase/admin-client", () => ({
-  createAdminSupabaseClient: vi.fn(() => ({})),
-}));
-vi.mock("@/infrastructure/supabase/reading-repository", () => ({
-  SupabaseReadingRepository: class {
-    listByUser = mocks.listByUser;
+vi.mock("@/infrastructure/backend/reading-records-client", () => ({
+  BackendReadingRecordsClient: class {
+    list = mocks.list;
   },
 }));
 
@@ -36,7 +35,8 @@ async function renderRecordsPage(searchParams: RecordsSearchParams = {}) {
 describe("RecordsPage", () => {
   beforeEach(() => {
     mocks.getUserId.mockResolvedValue("user-1");
-    mocks.listByUser.mockResolvedValue([]);
+    mocks.getAccessToken.mockResolvedValue("access-token");
+    mocks.list.mockResolvedValue([]);
   });
 
   it("shows a safe alert when guest transfer failed", async () => {
@@ -48,7 +48,7 @@ describe("RecordsPage", () => {
   });
 
   it("renders active owner readings with status and detail links", async () => {
-    mocks.listByUser.mockResolvedValue([
+    mocks.list.mockResolvedValue([
       {
         id: "reading-1",
         kind: "tarot",
@@ -69,7 +69,7 @@ describe("RecordsPage", () => {
 
     await renderRecordsPage();
 
-    expect(mocks.listByUser).toHaveBeenCalledWith("user-1");
+    expect(mocks.list).toHaveBeenCalledWith("access-token");
     expect(screen.getByRole("link", { name: /관계의 흐름/ })).toHaveAttribute(
       "href",
       "/records/reading-1",
