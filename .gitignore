@@ -8,3 +8,4 @@ test-results/
 .env.local
 .superpowers/
 supabase/.temp/
+AGENTS.md
