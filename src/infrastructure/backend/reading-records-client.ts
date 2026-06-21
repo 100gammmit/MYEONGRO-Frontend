@@ -8,6 +8,15 @@ interface ReadingRecordsEnvelope {
   items: PublicReadingRecord[];
 }
 
+export class BackendReadingRecordsError extends Error {
+  constructor(
+    readonly status: number,
+    readonly body: unknown,
+  ) {
+    super(`Backend reading records API failed: ${status}`);
+  }
+}
+
 export class BackendReadingRecordsClient {
   private readonly baseUrl: string;
 
@@ -49,6 +58,7 @@ export class BackendReadingRecordsClient {
       `/api/readings/${readingId}/retry`,
       accessToken,
       { method: "POST" },
+      { allowNotFound: false },
     );
     const body = await response.json() as ReadingRecordEnvelope;
     return body.reading;
@@ -58,6 +68,7 @@ export class BackendReadingRecordsClient {
     path: string,
     accessToken: string,
     init: RequestInit = {},
+    options: { allowNotFound?: boolean } = {},
   ): Promise<Response> {
     const response = await fetch(`${this.baseUrl}${path}`, {
       ...init,
@@ -67,12 +78,24 @@ export class BackendReadingRecordsClient {
       },
       cache: "no-store",
     });
-    if (response.status === 404 || response.status === 204) {
+    if ((options.allowNotFound !== false && response.status === 404)
+      || response.status === 204) {
       return response;
     }
     if (!response.ok) {
-      throw new Error(`Backend reading records API failed: ${response.status}`);
+      throw new BackendReadingRecordsError(
+        response.status,
+        await readErrorBody(response),
+      );
     }
     return response;
+  }
+}
+
+async function readErrorBody(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch {
+    return { error: "Backend reading records API failed" };
   }
 }

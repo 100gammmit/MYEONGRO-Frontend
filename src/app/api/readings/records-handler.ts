@@ -60,6 +60,23 @@ function notFoundResponse(): Response {
   return Response.json({ error: "리딩을 찾을 수 없습니다." }, { status: 404 });
 }
 
+function isBackendStatusError(error: unknown): error is {
+  status: number;
+  body: unknown;
+} {
+  return typeof error === "object"
+    && error !== null
+    && "status" in error
+    && typeof (error as { status: unknown }).status === "number";
+}
+
+function backendErrorResponse(error: { status: number; body: unknown }): Response {
+  const body = typeof error.body === "object" && error.body !== null
+    ? error.body
+    : { error: "Reading records request failed." };
+  return Response.json(body, { status: error.status });
+}
+
 export function createReadingListHandler(
   dependencies: ReadingRecordsDependencies,
 ) {
@@ -121,7 +138,10 @@ export function createReadingRetryHandler(
     try {
       const reading = await dependencies.retryReading(userId, readingId);
       return Response.json({ reading });
-    } catch {
+    } catch (error) {
+      if (isBackendStatusError(error)) {
+        return backendErrorResponse(error);
+      }
       return Response.json(
         { error: "재시도할 수 없는 리딩입니다." },
         { status: 409 },

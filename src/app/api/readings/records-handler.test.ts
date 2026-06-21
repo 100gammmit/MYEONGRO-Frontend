@@ -128,4 +128,42 @@ describe("reading records handlers", () => {
       error: "재시도할 수 없는 리딩입니다.",
     });
   });
+
+  it("preserves backend retry error status and body", async () => {
+    const notFoundDeps = dependencies({
+      retryReading: vi.fn().mockRejectedValue({
+        status: 404,
+        body: { error: "리딩을 찾을 수 없습니다." },
+      }),
+    });
+    const notFound = await createReadingRetryHandler(notFoundDeps)(
+      new Request("https://fortune.test/api/readings/foreign/retry"),
+      { params: Promise.resolve({ readingId: "foreign" }) },
+    );
+
+    expect(notFound.status).toBe(404);
+    expect(await notFound.json()).toEqual({
+      error: "리딩을 찾을 수 없습니다.",
+    });
+
+    const generationFailureDeps = dependencies({
+      retryReading: vi.fn().mockRejectedValue({
+        status: 502,
+        body: {
+          error: "OpenAI reading generation failed",
+          code: "OPENAI_READING_GENERATION_FAILED",
+        },
+      }),
+    });
+    const generationFailure = await createReadingRetryHandler(generationFailureDeps)(
+      new Request("https://fortune.test/api/readings/reading-1/retry"),
+      { params: Promise.resolve({ readingId: "reading-1" }) },
+    );
+
+    expect(generationFailure.status).toBe(502);
+    expect(await generationFailure.json()).toEqual({
+      error: "OpenAI reading generation failed",
+      code: "OPENAI_READING_GENERATION_FAILED",
+    });
+  });
 });
