@@ -1,14 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const exchangeCodeForSession = vi.fn();
-const transfer = vi.fn();
 const createAuthCallbackHandler = vi.fn((dependencies) => {
   createAuthCallbackHandler.dependencies = dependencies;
   return async () => new Response("ok");
 }) as ReturnType<typeof vi.fn> & {
   dependencies?: {
     exchangeCodeForSession(code: string): Promise<{ userId: string }>;
-    transferGuestOwnership(guestSessionId: string, userId: string): Promise<unknown>;
     signingSecret: string;
     secureCookies: boolean;
   };
@@ -28,20 +26,6 @@ vi.mock("@/infrastructure/supabase/server-client", () => ({
   createServerSupabaseClient: vi.fn(async () => serverSupabaseClient),
 }));
 
-vi.mock("@/infrastructure/supabase/admin-client", () => ({
-  createAdminSupabaseClient: vi.fn(() => ({ role: "service_role" })),
-}));
-
-vi.mock("@/infrastructure/supabase/guest-ownership-transfer-repository", () => ({
-  SupabaseGuestOwnershipTransferRepository: vi.fn().mockImplementation(() => ({ kind: "repository" })),
-}));
-
-vi.mock("@/domain/consent/guest-ownership-transfer-service", () => ({
-  GuestOwnershipTransferService: vi.fn().mockImplementation(() => ({
-    transfer,
-  })),
-}));
-
 describe("GET /auth/callback route wiring", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -50,16 +34,12 @@ describe("GET /auth/callback route wiring", () => {
     vi.stubEnv("NODE_ENV", "test");
   });
 
-  it("returns the exchanged user id and delegates guest transfer through the service role repository", async () => {
+  it("returns the exchanged user id without wiring guest ownership transfer", async () => {
     exchangeCodeForSession.mockResolvedValue({
       data: {
         user: { id: "user-1" },
       },
       error: null,
-    });
-    transfer.mockResolvedValue({
-      guestSessionId: "guest-1",
-      userId: "user-1",
     });
 
     const { GET } = await import("./route");
@@ -73,8 +53,6 @@ describe("GET /auth/callback route wiring", () => {
       userId: "user-1",
     });
     expect(exchangeCodeForSession).toHaveBeenCalledWith("oauth-code");
-
-    await dependencies?.transferGuestOwnership("guest-1", "user-1");
-    expect(transfer).toHaveBeenCalledWith("guest-1", "user-1");
+    expect(dependencies).not.toHaveProperty("transferGuestOwnership");
   });
 });

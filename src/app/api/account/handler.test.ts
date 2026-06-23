@@ -14,6 +14,10 @@ describe("DELETE /api/account", () => {
     })();
 
     expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      code: "UNAUTHENTICATED",
+      message: "로그인이 필요합니다.",
+    });
     expect(deleteUser).not.toHaveBeenCalled();
     expect(signOut).not.toHaveBeenCalled();
     expect(clearLocalAuthCookies).not.toHaveBeenCalled();
@@ -75,7 +79,8 @@ describe("DELETE /api/account", () => {
 
     expect(response.status).toBe(500);
     await expect(response.json()).resolves.toEqual({
-      error: "계정 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      code: "ACCOUNT_DELETE_FAILED",
+      message: "계정 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     });
     expect(clearLocalAuthCookies).not.toHaveBeenCalled();
   });

@@ -39,12 +39,10 @@ describe("RecordsPage", () => {
     mocks.list.mockResolvedValue([]);
   });
 
-  it("shows a safe alert when guest transfer failed", async () => {
+  it("ignores legacy guest transfer markers", async () => {
     await renderRecordsPage({ guestTransfer: "failed" });
 
-    const alert = screen.getByRole("alert");
-    expect(alert).toHaveAttribute("aria-live", "assertive");
-    expect(alert).toHaveTextContent("로그인은 완료했지만 이전 기록 연결에 실패했어요.");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("renders active owner readings with status and detail links", async () => {

@@ -53,11 +53,17 @@ type ReadingRouteContext = {
 };
 
 function unauthorizedResponse(): Response {
-  return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  return Response.json(
+    { code: "UNAUTHENTICATED", message: "로그인이 필요합니다." },
+    { status: 401 },
+  );
 }
 
 function notFoundResponse(): Response {
-  return Response.json({ error: "리딩을 찾을 수 없습니다." }, { status: 404 });
+  return Response.json(
+    { code: "READING_NOT_FOUND", message: "리딩을 찾을 수 없습니다." },
+    { status: 404 },
+  );
 }
 
 function isBackendStatusError(error: unknown): error is {
@@ -73,7 +79,10 @@ function isBackendStatusError(error: unknown): error is {
 function backendErrorResponse(error: { status: number; body: unknown }): Response {
   const body = typeof error.body === "object" && error.body !== null
     ? error.body
-    : { error: "Reading records request failed." };
+    : {
+        code: "READING_RECORDS_REQUEST_FAILED",
+        message: "리딩 기록 요청을 처리하지 못했습니다.",
+      };
   return Response.json(body, { status: error.status });
 }
 
@@ -143,7 +152,10 @@ export function createReadingRetryHandler(
         return backendErrorResponse(error);
       }
       return Response.json(
-        { error: "재시도할 수 없는 리딩입니다." },
+        {
+          code: "READING_RETRY_NOT_ALLOWED",
+          message: "재시도할 수 없는 리딩입니다.",
+        },
         { status: 409 },
       );
     }

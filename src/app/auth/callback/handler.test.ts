@@ -11,11 +11,9 @@ const secret = "0123456789abcdef0123456789abcdef";
 describe("GET /auth/callback", () => {
   it("exchanges the code and redirects to a normalized destination", async () => {
     const exchangeCodeForSession = vi.fn().mockResolvedValue({ userId: "user-1" });
-    const transferGuestOwnership = vi.fn().mockResolvedValue(undefined);
     const handler = createAuthCallbackHandler({
       signingSecret: secret,
       exchangeCodeForSession,
-      transferGuestOwnership,
     });
 
     const response = await handler(
@@ -25,7 +23,6 @@ describe("GET /auth/callback", () => {
     );
 
     expect(exchangeCodeForSession).toHaveBeenCalledWith("oauth-code");
-    expect(transferGuestOwnership).not.toHaveBeenCalled();
     expect(response.headers.get("location")).toBe(
       "https://fortune.test/records/reading-1?tab=detail",
     );
@@ -35,7 +32,6 @@ describe("GET /auth/callback", () => {
     const handler = createAuthCallbackHandler({
       signingSecret: secret,
       exchangeCodeForSession: vi.fn().mockResolvedValue({ userId: "user-1" }),
-      transferGuestOwnership: vi.fn().mockResolvedValue(undefined),
     });
 
     const response = await handler(
@@ -62,7 +58,6 @@ describe("GET /auth/callback", () => {
     const handler = createAuthCallbackHandler({
       signingSecret: secret,
       exchangeCodeForSession: vi.fn().mockResolvedValue({ userId: "user-1" }),
-      transferGuestOwnership: vi.fn().mockResolvedValue(undefined),
     });
     const url = new URL("https://fortune.test/auth/callback");
     url.searchParams.set("code", "oauth-code");
@@ -73,17 +68,15 @@ describe("GET /auth/callback", () => {
     expect(response.headers.get("location")).toBe("https://fortune.test/records");
   });
 
-  it("transfers guest ownership after the OAuth exchange and clears the cookie on success", async () => {
+  it("does not transfer guest ownership or clear the guest cookie after OAuth", async () => {
     const signed = createSignedGuestSession({
       secret,
       sessionId: "9775ff70-5708-45d8-85f8-cb57878bc25d",
       expiresAt: "2026-06-12T00:00:00.000Z",
     });
-    const transferGuestOwnership = vi.fn().mockResolvedValue(undefined);
     const handler = createAuthCallbackHandler({
       signingSecret: secret,
       exchangeCodeForSession: vi.fn().mockResolvedValue({ userId: "user-1" }),
-      transferGuestOwnership,
       now: () => new Date("2026-06-11T00:00:00.000Z"),
     });
 
@@ -96,12 +89,8 @@ describe("GET /auth/callback", () => {
       },
     ));
 
-    expect(transferGuestOwnership).toHaveBeenCalledWith(
-      "9775ff70-5708-45d8-85f8-cb57878bc25d",
-      "user-1",
-    );
-    expect(transferGuestOwnership).toHaveBeenCalledTimes(1);
-    expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
+    expect(response.headers.get("location")).toBe("https://fortune.test/records");
+    expect(response.headers.get("set-cookie")).toBeNull();
   });
 
   it("ignores a legacy guest cookie name during OAuth callback", async () => {
@@ -110,11 +99,9 @@ describe("GET /auth/callback", () => {
       sessionId: "9775ff70-5708-45d8-85f8-cb57878bc25d",
       expiresAt: "2026-06-12T00:00:00.000Z",
     });
-    const transferGuestOwnership = vi.fn().mockResolvedValue(undefined);
     const handler = createAuthCallbackHandler({
       signingSecret: secret,
       exchangeCodeForSession: vi.fn().mockResolvedValue({ userId: "user-1" }),
-      transferGuestOwnership,
       now: () => new Date("2026-06-11T00:00:00.000Z"),
     });
 
@@ -127,24 +114,20 @@ describe("GET /auth/callback", () => {
       },
     ));
 
-    expect(transferGuestOwnership).not.toHaveBeenCalled();
     expect(response.headers.get("location")).toBe("https://fortune.test/records");
     expect(response.headers.get("set-cookie")).toBeNull();
   });
 
   it("continues login without a transfer when there is no guest cookie", async () => {
-    const transferGuestOwnership = vi.fn().mockResolvedValue(undefined);
     const handler = createAuthCallbackHandler({
       signingSecret: secret,
       exchangeCodeForSession: vi.fn().mockResolvedValue({ userId: "user-1" }),
-      transferGuestOwnership,
     });
 
     const response = await handler(new Request(
       "https://fortune.test/auth/callback?code=oauth-code&next=%2Frecords",
     ));
 
-    expect(transferGuestOwnership).not.toHaveBeenCalled();
     expect(response.headers.get("location")).toBe("https://fortune.test/records");
     expect(response.headers.get("set-cookie")).toBeNull();
   });
@@ -157,11 +140,9 @@ describe("GET /auth/callback", () => {
       expiresAt: "2026-06-10T00:00:00.000Z",
     }).token,
   ])("continues login without a transfer when the guest cookie is unusable: %s", async (token) => {
-    const transferGuestOwnership = vi.fn().mockResolvedValue(undefined);
     const handler = createAuthCallbackHandler({
       signingSecret: secret,
       exchangeCodeForSession: vi.fn().mockResolvedValue({ userId: "user-1" }),
-      transferGuestOwnership,
       now: () => new Date("2026-06-11T00:00:00.000Z"),
     });
 
@@ -174,12 +155,11 @@ describe("GET /auth/callback", () => {
       },
     ));
 
-    expect(transferGuestOwnership).not.toHaveBeenCalled();
     expect(response.headers.get("location")).toBe("https://fortune.test/records");
     expect(response.headers.get("set-cookie")).toBeNull();
   });
 
-  it("keeps the guest cookie and appends a non-sensitive marker when transfer fails", async () => {
+  it("ignores guest transfer failure markers because guest claim is out of scope", async () => {
     const signed = createSignedGuestSession({
       secret,
       sessionId: "9775ff70-5708-45d8-85f8-cb57878bc25d",
@@ -188,7 +168,6 @@ describe("GET /auth/callback", () => {
     const handler = createAuthCallbackHandler({
       signingSecret: secret,
       exchangeCodeForSession: vi.fn().mockResolvedValue({ userId: "user-1" }),
-      transferGuestOwnership: vi.fn().mockRejectedValue(new Error("transfer failed")),
       now: () => new Date("2026-06-11T00:00:00.000Z"),
     });
 
@@ -201,9 +180,7 @@ describe("GET /auth/callback", () => {
       },
     ));
 
-    expect(response.headers.get("location")).toBe(
-      "https://fortune.test/records?guestTransfer=failed",
-    );
+    expect(response.headers.get("location")).toBe("https://fortune.test/records");
     expect(response.headers.get("set-cookie")).toBeNull();
   });
 });

@@ -12,12 +12,18 @@ export function createAccountDeleteHandler(dependencies: AccountDeleteDependenci
   return async function DELETE(): Promise<Response> {
     const userId = await dependencies.getUserId();
     if (!userId) {
-      return Response.json({ error: "Authentication required" }, { status: 401 });
+      return Response.json(
+        { code: "UNAUTHENTICATED", message: "로그인이 필요합니다." },
+        { status: 401 },
+      );
     }
     try {
       await dependencies.deleteUser(userId);
     } catch {
-      return Response.json({ error: ACCOUNT_DELETE_ERROR }, { status: 500 });
+      return Response.json(
+        { code: "ACCOUNT_DELETE_FAILED", message: ACCOUNT_DELETE_ERROR },
+        { status: 500 },
+      );
     }
 
     try {

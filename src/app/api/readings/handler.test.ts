@@ -186,7 +186,8 @@ describe("createReadingPostHandler", () => {
     const body = await response.json();
 
     expect(response.status).toBe(status);
-    expect(body.error).not.toContain("provider secret details");
+    expect(body).toHaveProperty("code");
+    expect(body.message).not.toContain("provider secret details");
   });
 
   it.each([

@@ -6,7 +6,8 @@ describe("POST /api/readings/generate", () => {
 
     expect(response.status).toBe(410);
     expect(await response.json()).toEqual({
-      error: "Use POST /api/readings.",
+      code: "READING_GENERATE_ROUTE_GONE",
+      message: "POST /api/readings를 사용해 주세요.",
     });
   });
 });

@@ -1,6 +1,9 @@
 export async function POST() {
   return Response.json(
-    { error: "Use POST /api/readings." },
+    {
+      code: "READING_GENERATE_ROUTE_GONE",
+      message: "POST /api/readings를 사용해 주세요.",
+    },
     { status: 410 },
   );
 }

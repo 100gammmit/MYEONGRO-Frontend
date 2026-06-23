@@ -82,30 +82,45 @@ function getErrorCode(error: unknown): string | undefined {
 function errorResponse(code: string | undefined): Response {
   if (code === "IDEMPOTENCY_CONFLICT") {
     return Response.json(
-      { error: "같은 요청 ID에 다른 입력을 사용할 수 없습니다." },
+      {
+        code: "IDEMPOTENCY_CONFLICT",
+        message: "같은 요청 ID에 다른 입력을 사용할 수 없습니다.",
+      },
       { status: 409 },
     );
   }
   if (code === "FREE_READING_QUOTA_EXCEEDED") {
     return Response.json(
-      { error: "무료 리딩 이용 한도를 초과했습니다." },
+      {
+        code: "FREE_READING_QUOTA_EXCEEDED",
+        message: "무료 리딩 이용 한도를 초과했습니다.",
+      },
       { status: 429 },
     );
   }
   if (code === "GENERATION_IN_PROGRESS") {
     return Response.json(
-      { error: "리딩을 생성하고 있습니다. 잠시 후 다시 확인해 주세요." },
+      {
+        code: "GENERATION_IN_PROGRESS",
+        message: "리딩을 생성하고 있습니다. 잠시 후 다시 확인해 주세요.",
+      },
       { status: 409 },
     );
   }
   if (code === "GENERATION_FAILED") {
     return Response.json(
-      { error: "리딩 생성에 실패했습니다. 잠시 후 다시 시도해 주세요." },
+      {
+        code: "GENERATION_FAILED",
+        message: "리딩 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      },
       { status: 502 },
     );
   }
   return Response.json(
-    { error: "리딩 요청을 처리하지 못했습니다." },
+    {
+      code: "READING_REQUEST_FAILED",
+      message: "리딩 요청을 처리하지 못했습니다.",
+    },
     { status: 500 },
   );
 }
@@ -117,18 +132,30 @@ export function createReadingPostHandler(dependencies: ReadingPostDependencies) 
     try {
       parsed = parseFreeReadingRequest(await request.json());
     } catch {
-      return Response.json({ error: "잘못된 리딩 요청입니다." }, { status: 400 });
+      return Response.json(
+        { code: "INVALID_READING_REQUEST", message: "잘못된 리딩 요청입니다." },
+        { status: 400 },
+      );
     }
 
     try {
       const resolvedOwner = await resolveOwner(request, dependencies);
       if (!resolvedOwner) {
-        return Response.json({ error: "로그인 또는 게스트 세션이 필요합니다." }, { status: 401 });
+        return Response.json(
+          {
+            code: "UNAUTHENTICATED",
+            message: "로그인 또는 게스트 세션이 필요합니다.",
+          },
+          { status: 401 },
+        );
       }
       const { owner } = resolvedOwner;
       migrationCookies = resolvedOwner.migrationCookies;
       if (!await dependencies.hasRequiredConsent(owner)) {
-        return Response.json({ error: "필수 동의가 필요합니다." }, { status: 403 });
+        return Response.json(
+          { code: "REQUIRED_CONSENT_MISSING", message: "필수 동의가 필요합니다." },
+          { status: 403 },
+        );
       }
 
       const reading = await dependencies.createReading({

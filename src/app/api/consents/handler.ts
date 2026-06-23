@@ -88,7 +88,13 @@ export function createConsentGetHandler(dependencies: ConsentGetRouteDependencie
       : resolveGuestSubject(request, dependencies, { allowCreate: true });
 
     if (!subject) {
-      return Response.json({ error: "Guest session is required" }, { status: 400 });
+      return Response.json(
+        {
+          code: "GUEST_SESSION_REQUIRED",
+          message: "게스트 세션이 필요합니다.",
+        },
+        { status: 400 },
+      );
     }
 
     const status = await dependencies.getStatus({
@@ -111,7 +117,13 @@ export function createConsentPostHandler(dependencies: ConsentPostRouteDependenc
         : resolveGuestSubject(request, dependencies, { allowCreate: false });
 
       if (!subject) {
-        return Response.json({ error: "Verified guest session is required" }, { status: 400 });
+        return Response.json(
+          {
+            code: "VERIFIED_GUEST_SESSION_REQUIRED",
+            message: "검증된 게스트 세션이 필요합니다.",
+          },
+          { status: 400 },
+        );
       }
       const consents = await dependencies.acceptRequired({
         subjectId: subject.subjectId,
@@ -123,7 +135,10 @@ export function createConsentPostHandler(dependencies: ConsentPostRouteDependenc
       return response;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Invalid consent request";
-      return Response.json({ error: message }, { status: 400 });
+      return Response.json(
+        { code: "INVALID_CONSENT_REQUEST", message },
+        { status: 400 },
+      );
     }
   };
 }

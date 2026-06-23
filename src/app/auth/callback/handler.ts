@@ -1,13 +1,8 @@
 import { normalizeNextPath } from "@/infrastructure/auth/next-path";
-import {
-  resolveSignedGuestSessionCookie,
-  serializeExpiredGuestSessionCookie,
-} from "@/infrastructure/auth/guest-identity";
 
 interface AuthCallbackDependencies {
   signingSecret: string;
   exchangeCodeForSession(code: string): Promise<{ userId: string }>;
-  transferGuestOwnership(guestSessionId: string, userId: string): Promise<unknown>;
   now?(): Date;
   secureCookies?: boolean;
 }
@@ -19,12 +14,6 @@ function createRedirectResponse(url: URL): Response {
       location: url.toString(),
     },
   });
-}
-
-function appendGuestTransferFailure(next: string, origin: string): URL {
-  const redirectUrl = new URL(next, origin);
-  redirectUrl.searchParams.set("guestTransfer", "failed");
-  return redirectUrl;
 }
 
 export function createAuthCallbackHandler(
@@ -42,34 +31,9 @@ export function createAuthCallbackHandler(
     }
 
     try {
-      const { userId } = await dependencies.exchangeCodeForSession(code);
+      await dependencies.exchangeCodeForSession(code);
       const redirectUrl = new URL(next, url.origin);
-      const resolvedGuest = resolveSignedGuestSessionCookie({
-        cookieHeader: request.headers.get("cookie"),
-        secret: dependencies.signingSecret,
-        now: dependencies.now?.(),
-        secure: dependencies.secureCookies ?? false,
-      });
-      if (!resolvedGuest) {
-        return createRedirectResponse(redirectUrl);
-      }
-
-      try {
-        await dependencies.transferGuestOwnership(
-          resolvedGuest.session.sessionId,
-          userId,
-        );
-        const response = createRedirectResponse(redirectUrl);
-        response.headers.append(
-          "set-cookie",
-          serializeExpiredGuestSessionCookie({
-            secure: dependencies.secureCookies ?? false,
-          }),
-        );
-        return response;
-      } catch {
-        return createRedirectResponse(appendGuestTransferFailure(next, url.origin));
-      }
+      return createRedirectResponse(redirectUrl);
     } catch {
       return createRedirectResponse(
         new URL("/login?error=oauth_failed", url.origin),

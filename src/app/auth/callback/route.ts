@@ -1,7 +1,4 @@
-import { GuestOwnershipTransferService } from "@/domain/consent/guest-ownership-transfer-service";
 import { requireAppSigningSecret } from "@/infrastructure/auth/guest-identity";
-import { createAdminSupabaseClient } from "@/infrastructure/supabase/admin-client";
-import { SupabaseGuestOwnershipTransferRepository } from "@/infrastructure/supabase/guest-ownership-transfer-repository";
 import { createServerSupabaseClient } from "@/infrastructure/supabase/server-client";
 import { createAuthCallbackHandler } from "./handler";
 
@@ -14,10 +11,6 @@ function shouldUseSecureCookies(): boolean {
 }
 
 export async function GET(request: Request) {
-  const transferService = new GuestOwnershipTransferService(
-    new SupabaseGuestOwnershipTransferRepository(createAdminSupabaseClient()),
-  );
-
   return createAuthCallbackHandler({
     signingSecret: getSigningSecret(),
     exchangeCodeForSession: async (code) => {
@@ -30,8 +23,6 @@ export async function GET(request: Request) {
       }
       return { userId };
     },
-    transferGuestOwnership: (guestSessionId, userId) =>
-      transferService.transfer(guestSessionId, userId),
     secureCookies: shouldUseSecureCookies(),
   })(request);
 }

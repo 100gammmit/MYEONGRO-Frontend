@@ -1,15 +1,10 @@
 import Link from "next/link";
 
-import { AccountDeleteButton } from "@/components/account-delete-button";
 import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
 import {
   getAuthenticatedAccessToken,
   getAuthenticatedUserId,
 } from "@/infrastructure/supabase/auth";
-
-interface RecordsPageProps {
-  searchParams: Promise<{ guestTransfer?: string | string[] }>;
-}
 
 const statusLabels = {
   generating: "생성 중",
@@ -21,12 +16,7 @@ function getQuestion(input: Record<string, unknown>): string {
   return typeof input.question === "string" ? input.question : "저장된 리딩";
 }
 
-export default async function RecordsPage({ searchParams }: RecordsPageProps) {
-  const params = await searchParams;
-  const guestTransfer = Array.isArray(params.guestTransfer)
-    ? params.guestTransfer[0]
-    : params.guestTransfer;
-  const showGuestTransferFailure = guestTransfer === "failed";
+export default async function RecordsPage() {
   const userId = await getAuthenticatedUserId();
   const accessToken = userId ? await getAuthenticatedAccessToken() : null;
   const readings = accessToken
@@ -37,11 +27,6 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
     <section className="simple-page page-width records-page">
       <p className="eyebrow">MY READINGS</p>
       <h1>나의 리딩 기록</h1>
-      {showGuestTransferFailure ? (
-        <div className="records-alert" role="alert" aria-live="assertive">
-          로그인은 완료했지만 이전 기록 연결에 실패했어요. 다시 로그인해 보거나 잠시 후 재시도해 주세요.
-        </div>
-      ) : null}
 
       {readings.length === 0 ? (
         <div className="empty-state">
@@ -85,8 +70,6 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           ))}
         </div>
       )}
-
-      {userId ? <AccountDeleteButton /> : null}
     </section>
   );
 }

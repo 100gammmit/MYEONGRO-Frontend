@@ -125,7 +125,8 @@ describe("reading records handlers", () => {
 
     expect(failure.status).toBe(409);
     expect(await failure.json()).toEqual({
-      error: "재시도할 수 없는 리딩입니다.",
+      code: "READING_RETRY_NOT_ALLOWED",
+      message: "재시도할 수 없는 리딩입니다.",
     });
   });
 
@@ -133,7 +134,10 @@ describe("reading records handlers", () => {
     const notFoundDeps = dependencies({
       retryReading: vi.fn().mockRejectedValue({
         status: 404,
-        body: { error: "리딩을 찾을 수 없습니다." },
+        body: {
+          code: "READING_NOT_FOUND",
+          message: "리딩을 찾을 수 없습니다.",
+        },
       }),
     });
     const notFound = await createReadingRetryHandler(notFoundDeps)(
@@ -143,15 +147,16 @@ describe("reading records handlers", () => {
 
     expect(notFound.status).toBe(404);
     expect(await notFound.json()).toEqual({
-      error: "리딩을 찾을 수 없습니다.",
+      code: "READING_NOT_FOUND",
+      message: "리딩을 찾을 수 없습니다.",
     });
 
     const generationFailureDeps = dependencies({
       retryReading: vi.fn().mockRejectedValue({
         status: 502,
         body: {
-          error: "OpenAI reading generation failed",
-          code: "OPENAI_READING_GENERATION_FAILED",
+          code: "GENERATION_FAILED",
+          message: "리딩 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.",
         },
       }),
     });
@@ -162,8 +167,8 @@ describe("reading records handlers", () => {
 
     expect(generationFailure.status).toBe(502);
     expect(await generationFailure.json()).toEqual({
-      error: "OpenAI reading generation failed",
-      code: "OPENAI_READING_GENERATION_FAILED",
+      code: "GENERATION_FAILED",
+      message: "리딩 생성에 실패했습니다. 잠시 후 다시 시도해 주세요.",
     });
   });
 });
