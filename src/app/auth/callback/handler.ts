@@ -2,7 +2,6 @@ import { normalizeNextPath } from "@/infrastructure/auth/next-path";
 import {
   resolveSignedGuestSessionCookie,
   serializeExpiredGuestSessionCookie,
-  serializeExpiredLegacyGuestSessionCookie,
 } from "@/infrastructure/auth/guest-identity";
 
 interface AuthCallbackDependencies {
@@ -64,12 +63,6 @@ export function createAuthCallbackHandler(
         response.headers.append(
           "set-cookie",
           serializeExpiredGuestSessionCookie({
-            secure: dependencies.secureCookies ?? false,
-          }),
-        );
-        response.headers.append(
-          "set-cookie",
-          serializeExpiredLegacyGuestSessionCookie({
             secure: dependencies.secureCookies ?? false,
           }),
         );

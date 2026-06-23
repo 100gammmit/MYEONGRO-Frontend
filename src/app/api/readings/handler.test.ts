@@ -131,7 +131,7 @@ describe("createReadingPostHandler", () => {
     }));
   });
 
-  it("accepts a legacy guest cookie and migrates it in the response", async () => {
+  it("rejects a guest request with only a legacy cookie name", async () => {
     const session = createSignedGuestSession({
       secret: signingSecret,
       sessionId: "22222222-2222-4222-8222-222222222222",
@@ -142,13 +142,12 @@ describe("createReadingPostHandler", () => {
     });
 
     const response = await createReadingPostHandler(deps)(
-      request(tarotBody, `woondam_guest=${session.token}`),
+      request(tarotBody, `legacy_guest=${session.token}`),
     );
-    const setCookie = response.headers.get("set-cookie");
 
-    expect(response.status).toBe(200);
-    expect(setCookie).toContain(`myeongro_guest=${session.token}`);
-    expect(setCookie).toContain("woondam_guest=;");
+    expect(response.status).toBe(401);
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(deps.createReading).not.toHaveBeenCalled();
   });
 
   it("rejects a guest without a valid signed cookie", async () => {

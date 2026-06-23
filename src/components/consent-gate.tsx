@@ -32,12 +32,6 @@ const agreementDetails: Record<AgreementId, { label: string; detail: string }> =
   },
 };
 
-function clearLegacyConsentState(): void {
-  window.localStorage.removeItem("woondam_guest_session");
-  window.localStorage.removeItem("woondam_consent");
-  window.localStorage.removeItem("woondam_consent_accepted_at");
-}
-
 export function ConsentGate({ onComplete }: { onComplete: () => void }) {
   const [checked, setChecked] = useState<Partial<Record<AgreementId, boolean>>>({});
   const [status, setStatus] = useState<ConsentStatus | null>(null);
@@ -64,7 +58,6 @@ export function ConsentGate({ onComplete }: { onComplete: () => void }) {
 
       const payload = await response.json() as { status: ConsentStatus };
       if (payload.status.hasAcceptedRequired) {
-        clearLegacyConsentState();
         setCompleted(true);
         onComplete();
         return;
@@ -106,7 +99,6 @@ export function ConsentGate({ onComplete }: { onComplete: () => void }) {
         throw new Error("failed");
       }
 
-      clearLegacyConsentState();
       setCompleted(true);
       onComplete();
     } catch {

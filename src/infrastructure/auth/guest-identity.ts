@@ -5,7 +5,6 @@ import {
 } from "node:crypto";
 
 const GUEST_COOKIE_NAME = "myeongro_guest";
-const LEGACY_GUEST_COOKIE_NAME = "woondam_guest";
 const MIN_SECRET_BYTES = 32;
 
 interface GuestSessionPayload {
@@ -187,22 +186,8 @@ export function serializeExpiredGuestSessionCookie(options?: { secure?: boolean 
   });
 }
 
-export function serializeExpiredLegacyGuestSessionCookie(
-  options?: { secure?: boolean },
-): string {
-  return createCookieString(LEGACY_GUEST_COOKIE_NAME, "", {
-    expires: new Date(0).toISOString(),
-    maxAge: 0,
-    secure: options?.secure ?? false,
-  });
-}
-
 export function getGuestSessionCookieName(): string {
   return GUEST_COOKIE_NAME;
-}
-
-export function getLegacyGuestSessionCookieName(): string {
-  return LEGACY_GUEST_COOKIE_NAME;
 }
 
 export function resolveSignedGuestSessionCookie(input: {
@@ -222,33 +207,7 @@ export function resolveSignedGuestSessionCookie(input: {
       return { session, token: currentToken, migrationCookies: [] };
     }
   }
-
-  const legacyToken = readCookie(
-    input.cookieHeader,
-    LEGACY_GUEST_COOKIE_NAME,
-  );
-  if (!legacyToken) return null;
-
-  const session = verifySignedGuestSession({
-    secret: input.secret,
-    token: legacyToken,
-    now: input.now,
-  });
-  if (!session) return null;
-
-  return {
-    session,
-    token: legacyToken,
-    migrationCookies: [
-      serializeGuestSessionCookie(
-        { ...session, token: legacyToken },
-        { secure: input.secure ?? false },
-      ),
-      serializeExpiredLegacyGuestSessionCookie({
-        secure: input.secure ?? false,
-      }),
-    ],
-  };
+  return null;
 }
 
 function readCookie(cookieHeader: string | null, name: string): string | null {

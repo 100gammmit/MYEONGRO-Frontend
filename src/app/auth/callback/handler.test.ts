@@ -104,7 +104,7 @@ describe("GET /auth/callback", () => {
     expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
   });
 
-  it("transfers a legacy guest cookie and clears both brand cookie names", async () => {
+  it("ignores a legacy guest cookie name during OAuth callback", async () => {
     const signed = createSignedGuestSession({
       secret,
       sessionId: "9775ff70-5708-45d8-85f8-cb57878bc25d",
@@ -122,18 +122,14 @@ describe("GET /auth/callback", () => {
       "https://fortune.test/auth/callback?code=oauth-code&next=%2Frecords",
       {
         headers: {
-          cookie: `woondam_guest=${signed.token}`,
+          cookie: `legacy_guest=${signed.token}`,
         },
       },
     ));
-    const setCookie = response.headers.get("set-cookie");
 
-    expect(transferGuestOwnership).toHaveBeenCalledWith(
-      "9775ff70-5708-45d8-85f8-cb57878bc25d",
-      "user-1",
-    );
-    expect(setCookie).toContain("myeongro_guest=;");
-    expect(setCookie).toContain("woondam_guest=;");
+    expect(transferGuestOwnership).not.toHaveBeenCalled();
+    expect(response.headers.get("location")).toBe("https://fortune.test/records");
+    expect(response.headers.get("set-cookie")).toBeNull();
   });
 
   it("continues login without a transfer when there is no guest cookie", async () => {

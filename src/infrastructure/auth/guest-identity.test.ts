@@ -3,10 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   createSignedGuestSession,
   getGuestSessionCookieName,
-  getLegacyGuestSessionCookieName,
   resolveSignedGuestSessionCookie,
   serializeExpiredGuestSessionCookie,
-  serializeExpiredLegacyGuestSessionCookie,
   serializeGuestSessionCookie,
   verifySignedGuestSession,
 } from "./guest-identity";
@@ -16,7 +14,6 @@ const secret = "0123456789abcdef0123456789abcdef";
 describe("guest identity signing", () => {
   it("uses the Myeongro cookie name for new sessions", () => {
     expect(getGuestSessionCookieName()).toBe("myeongro_guest");
-    expect(getLegacyGuestSessionCookieName()).toBe("woondam_guest");
   });
 
   it("signs and verifies a guest session", () => {
@@ -97,7 +94,7 @@ describe("guest identity signing", () => {
     expect(serializeExpiredGuestSessionCookie()).toContain("SameSite=Lax");
   });
 
-  it("resolves a legacy cookie and returns migration cookies", () => {
+  it("does not resolve a legacy cookie name", () => {
     const signed = createSignedGuestSession({
       secret,
       sessionId: "9775ff70-5708-45d8-85f8-cb57878bc25d",
@@ -105,24 +102,11 @@ describe("guest identity signing", () => {
     });
 
     const resolved = resolveSignedGuestSessionCookie({
-      cookieHeader: `woondam_guest=${signed.token}`,
+      cookieHeader: `legacy_guest=${signed.token}`,
       secret,
       now: new Date("2026-06-11T00:00:00.000Z"),
     });
 
-    expect(resolved?.session.sessionId).toBe(
-      "9775ff70-5708-45d8-85f8-cb57878bc25d",
-    );
-    expect(resolved?.migrationCookies).toEqual([
-      expect.stringContaining(`myeongro_guest=${signed.token}`),
-      expect.stringContaining("woondam_guest=;"),
-    ]);
-  });
-
-  it("serializes legacy cookie expiration for deletion", () => {
-    expect(serializeExpiredLegacyGuestSessionCookie()).toContain(
-      "woondam_guest=;",
-    );
-    expect(serializeExpiredLegacyGuestSessionCookie()).toContain("Max-Age=0");
+    expect(resolved).toBeNull();
   });
 });

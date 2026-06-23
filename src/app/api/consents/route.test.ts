@@ -67,7 +67,7 @@ describe("GET /api/consents", () => {
     expect(response.headers.get("set-cookie")).toBeNull();
   });
 
-  it("migrates a valid legacy guest cookie to the Myeongro cookie", async () => {
+  it("does not accept a legacy guest cookie name", async () => {
     const signed = createSignedGuestSession({
       secret,
       sessionId: "9775ff70-5708-45d8-85f8-cb57878bc25d",
@@ -87,14 +87,18 @@ describe("GET /api/consents", () => {
 
     const response = await get(new Request("http://localhost/api/consents", {
       headers: {
-        cookie: `woondam_guest=${signed.token}`,
+        cookie: `legacy_guest=${signed.token}`,
       },
     }));
     const setCookie = response.headers.get("set-cookie");
 
     expect(response.status).toBe(200);
-    expect(setCookie).toContain(`myeongro_guest=${signed.token}`);
-    expect(setCookie).toContain("woondam_guest=;");
+    expect(getStatus).toHaveBeenCalledWith({
+      subjectId: expect.any(String),
+      subjectType: "guest",
+    });
+    expect(setCookie).toContain("myeongro_guest=");
+    expect(setCookie).not.toContain("legacy_guest=");
   });
 
   it("replaces an invalid guest cookie with a fresh signed cookie", async () => {
@@ -112,7 +116,7 @@ describe("GET /api/consents", () => {
 
     const response = await get(new Request("http://localhost/api/consents", {
       headers: {
-        cookie: "woondam_guest=invalid.token",
+        cookie: "myeongro_guest=invalid.token",
       },
     }));
 
