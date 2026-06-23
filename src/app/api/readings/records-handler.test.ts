@@ -75,6 +75,37 @@ describe("reading records handlers", () => {
     expect(deps.retryReading).not.toHaveBeenCalled();
   });
 
+  it("maps missing access tokens to unauthorized responses", async () => {
+    const missingAccessToken = new Error("Missing Supabase access token.");
+    const deps = dependencies({
+      listReadings: vi.fn().mockRejectedValue(missingAccessToken),
+      getReading: vi.fn().mockRejectedValue(missingAccessToken),
+      deleteReading: vi.fn().mockRejectedValue(missingAccessToken),
+      retryReading: vi.fn().mockRejectedValue(missingAccessToken),
+    });
+
+    const responses = await Promise.all([
+      createReadingListHandler(deps)(new Request("https://fortune.test/api/readings")),
+      createReadingDetailHandler(deps)(
+        new Request("https://fortune.test/api/readings/reading-1"),
+        { params: Promise.resolve({ readingId: "reading-1" }) },
+      ),
+      createReadingDeleteHandler(deps)(
+        new Request("https://fortune.test/api/readings/reading-1"),
+        { params: Promise.resolve({ readingId: "reading-1" }) },
+      ),
+      createReadingRetryHandler(deps)(
+        new Request("https://fortune.test/api/readings/reading-1/retry"),
+        { params: Promise.resolve({ readingId: "reading-1" }) },
+      ),
+    ]);
+
+    expect(responses.map((response) => response.status)).toEqual([401, 401, 401, 401]);
+    await expect(responses[0].json()).resolves.toMatchObject({
+      code: "UNAUTHENTICATED",
+    });
+  });
+
   it("returns 404 for a missing or foreign reading", async () => {
     const deps = dependencies({
       getReading: vi.fn().mockResolvedValue(null),
