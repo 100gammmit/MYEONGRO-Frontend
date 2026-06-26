@@ -1,99 +1,37 @@
-// @vitest-environment node
+﻿// @vitest-environment node
 
 import { NextRequest } from "next/server";
 import { beforeEach, vi } from "vitest";
 
-const supabaseState = vi.hoisted(() => ({
-  authenticated: false,
-  refreshCookies: [] as Array<{
-    name: string;
-    value: string;
-    options?: { httpOnly?: boolean; path?: string };
-  }>,
+const sessionState = vi.hoisted(() => ({
+  user: null as null | { id: string },
+  getSpringSessionUser: vi.fn(),
 }));
 
-vi.mock("@supabase/ssr", () => ({
-  createServerClient: (
-    _url: string,
-    _anonKey: string,
-    options: {
-      cookies: {
-        setAll(
-          cookies: Array<{
-            name: string;
-            value: string;
-            options?: { httpOnly?: boolean; path?: string };
-          }>,
-        ): void;
-      };
-    },
-  ) => ({
-    auth: {
-      getUser: async () => {
-        if (supabaseState.refreshCookies.length) {
-          options.cookies.setAll(supabaseState.refreshCookies);
-        }
-        return {
-          data: {
-            user: supabaseState.authenticated ? { id: "user-1" } : null,
-          },
-        };
-      },
-    },
-  }),
-}));
-
-vi.mock("@/infrastructure/supabase/env", () => ({
-  getPublicSupabaseEnvironment: () => ({
-    url: "https://project.supabase.co",
-    anonKey: "anon-key",
-  }),
+vi.mock("@/infrastructure/backend/session-auth", () => ({
+  getSpringSessionUser: sessionState.getSpringSessionUser,
 }));
 
 import { config, middleware } from "./middleware";
 
 describe("session middleware", () => {
   beforeEach(() => {
-    supabaseState.authenticated = false;
-    supabaseState.refreshCookies = [];
+    sessionState.user = null;
+    sessionState.getSpringSessionUser.mockReset();
+    sessionState.getSpringSessionUser.mockImplementation(async () => sessionState.user);
   });
 
-  it("propagates refreshed Supabase cookies to the response", async () => {
-    supabaseState.authenticated = true;
-    supabaseState.refreshCookies = [
-      {
-        name: "sb-session",
-        value: "refreshed",
-        options: { httpOnly: true, path: "/" },
-      },
-    ];
-
-    const response = await middleware(
-      new NextRequest("https://fortune.test/records"),
-    );
-
-    expect(response.cookies.get("sb-session")?.value).toBe("refreshed");
-  });
-
-  it("preserves non-Supabase cookies for downstream route handlers", async () => {
-    supabaseState.refreshCookies = [
-      {
-        name: "sb-session",
-        value: "refreshed",
-        options: { httpOnly: true, path: "/" },
-      },
-    ];
-
-    const response = await middleware(
+  it("checks the Spring session with the incoming cookie header", async () => {
+    await middleware(
       new NextRequest("https://fortune.test/api/consents", {
         headers: {
-          cookie: "myeongro_guest=signed-token",
+          cookie: "JSESSIONID=session; myeongro_guest=signed-token",
         },
       }),
     );
 
-    expect(response.headers.get("x-middleware-request-cookie")).toContain(
-      "myeongro_guest=signed-token",
+    expect(sessionState.getSpringSessionUser).toHaveBeenCalledWith(
+      "JSESSIONID=session; myeongro_guest=signed-token",
     );
   });
 
@@ -109,7 +47,7 @@ describe("session middleware", () => {
   });
 
   it("allows an authenticated user through to records", async () => {
-    supabaseState.authenticated = true;
+    sessionState.user = { id: "user-1" };
 
     const response = await middleware(
       new NextRequest("https://fortune.test/records/reading-1"),

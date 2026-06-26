@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const getAccessToken = vi.fn();
 const proxyBackendRequest = vi.fn();
-
-vi.mock("@/infrastructure/supabase/auth", () => ({
-  getAuthenticatedAccessToken: getAccessToken,
-}));
 
 vi.mock("@/infrastructure/backend/proxy-client", () => ({
   proxyBackendRequest,
@@ -15,7 +10,6 @@ describe("/api/consents route proxy", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
-    getAccessToken.mockResolvedValue(null);
   });
 
   it("proxies guest consent status to Spring so it can issue the guest cookie", async () => {
@@ -30,15 +24,13 @@ describe("/api/consents route proxy", () => {
     expect(proxyBackendRequest).toHaveBeenCalledWith({
       request,
       path: "/api/consents",
-      accessToken: null,
     });
     expect(await response.json()).toEqual({
       status: { hasAcceptedRequired: false },
     });
   });
 
-  it("proxies consent submission with the authenticated user's access token when present", async () => {
-    getAccessToken.mockResolvedValue("access-token");
+  it("proxies consent submission with the Spring session cookies when present", async () => {
     proxyBackendRequest.mockResolvedValue(Response.json({ consents: [] }));
     const request = new Request("https://front.test/api/consents", {
       method: "POST",
@@ -51,7 +43,6 @@ describe("/api/consents route proxy", () => {
     expect(proxyBackendRequest).toHaveBeenCalledWith({
       request,
       path: "/api/consents",
-      accessToken: "access-token",
     });
   });
 });

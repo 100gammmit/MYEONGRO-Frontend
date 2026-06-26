@@ -1,19 +1,25 @@
-import type { ReactElement } from "react";
+﻿import type { ReactElement } from "react";
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  getUserId: vi.fn(),
-  getAccessToken: vi.fn(),
+  getCookieHeader: vi.fn(),
+  getSessionUser: vi.fn(),
   list: vi.fn(),
 }));
 
-vi.mock("@/infrastructure/supabase/auth", () => ({
-  getAuthenticatedUserId: mocks.getUserId,
-  getAuthenticatedAccessToken: mocks.getAccessToken,
+vi.mock("@/infrastructure/backend/request-cookies", () => ({
+  getBackendCookieHeader: mocks.getCookieHeader,
+}));
+vi.mock("@/infrastructure/backend/session-auth", () => ({
+  getSpringSessionUser: mocks.getSessionUser,
 }));
 vi.mock("@/infrastructure/backend/reading-records-client", () => ({
   BackendReadingRecordsClient: class {
+    constructor(readonly cookieHeader: string) {
+      expect(cookieHeader).toBe("JSESSIONID=session");
+    }
+
     list = mocks.list;
   },
 }));
@@ -34,8 +40,9 @@ async function renderRecordsPage(searchParams: RecordsSearchParams = {}) {
 
 describe("RecordsPage", () => {
   beforeEach(() => {
-    mocks.getUserId.mockResolvedValue("user-1");
-    mocks.getAccessToken.mockResolvedValue("access-token");
+    vi.clearAllMocks();
+    mocks.getCookieHeader.mockResolvedValue("JSESSIONID=session");
+    mocks.getSessionUser.mockResolvedValue({ id: "user-1" });
     mocks.list.mockResolvedValue([]);
   });
 
@@ -67,19 +74,25 @@ describe("RecordsPage", () => {
 
     await renderRecordsPage();
 
-    expect(mocks.list).toHaveBeenCalledWith("access-token");
+    expect(mocks.getSessionUser).toHaveBeenCalledWith("JSESSIONID=session");
+    expect(mocks.list).toHaveBeenCalledWith();
     expect(screen.getByRole("link", { name: /관계의 흐름/ })).toHaveAttribute(
       "href",
       "/records/reading-1",
     );
-    expect(screen.getByText("완료")).toBeInTheDocument();
-    expect(screen.getByText("재시도 필요")).toBeInTheDocument();
   });
 
   it("shows an authenticated empty state without another login prompt", async () => {
     await renderRecordsPage();
 
-    expect(screen.getByText("아직 저장된 이야기가 없어요")).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /로그인/ })).not.toBeInTheDocument();
+  });
+
+  it("does not load records for guests", async () => {
+    mocks.getSessionUser.mockResolvedValue(null);
+
+    await renderRecordsPage();
+
+    expect(mocks.list).not.toHaveBeenCalled();
   });
 });

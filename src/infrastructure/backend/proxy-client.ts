@@ -1,4 +1,4 @@
-const DEFAULT_BACKEND_API_URL = "http://localhost:8080";
+import { toBackendUrl } from "./url";
 
 const FORWARDED_REQUEST_HEADERS = [
   "content-type",
@@ -15,12 +15,11 @@ const FORWARDED_RESPONSE_HEADERS = [
 export async function proxyBackendRequest(input: {
   request: Request;
   path: string;
-  accessToken?: string | null;
 }): Promise<Response> {
   try {
     const response = await fetch(toBackendUrl(input.path), {
       method: input.request.method,
-      headers: createBackendHeaders(input.request, input.accessToken),
+      headers: createBackendHeaders(input.request),
       body: await getRequestBody(input.request),
       cache: "no-store",
     });
@@ -41,20 +40,12 @@ export async function proxyBackendRequest(input: {
   }
 }
 
-function toBackendUrl(path: string): string {
-  const baseUrl = (process.env.BACKEND_API_URL ?? DEFAULT_BACKEND_API_URL)
-    .replace(/\/$/, "");
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-  return `${baseUrl}${normalizedPath}`;
-}
-
-function createBackendHeaders(request: Request, accessToken?: string | null): HeadersInit {
+function createBackendHeaders(request: Request): HeadersInit {
   const headers: Record<string, string> = {};
   for (const name of FORWARDED_REQUEST_HEADERS) {
     const value = request.headers.get(name);
     if (value) headers[name] = value;
   }
-  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   return headers;
 }
 

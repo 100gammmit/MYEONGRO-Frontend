@@ -1,12 +1,15 @@
-import { createServerSupabaseClient } from "@/infrastructure/supabase/server-client";
+import { toBackendUrl } from "@/infrastructure/backend/url";
 import { createLogoutHandler } from "./handler";
 
 export async function POST(request: Request) {
   return createLogoutHandler({
-    signOut: async () => {
-      const supabase = await createServerSupabaseClient();
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+    logout: async (logoutRequest) => {
+      const cookie = logoutRequest.headers.get("cookie");
+      return fetch(toBackendUrl("/api/auth/logout"), {
+        method: "POST",
+        headers: cookie ? { cookie } : undefined,
+        cache: "no-store",
+      });
     },
   })(request);
 }

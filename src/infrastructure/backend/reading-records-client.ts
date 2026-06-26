@@ -1,4 +1,5 @@
 import type { PublicReadingRecord } from "@/app/api/readings/records-handler";
+import { toBackendUrl } from "./url";
 
 interface ReadingRecordEnvelope {
   reading: PublicReadingRecord;
@@ -18,45 +19,33 @@ export class BackendReadingRecordsError extends Error {
 }
 
 export class BackendReadingRecordsClient {
-  private readonly baseUrl: string;
+  constructor(private readonly cookieHeader?: string | null) {}
 
-  constructor(baseUrl = process.env.BACKEND_API_URL ?? "http://localhost:8080") {
-    this.baseUrl = baseUrl.replace(/\/$/, "");
-  }
-
-  async list(accessToken: string): Promise<PublicReadingRecord[]> {
-    const response = await this.request("/api/readings", accessToken);
+  async list(): Promise<PublicReadingRecord[]> {
+    const response = await this.request("/api/readings");
     const body = await response.json() as ReadingRecordsEnvelope;
     return body.items;
   }
 
-  async get(
-    accessToken: string,
-    readingId: string,
-  ): Promise<PublicReadingRecord | null> {
-    const response = await this.request(`/api/readings/${readingId}`, accessToken);
+  async get(readingId: string): Promise<PublicReadingRecord | null> {
+    const response = await this.request(`/api/readings/${readingId}`);
     if (response.status === 404) return null;
     const body = await response.json() as ReadingRecordEnvelope;
     return body.reading;
   }
 
-  async softDelete(accessToken: string, readingId: string): Promise<boolean> {
+  async softDelete(readingId: string): Promise<boolean> {
     const response = await this.request(
       `/api/readings/${readingId}`,
-      accessToken,
       { method: "DELETE" },
     );
     if (response.status === 404) return false;
     return response.status === 204;
   }
 
-  async retry(
-    accessToken: string,
-    readingId: string,
-  ): Promise<PublicReadingRecord> {
+  async retry(readingId: string): Promise<PublicReadingRecord> {
     const response = await this.request(
       `/api/readings/${readingId}/retry`,
-      accessToken,
       { method: "POST" },
       { allowNotFound: false },
     );
@@ -66,16 +55,17 @@ export class BackendReadingRecordsClient {
 
   private async request(
     path: string,
-    accessToken: string,
     init: RequestInit = {},
     options: { allowNotFound?: boolean } = {},
   ): Promise<Response> {
-    const response = await fetch(`${this.baseUrl}${path}`, {
+    const headers = new Headers(init.headers);
+    if (this.cookieHeader) {
+      headers.set("cookie", this.cookieHeader);
+    }
+
+    const response = await fetch(toBackendUrl(path), {
       ...init,
-      headers: {
-        ...init.headers,
-        Authorization: `Bearer ${accessToken}`,
-      },
+      headers,
       cache: "no-store",
     });
     if ((options.allowNotFound !== false && response.status === 404)

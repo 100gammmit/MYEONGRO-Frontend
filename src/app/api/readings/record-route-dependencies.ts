@@ -1,26 +1,20 @@
 import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
-import {
-  getAuthenticatedAccessToken,
-  getAuthenticatedUserId,
-} from "@/infrastructure/supabase/auth";
+import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
+import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
 
 export function createRecordRouteDependencies() {
-  const client = new BackendReadingRecordsClient();
-
-  async function requireAccessToken(): Promise<string> {
-    const accessToken = await getAuthenticatedAccessToken();
-    if (!accessToken) throw new Error("Missing Supabase access token.");
-    return accessToken;
+  async function createClient(): Promise<BackendReadingRecordsClient> {
+    return new BackendReadingRecordsClient(await getBackendCookieHeader());
   }
 
   return {
-    getUserId: getAuthenticatedUserId,
-    listReadings: async () => client.list(await requireAccessToken()),
+    getUserId: async () => (await getSpringSessionUser(await getBackendCookieHeader()))?.id ?? null,
+    listReadings: async () => (await createClient()).list(),
     getReading: async (_userId: string, readingId: string) =>
-      client.get(await requireAccessToken(), readingId),
+      (await createClient()).get(readingId),
     deleteReading: async (_userId: string, readingId: string) =>
-      client.softDelete(await requireAccessToken(), readingId),
+      (await createClient()).softDelete(readingId),
     retryReading: async (_userId: string, readingId: string) =>
-      client.retry(await requireAccessToken(), readingId),
+      (await createClient()).retry(readingId),
   };
 }

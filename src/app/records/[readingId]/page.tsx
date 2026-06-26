@@ -3,27 +3,20 @@ import { notFound } from "next/navigation";
 
 import { ReadingRecordActions } from "@/components/reading-record-actions";
 import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
-import {
-  getAuthenticatedAccessToken,
-  getAuthenticatedUserId,
-} from "@/infrastructure/supabase/auth";
+import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
+import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
 
 export default async function ReadingDetailPage({
   params,
 }: {
   params: Promise<{ readingId: string }>;
 }) {
-  const userId = await getAuthenticatedUserId();
+  const cookieHeader = await getBackendCookieHeader();
+  const user = await getSpringSessionUser(cookieHeader);
   const { readingId } = await params;
-  if (!userId) notFound();
+  if (!user) notFound();
 
-  const accessToken = await getAuthenticatedAccessToken();
-  if (!accessToken) notFound();
-
-  const reading = await new BackendReadingRecordsClient().get(
-    accessToken,
-    readingId,
-  );
+  const reading = await new BackendReadingRecordsClient(cookieHeader).get(readingId);
   if (!reading) notFound();
 
   const question = typeof reading.input.question === "string"

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
-import { getAuthenticatedUserId } from "@/infrastructure/supabase/auth";
+import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
+import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,7 +13,9 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const authenticated = Boolean(await getAuthenticatedUserId());
+  const authenticated = Boolean(
+    await getSpringSessionUser(await getBackendCookieHeader()),
+  );
 
   return (
     <html lang="ko">

@@ -1,10 +1,8 @@
 import Link from "next/link";
 
 import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
-import {
-  getAuthenticatedAccessToken,
-  getAuthenticatedUserId,
-} from "@/infrastructure/supabase/auth";
+import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
+import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
 
 const statusLabels = {
   generating: "생성 중",
@@ -17,10 +15,10 @@ function getQuestion(input: Record<string, unknown>): string {
 }
 
 export default async function RecordsPage() {
-  const userId = await getAuthenticatedUserId();
-  const accessToken = userId ? await getAuthenticatedAccessToken() : null;
-  const readings = accessToken
-    ? await new BackendReadingRecordsClient().list(accessToken)
+  const cookieHeader = await getBackendCookieHeader();
+  const user = await getSpringSessionUser(cookieHeader);
+  const readings = user
+    ? await new BackendReadingRecordsClient(cookieHeader).list()
     : [];
 
   return (

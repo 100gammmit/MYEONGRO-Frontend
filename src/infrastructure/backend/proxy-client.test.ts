@@ -8,7 +8,7 @@ describe("proxyBackendRequest", () => {
     vi.stubEnv("BACKEND_API_URL", "https://spring.test/");
   });
 
-  it("forwards JSON requests with cookies and a server-side bearer token", async () => {
+  it("forwards JSON requests with cookies and no bearer token", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       Response.json(
         { reading: { id: "reading-1" } },
@@ -33,7 +33,6 @@ describe("proxyBackendRequest", () => {
         body: JSON.stringify({ kind: "tarot" }),
       }),
       path: "/api/readings",
-      accessToken: "access-token",
     });
 
     expect(fetchMock).toHaveBeenCalledWith("https://spring.test/api/readings", {
@@ -42,7 +41,6 @@ describe("proxyBackendRequest", () => {
         "content-type": "application/json",
         cookie: "myeongro_guest=old",
         "x-forwarded-for": "203.0.113.8",
-        Authorization: "Bearer access-token",
       }),
       body: JSON.stringify({ kind: "tarot" }),
       cache: "no-store",

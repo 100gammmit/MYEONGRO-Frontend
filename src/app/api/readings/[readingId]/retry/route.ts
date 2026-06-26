@@ -1,10 +1,13 @@
-import { createReadingRetryHandler } from "@/app/api/readings/records-handler";
-import { createRecordRouteDependencies } from "@/app/api/readings/record-route-dependencies";
+import { proxyBackendRequest } from "@/infrastructure/backend/proxy-client";
 
 type RouteContext = {
   params: Promise<{ readingId: string }>;
 };
 
 export async function POST(request: Request, context: RouteContext) {
-  return createReadingRetryHandler(createRecordRouteDependencies())(request, context);
+  const { readingId } = await context.params;
+  return proxyBackendRequest({
+    request,
+    path: `/api/readings/${encodeURIComponent(readingId)}/retry`,
+  });
 }

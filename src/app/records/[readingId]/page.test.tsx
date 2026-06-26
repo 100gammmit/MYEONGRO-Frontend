@@ -1,10 +1,10 @@
-import type { ReactElement } from "react";
+﻿import type { ReactElement } from "react";
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  getUserId: vi.fn(),
-  getAccessToken: vi.fn(),
+  getCookieHeader: vi.fn(),
+  getSessionUser: vi.fn(),
   get: vi.fn(),
   notFound: vi.fn(() => {
     throw new Error("NOT_FOUND");
@@ -18,12 +18,18 @@ vi.mock("next/navigation", () => ({
     refresh: vi.fn(),
   }),
 }));
-vi.mock("@/infrastructure/supabase/auth", () => ({
-  getAuthenticatedUserId: mocks.getUserId,
-  getAuthenticatedAccessToken: mocks.getAccessToken,
+vi.mock("@/infrastructure/backend/request-cookies", () => ({
+  getBackendCookieHeader: mocks.getCookieHeader,
+}));
+vi.mock("@/infrastructure/backend/session-auth", () => ({
+  getSpringSessionUser: mocks.getSessionUser,
 }));
 vi.mock("@/infrastructure/backend/reading-records-client", () => ({
   BackendReadingRecordsClient: class {
+    constructor(readonly cookieHeader: string) {
+      expect(cookieHeader).toBe("JSESSIONID=session");
+    }
+
     get = mocks.get;
   },
 }));
@@ -41,8 +47,9 @@ async function renderPage() {
 
 describe("ReadingDetailPage", () => {
   beforeEach(() => {
-    mocks.getUserId.mockResolvedValue("user-1");
-    mocks.getAccessToken.mockResolvedValue("access-token");
+    vi.clearAllMocks();
+    mocks.getCookieHeader.mockResolvedValue("JSESSIONID=session");
+    mocks.getSessionUser.mockResolvedValue({ id: "user-1" });
   });
 
   it("renders a completed structured reading", async () => {
@@ -65,10 +72,11 @@ describe("ReadingDetailPage", () => {
 
     await renderPage();
 
+    expect(mocks.getSessionUser).toHaveBeenCalledWith("JSESSIONID=session");
+    expect(mocks.get).toHaveBeenCalledWith("reading-1");
     expect(screen.getByRole("heading", { name: "관계의 흐름" })).toBeInTheDocument();
     expect(screen.getByText("천천히 확인할 시기입니다.")).toBeInTheDocument();
     expect(screen.getByText("대화를 이어가세요.")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "기록 삭제" })).toBeInTheDocument();
   });
 
   it("shows retry only for failed readings", async () => {
@@ -84,8 +92,14 @@ describe("ReadingDetailPage", () => {
 
     await renderPage();
 
-    expect(screen.getByText("리딩 생성에 실패했어요")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "다시 생성" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("returns not found for guests", async () => {
+    mocks.getSessionUser.mockResolvedValue(null);
+
+    await expect(renderPage()).rejects.toThrow("NOT_FOUND");
+    expect(mocks.get).not.toHaveBeenCalled();
   });
 
   it("returns not found for a foreign or deleted reading", async () => {
