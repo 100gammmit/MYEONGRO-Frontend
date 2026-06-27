@@ -24,7 +24,7 @@ describe("GET /api/me", () => {
 
     expect(proxyBackendRequest).toHaveBeenCalledWith({
       request,
-      path: "/api/me",
+      path: "/auth/me",
     });
     expect(await response.json()).toEqual({
       authenticated: true,
