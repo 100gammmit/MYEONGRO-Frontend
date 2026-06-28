@@ -18,7 +18,7 @@ describe("POST /auth/logout route", () => {
 
     await POST(request);
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8080/auth/logout", {
+    expect(fetch).toHaveBeenCalledWith("http://localhost:8080/api/auth/logout", {
       method: "POST",
       headers: { cookie: "JSESSIONID=session" },
       cache: "no-store",

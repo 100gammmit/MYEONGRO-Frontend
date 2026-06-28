@@ -16,7 +16,7 @@ interface MeResponse {
 export async function getSpringSessionUser(
   cookieHeader?: string | null,
 ): Promise<SpringSessionUser | null> {
-  const response = await fetch(toBackendUrl("/auth/me"), {
+  const response = await fetch(toBackendUrl("/api/auth/me"), {
     headers: cookieHeader ? { cookie: cookieHeader } : undefined,
     cache: "no-store",
   });

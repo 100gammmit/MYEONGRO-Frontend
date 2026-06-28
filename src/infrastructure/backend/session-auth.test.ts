@@ -15,7 +15,7 @@ describe("getSpringSessionUser", () => {
 
     const user = await getSpringSessionUser("JSESSIONID=session");
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8080/auth/me", {
+    expect(fetch).toHaveBeenCalledWith("http://localhost:8080/api/auth/me", {
       headers: { cookie: "JSESSIONID=session" },
       cache: "no-store",
     });
