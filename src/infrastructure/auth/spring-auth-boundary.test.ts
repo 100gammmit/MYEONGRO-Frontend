@@ -19,7 +19,9 @@ describe("Spring auth boundary", () => {
   it("keeps removed Supabase Auth routes and clients out of the frontend runtime", () => {
     expect(existsSync(path.join(sourceRoot, "app/auth/callback"))).toBe(false);
     expect(existsSync(path.join(sourceRoot, "app/api/account"))).toBe(false);
+    expect(existsSync(path.join(sourceRoot, "app/api/consents/transfer"))).toBe(false);
     expect(existsSync(path.join(sourceRoot, "infrastructure/supabase"))).toBe(false);
+    expect(existsSync(path.join(projectRoot, "supabase"))).toBe(false);
 
     const packageJson = JSON.parse(
       readFileSync(path.join(projectRoot, "package.json"), "utf8"),
@@ -34,6 +36,8 @@ describe("Spring auth boundary", () => {
       "exchangeCodeForSession",
       "clearSupabaseAuthCookies",
       "/api/account",
+      "/api/consents/transfer",
+      "Missing Supabase access token",
     ];
     const files = listSourceFiles(sourceRoot)
       .filter((filePath) => filePath !== __filename);

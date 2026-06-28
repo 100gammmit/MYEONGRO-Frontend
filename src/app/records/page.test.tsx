@@ -26,16 +26,12 @@ vi.mock("@/infrastructure/backend/reading-records-client", () => ({
 
 import RecordsPage from "./page";
 
-type RecordsSearchParams = {
-  guestTransfer?: string;
-};
-
-async function renderRecordsPage(searchParams: RecordsSearchParams = {}) {
+async function renderRecordsPage() {
   const Page = RecordsPage as (props: {
-    searchParams: Promise<RecordsSearchParams>;
+    searchParams: Promise<Record<string, never>>;
   }) => Promise<ReactElement>;
 
-  return render(await Page({ searchParams: Promise.resolve(searchParams) }));
+  return render(await Page({ searchParams: Promise.resolve({}) }));
 }
 
 describe("RecordsPage", () => {
@@ -44,12 +40,6 @@ describe("RecordsPage", () => {
     mocks.getCookieHeader.mockResolvedValue("JSESSIONID=session");
     mocks.getSessionUser.mockResolvedValue({ id: "user-1" });
     mocks.list.mockResolvedValue([]);
-  });
-
-  it("ignores legacy guest transfer markers", async () => {
-    await renderRecordsPage({ guestTransfer: "failed" });
-
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("renders active owner readings with status and detail links", async () => {

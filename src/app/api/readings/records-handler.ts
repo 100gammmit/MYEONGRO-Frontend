@@ -59,11 +59,6 @@ function unauthorizedResponse(): Response {
   );
 }
 
-function isMissingAccessTokenError(error: unknown): boolean {
-  return error instanceof Error
-    && error.message === "Missing Supabase access token.";
-}
-
 function notFoundResponse(): Response {
   return Response.json(
     { code: "READING_NOT_FOUND", message: "리딩을 찾을 수 없습니다." },
@@ -99,13 +94,8 @@ export function createReadingListHandler(
     const userId = await dependencies.getUserId();
     if (!userId) return unauthorizedResponse();
 
-    try {
-      const items = await dependencies.listReadings(userId);
-      return Response.json({ items });
-    } catch (error) {
-      if (isMissingAccessTokenError(error)) return unauthorizedResponse();
-      throw error;
-    }
+    const items = await dependencies.listReadings(userId);
+    return Response.json({ items });
   };
 }
 
@@ -120,13 +110,8 @@ export function createReadingDetailHandler(
     if (!userId) return unauthorizedResponse();
 
     const { readingId } = await context.params;
-    try {
-      const reading = await dependencies.getReading(userId, readingId);
-      return reading ? Response.json({ reading }) : notFoundResponse();
-    } catch (error) {
-      if (isMissingAccessTokenError(error)) return unauthorizedResponse();
-      throw error;
-    }
+    const reading = await dependencies.getReading(userId, readingId);
+    return reading ? Response.json({ reading }) : notFoundResponse();
   };
 }
 
@@ -141,15 +126,10 @@ export function createReadingDeleteHandler(
     if (!userId) return unauthorizedResponse();
 
     const { readingId } = await context.params;
-    try {
-      const deleted = await dependencies.deleteReading(userId, readingId);
-      return deleted
-        ? new Response(null, { status: 204 })
-        : notFoundResponse();
-    } catch (error) {
-      if (isMissingAccessTokenError(error)) return unauthorizedResponse();
-      throw error;
-    }
+    const deleted = await dependencies.deleteReading(userId, readingId);
+    return deleted
+      ? new Response(null, { status: 204 })
+      : notFoundResponse();
   };
 }
 
@@ -168,7 +148,6 @@ export function createReadingRetryHandler(
       const reading = await dependencies.retryReading(userId, readingId);
       return Response.json({ reading });
     } catch (error) {
-      if (isMissingAccessTokenError(error)) return unauthorizedResponse();
       if (isBackendStatusError(error)) {
         return backendErrorResponse(error);
       }

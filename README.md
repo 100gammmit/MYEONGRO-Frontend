@@ -2,7 +2,7 @@
 
 `명로`는 사주의 **명(命)**과 타로가 비추는 **길(路)**을 결합한 이름입니다.
 
-한국어 사용자를 위한 모바일 우선 AI 타로·사주 MVP입니다. 비회원은 동의 후 무료 데모 리딩을 체험하고, Supabase와 OpenAI 환경을 연결하면 로그인, 구조화 AI 생성과 기록 저장을 사용할 수 있습니다.
+한국어 사용자를 위한 모바일 우선 AI 타로·사주 MVP입니다. 비회원은 동의 후 무료 데모 리딩을 체험하고, Spring backend와 OpenAI 환경을 연결하면 로그인, 구조화 AI 생성과 기록 저장을 사용할 수 있습니다.
 
 ## 로컬 실행
 
@@ -17,18 +17,14 @@ npm run dev
 ## 환경 변수
 
 - `NEXT_PUBLIC_APP_URL`: 로컬에서는 `http://localhost:3000`
-- `NEXT_PUBLIC_SUPABASE_URL`: Supabase 프로젝트 URL
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: 브라우저용 publishable key
-- `SUPABASE_SERVICE_ROLE_KEY`: 서버 전용 secret key
-- `OPENAI_API_KEY`: 서버 전용 OpenAI 프로젝트 API key
-- `OPENAI_FREE_MODEL`: 기본값 `gpt-5.4-mini`
+- `BACKEND_BASE_URL`: 로컬 Spring backend 주소. 기본값 `http://localhost:8080`
 
 키 발급 위치, OAuth 리디렉션과 로컬 테스트 가능 범위는
 [`docs/local-integrations.md`](docs/local-integrations.md)를 참고하세요.
 
 ## 데이터베이스
 
-기존 Supabase 마이그레이션은 현재 리딩 저장 계약을 유지하기 위한 과거 스키마 이력입니다. 신규 데이터베이스 변경은 백엔드 마이그레이션 작업에서 관리합니다.
+프론트 저장소는 데이터베이스 migration history를 더 이상 관리하지 않습니다. DB 재현성과 신규 데이터베이스 변경은 Spring backend의 Flyway migration에서 관리합니다.
 
 ## 검증
 

@@ -2,99 +2,71 @@
 
 ## 먼저 알아둘 점
 
-`.env.local`에 시크릿 키만 입력한다고 모든 기능이 바로 동작하지는 않습니다.
+프론트 `.env.local`에 키를 넣는 것만으로 전체 기능이 켜지지는 않습니다. 현재 인증과 데이터 쓰기는 Spring backend가 담당하고, 프론트는 Spring session 쿠키를 전달하는 경계만 가집니다.
 
-| 기능 | 키 입력만으로 가능 | 추가로 필요한 설정 |
+| 기능 | 프론트 키만으로 가능 | 추가로 필요한 설정 |
 | --- | --- | --- |
 | 무료 데모 리딩 | 가능 | 외부 키 불필요 |
-| OpenAI 실제 리딩 | 거의 가능 | API 결제 수단 또는 크레딧, 사용 가능한 모델 권한 |
-| Supabase 데이터 접근 | 불가능 | SQL 마이그레이션과 RLS 정책 적용 |
-| Google/Kakao 로그인 | 불가능 | 각 공급자 앱 생성, Supabase 공급자 설정, 리디렉션 URL 등록 |
+| OpenAI 실제 리딩 | 불가능 | backend OpenAI key와 사용 가능한 모델 권한 |
+| 로그인/기록 관리 | 불가능 | Spring backend 실행, PostgreSQL/Flyway migration, OAuth provider redirect 등록 |
 
-## `.env.local`
+## 프론트 `.env.local`
 
 ```dotenv
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-NEXT_PUBLIC_SUPABASE_URL=https://PROJECT_REF.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_...
-SUPABASE_SERVICE_ROLE_KEY=sb_secret_...
-
-OPENAI_API_KEY=sk-...
-OPENAI_FREE_MODEL=gpt-5.4-mini
+BACKEND_BASE_URL=http://localhost:8080
 ```
 
-`NEXT_PUBLIC_`이 붙은 값은 브라우저 번들에서 볼 수 있습니다. 여기에 OpenAI,
-Supabase secret key를 넣으면 안 됩니다. 환경변수를 변경한
-뒤에는 `npm run dev`를 다시 시작해야 합니다.
+`NEXT_PUBLIC_`이 붙은 값은 브라우저 번들에서 볼 수 있습니다. OpenAI key, OAuth client secret, DB password 같은 secret은 프론트 환경변수에 넣지 않습니다. 환경변수를 변경한 뒤에는 `npm run dev`를 다시 시작해야 합니다.
 
-## Supabase
+## Spring Backend
 
-1. Supabase Dashboard에서 프로젝트를 엽니다.
-2. `Connect` 또는 `Project Settings > API Keys`로 이동합니다.
-3. Project URL을 `NEXT_PUBLIC_SUPABASE_URL`에 넣습니다.
-4. `Publishable key`의 `sb_publishable_...` 값을
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY`에 넣습니다.
-5. `Secret keys`의 `sb_secret_...` 값을 `SUPABASE_SERVICE_ROLE_KEY`에 넣습니다.
-6. SQL Editor에서
-   `supabase/migrations/20260610120000_initial_persistence.sql`을 실행합니다.
+로컬 로그인과 기록 API를 확인하려면 backend를 함께 실행해야 합니다.
 
-기존 프로젝트라면 legacy `anon`과 `service_role` JWT도 동작하지만, 새 프로젝트는
-publishable/secret key 사용을 권장합니다. secret key는 RLS를 우회하므로 서버
-환경변수로만 사용합니다.
+1. PostgreSQL을 준비합니다.
+2. backend `application-secret.yaml`에 DB 접속 정보, guest signing secret, OAuth provider client id/secret/redirect URI를 넣습니다.
+3. backend를 실행하면 Flyway가 `MYEONGRO-Backend/src/main/resources/db/migration`의 migration을 적용합니다.
+4. 프론트의 `BACKEND_BASE_URL`이 backend 주소와 일치하는지 확인합니다.
 
-### 앱 리디렉션
+기존 프론트 `supabase/migrations` 폴더는 더 이상 기준이 아닙니다. DB 재현성 기준은 Spring backend의 Flyway migration입니다.
 
-Supabase Dashboard의 `Authentication > URL Configuration`에서 다음을 등록합니다.
+## OAuth Redirect URI
 
-- Site URL: `http://localhost:3000`
-- Redirect URLs: `http://localhost:3000/auth/callback`
+Kakao Developers 등 OAuth provider 콘솔에는 Spring backend redirect URI를 등록합니다.
 
-로컬에서 여러 경로가 필요하면 `http://localhost:3000/**`를 추가할 수 있습니다.
+```text
+http://localhost:8080/login/oauth2/code/kakao
+```
 
-### Google 로그인
-
-1. Google Cloud Console에서 OAuth Web Client를 만듭니다.
-2. Authorized redirect URI에는 Supabase의 Google Provider 화면에 표시되는
-   `https://PROJECT_REF.supabase.co/auth/v1/callback`을 등록합니다.
-3. 발급된 Google Client ID와 Client Secret을 Supabase Dashboard의
-   `Authentication > Sign In / Providers > Google`에 입력하고 활성화합니다.
-
-Google Client Secret은 이 앱의 `.env.local`에 직접 넣지 않습니다.
-
-### Kakao 로그인
-
-1. Kakao Developers에서 앱을 만들고 Kakao Login을 활성화합니다.
-2. Redirect URI에는 Supabase의 Kakao Provider 화면에 표시되는
-   `https://PROJECT_REF.supabase.co/auth/v1/callback`을 등록합니다.
-3. Kakao REST API key와 활성화한 Client Secret을 Supabase Dashboard의
-   `Authentication > Sign In / Providers > Kakao`에 입력합니다.
-
-Kakao Client Secret도 이 앱의 `.env.local`에 직접 넣지 않습니다.
+프론트 로그인 버튼은 사용자를 Spring OAuth 시작 경로로 보냅니다. 로그인 성공 후에는 Spring success handler가 프론트 기본 주소와 return URL 정책에 따라 사용자를 돌려보냅니다.
 
 ## OpenAI
 
-1. [OpenAI API Keys](https://platform.openai.com/api-keys)에서 프로젝트 API key를
-   생성합니다.
-2. 생성 직후 한 번만 표시되는 `sk-...` 값을 `OPENAI_API_KEY`에 넣습니다.
+OpenAI 실제 생성은 backend 설정으로 관리합니다.
+
+1. [OpenAI API Keys](https://platform.openai.com/api-keys)에서 프로젝트 API key를 생성합니다.
+2. backend secret 설정에 `OPENAI_API_KEY` 또는 대응되는 설정 값을 넣습니다.
 3. API 프로젝트에 결제 수단 또는 크레딧과 모델 사용 권한이 있는지 확인합니다.
 
-이 앱은 Responses API의 Structured Outputs를 사용합니다. 기본 모델은
-`gpt-5.4-mini`입니다. 키가 비어 있으면 앱은 오류 대신
-결정적 데모 리딩을 반환합니다.
+키가 비어 있으면 앱은 오류 대신 결정적 데모 리딩을 반환해야 합니다.
 
 ## 현재 상태 확인
 
-키를 입력하고 개발 서버를 다시 시작합니다.
+backend와 frontend 개발 서버를 모두 실행합니다.
 
 ```powershell
+# MYEONGRO-Backend
+.\gradlew.bat bootRun
+
+# MYEONGRO-Front
 npm run dev
 ```
 
 다음 순서로 확인합니다.
 
-1. 타로 무료 리딩 API 응답의 `meta.provider`가 `openai`인지 확인합니다.
-2. `/login`에서 Google/Kakao OAuth 화면으로 이동하고 앱으로 돌아오는지 확인합니다.
-3. 로그인 후 Supabase 기록 조회가 RLS 오류 없이 동작하는지 확인합니다.
+1. `/login`에서 Kakao OAuth 화면으로 이동하고 앱으로 돌아오는지 확인합니다.
+2. 로그인 후 `/api/me`가 인증된 사용자 응답을 반환하는지 확인합니다.
+3. 무료 리딩 생성 후 `/records`에서 Spring backend 기록 조회가 동작하는지 확인합니다.
+4. 기록 삭제가 `204 No Content`로 처리되고 화면에서 실패로 표시되지 않는지 확인합니다.
 
 키 값을 채팅, Git, 브라우저 콘솔 또는 스크린샷에 노출하지 마세요.
