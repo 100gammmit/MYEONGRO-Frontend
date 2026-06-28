@@ -24,7 +24,11 @@ export async function proxyBackendRequest(input: {
       cache: "no-store",
     });
 
-    return new Response(await response.arrayBuffer(), {
+    const body = responseMustNotHaveBody(response.status)
+      ? null
+      : await response.arrayBuffer();
+
+    return new Response(body, {
       status: response.status,
       statusText: response.statusText,
       headers: createResponseHeaders(response),
@@ -38,6 +42,10 @@ export async function proxyBackendRequest(input: {
       { status: 502 },
     );
   }
+}
+
+function responseMustNotHaveBody(status: number): boolean {
+  return status === 204 || status === 205 || status === 304;
 }
 
 function createBackendHeaders(request: Request): HeadersInit {

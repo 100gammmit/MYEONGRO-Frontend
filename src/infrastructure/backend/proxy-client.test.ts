@@ -64,4 +64,20 @@ describe("proxyBackendRequest", () => {
       message: "요청을 처리할 서버에 연결하지 못했습니다.",
     });
   });
+
+  it("forwards no-content responses without converting them to backend unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, {
+      status: 204,
+    })));
+
+    const response = await proxyBackendRequest({
+      request: new Request("https://front.test/api/readings/reading-1", {
+        method: "DELETE",
+      }),
+      path: "/api/readings/reading-1",
+    });
+
+    expect(response.status).toBe(204);
+    expect(await response.text()).toBe("");
+  });
 });
