@@ -32,13 +32,16 @@ BACKEND_BASE_URL=http://localhost:8080
 
 ## OAuth Redirect URI
 
-Kakao Developers 등 OAuth provider 콘솔에는 Spring backend redirect URI를 등록합니다.
+Kakao Developers, Google Cloud Console 등 OAuth provider 콘솔에는 Spring backend redirect URI를 등록합니다.
 
 ```text
 http://localhost:8080/login/oauth2/code/kakao
+http://localhost:8080/login/oauth2/code/google
 ```
 
-프론트 로그인 버튼은 사용자를 Spring OAuth 시작 경로로 보냅니다. 로그인 성공 후에는 Spring success handler가 프론트 기본 주소와 return URL 정책에 따라 사용자를 돌려보냅니다.
+프론트 로그인 버튼은 사용자를 Spring OAuth 시작 경로로 보냅니다. 현재 UI에는 Kakao 로그인만 노출하지만, 프론트 route는 `/auth/login/{provider}` 형태로 Kakao와 Google redirect를 모두 처리할 수 있습니다. 로그인 성공 후에는 Spring success handler가 프론트 기본 주소와 return URL 정책에 따라 사용자를 돌려보냅니다.
+
+Google 로그인을 실제로 테스트하려면 백엔드 `application-secret.yaml`에 Spring Security Google registration 값을 추가해야 합니다. 프론트는 `/auth/login/google` route를 지원하지만, 현재 MVP UI에는 Google 버튼을 노출하지 않습니다.
 
 ## OpenAI
 
