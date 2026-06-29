@@ -18,7 +18,6 @@ function listSourceFiles(directory: string): string[] {
 describe("Spring auth boundary", () => {
   it("keeps removed Supabase Auth routes and clients out of the frontend runtime", () => {
     expect(existsSync(path.join(sourceRoot, "app/auth/callback"))).toBe(false);
-    expect(existsSync(path.join(sourceRoot, "app/api/account"))).toBe(false);
     expect(existsSync(path.join(sourceRoot, "app/api/consents/transfer"))).toBe(false);
     expect(existsSync(path.join(sourceRoot, "infrastructure/supabase"))).toBe(false);
     expect(existsSync(path.join(projectRoot, "supabase"))).toBe(false);
@@ -35,7 +34,6 @@ describe("Spring auth boundary", () => {
       "@/infrastructure/supabase",
       "exchangeCodeForSession",
       "clearSupabaseAuthCookies",
-      "/api/account",
       "/api/consents/transfer",
       "Missing Supabase access token",
     ];

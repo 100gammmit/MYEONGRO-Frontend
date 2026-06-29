@@ -27,6 +27,10 @@ describe("SiteHeader", () => {
       "href",
       "/records",
     );
+    expect(screen.getByRole("link", { name: "계정" })).toHaveAttribute(
+      "href",
+      "/account",
+    );
     expect(screen.getByRole("button", { name: "로그아웃" })).toBeInTheDocument();
   });
 });

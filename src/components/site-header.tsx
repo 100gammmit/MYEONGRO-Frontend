@@ -11,6 +11,7 @@ export function SiteHeader({ authenticated }: { authenticated: boolean }) {
         {authenticated ? (
           <>
             <Link href="/records">내 기록</Link>
+            <Link href="/account">계정</Link>
             <form action="/auth/logout" method="post">
               <button type="submit" className="nav-cta nav-button">
                 로그아웃
