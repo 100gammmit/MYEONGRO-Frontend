@@ -203,7 +203,8 @@ h1, h2, h3, blockquote { font-family: Georgia, "Noto Serif KR", serif; font-weig
 .record-actions > div { display: flex; gap: 12px; }
 .record-delete-button { padding: 14px 18px; background: transparent; border: 1px solid rgba(231,164,151,.5); color: var(--danger); }
 .record-delete-button:disabled { opacity: .5; }
-.social-button { border: 0; padding: 16px; font-weight: 700; }
+.social-button { border: 0; padding: 16px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.social-logo { width: 20px; height: 20px; flex: 0 0 auto; }
 .kakao { background: #fee500; color: #191919; }
 .google { background: #fff; color: #1f1f1f; }
 .auth-card small { color: #7f8997; margin-top: 15px; }
