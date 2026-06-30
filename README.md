@@ -17,7 +17,7 @@ npm run dev
 ## 환경 변수
 
 - `NEXT_PUBLIC_APP_URL`: 로컬에서는 `http://localhost:3000`
-- `BACKEND_BASE_URL`: 로컬 Spring backend 주소. 기본값 `http://localhost:8080`
+- `BACKEND_API_URL`: 로컬 Spring backend 주소. 기본값 `http://localhost:8080`
 
 키 발급 위치, OAuth 리디렉션과 로컬 테스트 가능 범위는
 [`docs/local-integrations.md`](docs/local-integrations.md)를 참고하세요.

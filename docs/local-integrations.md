@@ -14,7 +14,7 @@
 
 ```dotenv
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-BACKEND_BASE_URL=http://localhost:8080
+BACKEND_API_URL=http://localhost:8080
 ```
 
 `NEXT_PUBLIC_`이 붙은 값은 브라우저 번들에서 볼 수 있습니다. OpenAI key, OAuth client secret, DB password 같은 secret은 프론트 환경변수에 넣지 않습니다. 환경변수를 변경한 뒤에는 `npm run dev`를 다시 시작해야 합니다.
@@ -26,7 +26,7 @@ BACKEND_BASE_URL=http://localhost:8080
 1. PostgreSQL을 준비합니다.
 2. backend `application-secret.yaml`에 DB 접속 정보, guest signing secret, OAuth provider client id/secret/redirect URI를 넣습니다.
 3. backend를 실행하면 Flyway가 `MYEONGRO-Backend/src/main/resources/db/migration`의 migration을 적용합니다.
-4. 프론트의 `BACKEND_BASE_URL`이 backend 주소와 일치하는지 확인합니다.
+4. 프론트의 `BACKEND_API_URL`이 backend 주소와 일치하는지 확인합니다.
 
 기존 프론트 `supabase/migrations` 폴더는 더 이상 기준이 아닙니다. DB 재현성 기준은 Spring backend의 Flyway migration입니다.
 
