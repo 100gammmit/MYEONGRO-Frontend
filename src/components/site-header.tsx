@@ -20,7 +20,7 @@ export function SiteHeader({ authenticated }: { authenticated: boolean }) {
           </>
         ) : (
           <Link href="/login" className="nav-cta">
-            카카오 로그인
+            로그인
           </Link>
         )}
       </nav>

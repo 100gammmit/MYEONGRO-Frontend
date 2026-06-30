@@ -39,9 +39,9 @@ http://localhost:8080/login/oauth2/code/kakao
 http://localhost:8080/login/oauth2/code/google
 ```
 
-프론트 로그인 버튼은 사용자를 Spring OAuth 시작 경로로 보냅니다. 현재 UI에는 Kakao 로그인만 노출하지만, 프론트 route는 `/auth/login/{provider}` 형태로 Kakao와 Google redirect를 모두 처리할 수 있습니다. 로그인 성공 후에는 Spring success handler가 프론트 기본 주소와 return URL 정책에 따라 사용자를 돌려보냅니다.
+프론트 로그인 화면은 Kakao와 Google 버튼을 노출하고, 사용자를 Spring OAuth 시작 경로로 보냅니다. 프론트 route는 `/auth/login/{provider}` 형태로 Kakao와 Google redirect를 모두 처리합니다. 로그인 성공 후에는 Spring success handler가 프론트 기본 주소와 return URL 정책에 따라 사용자를 돌려보냅니다.
 
-Google 로그인을 실제로 테스트하려면 백엔드 `application-secret.yaml`에 Spring Security Google registration 값을 추가해야 합니다. Google scope에는 `openid`를 포함해 OIDC login 경로를 사용합니다. 프론트는 `/auth/login/google` route를 지원하지만, 현재 MVP UI에는 Google 버튼을 노출하지 않습니다.
+Google 로그인을 실제로 테스트하려면 백엔드 `application-secret.yaml`에 Spring Security Google registration 값을 추가해야 합니다. Google scope에는 `openid`를 포함해 OIDC login 경로를 사용합니다.
 
 ## OpenAI
 
@@ -68,8 +68,9 @@ npm run dev
 다음 순서로 확인합니다.
 
 1. `/login`에서 Kakao OAuth 화면으로 이동하고 앱으로 돌아오는지 확인합니다.
-2. 로그인 후 `/api/me`가 인증된 사용자 응답을 반환하는지 확인합니다.
-3. 무료 리딩 생성 후 `/records`에서 Spring backend 기록 조회가 동작하는지 확인합니다.
-4. 기록 삭제가 `204 No Content`로 처리되고 화면에서 실패로 표시되지 않는지 확인합니다.
+2. `/login`에서 Google OAuth 화면으로 이동하고 앱으로 돌아오는지 확인합니다.
+3. 로그인 후 `/api/me`가 인증된 사용자 응답을 반환하는지 확인합니다.
+4. 무료 리딩 생성 후 `/records`에서 Spring backend 기록 조회가 동작하는지 확인합니다.
+5. 기록 삭제가 `204 No Content`로 처리되고 화면에서 실패로 표시되지 않는지 확인합니다.
 
 키 값을 채팅, Git, 브라우저 콘솔 또는 스크린샷에 노출하지 마세요.

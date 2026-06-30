@@ -19,7 +19,7 @@ describe("GET /auth/login/[provider]", () => {
     );
   });
 
-  it("redirects to Spring Google OAuth without exposing a login button yet", async () => {
+  it("redirects to Spring Google OAuth with a normalized next path", async () => {
     const response = await GET(
       new Request("https://front.test/auth/login/google?next=%2Faccount"),
       { params: Promise.resolve({ provider: "google" }) },

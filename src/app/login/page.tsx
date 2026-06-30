@@ -17,7 +17,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <p>로그인하면 리딩 기록을 안전하게 저장하고 다른 기기에서도 이어서 볼 수 있습니다.</p>
       <div className="auth-card">
         <AuthButtons next={next} />
-        <small>카카오 계정으로 간편하게 시작할 수 있습니다.</small>
+        <small>원하는 OAuth 계정으로 간편하게 시작할 수 있습니다.</small>
       </div>
     </section>
   );

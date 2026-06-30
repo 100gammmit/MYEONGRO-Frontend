@@ -10,10 +10,10 @@ describe("SiteHeader", () => {
     );
   });
 
-  it("offers Kakao login to guests without exposing records", () => {
+  it("offers login to guests without exposing records", () => {
     render(<SiteHeader authenticated={false} />);
 
-    expect(screen.getByRole("link", { name: "카카오 로그인" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "로그인" })).toHaveAttribute(
       "href",
       "/login",
     );

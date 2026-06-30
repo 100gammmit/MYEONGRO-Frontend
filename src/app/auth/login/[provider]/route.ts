@@ -4,7 +4,7 @@ import { toBackendUrl } from "@/infrastructure/backend/url";
 const SUPPORTED_PROVIDERS = new Set(["kakao", "google"]);
 
 interface LoginRouteContext {
-  params: Promise<{ provider: string }> | { provider: string };
+  params: Promise<{ provider: string }>;
 }
 
 export async function GET(request: Request, context: LoginRouteContext) {
