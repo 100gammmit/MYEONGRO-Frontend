@@ -48,4 +48,33 @@ describe("Spring auth boundary", () => {
       }
     }
   });
+
+  it("keeps OpenAI provider control out of the frontend runtime", () => {
+    expect(existsSync(path.join(sourceRoot, "domain/generation/openai-reading-generator.ts")))
+      .toBe(false);
+
+    const packageJson = JSON.parse(
+      readFileSync(path.join(projectRoot, "package.json"), "utf8"),
+    ) as { dependencies?: Record<string, string> };
+
+    expect(packageJson.dependencies).not.toHaveProperty("openai");
+
+    const forbiddenFragments = [
+      "OPENAI_API_KEY",
+      "OPENAI_FREE_MODEL",
+      "openai/helpers",
+      "from \"openai\"",
+      "OpenAIReadingGenerator",
+    ];
+    const files = listSourceFiles(sourceRoot)
+      .filter((filePath) => filePath !== __filename);
+
+    for (const filePath of files) {
+      const source = readFileSync(filePath, "utf8");
+      for (const fragment of forbiddenFragments) {
+        expect(source, `${path.relative(projectRoot, filePath)} contains ${fragment}`)
+          .not.toContain(fragment);
+      }
+    }
+  });
 });
