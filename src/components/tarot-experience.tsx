@@ -222,6 +222,11 @@ export function TarotExperience() {
     writeDraft({ spreadType, question, choiceOptions, cardIds: selectedCardIds });
     try {
       const response = await fetch("/api/me", { credentials: "same-origin" });
+      if (!response.ok && response.status !== 401) {
+        setError("로그인 상태를 확인하지 못했어요. 서버 연결 상태를 확인하고 다시 시도해 주세요.");
+        setPhase("error");
+        return;
+      }
       const payload = response.ok
         ? await response.json() as { authenticated?: boolean }
         : { authenticated: false };
@@ -488,7 +493,7 @@ function validateReadingResponse(
   const definition = TAROT_SPREADS[spreadType];
   if (
     reading.spreadType !== spreadType
-    || reading.schemaVersion < 1
+    || reading.schemaVersion !== 1
     || !reading.result
     || reading.input.cards.length !== definition.cardCount
     || reading.result.sections.length !== definition.cardCount

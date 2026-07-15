@@ -91,6 +91,24 @@ describe("TarotExperience", () => {
     expect(navigation.push.mock.calls[0][0]).not.toContain("question");
   });
 
+  it("keeps the draft and shows an error when the login check backend is unavailable", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({ code: "BACKEND_UNAVAILABLE" }, { status: 502 }),
+    );
+
+    render(<TarotExperience />);
+    startDailyReading();
+    fireEvent.click(screen.getByRole("button", { name: /리딩 생성/ }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "로그인 상태를 확인하지 못했어요",
+    );
+    expect(navigation.push).not.toHaveBeenCalled();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).not.toHaveBeenCalledWith("/api/readings", expect.anything());
+    expect(sessionStorage.getItem("myeongro:tarot-draft")).toContain("daily_one_card");
+  });
+
   it("submits choice cards in selection order and reveals matching sections by position", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
       "11111111-1111-4111-8111-111111111111",
@@ -213,6 +231,40 @@ describe("TarotExperience", () => {
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/login?next=%2Ftarot"));
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
+
+  it.each([0, 2, undefined])(
+    "rejects an unsupported reading schemaVersion (%s)",
+    async (schemaVersion) => {
+      storeDailyDraft();
+      vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+        if (input === "/api/me") {
+          return Response.json({ authenticated: true, user: { id: "user-1" } });
+        }
+        return Response.json({
+          reading: {
+            spreadType: "daily_one_card",
+            ...(schemaVersion === undefined ? {} : { schemaVersion }),
+            input: {
+              cards: [{ cardId: "major-17-star", position: "today", reversed: false }],
+            },
+            result: {
+              title: "지원하지 않는 결과",
+              summary: "표시하면 안 되는 결과",
+              sections: [{ position: "today", heading: "오늘", body: "본문" }],
+              guidance: ["조언"],
+              disclaimer: "참고 정보",
+            },
+          },
+        });
+      });
+
+      render(<TarotExperience />);
+      fireEvent.click(await screen.findByRole("button", { name: /리딩 생성/ }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent("리딩 결과 계약");
+      expect(screen.queryByText("지원하지 않는 결과")).not.toBeInTheDocument();
+    },
+  );
 
   it("rejects a result whose section position does not match the selected spread", async () => {
     storeDailyDraft();
