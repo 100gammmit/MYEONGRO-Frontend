@@ -47,6 +47,8 @@ describe("RecordsPage", () => {
       {
         id: "reading-1",
         kind: "tarot",
+        spreadType: "relationship_three_card",
+        schemaVersion: 1,
         status: "completed",
         title: "관계의 흐름",
         input: { question: "앞으로의 관계 흐름이 궁금해요." },
@@ -70,6 +72,7 @@ describe("RecordsPage", () => {
       "href",
       "/records/reading-1",
     );
+    expect(screen.getByText("관계 리딩 3장")).toBeInTheDocument();
   });
 
   it("shows an authenticated empty state without another login prompt", async () => {

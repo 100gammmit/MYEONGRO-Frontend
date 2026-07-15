@@ -32,7 +32,13 @@ const agreementDetails: Record<AgreementId, { label: string; detail: string }> =
   },
 };
 
-export function ConsentGate({ onComplete }: { onComplete: () => void }) {
+export function ConsentGate({
+  onComplete,
+  onUnauthenticated,
+}: {
+  onComplete: () => void;
+  onUnauthenticated?: () => void;
+}) {
   const [checked, setChecked] = useState<Partial<Record<AgreementId, boolean>>>({});
   const [status, setStatus] = useState<ConsentStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +57,11 @@ export function ConsentGate({ onComplete }: { onComplete: () => void }) {
     setError(null);
 
     try {
-      const response = await fetch("/api/consents");
+      const response = await fetch("/api/consents", { credentials: "same-origin" });
+      if (response.status === 401) {
+        onUnauthenticated?.();
+        return;
+      }
       if (!response.ok) {
         throw new Error("failed");
       }
@@ -77,7 +87,7 @@ export function ConsentGate({ onComplete }: { onComplete: () => void }) {
     } finally {
       setLoading(false);
     }
-  }, [onComplete]);
+  }, [onComplete, onUnauthenticated]);
 
   useEffect(() => {
     void loadStatus();
@@ -90,11 +100,16 @@ export function ConsentGate({ onComplete }: { onComplete: () => void }) {
     try {
       const response = await fetch("/api/consents", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           acceptedDocumentTypes: requiredAgreements,
         }),
       });
+      if (response.status === 401) {
+        onUnauthenticated?.();
+        return;
+      }
       if (!response.ok) {
         throw new Error("failed");
       }

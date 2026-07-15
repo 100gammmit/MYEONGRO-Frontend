@@ -1,5 +1,33 @@
-import type { PublicReadingRecord } from "@/app/api/readings/records-handler";
 import { toBackendUrl } from "./url";
+
+export type ReadingKind = "tarot" | "saju";
+export type ReadingStatus = "generating" | "completed" | "failed";
+
+export interface ReadingResultSection {
+  position?: string;
+  heading: string;
+  body: string;
+}
+
+export interface PublicReadingRecord {
+  id: string;
+  kind: ReadingKind;
+  spreadType?: string | null;
+  schemaVersion?: number;
+  status: ReadingStatus;
+  title: string;
+  input: Record<string, unknown>;
+  result?: {
+    title: string;
+    summary: string;
+    sections: ReadingResultSection[];
+    guidance: string[];
+    disclaimer: string;
+  };
+  errorCode?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface ReadingRecordEnvelope {
   reading: PublicReadingRecord;

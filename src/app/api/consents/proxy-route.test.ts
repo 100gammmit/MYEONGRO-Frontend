@@ -12,10 +12,11 @@ describe("/api/consents route proxy", () => {
     vi.clearAllMocks();
   });
 
-  it("proxies guest consent status to Spring so it can issue the guest cookie", async () => {
-    proxyBackendRequest.mockResolvedValue(Response.json({
-      status: { hasAcceptedRequired: false },
-    }));
+  it("returns Spring's unauthenticated consent response without a guest fallback", async () => {
+    proxyBackendRequest.mockResolvedValue(Response.json(
+      { code: "UNAUTHENTICATED", message: "로그인이 필요합니다." },
+      { status: 401 },
+    ));
     const request = new Request("https://front.test/api/consents");
     const { GET } = await import("./route");
 
@@ -25,8 +26,10 @@ describe("/api/consents route proxy", () => {
       request,
       path: "/api/consents",
     });
+    expect(response.status).toBe(401);
     expect(await response.json()).toEqual({
-      status: { hasAcceptedRequired: false },
+      code: "UNAUTHENTICATED",
+      message: "로그인이 필요합니다.",
     });
   });
 

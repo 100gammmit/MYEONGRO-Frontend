@@ -1,12 +1,19 @@
 export { MAJOR_ARCANA } from "./deck";
-export { TarotDomainError } from "./errors";
-export { createDemoInterpretation } from "./interpretation";
-export { createThreeCardSpread } from "./spread";
+export {
+  DAILY_QUESTION,
+  TAROT_SPREAD_LIST,
+  TAROT_SPREADS,
+} from "./definitions";
+export { drawCandidateCardIds } from "./draw";
+export { createTarotReadingRequest } from "./request";
 export type {
-  DemoCardInterpretation,
-  DemoTarotInterpretation,
-  MajorArcanaCard,
-  TarotCardChoice,
-  TarotPosition,
-  TarotSpreadCard,
-} from "./types";
+  TarotPositionDefinition,
+  TarotPositionId,
+  TarotSpreadDefinition,
+  TarotSpreadType,
+} from "./definitions";
+export type {
+  CreateTarotReadingRequestInput,
+  TarotChoiceOptions,
+  TarotReadingRequest,
+} from "./request";

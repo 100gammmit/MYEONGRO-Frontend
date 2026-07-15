@@ -105,7 +105,9 @@ describe("SajuExperience", () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "음력" })).not.toBeInTheDocument();
 
-    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/consents");
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/consents", {
+      credentials: "same-origin",
+    });
   });
 
   it("posts the saju payload without client-side pillars and omits blank birthTime", async () => {

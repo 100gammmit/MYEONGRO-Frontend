@@ -21,4 +21,10 @@ describe("getSpringSessionUser", () => {
     });
     expect(user).toEqual({ id: "user-1", displayName: "Myeongro" });
   });
+
+  it("treats an unavailable backend as unauthenticated on public frontend routes", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("ECONNREFUSED")));
+
+    await expect(getSpringSessionUser()).resolves.toBeNull();
+  });
 });

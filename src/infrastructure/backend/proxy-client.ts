@@ -52,9 +52,23 @@ function createBackendHeaders(request: Request): HeadersInit {
   const headers: Record<string, string> = {};
   for (const name of FORWARDED_REQUEST_HEADERS) {
     const value = request.headers.get(name);
-    if (value) headers[name] = value;
+    if (!value) continue;
+    if (name === "cookie") {
+      const sessionCookie = getSpringSessionCookie(value);
+      if (sessionCookie) headers[name] = sessionCookie;
+      continue;
+    }
+    headers[name] = value;
   }
   return headers;
+}
+
+function getSpringSessionCookie(cookieHeader: string): string | null {
+  const sessionCookies = cookieHeader
+    .split(";")
+    .map((cookie) => cookie.trim())
+    .filter((cookie) => cookie.startsWith("JSESSIONID=") || cookie.startsWith("SESSION="));
+  return sessionCookies.length > 0 ? sessionCookies.join("; ") : null;
 }
 
 async function getRequestBody(request: Request): Promise<string | undefined> {

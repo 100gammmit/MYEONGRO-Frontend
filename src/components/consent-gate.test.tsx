@@ -14,6 +14,23 @@ function deferred<T>() {
 }
 
 describe("ConsentGate", () => {
+  it("routes a 401 consent response back through the login gate", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({ code: "UNAUTHENTICATED", message: "로그인이 필요합니다." }, { status: 401 }),
+    );
+    const onUnauthenticated = vi.fn();
+
+    render(
+      <ConsentGate
+        onComplete={vi.fn()}
+        onUnauthenticated={onUnauthenticated}
+      />,
+    );
+
+    await waitFor(() => expect(onUnauthenticated).toHaveBeenCalledOnce());
+    expect(screen.queryByText(/게스트/)).not.toBeInTheDocument();
+  });
+
   it("shows a loading state while checking the current consent status", async () => {
     const pending = deferred<Response>();
     const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() => pending.promise);
@@ -75,7 +92,9 @@ describe("ConsentGate", () => {
 
     expect(await screen.findByRole("button", { name: "동의하고 계속" })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock).toHaveBeenLastCalledWith("/api/consents");
+    expect(fetchMock).toHaveBeenLastCalledWith("/api/consents", {
+      credentials: "same-origin",
+    });
     expect(onComplete).not.toHaveBeenCalled();
     fetchMock.mockRestore();
   });

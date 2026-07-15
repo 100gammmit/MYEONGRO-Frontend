@@ -8,14 +8,14 @@ describe("proxyBackendRequest", () => {
     vi.stubEnv("BACKEND_API_URL", "https://spring.test/");
   });
 
-  it("forwards JSON requests with cookies and no bearer token", async () => {
+  it("forwards JSON requests with only the Spring session cookie and no bearer token", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       Response.json(
         { reading: { id: "reading-1" } },
         {
           status: 201,
           headers: {
-            "set-cookie": "myeongro_guest=signed; HttpOnly; SameSite=Lax; Path=/",
+            "set-cookie": "JSESSIONID=renewed; HttpOnly; SameSite=Lax; Path=/",
           },
         },
       ),
@@ -27,7 +27,7 @@ describe("proxyBackendRequest", () => {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          cookie: "myeongro_guest=old",
+          cookie: "JSESSIONID=session; theme=dark",
           "x-forwarded-for": "203.0.113.8",
         },
         body: JSON.stringify({ kind: "tarot" }),
@@ -39,14 +39,14 @@ describe("proxyBackendRequest", () => {
       method: "POST",
       headers: expect.objectContaining({
         "content-type": "application/json",
-        cookie: "myeongro_guest=old",
+        cookie: "JSESSIONID=session",
         "x-forwarded-for": "203.0.113.8",
       }),
       body: JSON.stringify({ kind: "tarot" }),
       cache: "no-store",
     });
     expect(response.status).toBe(201);
-    expect(response.headers.get("set-cookie")).toContain("myeongro_guest=signed");
+    expect(response.headers.get("set-cookie")).toContain("JSESSIONID=renewed");
     expect(await response.json()).toEqual({ reading: { id: "reading-1" } });
   });
 
@@ -63,6 +63,20 @@ describe("proxyBackendRequest", () => {
       code: "BACKEND_UNAVAILABLE",
       message: "요청을 처리할 서버에 연결하지 못했습니다.",
     });
+  });
+
+  it("supports Spring Session's SESSION cookie name", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({ authenticated: true }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await proxyBackendRequest({
+      request: new Request("https://front.test/api/me", {
+        headers: { cookie: "SESSION=spring-session; theme=dark" },
+      }),
+      path: "/api/auth/me",
+    });
+
+    expect(fetchMock.mock.calls[0]?.[1]?.headers).toEqual({ cookie: "SESSION=spring-session" });
   });
 
   it("forwards no-content responses without converting them to backend unavailable", async () => {

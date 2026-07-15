@@ -16,10 +16,15 @@ interface MeResponse {
 export async function getSpringSessionUser(
   cookieHeader?: string | null,
 ): Promise<SpringSessionUser | null> {
-  const response = await fetch(toBackendUrl("/api/auth/me"), {
-    headers: cookieHeader ? { cookie: cookieHeader } : undefined,
-    cache: "no-store",
-  });
+  let response: Response;
+  try {
+    response = await fetch(toBackendUrl("/api/auth/me"), {
+      headers: cookieHeader ? { cookie: cookieHeader } : undefined,
+      cache: "no-store",
+    });
+  } catch {
+    return null;
+  }
 
   if (!response.ok) return null;
 

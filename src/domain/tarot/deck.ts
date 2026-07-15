@@ -1,4 +1,10 @@
-import type { MajorArcanaCard } from "./types";
+export interface MajorArcanaCard {
+  readonly id: string;
+  readonly name: string;
+  readonly keywords: readonly string[];
+  readonly uprightMeaning: string;
+  readonly reversedMeaning: string;
+}
 
 export const MAJOR_ARCANA = [
   {

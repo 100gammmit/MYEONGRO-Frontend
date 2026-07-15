@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { TAROT_SPREADS, type TarotSpreadType } from "@/domain/tarot";
 import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
@@ -12,6 +13,14 @@ const statusLabels = {
 
 function getQuestion(input: Record<string, unknown>): string {
   return typeof input.question === "string" ? input.question : "저장된 리딩";
+}
+
+function getReadingTypeLabel(kind: "tarot" | "saju", spreadType?: string | null): string {
+  if (kind === "saju") return "AI 사주";
+  if (spreadType && spreadType in TAROT_SPREADS) {
+    return TAROT_SPREADS[spreadType as TarotSpreadType].name;
+  }
+  return "AI 타로";
 }
 
 export default async function RecordsPage() {
@@ -45,7 +54,7 @@ export default async function RecordsPage() {
             >
               <div>
                 <span className="record-kind">
-                  {reading.kind === "tarot" ? "AI 타로" : "AI 사주"}
+                  {getReadingTypeLabel(reading.kind, reading.spreadType)}
                 </span>
                 <h2>
                   {reading.status === "completed"

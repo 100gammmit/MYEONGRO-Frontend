@@ -25,13 +25,13 @@ describe("session middleware", () => {
     await middleware(
       new NextRequest("https://fortune.test/api/consents", {
         headers: {
-          cookie: "JSESSIONID=session; myeongro_guest=signed-token",
+          cookie: "JSESSIONID=session",
         },
       }),
     );
 
     expect(sessionState.getSpringSessionUser).toHaveBeenCalledWith(
-      "JSESSIONID=session; myeongro_guest=signed-token",
+      "JSESSIONID=session",
     );
   });
 

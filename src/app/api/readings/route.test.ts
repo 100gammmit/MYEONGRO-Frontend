@@ -12,11 +12,13 @@ describe("/api/readings route", () => {
     vi.clearAllMocks();
   });
 
-  it("proxies free reading creation to Spring without requiring authentication", async () => {
-    proxyBackendRequest.mockResolvedValue(Response.json({ reading: { id: "guest-reading" } }));
+  it("returns Spring's unauthenticated response without a guest fallback", async () => {
+    proxyBackendRequest.mockResolvedValue(Response.json(
+      { code: "UNAUTHENTICATED", message: "로그인이 필요합니다." },
+      { status: 401 },
+    ));
     const request = new Request("https://front.test/api/readings", {
       method: "POST",
-      headers: { cookie: "myeongro_guest=signed" },
       body: JSON.stringify({ kind: "tarot" }),
     });
     const { POST } = await import("./route");
@@ -27,7 +29,11 @@ describe("/api/readings route", () => {
       request,
       path: "/api/readings",
     });
-    expect(await response.json()).toEqual({ reading: { id: "guest-reading" } });
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({
+      code: "UNAUTHENTICATED",
+      message: "로그인이 필요합니다.",
+    });
   });
 
   it("proxies authenticated free reading creation with Spring session cookies", async () => {
