@@ -678,6 +678,115 @@ describe("TarotExperience", () => {
     expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
   });
 
+  it("retries the same persisted reading after finalize and an active 404", async () => {
+    const complete = makeComplete("mind_three_card");
+    sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+      version: 3,
+      spreadType: complete.spreadType,
+      question: "recover a lost response",
+      choiceOptions: { a: "", b: "" },
+      drawSessionId: complete.drawSessionId,
+    }));
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
+      "33333333-3333-4333-8333-333333333333",
+    );
+    const submittedBodies: Array<Record<string, unknown>> = [];
+    let activeCalls = 0;
+    let readingCalls = 0;
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") {
+        activeCalls += 1;
+        return activeCalls === 1 ? Response.json(complete) : drawNotFound();
+      }
+      if (input === "/api/readings") {
+        readingCalls += 1;
+        submittedBodies.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+        if (readingCalls === 1) throw new TypeError("response connection lost");
+        return readingResponse(complete);
+      }
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    const first = render(<TarotExperience />);
+    await waitFor(() => expect(first.container.querySelector(".confirmation-card .primary-button")).not.toBeNull());
+    fireEvent.click(first.container.querySelector(".confirmation-card .primary-button") as HTMLButtonElement);
+    await screen.findByRole("alert");
+    first.unmount();
+
+    const second = render(<TarotExperience />);
+    await screen.findByRole("alert");
+    fireEvent.click(second.container.querySelector(".wizard-card .secondary-button") as HTMLButtonElement);
+    await waitFor(() => expect(second.container.querySelector(".reveal-button")).not.toBeNull());
+
+    expect(submittedBodies).toHaveLength(2);
+    expect(submittedBodies[1]).toEqual(submittedBodies[0]);
+    expect(submittedBodies[1]).toMatchObject({
+      drawSessionId: complete.drawSessionId,
+      requestId: "33333333-3333-4333-8333-333333333333",
+    });
+    expect(globalThis.crypto.randomUUID).toHaveBeenCalledTimes(1);
+    expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
+  });
+
+  it("rejects duplicate canonical cards in an active-404 recovery response", async () => {
+    const complete = makeComplete("mind_three_card");
+    let readingCalls = 0;
+    sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+      version: 3,
+      spreadType: complete.spreadType,
+      question: "recover strictly",
+      choiceOptions: { a: "", b: "" },
+      drawSessionId: complete.drawSessionId,
+      requestId: "44444444-4444-4444-8444-444444444444",
+    }));
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") return drawNotFound();
+      if (input === "/api/readings") {
+        readingCalls += 1;
+        const payload = await readingResponse(complete).json() as {
+          reading: { input: { cards: Array<{ cardId: string }> } };
+        };
+        payload.reading.input.cards[1].cardId = payload.reading.input.cards[0].cardId;
+        return Response.json(payload);
+      }
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    const { container } = render(<TarotExperience />);
+    await screen.findByRole("alert");
+    fireEvent.click(container.querySelector(".wizard-card .secondary-button") as HTMLButtonElement);
+
+    await waitFor(() => expect(readingCalls).toBe(1));
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(container.querySelector(".reveal-button")).toBeNull();
+    expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).not.toBeNull();
+  });
+
+  it("keeps the newly created requestId when the reading POST returns 401", async () => {
+    const complete = makeComplete("daily_one_card");
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
+      "55555555-5555-4555-8555-555555555555",
+    );
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") return Response.json(complete);
+      if (input === "/api/readings") return Response.json({}, { status: 401 });
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    const { container } = render(<TarotExperience />);
+    await waitFor(() => expect(container.querySelector(".confirmation-card .primary-button")).not.toBeNull());
+    fireEvent.click(container.querySelector(".confirmation-card .primary-button") as HTMLButtonElement);
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/login?next=%2Ftarot"));
+    expect(JSON.parse(sessionStorage.getItem("myeongro:tarot-draw-draft-v3") ?? "{}")).toMatchObject({
+      drawSessionId: complete.drawSessionId,
+      requestId: "55555555-5555-4555-8555-555555555555",
+    });
+  });
+
   it("guides an already-consumed draw to records or a new start", async () => {
     const complete = makeComplete("daily_one_card");
     vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {

@@ -102,6 +102,7 @@ export function TarotExperience() {
   const [isSelectionPending, setIsSelectionPending] = useState(false);
   const [isOperationPending, setIsOperationPending] = useState(false);
   const [isRecoveringInput, setIsRecoveringInput] = useState(false);
+  const [readingRecoveryDrawSessionId, setReadingRecoveryDrawSessionId] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [result, setResult] = useState<TarotReadingResult | null>(null);
   const [resultCards, setResultCards] = useState<string[]>([]);
@@ -127,8 +128,8 @@ export function TarotExperience() {
     });
   }, [choiceOptions, question, requestId, spreadType]);
 
-  const redirectToLogin = useCallback((drawSessionId?: string) => {
-    persistDraft(drawSessionId);
+  const redirectToLogin = useCallback((drawSessionId?: string, persistedRequestId?: string) => {
+    persistDraft(drawSessionId, persistedRequestId);
     router.push("/login?next=%2Ftarot");
   }, [persistDraft, router]);
 
@@ -171,6 +172,7 @@ export function TarotExperience() {
     setChoiceOptions(restoredChoices);
     setRequestId(restoredRequestId);
     setIsRecoveringInput(needsInputRecovery);
+    setReadingRecoveryDrawSessionId(null);
     setDrawState(state);
     setError(null);
     setRetryMode(null);
@@ -207,7 +209,20 @@ export function TarotExperience() {
       if (response.status === 404) {
         const apiError = await readApiError(response);
         if (apiError.code === "DRAW_SESSION_NOT_FOUND") {
+          const recoveryDraft = options?.draft ?? readDraft();
+          if (isRecoverableReadingDraft(recoveryDraft)) {
+            setSpreadType(recoveryDraft.spreadType);
+            setQuestion(recoveryDraft.question);
+            setChoiceOptions(recoveryDraft.choiceOptions);
+            setRequestId(recoveryDraft.requestId);
+            setDrawState(null);
+            setReadingRecoveryDrawSessionId(recoveryDraft.drawSessionId);
+            setIsRecoveringInput(false);
+            showError("이전 리딩 요청의 결과를 확인하지 못했어요. 같은 요청으로 다시 확인해 주세요.", "reading");
+            return;
+          }
           setDrawState(null);
+          setReadingRecoveryDrawSessionId(null);
           setError(null);
           setRetryMode(null);
           setPhase("spread");
@@ -270,6 +285,7 @@ export function TarotExperience() {
     setChoiceOptions({ a: "", b: "" });
     setDrawState(null);
     setIsRecoveringInput(false);
+    setReadingRecoveryDrawSessionId(null);
     setRequestId(null);
     setResult(null);
     setError(null);
@@ -421,6 +437,7 @@ export function TarotExperience() {
     setQuestion("");
     setChoiceOptions({ a: "", b: "" });
     setIsRecoveringInput(false);
+    setReadingRecoveryDrawSessionId(null);
     setRequestId(null);
     setResult(null);
     setError(null);
@@ -430,7 +447,9 @@ export function TarotExperience() {
   }
 
   const submitReading = useCallback(async () => {
-    if (drawState?.status !== "complete" || inFlightRequestId.current) return;
+    const completedDraw = drawState?.status === "complete" ? drawState : null;
+    const drawSessionId = completedDraw?.drawSessionId ?? readingRecoveryDrawSessionId;
+    if (!drawSessionId || inFlightRequestId.current) return;
     const nextRequestId = requestId ?? globalThis.crypto.randomUUID();
     let body;
     try {
@@ -439,7 +458,7 @@ export function TarotExperience() {
         question,
         choiceOptions,
         requestId: nextRequestId,
-        drawSessionId: drawState.drawSessionId,
+        drawSessionId,
       });
     } catch (submissionError) {
       showError(submissionError instanceof Error ? submissionError.message : "입력을 확인해 주세요.", "reading");
@@ -448,7 +467,7 @@ export function TarotExperience() {
 
     inFlightRequestId.current = nextRequestId;
     setRequestId(nextRequestId);
-    persistDraft(drawState.drawSessionId, nextRequestId);
+    persistDraft(drawSessionId, nextRequestId);
     setError(null);
     setResult(null);
     setPhase("loading");
@@ -462,8 +481,8 @@ export function TarotExperience() {
       });
 
       if (response.status === 401) {
-        redirectToLogin(drawState.drawSessionId);
-        setPhase("confirm");
+        redirectToLogin(drawSessionId, nextRequestId);
+        if (completedDraw) setPhase("confirm");
         return;
       }
       if (!response.ok) {
@@ -480,11 +499,12 @@ export function TarotExperience() {
       }
 
       const payload = await response.json() as TarotReadingResponse;
-      const validated = validateReadingResponse(payload, spreadType, drawState.cards);
+      const validated = validateReadingResponse(payload, spreadType, completedDraw?.cards);
       setResult(validated.result);
       setResultCards(validated.cardIds);
       setRevealedResultCount(0);
       setRequestId(null);
+      setReadingRecoveryDrawSessionId(null);
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
       setPhase("result");
     } catch (readingError) {
@@ -497,7 +517,7 @@ export function TarotExperience() {
     } finally {
       inFlightRequestId.current = null;
     }
-  }, [choiceOptions, drawState, persistDraft, question, redirectToLogin, requestId, showError, spreadType]);
+  }, [choiceOptions, drawState, persistDraft, question, readingRecoveryDrawSessionId, redirectToLogin, requestId, showError, spreadType]);
 
   const handleConsentComplete = useCallback(() => {
     void submitReading();
@@ -877,29 +897,39 @@ function DrawScreen({
 function validateReadingResponse(
   payload: TarotReadingResponse,
   spreadType: TarotSpreadType,
-  completedCards: TarotDrawComplete["cards"],
+  completedCards?: TarotDrawComplete["cards"],
 ): { result: TarotReadingResult; cardIds: string[] } {
   const reading = payload.reading;
   const definition = TAROT_SPREADS[spreadType];
   if (
-    reading.spreadType !== spreadType
+    !reading
+    || reading.spreadType !== spreadType
     || reading.schemaVersion !== 1
     || !reading.result
+    || !Array.isArray(reading.input?.cards)
+    || !Array.isArray(reading.result.sections)
     || reading.input.cards.length !== definition.cardCount
     || reading.result.sections.length !== definition.cardCount
   ) {
     throw new Error("리딩 결과 계약이 선택한 유형과 일치하지 않습니다.");
   }
 
+  const seenCardIds = new Set<string>();
   for (let index = 0; index < definition.cardCount; index += 1) {
     const position = definition.positions[index].id;
+    const inputCard = reading.input.cards[index];
     if (
-      reading.input.cards[index]?.position !== position
-      || reading.input.cards[index]?.cardId !== completedCards[index]?.cardId
+      inputCard?.position !== position
+      || typeof inputCard.cardId !== "string"
+      || !CARD_INDEX.has(inputCard.cardId)
+      || typeof inputCard.reversed !== "boolean"
+      || seenCardIds.has(inputCard.cardId)
+      || (completedCards && inputCard.cardId !== completedCards[index]?.cardId)
       || reading.result.sections[index]?.position !== position
     ) {
       throw new Error("리딩 결과의 카드와 해석 위치가 일치하지 않습니다.");
     }
+    seenCardIds.add(inputCard.cardId);
   }
   return {
     result: reading.result,
@@ -936,6 +966,16 @@ function hasValidTarotInput(
     && choiceOptions.a.length <= MAX_CHOICE_LENGTH
     && choiceOptions.b.length <= MAX_CHOICE_LENGTH
     && optionA !== optionB;
+}
+
+function isRecoverableReadingDraft(
+  draft: TarotDraft | null,
+): draft is TarotDraft & { drawSessionId: string; requestId: string } {
+  return Boolean(
+    draft?.drawSessionId
+    && draft.requestId
+    && hasValidTarotInput(draft.spreadType, draft.question, draft.choiceOptions),
+  );
 }
 
 function writeDraft(draft: TarotDraft): void {
