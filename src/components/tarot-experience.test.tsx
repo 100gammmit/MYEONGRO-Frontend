@@ -183,7 +183,7 @@ describe("TarotExperience", () => {
     expect(container.innerHTML).not.toContain("major-");
     expect(container.innerHTML).not.toContain("opaque-");
     expect(sessionStorage.getItem("myeongro:tarot-draft")).toBeNull();
-    const safeDraft = sessionStorage.getItem("myeongro:tarot-draw-draft-v2") ?? "";
+    const safeDraft = sessionStorage.getItem("myeongro:tarot-draw-draft-v3") ?? "";
     expect(safeDraft).toContain(initial.drawSessionId);
     expect(safeDraft).not.toContain("cardId");
     expect(safeDraft).not.toContain("opaque-");
@@ -305,6 +305,15 @@ describe("TarotExperience", () => {
       const state = status === "in_progress"
         ? makeInProgress("mind_three_card", 1)
         : makeComplete("daily_one_card");
+      if (status === "in_progress") {
+        sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+          version: 3,
+          spreadType: state.spreadType,
+          question: "restored question",
+          choiceOptions: { a: "", b: "" },
+          drawSessionId: state.drawSessionId,
+        }));
+      }
       const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
         if (input === "/api/me") return AUTHENTICATED.clone();
         if (input === "/api/tarot/draw-sessions/active") return Response.json(state);
@@ -329,8 +338,112 @@ describe("TarotExperience", () => {
     },
   );
 
+  it.each([
+    ["mind_three_card", "in_progress"],
+    ["mind_three_card", "complete"],
+    ["relationship_three_card", "in_progress"],
+    ["relationship_three_card", "complete"],
+    ["choice_five_card", "in_progress"],
+    ["choice_five_card", "complete"],
+  ] as const)(
+    "recovers missing input for an active %s %s session without creating a replacement",
+    async (spreadType, status) => {
+      const definition = TAROT_SPREADS[spreadType];
+      const active = status === "in_progress"
+        ? makeInProgress(spreadType, 1)
+        : makeComplete(spreadType);
+      const complete = makeComplete(spreadType);
+      let selectedCount = status === "in_progress" ? 1 : definition.cardCount;
+      let readingBody: Record<string, unknown> | null = null;
+      const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+        if (input === "/api/me") return AUTHENTICATED.clone();
+        if (input === "/api/tarot/draw-sessions/active") return Response.json(active);
+        if (String(input).endsWith("/selections")) {
+          selectedCount += 1;
+          return Response.json(
+            selectedCount === definition.cardCount
+              ? complete
+              : makeInProgress(spreadType, selectedCount),
+          );
+        }
+        if (input === "/api/readings") {
+          readingBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+          return readingResponse(complete);
+        }
+        throw new Error(`unexpected fetch: ${String(input)}`);
+      });
+
+      const { container } = render(<TarotExperience />);
+
+      const textboxes = await screen.findAllByRole("textbox");
+      fireEvent.change(textboxes[0], { target: { value: "restored question" } });
+      if (definition.inputMode === "choice") {
+        fireEvent.change(textboxes[1], { target: { value: "option a" } });
+        fireEvent.change(textboxes[2], { target: { value: "option b" } });
+      }
+      fireEvent.click(container.querySelector(".wizard-card .primary-button") as HTMLButtonElement);
+
+      while (selectedCount < definition.cardCount) {
+        const expectedCount = selectedCount + 1;
+        await waitFor(() => expect(container.querySelector(".tarot-candidates button")).not.toBeNull());
+        fireEvent.click(container.querySelector(".tarot-candidates button") as HTMLButtonElement);
+        await waitFor(() => expect(selectedCount).toBe(expectedCount));
+      }
+      await waitFor(() => expect(container.querySelector(".confirmation-card .primary-button")).not.toBeNull());
+      fireEvent.click(container.querySelector(".confirmation-card .primary-button") as HTMLButtonElement);
+      await waitFor(() => expect(container.querySelector(".reveal-button")).not.toBeNull());
+
+      expect(readingBody).toMatchObject({
+        spreadType,
+        drawSessionId: active.drawSessionId,
+        question: "restored question",
+      });
+      expect(fetchMock).not.toHaveBeenCalledWith(
+        "/api/tarot/draw-sessions",
+        expect.objectContaining({ method: "POST" }),
+      );
+    },
+  );
+
+  it("keeps an active session while replacing an invalid matching draft input", async () => {
+    const active = makeInProgress("mind_three_card", 1);
+    sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+      version: 3,
+      spreadType: active.spreadType,
+      question: " ",
+      choiceOptions: { a: "", b: "" },
+      drawSessionId: active.drawSessionId,
+    }));
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") return Response.json(active);
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    const { container } = render(<TarotExperience />);
+    const questionInput = (await screen.findAllByRole("textbox"))[0];
+    const continueButton = container.querySelector(".wizard-card .primary-button") as HTMLButtonElement;
+    expect(continueButton).toBeDisabled();
+
+    fireEvent.change(questionInput, { target: { value: "replacement question" } });
+    fireEvent.click(continueButton);
+
+    expect(await screen.findByText("2 / 3")).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/tarot/draw-sessions",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
   it("does not create a new session until explicit abandon succeeds", async () => {
     const active = makeInProgress("mind_three_card", 1);
+    sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+      version: 3,
+      spreadType: active.spreadType,
+      question: "existing question",
+      choiceOptions: { a: "", b: "" },
+      drawSessionId: active.drawSessionId,
+    }));
     const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
       if (input === "/api/me") return AUTHENTICATED.clone();
       if (input === "/api/tarot/draw-sessions/active") return Response.json(active);
@@ -444,7 +557,7 @@ describe("TarotExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "숨은 카드 1" }));
 
     expect(await screen.findByRole("button", { name: /오늘의 한 장/ })).toBeInTheDocument();
-    expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v2")).toBeNull();
+    expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
   });
 
   it("keeps the server session and never falls back after a selection 502", async () => {
@@ -479,8 +592,8 @@ describe("TarotExperience", () => {
 
   it("submits drawSessionId without cards or candidate data when creating a reading", async () => {
     const complete = makeComplete("choice_five_card");
-    sessionStorage.setItem("myeongro:tarot-draw-draft-v2", JSON.stringify({
-      version: 2,
+    sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+      version: 3,
       spreadType: "choice_five_card",
       question: "현재 일을 유지할지 새로운 기회를 준비할지 고민돼요.",
       choiceOptions: { a: "현재를 유지한다", b: "새로운 기회를 준비한다" },
@@ -516,6 +629,53 @@ describe("TarotExperience", () => {
     expect(submittedBody).not.toHaveProperty("candidateToken");
     expect(submittedBody).not.toHaveProperty("position");
     expect(submittedBody).not.toHaveProperty("schemaVersion");
+  });
+
+  it("reuses the persisted reading requestId after a claimed-session reload", async () => {
+    const complete = makeComplete("mind_three_card");
+    sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+      version: 3,
+      spreadType: "mind_three_card",
+      question: "persist this request",
+      choiceOptions: { a: "", b: "" },
+      drawSessionId: complete.drawSessionId,
+    }));
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(
+      "22222222-2222-4222-8222-222222222222",
+    );
+    const submittedBodies: Array<Record<string, unknown>> = [];
+    let readingCalls = 0;
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input, init) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") return Response.json(complete);
+      if (input === "/api/readings") {
+        readingCalls += 1;
+        submittedBodies.push(JSON.parse(String(init?.body)) as Record<string, unknown>);
+        return readingCalls === 1
+          ? Response.json({ code: "BACKEND_UNAVAILABLE" }, { status: 502 })
+          : readingResponse(complete);
+      }
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    const first = render(<TarotExperience />);
+    await waitFor(() => expect(first.container.querySelector(".confirmation-card .primary-button")).not.toBeNull());
+    fireEvent.click(first.container.querySelector(".confirmation-card .primary-button") as HTMLButtonElement);
+    await screen.findByRole("alert");
+    expect(JSON.parse(sessionStorage.getItem("myeongro:tarot-draw-draft-v3") ?? "{}")).toMatchObject({
+      requestId: "22222222-2222-4222-8222-222222222222",
+    });
+    first.unmount();
+
+    const second = render(<TarotExperience />);
+    await waitFor(() => expect(second.container.querySelector(".confirmation-card .primary-button")).not.toBeNull());
+    fireEvent.click(second.container.querySelector(".confirmation-card .primary-button") as HTMLButtonElement);
+    await waitFor(() => expect(second.container.querySelector(".reveal-button")).not.toBeNull());
+
+    expect(submittedBodies).toHaveLength(2);
+    expect(submittedBodies[1].requestId).toBe(submittedBodies[0].requestId);
+    expect(globalThis.crypto.randomUUID).toHaveBeenCalledTimes(1);
+    expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
   });
 
   it("guides an already-consumed draw to records or a new start", async () => {

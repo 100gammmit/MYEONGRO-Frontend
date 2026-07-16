@@ -25,7 +25,8 @@ import { ReadingShell } from "./reading-shell";
 const MAX_QUESTION_LENGTH = 300;
 const MAX_CHOICE_LENGTH = 100;
 const LEGACY_DRAFT_STORAGE_KEY = "myeongro:tarot-draft";
-const DRAFT_STORAGE_KEY = "myeongro:tarot-draw-draft-v2";
+const PREVIOUS_DRAFT_STORAGE_KEY = "myeongro:tarot-draw-draft-v2";
+const DRAFT_STORAGE_KEY = "myeongro:tarot-draw-draft-v3";
 
 type Phase =
   | "auth"
@@ -72,11 +73,12 @@ type TarotReadingResponse = {
 };
 
 type TarotDraft = {
-  version: 2;
+  version: 3;
   spreadType: TarotSpreadType;
   question: string;
   choiceOptions: TarotChoiceOptions;
   drawSessionId?: string;
+  requestId?: string;
 };
 
 const CARD_INDEX = new Map<string, (typeof MAJOR_ARCANA)[number]>(
@@ -99,6 +101,7 @@ export function TarotExperience() {
   const [drawState, setDrawState] = useState<TarotDrawSessionState | null>(null);
   const [isSelectionPending, setIsSelectionPending] = useState(false);
   const [isOperationPending, setIsOperationPending] = useState(false);
+  const [isRecoveringInput, setIsRecoveringInput] = useState(false);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [result, setResult] = useState<TarotReadingResult | null>(null);
   const [resultCards, setResultCards] = useState<string[]>([]);
@@ -111,25 +114,18 @@ export function TarotExperience() {
   const bootstrapStarted = useRef(false);
 
   const definition = TAROT_SPREADS[spreadType];
-  const questionIsValid = definition.inputMode === "fixed"
-    || question.trim().length >= 1;
-  const choicesAreValid = definition.inputMode !== "choice"
-    || (
-      choiceOptions.a.trim().length >= 1
-      && choiceOptions.b.trim().length >= 1
-      && choiceOptions.a.trim() !== choiceOptions.b.trim()
-    );
-  const inputIsValid = questionIsValid && choicesAreValid;
+  const inputIsValid = hasValidTarotInput(spreadType, question, choiceOptions);
 
-  const persistDraft = useCallback((drawSessionId?: string) => {
+  const persistDraft = useCallback((drawSessionId?: string, persistedRequestId = requestId ?? undefined) => {
     writeDraft({
-      version: 2,
+      version: 3,
       spreadType,
       question,
       choiceOptions,
       ...(drawSessionId ? { drawSessionId } : {}),
+      ...(persistedRequestId ? { requestId: persistedRequestId } : {}),
     });
-  }, [choiceOptions, question, spreadType]);
+  }, [choiceOptions, question, requestId, spreadType]);
 
   const redirectToLogin = useCallback((drawSessionId?: string) => {
     persistDraft(drawSessionId);
@@ -147,32 +143,55 @@ export function TarotExperience() {
     options?: { offerChoice?: boolean; draft?: TarotDraft | null },
   ) => {
     const draft = options?.draft;
+    const draftMatchesSession = draft?.spreadType === state.spreadType
+      && draft.drawSessionId === state.drawSessionId;
+    const sameCurrentSession = drawState?.drawSessionId === state.drawSessionId;
+    const restoredQuestion = draftMatchesSession
+      ? draft.question
+      : sameCurrentSession
+        ? question
+        : "";
+    const restoredChoices = draftMatchesSession
+      ? draft.choiceOptions
+      : sameCurrentSession
+        ? choiceOptions
+        : { a: "", b: "" };
+    const restoredRequestId = draftMatchesSession
+      ? draft.requestId ?? null
+      : sameCurrentSession
+        ? requestId
+        : null;
+    const needsInputRecovery = !hasValidTarotInput(
+      state.spreadType,
+      restoredQuestion,
+      restoredChoices,
+    );
     setSpreadType(state.spreadType);
-    if (draft?.spreadType === state.spreadType) {
-      setQuestion(draft.question);
-      setChoiceOptions(draft.choiceOptions);
-    } else if (state.spreadType !== spreadType) {
-      setQuestion("");
-      setChoiceOptions({ a: "", b: "" });
-    }
+    setQuestion(restoredQuestion);
+    setChoiceOptions(restoredChoices);
+    setRequestId(restoredRequestId);
+    setIsRecoveringInput(needsInputRecovery);
     setDrawState(state);
     setError(null);
     setRetryMode(null);
     writeDraft({
-      version: 2,
+      version: 3,
       spreadType: state.spreadType,
-      question: draft?.spreadType === state.spreadType ? draft.question : question,
-      choiceOptions: draft?.spreadType === state.spreadType
-        ? draft.choiceOptions
-        : choiceOptions,
+      question: restoredQuestion,
+      choiceOptions: restoredChoices,
       drawSessionId: state.drawSessionId,
+      ...(restoredRequestId ? { requestId: restoredRequestId } : {}),
     });
     if (options?.offerChoice) {
       setPhase("active-choice");
       return;
     }
+    if (needsInputRecovery) {
+      setPhase("input");
+      return;
+    }
     setPhase(state.status === "complete" ? "confirm" : "draw");
-  }, [choiceOptions, question, spreadType]);
+  }, [choiceOptions, drawState?.drawSessionId, question, requestId]);
 
   const loadActiveSession = useCallback(async (
     options?: { offerChoice?: boolean; draft?: TarotDraft | null },
@@ -212,11 +231,13 @@ export function TarotExperience() {
     setError(null);
     setRetryMode(null);
     sessionStorage.removeItem(LEGACY_DRAFT_STORAGE_KEY);
+    sessionStorage.removeItem(PREVIOUS_DRAFT_STORAGE_KEY);
     const draft = readDraft();
     if (draft) {
       setSpreadType(draft.spreadType);
       setQuestion(draft.question);
       setChoiceOptions(draft.choiceOptions);
+      setRequestId(draft.requestId ?? null);
     }
     try {
       const response = await fetch("/api/me", { credentials: "same-origin" });
@@ -248,6 +269,7 @@ export function TarotExperience() {
     setQuestion("");
     setChoiceOptions({ a: "", b: "" });
     setDrawState(null);
+    setIsRecoveringInput(false);
     setRequestId(null);
     setResult(null);
     setError(null);
@@ -283,13 +305,34 @@ export function TarotExperience() {
         showError(apiError.message || "새 추첨을 시작하지 못했어요.", "start");
         return;
       }
-      adoptDrawState(parseTarotDrawSessionState(await response.json()));
+      const state = parseTarotDrawSessionState(await response.json());
+      adoptDrawState(state, {
+        draft: {
+          version: 3,
+          spreadType,
+          question,
+          choiceOptions,
+          drawSessionId: state.drawSessionId,
+        },
+      });
     } catch {
       showError("새 추첨을 시작하지 못했어요. 서버 연결 상태를 확인해 주세요.", "start");
     } finally {
       operationInFlight.current = false;
       setIsOperationPending(false);
     }
+  }
+
+  function resumeDrawAfterInput() {
+    if (!inputIsValid || !drawState) return;
+    persistDraft(drawState.drawSessionId);
+    setIsRecoveringInput(false);
+    setPhase(drawState.status === "complete" ? "confirm" : "draw");
+  }
+
+  function continueActiveDraw() {
+    if (!drawState) return;
+    setPhase(isRecoveringInput ? "input" : drawState.status === "complete" ? "confirm" : "draw");
   }
 
   async function submitSelection(candidateToken: string) {
@@ -377,6 +420,7 @@ export function TarotExperience() {
     setSpreadType("daily_one_card");
     setQuestion("");
     setChoiceOptions({ a: "", b: "" });
+    setIsRecoveringInput(false);
     setRequestId(null);
     setResult(null);
     setError(null);
@@ -404,6 +448,7 @@ export function TarotExperience() {
 
     inFlightRequestId.current = nextRequestId;
     setRequestId(nextRequestId);
+    persistDraft(drawState.drawSessionId, nextRequestId);
     setError(null);
     setResult(null);
     setPhase("loading");
@@ -452,7 +497,7 @@ export function TarotExperience() {
     } finally {
       inFlightRequestId.current = null;
     }
-  }, [choiceOptions, drawState, question, redirectToLogin, requestId, showError, spreadType]);
+  }, [choiceOptions, drawState, persistDraft, question, redirectToLogin, requestId, showError, spreadType]);
 
   const handleConsentComplete = useCallback(() => {
     void submitReading();
@@ -556,7 +601,7 @@ export function TarotExperience() {
           <button
             className="primary-button full-button"
             disabled={!inputIsValid || isOperationPending}
-            onClick={() => void beginDraw()}
+            onClick={() => isRecoveringInput ? resumeDrawAfterInput() : void beginDraw()}
             type="button"
           >
             카드 고르러 가기
@@ -585,7 +630,7 @@ export function TarotExperience() {
           <div className="result-actions">
             <button
               className="primary-button"
-              onClick={() => setPhase(drawState.status === "complete" ? "confirm" : "draw")}
+              onClick={continueActiveDraw}
               type="button"
             >
               기존 추첨 이어가기
@@ -608,7 +653,7 @@ export function TarotExperience() {
             <button
               className="secondary-button"
               disabled={isOperationPending}
-              onClick={() => setPhase(drawState.status === "complete" ? "confirm" : "draw")}
+              onClick={continueActiveDraw}
               type="button"
             >
               계속 이어가기
@@ -874,6 +919,25 @@ async function readApiError(response: Response): Promise<TarotDrawError> {
   }
 }
 
+function hasValidTarotInput(
+  spreadType: TarotSpreadType,
+  question: string,
+  choiceOptions: TarotChoiceOptions,
+): boolean {
+  const definition = TAROT_SPREADS[spreadType];
+  if (definition.inputMode === "fixed") return true;
+  const normalizedQuestion = question.trim();
+  if (normalizedQuestion.length < 1 || question.length > MAX_QUESTION_LENGTH) return false;
+  if (definition.inputMode !== "choice") return true;
+  const optionA = choiceOptions.a.trim();
+  const optionB = choiceOptions.b.trim();
+  return optionA.length >= 1
+    && optionB.length >= 1
+    && choiceOptions.a.length <= MAX_CHOICE_LENGTH
+    && choiceOptions.b.length <= MAX_CHOICE_LENGTH
+    && optionA !== optionB;
+}
+
 function writeDraft(draft: TarotDraft): void {
   sessionStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
 }
@@ -884,13 +948,14 @@ function readDraft(): TarotDraft | null {
   try {
     const parsed = JSON.parse(raw) as Partial<TarotDraft>;
     if (
-      parsed.version !== 2
+      parsed.version !== 3
       || !parsed.spreadType
       || !(parsed.spreadType in TAROT_SPREADS)
       || typeof parsed.question !== "string"
       || typeof parsed.choiceOptions?.a !== "string"
       || typeof parsed.choiceOptions?.b !== "string"
       || (parsed.drawSessionId !== undefined && typeof parsed.drawSessionId !== "string")
+      || (parsed.requestId !== undefined && typeof parsed.requestId !== "string")
     ) {
       return null;
     }
