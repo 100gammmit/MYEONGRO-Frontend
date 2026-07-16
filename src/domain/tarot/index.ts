@@ -4,7 +4,7 @@ export {
   TAROT_SPREAD_LIST,
   TAROT_SPREADS,
 } from "./definitions";
-export { drawCandidateCardIds } from "./draw";
+export { parseTarotDrawSessionState } from "./draw-session";
 export { createTarotReadingRequest } from "./request";
 export type {
   TarotPositionDefinition,
@@ -17,3 +17,9 @@ export type {
   TarotChoiceOptions,
   TarotReadingRequest,
 } from "./request";
+export type {
+  TarotDrawComplete,
+  TarotDrawError,
+  TarotDrawInProgress,
+  TarotDrawSessionState,
+} from "./draw-session";

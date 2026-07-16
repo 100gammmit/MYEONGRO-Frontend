@@ -154,13 +154,19 @@ h1, h2, h3, blockquote { font-family: Georgia, "Noto Serif KR", serif; font-weig
 .tarot-back { aspect-ratio: .62; border: 1px solid var(--gold); color: var(--gold-bright); background: repeating-linear-gradient(45deg, rgba(202,169,106,.06) 0 4px, transparent 4px 8px), #14213a; position: relative; }
 .tarot-back::before { content: ""; position: absolute; inset: 8px; border: 1px solid rgba(202,169,106,.35); }
 .tarot-back span { position: relative; z-index: 1; width: 34px; height: 34px; display: inline-grid; place-items: center; border: 1px solid var(--gold); border-radius: 50%; }
-.tarot-back.selected { transform: translateY(-12px); background: var(--gold-bright); color: var(--ink); }
-.tarot-back.revealed strong { position: relative; z-index: 1; padding: 8px; font: clamp(14px,2vw,20px) Georgia,serif; overflow-wrap: anywhere; }
-.tarot-back:disabled:not(.revealed) { opacity: .48; cursor: default; }
+.tarot-back:hover:not(:disabled), .tarot-back:focus-visible { transform: translateY(-10px); border-color: #fff; }
+.tarot-back:disabled { opacity: .48; cursor: default; }
 .tarot-back:focus-visible, .spread-option:focus-visible, .primary-button:focus-visible, .secondary-button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
 .selection-count { text-align: center; color: var(--gold-bright); }
+.confirmed-draw-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; list-style: none; padding: 0; margin: 12px 0 20px; }
+.confirmed-draw-slots li { display: grid; justify-items: center; gap: 6px; color: #9da6b4; font-size: 12px; }
+.confirmed-card-back { width: 34px; aspect-ratio: .62; display: grid; place-items: center; border: 1px solid rgba(202,169,106,.7); color: var(--gold); background: repeating-linear-gradient(45deg, rgba(202,169,106,.06) 0 3px, transparent 3px 6px), #14213a; }
+.confirmed-card-back i { font-style: normal; font-size: 10px; }
 .narrow-button { max-width: 360px; margin: 26px auto; display: flex; }
 .confirmation-card { max-width: 720px; }
+.draw-complete-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; margin: 24px 0; }
+.draw-complete-grid .revealed-card { width: 100%; margin: 0; padding: 18px 12px; }
+.draw-complete-grid .revealed-card strong { font-size: clamp(18px, 2.2vw, 25px); overflow-wrap: anywhere; }
 .selected-card-list { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 10px; }
 .selected-card-list li { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
 .selected-card-list span { color: #9da6b4; }
@@ -290,5 +296,5 @@ h1, h2, h3, blockquote { font-family: Georgia, "Noto Serif KR", serif; font-weig
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  .spread-option:hover, .primary-button:hover, .tarot-back.selected { transform: none; }
+  .spread-option:hover, .primary-button:hover, .tarot-back:hover:not(:disabled), .tarot-back:focus-visible { transform: none; }
 }

@@ -1,4 +1,3 @@
-import { MAJOR_ARCANA } from "./deck";
 import { DAILY_QUESTION, TAROT_SPREADS, type TarotSpreadType } from "./definitions";
 
 export interface TarotChoiceOptions {
@@ -11,7 +10,7 @@ export interface CreateTarotReadingRequestInput {
   readonly question: string;
   readonly choiceOptions?: TarotChoiceOptions;
   readonly requestId: string;
-  readonly cardIds: readonly string[];
+  readonly drawSessionId: string;
 }
 
 export interface TarotReadingRequest {
@@ -19,25 +18,19 @@ export interface TarotReadingRequest {
   readonly spreadType: TarotSpreadType;
   readonly question: string;
   readonly requestId: string;
-  readonly cardIds: string[];
+  readonly drawSessionId: string;
   readonly choiceOptions?: TarotChoiceOptions;
 }
-
-const CARD_IDS = new Set<string>(MAJOR_ARCANA.map((card) => card.id));
 
 export function createTarotReadingRequest(
   input: CreateTarotReadingRequestInput,
 ): TarotReadingRequest {
   const definition = TAROT_SPREADS[input.spreadType];
-  const cardIds = [...input.cardIds];
-  if (cardIds.length !== definition.cardCount) {
-    throw new Error(`선택한 카드 수가 ${definition.cardCount}장이어야 합니다.`);
-  }
-  if (new Set(cardIds).size !== cardIds.length) {
-    throw new Error("선택 카드 ID는 중복될 수 없습니다.");
-  }
-  if (cardIds.some((cardId) => !CARD_IDS.has(cardId))) {
-    throw new Error("Major Arcana에 없는 카드가 포함되어 있습니다.");
+  if (
+    input.drawSessionId.length < 1
+    || input.drawSessionId.trim() !== input.drawSessionId
+  ) {
+    throw new Error("완료된 타로 추첨 세션을 확인해 주세요.");
   }
 
   const question = definition.inputMode === "fixed"
@@ -52,7 +45,7 @@ export function createTarotReadingRequest(
     spreadType: input.spreadType,
     question,
     requestId: input.requestId,
-    cardIds,
+    drawSessionId: input.drawSessionId,
   } as const;
 
   if (definition.inputMode === "choice") {
