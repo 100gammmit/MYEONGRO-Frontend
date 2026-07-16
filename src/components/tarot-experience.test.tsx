@@ -764,6 +764,68 @@ describe("TarotExperience", () => {
     expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).not.toBeNull();
   });
 
+  it("exits recovery when the finalized draw session has expired", async () => {
+    const complete = makeComplete("mind_three_card");
+    sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+      version: 3,
+      spreadType: complete.spreadType,
+      question: "expired recovery",
+      choiceOptions: { a: "", b: "" },
+      drawSessionId: complete.drawSessionId,
+      requestId: "66666666-6666-4666-8666-666666666666",
+    }));
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") return drawNotFound();
+      if (input === "/api/readings") return drawNotFound();
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    const { container } = render(<TarotExperience />);
+    await screen.findByRole("alert");
+    fireEvent.click(container.querySelector(".wizard-card .secondary-button") as HTMLButtonElement);
+
+    await waitFor(() => expect(container.querySelector('a[href="/records"]')).not.toBeNull());
+    expect(container.querySelector(".wizard-card .secondary-button")).not.toBeNull();
+    expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
+    fireEvent.click(container.querySelector(".wizard-card .secondary-button") as HTMLButtonElement);
+    expect(await screen.findByRole("button", { name: /오늘의 한 장/ })).toBeInTheDocument();
+  });
+
+  it("rejects reversed cards in an active-404 recovery response", async () => {
+    const complete = makeComplete("mind_three_card");
+    sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
+      version: 3,
+      spreadType: complete.spreadType,
+      question: "upright cards only",
+      choiceOptions: { a: "", b: "" },
+      drawSessionId: complete.drawSessionId,
+      requestId: "77777777-7777-4777-8777-777777777777",
+    }));
+    let readingCalls = 0;
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") return drawNotFound();
+      if (input === "/api/readings") {
+        readingCalls += 1;
+        const payload = await readingResponse(complete).json() as {
+          reading: { input: { cards: Array<{ reversed: boolean }> } };
+        };
+        payload.reading.input.cards[0].reversed = true;
+        return Response.json(payload);
+      }
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    const { container } = render(<TarotExperience />);
+    await screen.findByRole("alert");
+    fireEvent.click(container.querySelector(".wizard-card .secondary-button") as HTMLButtonElement);
+
+    await waitFor(() => expect(readingCalls).toBe(1));
+    expect(container.querySelector(".reveal-button")).toBeNull();
+    expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).not.toBeNull();
+  });
+
   it("keeps the newly created requestId when the reading POST returns 401", async () => {
     const complete = makeComplete("daily_one_card");
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(

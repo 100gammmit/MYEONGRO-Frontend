@@ -41,7 +41,7 @@ type Phase =
   | "result"
   | "error";
 
-type RetryMode = "auth" | "active" | "start" | "reading" | "consumed" | null;
+type RetryMode = "auth" | "active" | "start" | "reading" | "consumed" | "expired" | null;
 
 type TarotReadingSection = {
   position: TarotPositionId;
@@ -487,6 +487,14 @@ export function TarotExperience() {
       }
       if (!response.ok) {
         const apiError = await readApiError(response);
+        if (response.status === 404 && apiError.code === "DRAW_SESSION_NOT_FOUND") {
+          setDrawState(null);
+          setReadingRecoveryDrawSessionId(null);
+          setRequestId(null);
+          sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+          showError("리딩 요청을 확인할 수 있는 기간이 끝났어요. 기록을 확인하거나 새 추첨을 시작해 주세요.", "expired");
+          return;
+        }
         if (response.status === 409 && apiError.code === "DRAW_SESSION_ALREADY_CONSUMED") {
           showError("이미 이 추첨으로 리딩이 생성되었어요. 기록을 확인하거나 새 추첨을 시작해 주세요.", "consumed");
           return;
@@ -752,7 +760,7 @@ export function TarotExperience() {
       <ReadingShell eyebrow={definition.name} title="리딩을 이어가지 못했어요" step={4} totalSteps={4}>
         <div className="wizard-card" role="alert">
           <p>{error}</p>
-          {retryMode === "consumed" ? (
+          {retryMode === "consumed" || retryMode === "expired" ? (
             <div className="result-actions">
               <Link className="primary-button" href="/records">기존 기록 확인</Link>
               <button className="secondary-button" onClick={resetForNewDraw} type="button">새 추첨 준비</button>
@@ -922,7 +930,7 @@ function validateReadingResponse(
       inputCard?.position !== position
       || typeof inputCard.cardId !== "string"
       || !CARD_INDEX.has(inputCard.cardId)
-      || typeof inputCard.reversed !== "boolean"
+      || inputCard.reversed !== false
       || seenCardIds.has(inputCard.cardId)
       || (completedCards && inputCard.cardId !== completedCards[index]?.cardId)
       || reading.result.sections[index]?.position !== position
