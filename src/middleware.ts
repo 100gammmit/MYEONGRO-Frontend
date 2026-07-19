@@ -1,16 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getRecordsLoginRedirect } from "@/infrastructure/auth/records-guard";
-import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
+import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({ request });
-  const user = await getSpringSessionUser(request.headers.get("cookie"));
+  const session = await getSpringSessionState(request.headers.get("cookie"));
 
   if (
     request.nextUrl.pathname === "/records" ||
     request.nextUrl.pathname.startsWith("/records/")
   ) {
-    const loginUrl = getRecordsLoginRedirect(request.nextUrl, Boolean(user));
+    const loginUrl = getRecordsLoginRedirect(
+      request.nextUrl,
+      session.status !== "unauthenticated",
+    );
     if (loginUrl) {
       return NextResponse.redirect(loginUrl);
     }

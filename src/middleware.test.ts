@@ -4,21 +4,23 @@ import { NextRequest } from "next/server";
 import { beforeEach, vi } from "vitest";
 
 const sessionState = vi.hoisted(() => ({
-  user: null as null | { id: string },
-  getSpringSessionUser: vi.fn(),
+  value: { status: "unauthenticated", user: null } as
+    | { status: "authenticated"; user: { id: string } }
+    | { status: "unauthenticated" | "unavailable"; user: null },
+  getSpringSessionState: vi.fn(),
 }));
 
 vi.mock("@/infrastructure/backend/session-auth", () => ({
-  getSpringSessionUser: sessionState.getSpringSessionUser,
+  getSpringSessionState: sessionState.getSpringSessionState,
 }));
 
 import { config, middleware } from "./middleware";
 
 describe("session middleware", () => {
   beforeEach(() => {
-    sessionState.user = null;
-    sessionState.getSpringSessionUser.mockReset();
-    sessionState.getSpringSessionUser.mockImplementation(async () => sessionState.user);
+    sessionState.value = { status: "unauthenticated", user: null };
+    sessionState.getSpringSessionState.mockReset();
+    sessionState.getSpringSessionState.mockImplementation(async () => sessionState.value);
   });
 
   it("checks the Spring session with the incoming cookie header", async () => {
@@ -30,7 +32,7 @@ describe("session middleware", () => {
       }),
     );
 
-    expect(sessionState.getSpringSessionUser).toHaveBeenCalledWith(
+    expect(sessionState.getSpringSessionState).toHaveBeenCalledWith(
       "JSESSIONID=session",
     );
   });
@@ -47,7 +49,7 @@ describe("session middleware", () => {
   });
 
   it("allows an authenticated user through to records", async () => {
-    sessionState.user = { id: "user-1" };
+    sessionState.value = { status: "authenticated", user: { id: "user-1" } };
 
     const response = await middleware(
       new NextRequest("https://fortune.test/records/reading-1"),
@@ -56,6 +58,20 @@ describe("session middleware", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("location")).toBeNull();
   });
+
+  it.each(["502 response", "network failure"])(
+    "does not redirect records when session verification has a %s",
+    async () => {
+      sessionState.value = { status: "unavailable", user: null };
+
+      const response = await middleware(
+        new NextRequest("https://fortune.test/records/reading-1"),
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("location")).toBeNull();
+    },
+  );
 
   it.each([
     "/_next/static/chunk.js",

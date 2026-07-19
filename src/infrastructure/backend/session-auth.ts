@@ -5,6 +5,11 @@ export interface SpringSessionUser {
   displayName?: string | null;
 }
 
+export type SpringSessionState =
+  | { status: "authenticated"; user: SpringSessionUser }
+  | { status: "unauthenticated"; user: null }
+  | { status: "unavailable"; user: null };
+
 interface MeResponse {
   authenticated?: boolean;
   user?: {
@@ -13,9 +18,9 @@ interface MeResponse {
   };
 }
 
-export async function getSpringSessionUser(
+export async function getSpringSessionState(
   cookieHeader?: string | null,
-): Promise<SpringSessionUser | null> {
+): Promise<SpringSessionState> {
   let response: Response;
   try {
     response = await fetch(toBackendUrl("/api/auth/me"), {
@@ -23,20 +28,43 @@ export async function getSpringSessionUser(
       cache: "no-store",
     });
   } catch {
-    return null;
+    return { status: "unavailable", user: null };
   }
 
-  if (!response.ok) return null;
+  if (response.status === 401) {
+    return { status: "unauthenticated", user: null };
+  }
+  if (!response.ok) {
+    return { status: "unavailable", user: null };
+  }
 
-  const body = await response.json() as MeResponse;
+  let body: MeResponse;
+  try {
+    body = await response.json() as MeResponse;
+  } catch {
+    return { status: "unavailable", user: null };
+  }
+  if (body.authenticated === false) {
+    return { status: "unauthenticated", user: null };
+  }
   if (body.authenticated !== true || typeof body.user?.id !== "string") {
-    return null;
+    return { status: "unavailable", user: null };
   }
 
   return {
-    id: body.user.id,
-    displayName: typeof body.user.displayName === "string"
-      ? body.user.displayName
-      : null,
+    status: "authenticated",
+    user: {
+      id: body.user.id,
+      displayName: typeof body.user.displayName === "string"
+        ? body.user.displayName
+        : null,
+    },
   };
+}
+
+export async function getSpringSessionUser(
+  cookieHeader?: string | null,
+): Promise<SpringSessionUser | null> {
+  const state = await getSpringSessionState(cookieHeader);
+  return state.status === "authenticated" ? state.user : null;
 }

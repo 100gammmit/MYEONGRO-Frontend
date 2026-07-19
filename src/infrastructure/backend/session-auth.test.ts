@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { getSpringSessionUser } from "./session-auth";
+import { getSpringSessionState, getSpringSessionUser } from "./session-auth";
 
 describe("getSpringSessionUser", () => {
   afterEach(() => {
@@ -26,5 +26,38 @@ describe("getSpringSessionUser", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("ECONNREFUSED")));
 
     await expect(getSpringSessionUser()).resolves.toBeNull();
+  });
+
+  it.each([
+    Response.json({ code: "BACKEND_UNAVAILABLE" }, { status: 502 }),
+    Response.json({ code: "INTERNAL_ERROR" }, { status: 500 }),
+  ])("preserves an abnormal response as unavailable", async (response) => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+
+    await expect(getSpringSessionState()).resolves.toEqual({
+      status: "unavailable",
+      user: null,
+    });
+  });
+
+  it("preserves a network failure as unavailable", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("ECONNREFUSED")));
+
+    await expect(getSpringSessionState()).resolves.toEqual({
+      status: "unavailable",
+      user: null,
+    });
+  });
+
+  it.each([
+    Response.json({ authenticated: false }),
+    Response.json({ code: "UNAUTHENTICATED" }, { status: 401 }),
+  ])("preserves an explicit guest response as unauthenticated", async (response) => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+
+    await expect(getSpringSessionState()).resolves.toEqual({
+      status: "unauthenticated",
+      user: null,
+    });
   });
 });

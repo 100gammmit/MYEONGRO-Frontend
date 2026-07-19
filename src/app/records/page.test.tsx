@@ -4,7 +4,7 @@ import { vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getCookieHeader: vi.fn(),
-  getSessionUser: vi.fn(),
+  getSessionState: vi.fn(),
   list: vi.fn(),
 }));
 
@@ -12,7 +12,7 @@ vi.mock("@/infrastructure/backend/request-cookies", () => ({
   getBackendCookieHeader: mocks.getCookieHeader,
 }));
 vi.mock("@/infrastructure/backend/session-auth", () => ({
-  getSpringSessionUser: mocks.getSessionUser,
+  getSpringSessionState: mocks.getSessionState,
 }));
 vi.mock("@/infrastructure/backend/reading-records-client", () => ({
   BackendReadingRecordsClient: class {
@@ -38,7 +38,10 @@ describe("RecordsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getCookieHeader.mockResolvedValue("JSESSIONID=session");
-    mocks.getSessionUser.mockResolvedValue({ id: "user-1" });
+    mocks.getSessionState.mockResolvedValue({
+      status: "authenticated",
+      user: { id: "user-1" },
+    });
     mocks.list.mockResolvedValue([]);
   });
 
@@ -66,7 +69,7 @@ describe("RecordsPage", () => {
 
     await renderRecordsPage();
 
-    expect(mocks.getSessionUser).toHaveBeenCalledWith("JSESSIONID=session");
+    expect(mocks.getSessionState).toHaveBeenCalledWith("JSESSIONID=session");
     expect(mocks.list).toHaveBeenCalledWith();
     expect(screen.getByRole("link", { name: /관계의 흐름/ })).toHaveAttribute(
       "href",
@@ -82,10 +85,21 @@ describe("RecordsPage", () => {
   });
 
   it("does not load records for guests", async () => {
-    mocks.getSessionUser.mockResolvedValue(null);
+    mocks.getSessionState.mockResolvedValue({ status: "unauthenticated", user: null });
 
     await renderRecordsPage();
 
+    expect(mocks.list).not.toHaveBeenCalled();
+  });
+
+  it("creates only a generic retry body when session verification is unavailable", async () => {
+    mocks.getSessionState.mockResolvedValue({ status: "unavailable", user: null });
+
+    await renderRecordsPage();
+
+    expect(screen.getByRole("alert")).toHaveTextContent("페이지를 불러오지 못했어요");
+    expect(screen.getByRole("button", { name: "다시 시도" })).toBeInTheDocument();
+    expect(screen.queryByText("아직 저장된 이야기가 없어요")).not.toBeInTheDocument();
     expect(mocks.list).not.toHaveBeenCalled();
   });
 });

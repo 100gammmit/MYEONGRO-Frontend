@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ReadingRecordActions } from "@/components/reading-record-actions";
+import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
@@ -13,7 +14,7 @@ import {
   type PublicReadingRecord,
 } from "@/infrastructure/backend/reading-records-client";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
-import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
+import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 
 const CARD_NAMES = new Map<string, string>(
   MAJOR_ARCANA.map((card) => [card.id, card.name]),
@@ -78,9 +79,10 @@ export default async function ReadingDetailPage({
   params: Promise<{ readingId: string }>;
 }) {
   const cookieHeader = await getBackendCookieHeader();
-  const user = await getSpringSessionUser(cookieHeader);
+  const session = await getSpringSessionState(cookieHeader);
   const { readingId } = await params;
-  if (!user) notFound();
+  if (session.status === "unavailable") return <ProtectedPageUnavailable />;
+  if (session.status === "unauthenticated") notFound();
 
   const reading = await new BackendReadingRecordsClient(cookieHeader).get(readingId);
   if (!reading) notFound();

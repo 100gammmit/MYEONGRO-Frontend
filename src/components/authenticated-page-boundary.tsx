@@ -9,7 +9,7 @@ export function AuthenticatedPageBoundary({ children }: { children: ReactNode })
   const router = useRouter();
   const [status, setStatus] = useState<BoundaryStatus>("checking");
 
-  const verifySession = useCallback(async () => {
+  const verifySession = useCallback(async (refreshOnSuccess = false) => {
     setStatus("checking");
     try {
       const response = await fetch("/api/me", { credentials: "same-origin" });
@@ -26,6 +26,7 @@ export function AuthenticatedPageBoundary({ children }: { children: ReactNode })
       const payload = await response.json() as { authenticated?: unknown };
       if (payload.authenticated === true) {
         setStatus("authenticated");
+        if (refreshOnSuccess) router.refresh();
         return;
       }
       if (payload.authenticated === false) {
@@ -51,7 +52,7 @@ export function AuthenticatedPageBoundary({ children }: { children: ReactNode })
         <div className="wizard-card" role="alert">
           <h1>페이지를 불러오지 못했어요</h1>
           <p>잠시 후 다시 시도해 주세요.</p>
-          <button className="secondary-button narrow-button" onClick={() => void verifySession()} type="button">
+          <button className="secondary-button narrow-button" onClick={() => void verifySession(true)} type="button">
             다시 시도
           </button>
         </div>

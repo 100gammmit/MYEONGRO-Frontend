@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const navigation = vi.hoisted(() => ({ push: vi.fn() }));
+const navigation = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn() }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => navigation,
@@ -21,6 +21,7 @@ describe("AuthenticatedPageBoundary", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     navigation.push.mockReset();
+    navigation.refresh.mockReset();
     window.history.replaceState({}, "", "/account?from=settings");
   });
 
@@ -82,6 +83,7 @@ describe("AuthenticatedPageBoundary", () => {
 
     expect(await screen.findByText("보호된 계정 본문")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(navigation.refresh).toHaveBeenCalledOnce();
     expect(navigation.push).not.toHaveBeenCalled();
   });
 });

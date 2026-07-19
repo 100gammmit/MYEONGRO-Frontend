@@ -1,9 +1,10 @@
 import Link from "next/link";
 
+import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
 import { TAROT_SPREADS, type TarotSpreadType } from "@/domain/tarot";
 import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
-import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
+import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 
 const statusLabels = {
   generating: "생성 중",
@@ -25,8 +26,10 @@ function getReadingTypeLabel(kind: "tarot" | "saju", spreadType?: string | null)
 
 export default async function RecordsPage() {
   const cookieHeader = await getBackendCookieHeader();
-  const user = await getSpringSessionUser(cookieHeader);
-  const readings = user
+  const session = await getSpringSessionState(cookieHeader);
+  if (session.status === "unavailable") return <ProtectedPageUnavailable />;
+
+  const readings = session.status === "authenticated"
     ? await new BackendReadingRecordsClient(cookieHeader).list()
     : [];
 

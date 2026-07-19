@@ -1,13 +1,16 @@
 import Link from "next/link";
+import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
 import { AccountDeleteButton } from "./account-delete-button";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
-import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
+import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 
 export default async function AccountPage() {
   const cookieHeader = await getBackendCookieHeader();
-  const user = await getSpringSessionUser(cookieHeader);
+  const session = await getSpringSessionState(cookieHeader);
 
-  if (!user) {
+  if (session.status === "unavailable") return <ProtectedPageUnavailable />;
+
+  if (session.status === "unauthenticated") {
     return (
       <article className="simple-page page-width">
         <p className="eyebrow">ACCOUNT</p>
