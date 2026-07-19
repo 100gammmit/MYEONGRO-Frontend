@@ -29,7 +29,7 @@ const PREVIOUS_DRAFT_STORAGE_KEY = "myeongro:tarot-draw-draft-v2";
 const DRAFT_STORAGE_KEY = "myeongro:tarot-draw-draft-v3";
 
 type Phase =
-  | "auth"
+  | "bootstrap"
   | "spread"
   | "input"
   | "draw"
@@ -41,7 +41,7 @@ type Phase =
   | "result"
   | "error";
 
-type RetryMode = "auth" | "active" | "start" | "reading" | "consumed" | "expired" | null;
+type RetryMode = "active" | "start" | "reading" | "consumed" | "expired" | null;
 
 type TarotReadingSection = {
   position: TarotPositionId;
@@ -94,7 +94,7 @@ const READING_ERROR_MESSAGES: Readonly<Record<number, string>> = {
 
 export function TarotExperience() {
   const router = useRouter();
-  const [phase, setPhase] = useState<Phase>("auth");
+  const [phase, setPhase] = useState<Phase>("bootstrap");
   const [spreadType, setSpreadType] = useState<TarotSpreadType>("daily_one_card");
   const [question, setQuestion] = useState("");
   const [choiceOptions, setChoiceOptions] = useState<TarotChoiceOptions>({ a: "", b: "" });
@@ -241,8 +241,8 @@ export function TarotExperience() {
     }
   }, [adoptDrawState, drawState?.drawSessionId, redirectToLogin, showError]);
 
-  const authenticateAndRestore = useCallback(async () => {
-    setPhase("auth");
+  const restoreDrawSession = useCallback(async () => {
+    setPhase("bootstrap");
     setError(null);
     setRetryMode(null);
     sessionStorage.removeItem(LEGACY_DRAFT_STORAGE_KEY);
@@ -254,30 +254,14 @@ export function TarotExperience() {
       setChoiceOptions(draft.choiceOptions);
       setRequestId(draft.requestId ?? null);
     }
-    try {
-      const response = await fetch("/api/me", { credentials: "same-origin" });
-      if (!response.ok && response.status !== 401) {
-        showError("로그인 상태를 확인하지 못했어요. 서버 연결 상태를 확인하고 다시 시도해 주세요.", "auth");
-        return;
-      }
-      const payload = response.ok
-        ? await response.json() as { authenticated?: boolean }
-        : { authenticated: false };
-      if (payload.authenticated !== true) {
-        router.push("/login?next=%2Ftarot");
-        return;
-      }
-      await loadActiveSession({ draft });
-    } catch {
-      showError("로그인 상태를 확인하지 못했어요. 다시 시도해 주세요.", "auth");
-    }
-  }, [loadActiveSession, router, showError]);
+    await loadActiveSession({ draft });
+  }, [loadActiveSession]);
 
   useEffect(() => {
     if (bootstrapStarted.current) return;
     bootstrapStarted.current = true;
-    void authenticateAndRestore();
-  }, [authenticateAndRestore]);
+    void restoreDrawSession();
+  }, [restoreDrawSession]);
 
   function selectSpread(nextSpreadType: TarotSpreadType) {
     setSpreadType(nextSpreadType);
@@ -532,21 +516,12 @@ export function TarotExperience() {
   }, [submitReading]);
 
   function retry() {
-    if (retryMode === "auth") void authenticateAndRestore();
     if (retryMode === "active") void loadActiveSession();
     if (retryMode === "start") void beginDraw();
     if (retryMode === "reading") void submitReading();
   }
 
-  if (phase === "auth") {
-    return (
-      <ReadingShell eyebrow="AI TAROT" title="로그인 상태를 확인하고 있어요" step={1} totalSteps={4}>
-        <div className="wizard-card loading-card" aria-live="polite">
-          <p>잠시만 기다려 주세요.</p>
-        </div>
-      </ReadingShell>
-    );
-  }
+  if (phase === "bootstrap") return null;
 
   if (phase === "spread") {
     return (
@@ -767,9 +742,7 @@ export function TarotExperience() {
             </div>
           ) : (
             <button className="secondary-button full-button" onClick={retry} type="button">
-              {retryMode === "auth"
-                ? "로그인 상태 다시 확인"
-                : retryMode === "active"
+              {retryMode === "active"
                   ? "서버 상태 다시 확인"
                   : retryMode === "start"
                     ? "새 추첨 다시 시도"

@@ -135,29 +135,20 @@ describe("TarotExperience", () => {
     localStorage.clear();
   });
 
-  it("requires authentication before rendering the spread choices", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      Response.json({ authenticated: false }),
-    );
+  it("starts active draw restoration without its own authentication screen", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/tarot/draw-sessions/active") return drawNotFound();
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
 
     render(<TarotExperience />);
 
-    expect(screen.queryByRole("button", { name: /오늘의 한 장/ })).not.toBeInTheDocument();
-    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/login?next=%2Ftarot"));
+    expect(screen.queryByText("로그인 상태를 확인하고 있어요")).not.toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /오늘의 한 장/ })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith("/api/me", { credentials: "same-origin" });
-  });
-
-  it("shows a retryable auth error instead of redirecting on a backend failure", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch")
-      .mockResolvedValue(Response.json({ code: "BACKEND_UNAVAILABLE" }, { status: 502 }));
-
-    render(<TarotExperience />);
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("로그인 상태를 확인하지 못했어요");
-    expect(screen.getByRole("button", { name: "로그인 상태 다시 확인" })).toBeInTheDocument();
-    expect(navigation.push).not.toHaveBeenCalled();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith("/api/tarot/draw-sessions/active", {
+      credentials: "same-origin",
+    });
   });
 
   it("renders only opaque hidden candidates and removes the legacy card-ID draft", async () => {
