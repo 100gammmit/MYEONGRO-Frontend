@@ -9,12 +9,12 @@ describe("HomePage", () => {
       "href",
       "/tarot",
     );
-    expect(screen.getByRole("link", { name: /사주 분석 시작/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /사주 리딩 시작/i })).toHaveAttribute(
       "href",
       "/saju",
     );
     expect(
-      screen.getByRole("heading", { name: /당신의 오늘에\s*필요한 한 문장/i }),
+      screen.getByRole("heading", { name: /지금의 나를\s*조금 더 이해하는 시간/i }),
     ).toBeInTheDocument();
   });
 });

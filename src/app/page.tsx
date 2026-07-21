@@ -1,9 +1,21 @@
 import Link from "next/link";
 
 const features = [
-  { number: "01", title: "당신의 질문", copy: "마음에 오래 머문 질문을 조용히 꺼내 놓으세요." },
-  { number: "02", title: "정교한 해석", copy: "카드와 명식을 바탕으로 흐름을 읽어드립니다." },
-  { number: "03", title: "현실의 한 걸음", copy: "예언에 머물지 않는 구체적인 조언을 받아보세요." },
+  {
+    number: "01",
+    title: "리딩 선택",
+    copy: "오늘의 흐름, 마음, 관계, 선택 또는 사주 중 지금 필요한 리딩을 골라보세요.",
+  },
+  {
+    number: "02",
+    title: "나만의 입력",
+    copy: "타로 카드를 직접 고르거나 생년월일시를 입력해 나만의 리딩을 시작해요.",
+  },
+  {
+    number: "03",
+    title: "현실적인 조언",
+    copy: "결과를 단정하는 예언보다 지금 살펴볼 점과 실천할 행동을 확인해요.",
+  },
 ];
 
 export default function HomePage() {
@@ -11,25 +23,21 @@ export default function HomePage() {
     <>
       <section className="hero page-width">
         <div className="hero-copy">
-          <p className="eyebrow">AI FORTUNE READING</p>
           <h1>
-            당신의 오늘에
-            <br />
-            필요한 <em>한 문장</em>
+            AI 타로/사주
           </h1>
           <p className="hero-description">
-            오래된 지혜와 새로운 기술이 만나, 지금 당신에게 필요한 이야기를 들려드립니다.
+            타로 카드와 생년월일시를 바탕으로 지금의 마음, 관계와 선택을 차분히 살펴보세요.
           </p>
           <div className="trust-row">
-            <span>비회원 무료 체험</span>
-            <span>개인정보 보호</span>
-            <span>3분이면 충분해요</span>
+            <span>로그인 후 무료로 시작</span>
+            <span>완료한 리딩 기록 저장</span>
           </div>
         </div>
         <div className="hero-orbit" aria-hidden="true">
           <div className="orbit orbit-outer" />
           <div className="orbit orbit-inner" />
-          <div className="moon">月</div>
+          <div className="moon"></div>
           <span className="star star-a">✦</span>
           <span className="star star-b">✧</span>
           <span className="star star-c">✦</span>
@@ -39,17 +47,17 @@ export default function HomePage() {
       <section className="reading-choice page-width">
         <div className="section-heading">
           <p className="eyebrow">CHOOSE YOUR PATH</p>
-          <h2>어떤 이야기가 궁금한가요?</h2>
+          <h2>지금 무엇을 살펴보고 싶나요?</h2>
         </div>
         <div className="choice-grid">
           <article className="reading-card tarot-card">
             <div className="card-symbol">☾</div>
-            <p className="card-kicker">지금 이 순간의 흐름</p>
+            <p className="card-kicker">오늘의 흐름부터 중요한 선택까지</p>
             <h3>AI 타로</h3>
-            <p>세 장의 카드가 과거와 현재, 그리고 앞으로 나아갈 방향을 비춥니다.</p>
+            <p>오늘의 운세, 마음 정리, 관계, 선택 중 지금 고민에 맞는 리딩을 골라보세요.</p>
             <ul>
-              <li>연애 · 일 · 재물 · 자유 질문</li>
-              <li>직접 고르는 3장 스프레드</li>
+              <li>목적에 맞는 1장 · 3장 · 5장 리딩</li>
+              <li>카드를 직접 고르고 단계별로 확인</li>
             </ul>
             <Link href="/tarot" className="primary-button" aria-label="타로 리딩 시작">
               타로 리딩 시작 <span>→</span>
@@ -57,15 +65,15 @@ export default function HomePage() {
           </article>
           <article className="reading-card saju-card">
             <div className="card-symbol">命</div>
-            <p className="card-kicker">태어난 순간에 담긴 지도</p>
+            <p className="card-kicker">생년월일시로 살펴보는 나</p>
             <h3>AI 사주</h3>
-            <p>생년월일시의 네 기둥을 계산해 타고난 성향과 삶의 흐름을 읽습니다.</p>
+            <p>양력 생년월일시를 바탕으로 타고난 성향과 삶의 흐름을 이해하기 쉽게 풀어봐요.</p>
             <ul>
-              <li>정식 사주팔자 명식 계산</li>
-              <li>어려운 용어 없는 쉬운 해설</li>
+              <li>양력 기준 근사 베타 리딩</li>
+              <li>어려운 용어를 줄인 쉬운 해설</li>
             </ul>
-            <Link href="/saju" className="secondary-button" aria-label="사주 분석 시작">
-              사주 분석 시작 <span>→</span>
+            <Link href="/saju" className="secondary-button" aria-label="사주 리딩 시작">
+              사주 리딩 시작 <span>→</span>
             </Link>
           </article>
         </div>
@@ -74,7 +82,7 @@ export default function HomePage() {
       <section className="how-it-works page-width">
         <div className="section-heading">
           <p className="eyebrow">HOW IT WORKS</p>
-          <h2>신비롭지만, 막연하지 않게</h2>
+          <h2>선택부터 결과까지, 어렵지 않게</h2>
         </div>
         <div className="feature-row">
           {features.map((feature) => (

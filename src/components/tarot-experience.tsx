@@ -537,7 +537,7 @@ export function TarotExperience() {
               >
                 <strong>{spread.name}</strong>
                 <span>{spread.summary}</span>
-                <small>{spread.cardCount}장</small>
+                <small>{spread.metaLabel}</small>
               </button>
             </li>
           ))}
