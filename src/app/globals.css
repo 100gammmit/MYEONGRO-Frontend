@@ -125,7 +125,7 @@ h1, h2, h3, blockquote {
 .feature > span { color: var(--lilac); font-family: Georgia, serif; }
 .feature h3 { font-size: 24px; margin: 32px 0 12px; }
 .feature p { color: var(--muted); line-height: 1.75; font-size: 14px; }
-.site-footer { width: min(1180px, calc(100% - 64px)); margin: auto; border-top: 1px solid rgba(222,207,255,.09); padding: 30px 0 44px; color: #776d83; font-size: 11px; display: flex; justify-content: space-between; gap: 20px; }
+.site-footer { width: min(1180px, calc(100% - 64px)); margin: auto; border-top: 1px solid rgba(222,207,255,.09); padding: 30px 0 44px; color: #847990; font-size: 11px; display: flex; justify-content: space-between; gap: 20px; }
 .site-footer div { display: flex; gap: 22px; }
 
 .reading-shell { padding: 46px 0 110px; max-width: 940px; }
