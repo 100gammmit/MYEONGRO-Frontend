@@ -90,7 +90,7 @@ describe("Spring auth boundary", () => {
 
     const forbiddenFragments = [
       "OPENAI_API_KEY",
-      "OPENAI_FREE_MODEL",
+      "OPENAI_MODEL",
       "openai/helpers",
       "from \"openai\"",
       "OpenAIReadingGenerator",

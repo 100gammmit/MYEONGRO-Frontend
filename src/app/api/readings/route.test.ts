@@ -36,7 +36,7 @@ describe("/api/readings route", () => {
     });
   });
 
-  it("proxies authenticated free reading creation with Spring session cookies", async () => {
+  it("proxies authenticated reading creation with Spring session cookies", async () => {
     proxyBackendRequest.mockResolvedValue(Response.json({ reading: { id: "user-reading" } }));
     const request = new Request("https://front.test/api/readings", {
       method: "POST",

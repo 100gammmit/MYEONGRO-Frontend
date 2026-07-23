@@ -14,6 +14,5 @@ describe("LoginPage", () => {
     expect(
       screen.getByText("로그인하면 리딩 기록을 안전하게 저장하고 다른 기기에서도 이어서 볼 수 있습니다."),
     ).toBeInTheDocument();
-    expect(screen.queryByText(/결제/)).not.toBeInTheDocument();
   });
 });

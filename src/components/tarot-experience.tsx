@@ -88,7 +88,6 @@ const CARD_INDEX = new Map<string, (typeof MAJOR_ARCANA)[number]>(
 const READING_ERROR_MESSAGES: Readonly<Record<number, string>> = {
   403: "필수 동의를 완료한 뒤 다시 리딩을 생성해 주세요.",
   409: "같은 요청을 처리하고 있어요. 잠시 후 다시 확인해 주세요.",
-  429: "오늘의 무료 리딩 이용 한도에 도달했어요.",
   502: "리딩 생성에 실패했어요. 잠시 후 다시 시도해 주세요.",
 };
 

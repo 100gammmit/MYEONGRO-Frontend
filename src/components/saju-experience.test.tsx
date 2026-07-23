@@ -31,7 +31,6 @@ function acceptedReading() {
     reading: {
       id: "reading-1",
       kind: "saju",
-      tier: "free",
       status: "completed",
       input: {
         question: "올해 이직운이 궁금해요",

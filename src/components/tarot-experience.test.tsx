@@ -736,6 +736,26 @@ describe("TarotExperience", () => {
     expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
   });
 
+  it("uses the backend message for a generic 429 response", async () => {
+    const complete = makeComplete("daily_one_card");
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") return Response.json(complete);
+      if (input === "/api/readings") {
+        return Response.json(
+          { code: "TOO_MANY_REQUESTS", message: "요청이 너무 많습니다." },
+          { status: 429 },
+        );
+      }
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    render(<TarotExperience />);
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("요청이 너무 많습니다.");
+  });
+
   it("retries the same persisted reading after finalize and an active 404", async () => {
     const complete = makeComplete("mind_three_card");
     sessionStorage.setItem("myeongro:tarot-draw-draft-v3", JSON.stringify({
