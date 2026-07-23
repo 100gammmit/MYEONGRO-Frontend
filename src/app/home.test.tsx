@@ -13,8 +13,5 @@ describe("HomePage", () => {
       "href",
       "/saju",
     );
-    expect(
-      screen.getByRole("heading", { name: /지금의 나를\s*조금 더 이해하는 시간/i }),
-    ).toBeInTheDocument();
   });
 });

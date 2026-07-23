@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -38,7 +38,6 @@ type Phase =
   | "confirm"
   | "consent"
   | "loading"
-  | "result"
   | "error";
 
 type RetryMode = "active" | "start" | "reading" | "consumed" | "expired" | null;
@@ -59,6 +58,7 @@ type TarotReadingResult = {
 
 type TarotReadingResponse = {
   reading: {
+    id: string;
     spreadType: TarotSpreadType;
     schemaVersion: number;
     input: {
@@ -92,9 +92,9 @@ const READING_ERROR_MESSAGES: Readonly<Record<number, string>> = {
   502: "리딩 생성에 실패했어요. 잠시 후 다시 시도해 주세요.",
 };
 
-export function TarotExperience() {
+export function TarotExperience({ route = "entry" }: { route?: "entry" | "draw" }) {
   const router = useRouter();
-  const [phase, setPhase] = useState<Phase>("bootstrap");
+  const [phase, setPhase] = useState<Phase>("consent");
   const [spreadType, setSpreadType] = useState<TarotSpreadType>("daily_one_card");
   const [question, setQuestion] = useState("");
   const [choiceOptions, setChoiceOptions] = useState<TarotChoiceOptions>({ a: "", b: "" });
@@ -104,9 +104,6 @@ export function TarotExperience() {
   const [isRecoveringInput, setIsRecoveringInput] = useState(false);
   const [readingRecoveryDrawSessionId, setReadingRecoveryDrawSessionId] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
-  const [result, setResult] = useState<TarotReadingResult | null>(null);
-  const [resultCards, setResultCards] = useState<string[]>([]);
-  const [revealedResultCount, setRevealedResultCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [retryMode, setRetryMode] = useState<RetryMode>(null);
   const selectionInFlight = useRef(false);
@@ -130,8 +127,9 @@ export function TarotExperience() {
 
   const redirectToLogin = useCallback((drawSessionId?: string, persistedRequestId?: string) => {
     persistDraft(drawSessionId, persistedRequestId);
-    router.push("/login?next=%2Ftarot");
-  }, [persistDraft, router]);
+    const nextPath = route === "draw" ? "%2Ftarot%2Fdraw" : "%2Ftarot";
+    router.push(`/login?next=${nextPath}`);
+  }, [persistDraft, route, router]);
 
   const showError = useCallback((message: string, mode: RetryMode) => {
     setError(message);
@@ -184,6 +182,7 @@ export function TarotExperience() {
       drawSessionId: state.drawSessionId,
       ...(restoredRequestId ? { requestId: restoredRequestId } : {}),
     });
+    router.replace("/tarot/draw");
     if (options?.offerChoice) {
       setPhase("active-choice");
       return;
@@ -193,7 +192,7 @@ export function TarotExperience() {
       return;
     }
     setPhase(state.status === "complete" ? "confirm" : "draw");
-  }, [choiceOptions, drawState?.drawSessionId, question, requestId]);
+  }, [choiceOptions, drawState?.drawSessionId, question, requestId, router]);
 
   const loadActiveSession = useCallback(async (
     options?: { offerChoice?: boolean; draft?: TarotDraft | null },
@@ -227,6 +226,7 @@ export function TarotExperience() {
           setRetryMode(null);
           setPhase("spread");
           sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+          if (route === "draw") router.replace("/tarot");
           return;
         }
       }
@@ -239,7 +239,7 @@ export function TarotExperience() {
     } catch {
       showError("서버 상태를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.", "active");
     }
-  }, [adoptDrawState, drawState?.drawSessionId, redirectToLogin, showError]);
+  }, [adoptDrawState, drawState?.drawSessionId, redirectToLogin, route, router, showError]);
 
   const restoreDrawSession = useCallback(async () => {
     setPhase("bootstrap");
@@ -257,12 +257,6 @@ export function TarotExperience() {
     await loadActiveSession({ draft });
   }, [loadActiveSession]);
 
-  useEffect(() => {
-    if (bootstrapStarted.current) return;
-    bootstrapStarted.current = true;
-    void restoreDrawSession();
-  }, [restoreDrawSession]);
-
   function selectSpread(nextSpreadType: TarotSpreadType) {
     setSpreadType(nextSpreadType);
     setQuestion("");
@@ -271,7 +265,6 @@ export function TarotExperience() {
     setIsRecoveringInput(false);
     setReadingRecoveryDrawSessionId(null);
     setRequestId(null);
-    setResult(null);
     setError(null);
     setRetryMode(null);
   }
@@ -423,11 +416,11 @@ export function TarotExperience() {
     setIsRecoveringInput(false);
     setReadingRecoveryDrawSessionId(null);
     setRequestId(null);
-    setResult(null);
     setError(null);
     setRetryMode(null);
     sessionStorage.removeItem(DRAFT_STORAGE_KEY);
     setPhase("spread");
+    router.push("/tarot");
   }
 
   const submitReading = useCallback(async () => {
@@ -453,7 +446,6 @@ export function TarotExperience() {
     setRequestId(nextRequestId);
     persistDraft(drawSessionId, nextRequestId);
     setError(null);
-    setResult(null);
     setPhase("loading");
 
     try {
@@ -492,13 +484,10 @@ export function TarotExperience() {
 
       const payload = await response.json() as TarotReadingResponse;
       const validated = validateReadingResponse(payload, spreadType, completedDraw?.cards);
-      setResult(validated.result);
-      setResultCards(validated.cardIds);
-      setRevealedResultCount(0);
       setRequestId(null);
       setReadingRecoveryDrawSessionId(null);
       sessionStorage.removeItem(DRAFT_STORAGE_KEY);
-      setPhase("result");
+      router.push(`/tarot/results/${encodeURIComponent(validated.readingId)}`);
     } catch (readingError) {
       showError(
         readingError instanceof Error && readingError.message.startsWith("리딩 결과")
@@ -509,11 +498,13 @@ export function TarotExperience() {
     } finally {
       inFlightRequestId.current = null;
     }
-  }, [choiceOptions, drawState, persistDraft, question, readingRecoveryDrawSessionId, redirectToLogin, requestId, showError, spreadType]);
+  }, [choiceOptions, drawState, persistDraft, question, readingRecoveryDrawSessionId, redirectToLogin, requestId, router, showError, spreadType]);
 
   const handleConsentComplete = useCallback(() => {
-    void submitReading();
-  }, [submitReading]);
+    if (bootstrapStarted.current) return;
+    bootstrapStarted.current = true;
+    void restoreDrawSession();
+  }, [restoreDrawSession]);
 
   function retry() {
     if (retryMode === "active") void loadActiveSession();
@@ -695,10 +686,10 @@ export function TarotExperience() {
             <button
               className="primary-button"
               disabled={!inputIsValid}
-              onClick={() => setPhase("consent")}
+              onClick={() => void submitReading()}
               type="button"
             >
-              동의 확인 후 리딩 생성
+              리딩 생성
             </button>
             <button className="secondary-button" onClick={() => setPhase("abandon-confirm")} type="button">
               새 추첨 시작
@@ -750,59 +741,6 @@ export function TarotExperience() {
             </button>
           )}
         </div>
-      </ReadingShell>
-    );
-  }
-
-  if (phase === "result" && result) {
-    const revealedPositions = definition.positions.slice(0, revealedResultCount);
-    const allRevealed = revealedResultCount === definition.cardCount;
-    return (
-      <ReadingShell eyebrow={definition.name} title="카드가 전하는 메시지" step={4} totalSteps={4}>
-        <div className="result-reveal-list">
-          {revealedPositions.map((position, index) => {
-            const card = CARD_INDEX.get(resultCards[index]);
-            const section = result.sections[index];
-            return (
-              <article className="result-reveal" key={position.id}>
-                <div className="revealed-card" aria-label={`${position.label}: ${card?.name ?? "카드"}`}>
-                  <span>{position.label}</span>
-                  <strong>{card?.name}</strong>
-                </div>
-                <div>
-                  <h3>{section.heading}</h3>
-                  <p>{section.body}</p>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-        {!allRevealed ? (
-          <button
-            className="primary-button narrow-button reveal-button"
-            onClick={() => setRevealedResultCount((count) => count + 1)}
-            type="button"
-          >
-            {revealedResultCount === 0 ? "첫 카드 공개" : "다음 카드 공개"}
-          </button>
-        ) : (
-          <div className="result-summary">
-            <div className="result-hero">
-              <p className="eyebrow">YOUR READING</p>
-              <h2>{result.title}</h2>
-              <p>{result.summary}</p>
-            </div>
-            <section className="reading-guidance">
-              <h3>오늘부터 시도할 작은 행동</h3>
-              <ul>{result.guidance.map((item) => <li key={item}>{item}</li>)}</ul>
-            </section>
-            <p className="reading-disclaimer">{result.disclaimer}</p>
-            <div className="result-actions">
-              <Link className="primary-button" href="/tarot">새 타로 리딩 시작</Link>
-              <Link className="secondary-button" href="/records">내 기록 보기</Link>
-            </div>
-          </div>
-        )}
       </ReadingShell>
     );
   }
@@ -879,11 +817,13 @@ function validateReadingResponse(
   payload: TarotReadingResponse,
   spreadType: TarotSpreadType,
   completedCards?: TarotDrawComplete["cards"],
-): { result: TarotReadingResult; cardIds: string[] } {
+): { readingId: string } {
   const reading = payload.reading;
   const definition = TAROT_SPREADS[spreadType];
   if (
     !reading
+    || typeof reading.id !== "string"
+    || reading.id.length < 1
     || reading.spreadType !== spreadType
     || reading.schemaVersion !== 1
     || !reading.result
@@ -912,10 +852,7 @@ function validateReadingResponse(
     }
     seenCardIds.add(inputCard.cardId);
   }
-  return {
-    result: reading.result,
-    cardIds: reading.input.cards.map((card) => card.cardId),
-  };
+  return { readingId: reading.id };
 }
 
 async function readApiError(response: Response): Promise<TarotDrawError> {

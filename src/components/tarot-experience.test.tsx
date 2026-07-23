@@ -10,7 +10,8 @@ import {
   type TarotSpreadType,
 } from "@/domain/tarot";
 
-const navigation = vi.hoisted(() => ({ push: vi.fn() }));
+const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
+const consent = vi.hoisted(() => ({ autoComplete: true }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => navigation,
@@ -18,8 +19,12 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("./consent-gate", () => ({
   ConsentGate: ({ onComplete }: { onComplete: () => void }) => {
-    useEffect(() => onComplete(), [onComplete]);
-    return null;
+    useEffect(() => {
+      if (consent.autoComplete) onComplete();
+    }, [onComplete]);
+    return consent.autoComplete
+      ? null
+      : <button onClick={onComplete} type="button">동의 완료</button>;
   },
 }));
 
@@ -131,8 +136,56 @@ describe("TarotExperience", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     navigation.push.mockReset();
+    navigation.replace.mockReset();
+    consent.autoComplete = true;
     sessionStorage.clear();
     localStorage.clear();
+  });
+
+  it("checks consent before restoring a draw session or showing spread choices", async () => {
+    consent.autoComplete = false;
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/tarot/draw-sessions/active") return drawNotFound();
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    render(<TarotExperience />);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /오늘의 운세/ })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "동의 완료" }));
+
+    expect(await screen.findByRole("button", { name: /오늘의 운세/ })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith("/api/tarot/draw-sessions/active", {
+      credentials: "same-origin",
+    });
+  });
+
+  it("moves an active draw session to the draw route after consent", async () => {
+    const active = makeInProgress("mind_three_card", 1);
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/tarot/draw-sessions/active") return Response.json(active);
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    render(<TarotExperience />);
+
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/tarot/draw"));
+  });
+
+  it("returns a direct draw-route visit to the tarot entry when no session exists", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/tarot/draw-sessions/active") return drawNotFound();
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    render(<TarotExperience route="draw" />);
+
+    await waitFor(() => expect(navigation.replace).toHaveBeenCalledWith("/tarot"));
+    expect(await screen.findByRole("button", {
+      name: new RegExp(TAROT_SPREADS.daily_one_card.name),
+    })).toBeInTheDocument();
   });
 
   it("starts active draw restoration without its own authentication screen", async () => {
@@ -144,7 +197,9 @@ describe("TarotExperience", () => {
     render(<TarotExperience />);
 
     expect(screen.queryByText("로그인 상태를 확인하고 있어요")).not.toBeInTheDocument();
-    expect(await screen.findByRole("button", { name: /오늘의 한 장/ })).toBeInTheDocument();
+    expect(await screen.findByRole("button", {
+      name: new RegExp(TAROT_SPREADS.daily_one_card.name),
+    })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith("/api/tarot/draw-sessions/active", {
       credentials: "same-origin",
@@ -382,7 +437,9 @@ describe("TarotExperience", () => {
       }
       await waitFor(() => expect(container.querySelector(".confirmation-card .primary-button")).not.toBeNull());
       fireEvent.click(container.querySelector(".confirmation-card .primary-button") as HTMLButtonElement);
-      await waitFor(() => expect(container.querySelector(".reveal-button")).not.toBeNull());
+      await waitFor(() => {
+        expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+      });
 
       expect(readingBody).toMatchObject({
         spreadType,
@@ -458,7 +515,9 @@ describe("TarotExperience", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "기존 추첨 포기" }));
-    expect(await screen.findByRole("button", { name: /오늘의 한 장/ })).toBeInTheDocument();
+    expect(await screen.findByRole("button", {
+      name: new RegExp(TAROT_SPREADS.daily_one_card.name),
+    })).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       `/api/tarot/draw-sessions/${active.drawSessionId}`,
       expect.objectContaining({ method: "DELETE" }),
@@ -515,7 +574,9 @@ describe("TarotExperience", () => {
     });
 
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: /오늘의 한 장/ }));
+    fireEvent.click(await screen.findByRole("button", {
+      name: new RegExp(TAROT_SPREADS.daily_one_card.name),
+    }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
     fireEvent.click(screen.getByRole("button", { name: "카드 고르러 가기" }));
 
@@ -547,7 +608,9 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("daily_one_card");
     fireEvent.click(screen.getByRole("button", { name: "숨은 카드 1" }));
 
-    expect(await screen.findByRole("button", { name: /오늘의 한 장/ })).toBeInTheDocument();
+    expect(await screen.findByRole("button", {
+      name: new RegExp(TAROT_SPREADS.daily_one_card.name),
+    })).toBeInTheDocument();
     expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
   });
 
@@ -605,9 +668,11 @@ describe("TarotExperience", () => {
     });
 
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: "동의 확인 후 리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
 
-    await screen.findByRole("button", { name: "첫 카드 공개" });
+    await waitFor(() => {
+      expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+    });
     expect(submittedBody).toEqual({
       kind: "tarot",
       spreadType: "choice_five_card",
@@ -661,7 +726,9 @@ describe("TarotExperience", () => {
     const second = render(<TarotExperience />);
     await waitFor(() => expect(second.container.querySelector(".confirmation-card .primary-button")).not.toBeNull());
     fireEvent.click(second.container.querySelector(".confirmation-card .primary-button") as HTMLButtonElement);
-    await waitFor(() => expect(second.container.querySelector(".reveal-button")).not.toBeNull());
+    await waitFor(() => {
+      expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+    });
 
     expect(submittedBodies).toHaveLength(2);
     expect(submittedBodies[1].requestId).toBe(submittedBodies[0].requestId);
@@ -708,7 +775,9 @@ describe("TarotExperience", () => {
     const second = render(<TarotExperience />);
     await screen.findByRole("alert");
     fireEvent.click(second.container.querySelector(".wizard-card .secondary-button") as HTMLButtonElement);
-    await waitFor(() => expect(second.container.querySelector(".reveal-button")).not.toBeNull());
+    await waitFor(() => {
+      expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+    });
 
     expect(submittedBodies).toHaveLength(2);
     expect(submittedBodies[1]).toEqual(submittedBodies[0]);
@@ -780,7 +849,9 @@ describe("TarotExperience", () => {
     expect(container.querySelector(".wizard-card .secondary-button")).not.toBeNull();
     expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
     fireEvent.click(container.querySelector(".wizard-card .secondary-button") as HTMLButtonElement);
-    expect(await screen.findByRole("button", { name: /오늘의 한 장/ })).toBeInTheDocument();
+    expect(await screen.findByRole("button", {
+      name: new RegExp(TAROT_SPREADS.daily_one_card.name),
+    })).toBeInTheDocument();
   });
 
   it("rejects reversed cards in an active-404 recovery response", async () => {
@@ -855,7 +926,7 @@ describe("TarotExperience", () => {
     });
 
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: "동의 확인 후 리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("이미 이 추첨으로 리딩이 생성되었어요");
     expect(screen.getByRole("link", { name: "기존 기록 확인" })).toHaveAttribute("href", "/records");
@@ -881,7 +952,7 @@ describe("TarotExperience", () => {
       });
 
       render(<TarotExperience />);
-      fireEvent.click(await screen.findByRole("button", { name: "동의 확인 후 리딩 생성" }));
+      fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent("리딩 결과 계약");
       expect(screen.queryByText("완성된 리딩")).not.toBeInTheDocument();
@@ -906,7 +977,7 @@ describe("TarotExperience", () => {
     });
 
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: "동의 확인 후 리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "리딩 결과의 카드와 해석 위치가 일치하지 않습니다.",

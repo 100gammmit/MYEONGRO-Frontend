@@ -2,6 +2,8 @@
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
+import { TAROT_SPREADS } from "@/domain/tarot";
+
 const mocks = vi.hoisted(() => ({
   getCookieHeader: vi.fn(),
   getSessionState: vi.fn(),
@@ -75,7 +77,7 @@ describe("RecordsPage", () => {
       "href",
       "/records/reading-1",
     );
-    expect(screen.getByText("관계 리딩 3장")).toBeInTheDocument();
+    expect(screen.getByText(TAROT_SPREADS.relationship_three_card.name)).toBeInTheDocument();
   });
 
   it("shows an authenticated empty state without another login prompt", async () => {
