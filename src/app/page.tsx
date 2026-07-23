@@ -30,7 +30,7 @@ export default function HomePage() {
             타로 카드와 생년월일시를 바탕으로 지금의 마음, 관계와 선택을 차분히 살펴보세요.
           </p>
           <div className="trust-row">
-            <span>로그인 후 무료로 시작</span>
+            <span>로그인 후 리딩 시작</span>
             <span>완료한 리딩 기록 저장</span>
           </div>
         </div>

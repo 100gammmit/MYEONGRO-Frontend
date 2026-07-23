@@ -42,7 +42,7 @@ export default async function RecordsPage() {
         <div className="empty-state">
           <span>◇</span>
           <h2>아직 저장된 이야기가 없어요</h2>
-          <p>무료 타로와 사주 리딩을 완료하면 이곳에서 다시 볼 수 있어요.</p>
+          <p>타로와 사주 리딩을 완료하면 이곳에서 다시 볼 수 있어요.</p>
           <Link className="primary-button" href="/">
             첫 리딩 시작하기
           </Link>

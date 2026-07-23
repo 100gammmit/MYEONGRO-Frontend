@@ -6,8 +6,8 @@
 
 | 기능 | 프론트 키만으로 가능 | 추가로 필요한 설정 |
 | --- | --- | --- |
-| 무료 데모 리딩 | 가능 | 외부 키 불필요 |
-| OpenAI 실제 리딩 | 불가능 | backend OpenAI key와 사용 가능한 모델 권한 |
+| 리딩 화면 탐색 | 가능 | 외부 키 불필요 |
+| 타로 AI 리딩 생성 | 불가능 | Spring backend, OpenAI key와 사용 가능한 모델 권한 |
 | 로그인/기록 관리 | 불가능 | Spring backend 실행, PostgreSQL/Flyway migration, OAuth provider redirect 등록 |
 
 ## 프론트 `.env.local`
@@ -24,7 +24,7 @@ BACKEND_API_URL=http://localhost:8080
 로컬 로그인과 기록 API를 확인하려면 backend를 함께 실행해야 합니다.
 
 1. PostgreSQL을 준비합니다.
-2. backend `application-secret.yaml`에 DB 접속 정보, guest signing secret, OAuth provider client id/secret/redirect URI를 넣습니다.
+2. backend `application-secret.yaml`에 DB 접속 정보와 OAuth provider client id/secret/redirect URI를 넣습니다.
 3. backend를 실행하면 Flyway가 `MYEONGRO-Backend/src/main/resources/db/migration`의 migration을 적용합니다.
 4. 프론트의 `BACKEND_API_URL`이 backend 주소와 일치하는지 확인합니다.
 
@@ -51,7 +51,7 @@ OpenAI 실제 생성은 backend 설정으로 관리합니다.
 2. backend secret 설정에 `OPENAI_API_KEY` 또는 대응되는 설정 값을 넣습니다.
 3. API 프로젝트에 결제 수단 또는 크레딧과 모델 사용 권한이 있는지 확인합니다.
 
-키가 비어 있으면 앱은 오류 대신 결정적 데모 리딩을 반환해야 합니다.
+타로 OpenAI 설정이 없거나 호출에 실패하면 backend는 `502`를 반환합니다. 사주 생성은 실제 generator가 구현될 때까지 현재 demo 경로를 사용합니다.
 
 ## 현재 상태 확인
 
