@@ -101,4 +101,23 @@ describe("TarotResultPage", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("페이지를 불러오지 못했어요");
     expect(mocks.get).not.toHaveBeenCalled();
   });
+
+  it("shows the generic retry body when the reading request is unavailable", async () => {
+    mocks.get.mockRejectedValue(new Error("BACKEND_UNAVAILABLE"));
+
+    await renderPage();
+
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(mocks.notFound).not.toHaveBeenCalled();
+  });
+
+  it.each([null, undefined])(
+    "treats a malformed %s input as not found",
+    async (input) => {
+      mocks.get.mockResolvedValue({ ...completedReading(), input });
+
+      await expect(renderPage()).rejects.toThrow("NOT_FOUND");
+      expect(mocks.result).not.toHaveBeenCalled();
+    },
+  );
 });

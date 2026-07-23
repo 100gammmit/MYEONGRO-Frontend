@@ -37,7 +37,12 @@ export default async function TarotResultPage({
   if (session.status === "unauthenticated") notFound();
 
   const { readingId } = await params;
-  const reading = await new BackendReadingRecordsClient(cookieHeader).get(readingId);
+  let reading: PublicReadingRecord | null;
+  try {
+    reading = await new BackendReadingRecordsClient(cookieHeader).get(readingId);
+  } catch {
+    return <ProtectedPageUnavailable />;
+  }
   const view = reading ? parseTarotResultView(reading) : null;
   if (!view) notFound();
 
@@ -51,7 +56,8 @@ function parseTarotResultView(reading: PublicReadingRecord): TarotResultView | n
     || reading.schemaVersion !== 1
     || !reading.spreadType
     || !(reading.spreadType in TAROT_SPREADS)
-    || !reading.result
+    || !isRecord(reading.input)
+    || !isRecord(reading.result)
   ) {
     return null;
   }
