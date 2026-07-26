@@ -57,6 +57,20 @@ h1, h2, h3, blockquote {
 .ambient-one { width: 360px; height: 360px; background: #70439f; right: -140px; top: 16%; }
 .ambient-two { width: 280px; height: 280px; background: #482269; left: -170px; top: 64%; }
 
+.landing-page {
+  --landing-serif: "마루 부리", "Noto Serif KR", "Iowan Old Style", serif;
+  --landing-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", sans-serif;
+  font-family: var(--landing-sans);
+  letter-spacing: -0.01em;
+}
+
+.landing-page h1,
+.landing-page h2,
+.landing-page h3 {
+  font-family: var(--landing-serif);
+  font-weight: 400;
+}
+
 .site-header {
   width: min(1240px, calc(100% - 48px));
   height: 84px;
