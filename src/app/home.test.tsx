@@ -30,7 +30,7 @@ describe("HomePage", () => {
     expect(
       screen.getByRole("link", { name: "사주 리딩 시작" }),
     ).toHaveAttribute("href", "/saju");
-    expect(screen.getByText("Google 로그인 후 시작")).toBeInTheDocument();
+    expect(screen.getByText("소셜 로그인 후 시작")).toBeInTheDocument();
     expect(screen.getByText("완료한 리딩 기록 저장")).toBeInTheDocument();
     expect(screen.getByText("선택을 돕는 성찰형 해석")).toBeInTheDocument();
     expect(

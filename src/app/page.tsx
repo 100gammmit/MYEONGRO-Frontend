@@ -83,7 +83,7 @@ export default function HomePage() {
         </div>
 
         <div className="landing-trust" aria-label="서비스 이용 안내">
-          <span>Google 로그인 후 시작</span>
+          <span>소셜 로그인 후 시작</span>
           <span>완료한 리딩 기록 저장</span>
           <span>선택을 돕는 성찰형 해석</span>
         </div>
