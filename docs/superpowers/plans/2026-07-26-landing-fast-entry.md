@@ -50,7 +50,7 @@ import HomePage from "./page";
 
 describe("HomePage", () => {
   it("offers fast tarot and saju entry from the centered hero", () => {
-    const { container } = render(<HomePage />);
+    render(<HomePage />);
 
     expect(
       screen.getByRole("heading", {
@@ -66,7 +66,6 @@ describe("HomePage", () => {
       "href",
       "/saju",
     );
-    expect(container.querySelector(".hero-orbit")).not.toBeInTheDocument();
   });
 
   it("keeps both reading journeys and explains the service flow", () => {
