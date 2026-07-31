@@ -20,7 +20,7 @@ export default async function RootLayout({
   );
 
   return (
-    <html lang="ko">
+    <html lang="ko" data-theme="dark">
       <body>
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
