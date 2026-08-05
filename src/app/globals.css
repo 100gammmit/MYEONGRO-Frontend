@@ -277,15 +277,38 @@ h1, h2, h3, blockquote {
 .category.active { border-color: var(--accent-primary); background: var(--surface-accent-selected); box-shadow: var(--effect-selected-inset); }
 .field { display: block; margin: 22px 0; border: 0; padding: 0; }
 .field > span, .field legend { display: block; color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; }
-.field textarea, .field input { width: 100%; color: var(--text-primary); background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 6px; padding: 15px; outline: none; color-scheme: inherit; transition: border-color .2s, box-shadow .2s; }
+.field textarea, .field input, .field select { width: 100%; color: var(--text-primary); background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 6px; padding: 15px; outline: none; color-scheme: inherit; transition: border-color .2s, box-shadow .2s; }
 .field textarea { min-height: 120px; resize: vertical; line-height: 1.7; }
-.field textarea:focus, .field input:focus { border-color: var(--accent-primary); box-shadow: var(--focus-field-ring); }
+.field textarea:focus, .field input:focus, .field select:focus { border-color: var(--accent-primary); box-shadow: var(--focus-field-ring); }
 .field small { display: block; color: var(--text-faint); text-align: right; margin-top: 7px; }
 .segmented, .gender-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-control); margin-bottom: 24px; border-radius: 7px; overflow: hidden; }
 .segmented button, .gender-row button { border: 0; background: var(--surface-segment); color: var(--text-muted); padding: 13px; }
 .segmented button.active, .gender-row button.active { color: var(--text-inverse-control); background: var(--accent-strong); }
 .gender-row { grid-template-columns: repeat(3, 1fr); }
 .notice { color: var(--text-accent-strong); background: var(--surface-accent-soft); border-left: 2px solid var(--accent-primary); padding: 14px; font-size: 13px; line-height: 1.5; }
+.saju-option-list { display: grid; gap: 10px; }
+.saju-option { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 12px; padding: 16px; border: 1px solid var(--border-control); border-radius: 8px; background: var(--surface-accent-faint); cursor: pointer; }
+.saju-option:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-accent-selected); box-shadow: var(--effect-selected-inset); }
+.saju-option input, .saju-choice input, .saju-category input { width: auto; margin-top: 3px; accent-color: var(--accent-strong); }
+.saju-option strong, .saju-option small { display: block; }
+.saju-option small { margin-top: 5px; text-align: left; line-height: 1.5; }
+.saju-place-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.saju-choice-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.saju-choice { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 12px; border: 1px solid var(--border-control); border-radius: 7px; cursor: pointer; }
+.saju-choice:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-accent-selected); }
+.saju-category { position: relative; cursor: pointer; }
+.saju-category input { position: absolute; top: 14px; right: 14px; }
+.saju-error-summary { margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-danger); border-radius: 7px; background: var(--surface-danger-subtle); color: var(--text-danger); outline: none; }
+.saju-error-summary p { margin: 6px 0 0; font-size: 13px; }
+.saju-review-list { display: grid; gap: 0; margin: 0 0 28px; }
+.saju-review-list div { display: grid; grid-template-columns: minmax(90px, .35fr) 1fr; gap: 18px; padding: 15px 0; border-bottom: 1px solid var(--border-content-divider); }
+.saju-review-list dt { color: var(--text-muted); }
+.saju-review-list dd { margin: 0; color: var(--text-primary); overflow-wrap: anywhere; }
+.saju-loading-steps { max-width: 420px; margin: 24px auto 0; padding: 0; list-style: none; display: grid; gap: 10px; text-align: left; }
+.saju-loading-steps li { color: var(--text-faint); }
+.saju-loading-steps li::before { content: "◇"; display: inline-block; width: 24px; color: var(--text-faint); }
+.saju-loading-steps li.active { color: var(--text-accent-strong); }
+.saju-loading-steps li.active::before { content: "◆"; color: var(--accent-strong); }
 
 .spread-grid { list-style: none; padding: 0; margin: 0 auto 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 780px; }
 .spread-option { width: 100%; min-height: 176px; padding: 25px; text-align: left; color: var(--text-primary); border: 1px solid var(--border-card); border-radius: 9px; background: var(--gradient-spread-card); transition: border-color .2s ease, background .2s ease, transform .2s ease; }
@@ -432,7 +455,8 @@ h1, h2, h3, blockquote {
   .reading-shell { padding-top: 28px; }
   .wizard-heading { margin-top: 46px; }
   .consent-panel, .wizard-card { padding: 26px 20px; }
-  .category-grid, .spread-grid, .choice-fields { grid-template-columns: 1fr; }
+  .category-grid, .spread-grid, .choice-fields, .saju-place-grid, .saju-choice-row { grid-template-columns: 1fr; }
+  .saju-review-list div { grid-template-columns: 1fr; gap: 6px; }
   .spread-option { min-height: auto; }
   .tarot-candidates { gap: 7px; }
   .tarot-candidates .tarot-back { min-width: 0; }

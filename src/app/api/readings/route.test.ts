@@ -52,6 +52,28 @@ describe("/api/readings route", () => {
     });
   });
 
+  it("preserves Spring field validation details for the guided form", async () => {
+    proxyBackendRequest.mockResolvedValue(Response.json({
+      code: "INVALID_BIRTH_TIME",
+      field: "birthProfile.birthTime",
+      message: "출생 시각을 다시 확인해 주세요.",
+    }, { status: 400 }));
+    const request = new Request("https://front.test/api/readings", {
+      method: "POST",
+      body: JSON.stringify({ kind: "saju" }),
+    });
+    const { POST } = await import("./route");
+
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({
+      code: "INVALID_BIRTH_TIME",
+      field: "birthProfile.birthTime",
+      message: "출생 시각을 다시 확인해 주세요.",
+    });
+  });
+
   it("proxies reading list lookup to Spring", async () => {
     proxyBackendRequest.mockResolvedValue(Response.json({ items: [] }));
     const { GET } = await import("./route");
