@@ -233,6 +233,32 @@ describe("SajuExperience", () => {
     expect(requestIdSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("creates a new request id after a confirmed OpenAI generation failure", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID")
+      .mockReturnValueOnce(REQUEST_ID)
+      .mockReturnValueOnce(SECOND_REQUEST_ID);
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(jsonResponse({
+        code: "OPENAI_READING_GENERATION_FAILED",
+        message: "리딩 생성에 실패했어요. 다시 시도해 주세요.",
+      }, { status: 502 }))
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    await reachReview();
+
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("리딩 생성에 실패했어요.");
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalled());
+    const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
+    expect(first.requestId).toBe(REQUEST_ID);
+    expect(second.requestId).toBe(SECOND_REQUEST_ID);
+  });
+
   it("creates a new request id after the user changes an input", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID")
       .mockReturnValueOnce(REQUEST_ID)

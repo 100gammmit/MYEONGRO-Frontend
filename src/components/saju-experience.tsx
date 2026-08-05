@@ -229,6 +229,9 @@ export function SajuExperience() {
   }
 
   function handleSubmissionError(error: SajuApiError) {
+    if (error.code === "OPENAI_READING_GENERATION_FAILED") {
+      requestIdRef.current = null;
+    }
     const errorPhase = error.field ? FIELD_PHASE[error.field] : undefined;
     const key = error.field ? FIELD_KEY[error.field] : undefined;
     if (errorPhase && key) {
