@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 export function ReadingRecordActions({
   readingId,
   retryable,
+  retrySuccessHref,
 }: {
   readingId: string;
   retryable: boolean;
+  retrySuccessHref?: string;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState<"delete" | "retry" | null>(null);
@@ -43,6 +45,10 @@ export function ReadingRecordActions({
         method: "POST",
       });
       if (!response.ok) throw new Error("retry failed");
+      const body = await response.json() as { reading?: { status?: string } };
+      if (retrySuccessHref && body.reading?.status === "completed") {
+        router.push(retrySuccessHref);
+      }
       router.refresh();
     } catch {
       setError("리딩을 다시 생성하지 못했어요. 잠시 후 재시도해 주세요.");

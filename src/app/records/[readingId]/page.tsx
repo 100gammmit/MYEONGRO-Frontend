@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 
 import { ReadingRecordActions } from "@/components/reading-record-actions";
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
+import { SajuReadingResult } from "@/components/saju-reading-result";
+import { parseSajuReadingView } from "@/domain/saju/result";
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
@@ -22,6 +24,10 @@ const CARD_NAMES = new Map<string, string>(
 
 type TarotRecordView = {
   spreadName: string;
+  title: string;
+  summary: string;
+  guidance: string[];
+  disclaimer: string;
   items: Array<{
     position: TarotPositionId;
     positionLabel: string;
@@ -37,22 +43,29 @@ function getTarotRecordView(reading: PublicReadingRecord): TarotRecordView | nul
     || reading.schemaVersion !== 1
     || !reading.spreadType
     || !(reading.spreadType in TAROT_SPREADS)
-    || !reading.result
+    || !isRecord(reading.result)
   ) {
     return null;
   }
   const definition = TAROT_SPREADS[reading.spreadType as TarotSpreadType];
   const inputCards = reading.input.cards;
+  const result = reading.result;
+  const sections = result.sections;
   if (!Array.isArray(inputCards) || inputCards.length !== definition.cardCount
-    || reading.result.sections.length !== definition.cardCount) {
+    || !Array.isArray(sections) || sections.length !== definition.cardCount
+    || !Array.isArray(result.guidance) || result.guidance.some((item) => typeof item !== "string")
+    || typeof result.title !== "string" || typeof result.summary !== "string"
+    || typeof result.disclaimer !== "string") {
     return null;
   }
 
   const items = definition.positions.map((position, index) => {
     const inputCard = inputCards[index];
-    const section = reading.result?.sections[index];
+    const section = sections[index];
     if (!isRecord(inputCard) || typeof inputCard.cardId !== "string"
-      || inputCard.position !== position.id || section?.position !== position.id) {
+      || inputCard.position !== position.id || !isRecord(section)
+      || section.position !== position.id || typeof section.heading !== "string"
+      || typeof section.body !== "string") {
       return null;
     }
     const cardName = CARD_NAMES.get(inputCard.cardId);
@@ -66,7 +79,14 @@ function getTarotRecordView(reading: PublicReadingRecord): TarotRecordView | nul
     };
   });
   if (items.some((item) => item === null)) return null;
-  return { spreadName: definition.name, items: items as TarotRecordView["items"] };
+  return {
+    spreadName: definition.name,
+    title: result.title,
+    summary: result.summary,
+    guidance: result.guidance as string[],
+    disclaimer: result.disclaimer,
+    items: items as TarotRecordView["items"],
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -91,9 +111,24 @@ export default async function ReadingDetailPage({
     ? reading.input.question
     : "저장된 리딩";
   const tarotView = getTarotRecordView(reading);
+  const sajuView = parseSajuReadingView(reading);
   const unreadableTarot = reading.kind === "tarot"
     && reading.status === "completed"
     && !tarotView;
+  const unreadableSaju = reading.kind === "saju"
+    && reading.status === "completed"
+    && !sajuView;
+
+  if (sajuView) {
+    return (
+      <SajuReadingResult
+        backHref="/records"
+        backLabel="내 기록"
+        footer={<ReadingRecordActions readingId={reading.id} retryable={false} />}
+        view={sajuView}
+      />
+    );
+  }
 
   return (
     <article className="simple-page page-width record-detail">
@@ -104,47 +139,42 @@ export default async function ReadingDetailPage({
         {reading.kind === "tarot" ? "AI TAROT" : "AI SAJU"}
       </p>
 
-      {unreadableTarot ? (
+      {unreadableTarot || unreadableSaju ? (
         <div className="record-state" role="alert">
           <h1>이 리딩은 현재 형식으로 표시할 수 없어요</h1>
-          <p>저장된 위치 정보를 확인할 수 없어 새 타로 결과 형식으로 표시할 수 없어요.</p>
+          <p>{unreadableTarot
+            ? "저장된 위치 정보를 확인할 수 없어 새 타로 결과 형식으로 표시할 수 없어요."
+            : "저장된 사주 schema version에 맞는 결과 구조를 확인할 수 없어요."}</p>
         </div>
-      ) : reading.status === "completed" && reading.result ? (
+      ) : reading.status === "completed" && tarotView ? (
         <>
           <header className="record-detail-header">
-            {tarotView ? <p className="record-spread-name">{tarotView.spreadName}</p> : null}
-            <h1>{reading.result.title}</h1>
-            <p>{reading.result.summary}</p>
+            <p className="record-spread-name">{tarotView.spreadName}</p>
+            <h1>{tarotView.title}</h1>
+            <p>{tarotView.summary}</p>
             <blockquote>{question}</blockquote>
           </header>
           <div className="reading-sections">
-            {tarotView
-              ? tarotView.items.map((item) => (
-                <section key={item.position}>
-                  <p className="record-card-name">
-                    <span>{item.positionLabel}</span>
-                    <strong>{item.cardName}</strong>
-                  </p>
-                  <h2>{item.heading}</h2>
-                  <p>{item.body}</p>
-                </section>
-              ))
-              : reading.result.sections.map((section) => (
-                <section key={section.position ?? section.heading}>
-                  <h2>{section.heading}</h2>
-                  <p>{section.body}</p>
-                </section>
-              ))}
+            {tarotView.items.map((item) => (
+              <section key={item.position}>
+                <p className="record-card-name">
+                  <span>{item.positionLabel}</span>
+                  <strong>{item.cardName}</strong>
+                </p>
+                <h2>{item.heading}</h2>
+                <p>{item.body}</p>
+              </section>
+            ))}
           </div>
           <section className="reading-guidance">
             <h2>조언</h2>
             <ul>
-              {reading.result.guidance.map((guidance) => (
+              {tarotView.guidance.map((guidance) => (
                 <li key={guidance}>{guidance}</li>
               ))}
             </ul>
           </section>
-          <p className="reading-disclaimer">{reading.result.disclaimer}</p>
+          <p className="reading-disclaimer">{tarotView.disclaimer}</p>
         </>
       ) : reading.status === "failed" ? (
         <div className="record-state" role="alert">
@@ -161,6 +191,7 @@ export default async function ReadingDetailPage({
       <ReadingRecordActions
         readingId={reading.id}
         retryable={reading.status === "failed"}
+        retrySuccessHref={reading.kind === "saju" ? `/saju/results/${reading.id}` : undefined}
       />
     </article>
   );

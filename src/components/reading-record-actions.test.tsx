@@ -41,4 +41,22 @@ describe("ReadingRecordActions", () => {
       { method: "POST" },
     );
   });
+
+  it("opens the canonical saju result URL after a successful retry", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
+      reading: { id: "reading-1", status: "completed" },
+    }));
+    render(
+      <ReadingRecordActions
+        readingId="reading-1"
+        retryable
+        retrySuccessHref="/saju/results/reading-1"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "다시 생성" }));
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/saju/results/reading-1"));
+    expect(refresh).toHaveBeenCalled();
+  });
 });

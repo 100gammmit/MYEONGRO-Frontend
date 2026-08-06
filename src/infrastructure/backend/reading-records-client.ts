@@ -17,13 +17,7 @@ export interface PublicReadingRecord {
   status: ReadingStatus;
   title: string;
   input: Record<string, unknown>;
-  result?: {
-    title: string;
-    summary: string;
-    sections: ReadingResultSection[];
-    guidance: string[];
-    disclaimer: string;
-  };
+  result?: unknown;
   errorCode?: string;
   createdAt: string;
   updatedAt: string;

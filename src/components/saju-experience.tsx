@@ -17,6 +17,7 @@ import type {
   SajuFocusArea,
   SajuReadingCreateRequest,
 } from "@/domain/saju/contracts";
+import { takeRememberedSajuBirthProfile } from "@/domain/saju/draft-session";
 import {
   parseSajuReadingCreatedResponse,
   parseSajuReadingCreateRequest,
@@ -123,6 +124,7 @@ export function SajuExperience() {
   const [generalError, setGeneralError] = useState<string | null>(null);
   const requestIdRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
+  const followUpDraftRef = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const redirectToLogin = useCallback(() => {
@@ -147,6 +149,26 @@ export function SajuExperience() {
   }, [redirectToLogin]);
 
   useEffect(() => {
+    const remembered = takeRememberedSajuBirthProfile();
+    if (!remembered) return;
+    followUpDraftRef.current = true;
+    setForm((current) => ({
+      ...current,
+      birthDate: remembered.birthDate,
+      birthTimePrecision: remembered.birthTimePrecision,
+      birthTime: remembered.birthTime ?? "",
+      provinceCode: remembered.provinceCode,
+      cityCode: remembered.cityCode,
+      luckDirectionBasis: remembered.luckDirectionBasis,
+    }));
+  }, []);
+
+  const handleConsentComplete = useCallback(() => {
+    if (catalogStatus === "idle") void loadBirthPlaces();
+    setPhase(followUpDraftRef.current ? "question" : "birth-date");
+  }, [catalogStatus, loadBirthPlaces]);
+
+  useEffect(() => {
     if (phase !== "loading") return;
     setLoadingIndex(0);
     const timer = globalThis.setInterval(() => {
@@ -166,11 +188,6 @@ export function SajuExperience() {
     setFieldErrors({});
     setGeneralError(null);
     setForm((current) => ({ ...current, ...patch }));
-  }
-
-  function handleConsentComplete() {
-    if (catalogStatus === "idle") void loadBirthPlaces();
-    setPhase("birth-date");
   }
 
   function selectPrecision(value: BirthTimePrecision) {

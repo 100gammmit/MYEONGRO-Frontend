@@ -2,6 +2,8 @@
 import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
+import { sajuReadingRecord } from "@/test-fixtures/saju-reading";
+
 const mocks = vi.hoisted(() => ({
   getCookieHeader: vi.fn(),
   getSessionState: vi.fn(),
@@ -124,6 +126,27 @@ describe("ReadingDetailPage", () => {
     expect(screen.queryByText("추측하면 안 되는 본문")).not.toBeInTheDocument();
   });
 
+  it("selects the saju v2 renderer and restores its calculation context", async () => {
+    mocks.get.mockResolvedValue(sajuReadingRecord());
+
+    await renderPage();
+
+    expect(screen.getByRole("heading", { name: "변화를 준비하며 기준을 세우는 해" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "사주 리딩 목차" })).toBeInTheDocument();
+    expect(screen.getByText("출생 시각 미상")).toBeInTheDocument();
+  });
+
+  it("does not guess-render a malformed saju v2 payload", async () => {
+    const malformed = sajuReadingRecord();
+    malformed.result.natalSections = malformed.result.natalSections.slice(0, 3);
+    mocks.get.mockResolvedValue(malformed);
+
+    await renderPage();
+
+    expect(screen.getByRole("alert")).toHaveTextContent("현재 형식으로 표시할 수 없어요");
+    expect(screen.queryByText("중심을 살펴봅니다.")).not.toBeInTheDocument();
+  });
+
   it("shows retry only for failed readings", async () => {
     mocks.get.mockResolvedValue({
       id: "reading-1",
@@ -138,6 +161,7 @@ describe("ReadingDetailPage", () => {
     await renderPage();
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "다시 생성" })).toBeInTheDocument();
   });
 
   it("returns not found for guests", async () => {

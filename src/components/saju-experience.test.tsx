@@ -1,6 +1,11 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import {
+  clearRememberedSajuBirthProfile,
+  rememberSajuBirthProfile,
+} from "@/domain/saju/draft-session";
+
 import { SajuExperience } from "./saju-experience";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
@@ -71,6 +76,7 @@ function createDeferred<T>() {
 afterEach(() => {
   vi.restoreAllMocks();
   navigation.push.mockReset();
+  clearRememberedSajuBirthProfile();
 });
 
 async function startWithAcceptedConsent() {
@@ -321,5 +327,32 @@ describe("SajuExperience", () => {
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/login?next=%2Fsaju"));
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
+  });
+
+  it("consumes remembered birth information and starts at a new question", async () => {
+    rememberSajuBirthProfile({
+      calendarType: "solar",
+      birthDate: "1992-08-17",
+      birthTimePrecision: "unknown",
+      provinceCode: "36",
+      cityCode: "36110",
+      luckDirectionBasis: "unspecified",
+    });
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
+
+    render(<SajuExperience />);
+
+    expect(await screen.findByRole("heading", {
+      name: "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?",
+    })).toBeInTheDocument();
+    expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /일·진로/ })).not.toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: "이전" }));
+    await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toHaveValue("36"));
+    expect(screen.getByLabelText("출생 시·군·구")).toHaveValue("36110");
+    fireEvent.click(screen.getByRole("button", { name: "이전" }));
+    expect(screen.getByRole("radio", { name: /시간을 몰라요/ })).toBeChecked();
   });
 });
