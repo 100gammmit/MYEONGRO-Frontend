@@ -65,4 +65,33 @@ describe("TarotReadingResult", () => {
     expect(screen.getByText("운을 돕는 요소")).toBeInTheDocument();
     expect(screen.queryByText("선택 A")).not.toBeInTheDocument();
   });
+
+  it.each([
+    ["mind_three_card", "health_fortune", "현재의 운", "지금의 감정"],
+    ["relationship_three_card", "money_fortune", "운의 출발점", "내가 가져온 마음"],
+  ] as const)("uses fortune labels for redirected %s readings", (spreadType, readingMode, label, oldLabel) => {
+    const definition = TAROT_SPREADS[spreadType];
+    render(
+      <TarotReadingResult
+        cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
+        result={{
+          readingMode,
+          title: "운세의 방향",
+          summary: "지금 흐름을 분명하게 읽었어요.",
+          sections: definition.positions.map((position) => ({
+            position: position.id,
+            heading: "흐름",
+            body: "카드 해석",
+          })),
+          guidance: ["오늘 할 수 있는 한 가지를 정하세요."],
+          disclaimer: "오락과 자기 성찰을 위한 참고입니다.",
+        }}
+        spreadType={spreadType}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "첫 카드 공개" }));
+    expect(screen.getByText(label)).toBeInTheDocument();
+    expect(screen.queryByText(oldLabel)).not.toBeInTheDocument();
+  });
 });

@@ -19,6 +19,12 @@ const NOTICE: Record<ReadingMode, string | null> = {
 };
 
 const REDIRECTED_CHOICE_LABELS: Record<string, string> = {
+  emotion: "현재의 운",
+  underlying_need: "흐름을 움직이는 요인",
+  self_action: "앞으로의 방향",
+  my_heart: "운의 출발점",
+  relationship_flow: "이어지는 흐름",
+  check_point: "주의할 지점",
   desire: "바라는 흐름",
   fear: "주의할 흐름",
   core_value: "중심이 되는 힘",
