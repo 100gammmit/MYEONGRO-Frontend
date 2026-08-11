@@ -5,6 +5,8 @@ import {
   type TarotReadingResultData,
 } from "@/components/tarot-reading-result";
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
+import { ReadingDeclinedResult } from "@/components/reading-declined-result";
+import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
@@ -42,6 +44,16 @@ export default async function TarotResultPage({
     reading = await new BackendReadingRecordsClient(cookieHeader).get(readingId);
   } catch {
     return <ProtectedPageUnavailable />;
+  }
+  const declinedView = reading ? parseDeclinedReadingView(reading) : null;
+  if (declinedView) {
+    return (
+      <ReadingDeclinedResult
+        backHref="/tarot"
+        backLabel="타로 리딩"
+        view={declinedView}
+      />
+    );
   }
   const view = reading ? parseTarotResultView(reading) : null;
   if (!view) notFound();

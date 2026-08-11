@@ -100,6 +100,35 @@ describe("ReadingDetailPage", () => {
     expect(screen.getByText("별")).toBeInTheDocument();
   });
 
+  it("renders a completed decline as a saved result without retry", async () => {
+    mocks.get.mockResolvedValue({
+      id: "reading-1",
+      kind: "saju",
+      schemaVersion: 2,
+      status: "completed",
+      title: "건강에 관한 중요한 결정은 리딩으로 답하기 어려워요",
+      input: { question: "수술을 받아야 할까요?" },
+      result: {
+        resultType: "declined",
+        reasonCode: "MEDICAL_DECISION",
+        title: "건강에 관한 중요한 결정은 리딩으로 답하기 어려워요",
+        message: "의료 전문가와 확인해 주세요.",
+        guidance: ["불안한 마음을 살펴보는 질문으로 바꿔보세요."],
+        disclaimer: "전문적인 의료 조언을 대신하지 않습니다.",
+      },
+      createdAt: "2026-06-12T00:00:00.000Z",
+      updatedAt: "2026-06-12T00:00:01.000Z",
+    });
+
+    await renderPage();
+
+    expect(screen.getByRole("heading", {
+      name: "건강에 관한 중요한 결정은 리딩으로 답하기 어려워요",
+    })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "다시 생성" }))
+      .not.toBeInTheDocument();
+  });
+
   it("does not guess-render a legacy tarot payload", async () => {
     mocks.get.mockResolvedValue({
       id: "reading-1",

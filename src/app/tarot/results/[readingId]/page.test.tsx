@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
     throw new Error("NOT_FOUND");
   }),
   result: vi.fn(() => <div>tarot result</div>),
+  declined: vi.fn(() => <div>declined result</div>),
 }));
 
 vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
@@ -26,6 +27,9 @@ vi.mock("@/infrastructure/backend/reading-records-client", () => ({
 }));
 vi.mock("@/components/tarot-reading-result", () => ({
   TarotReadingResult: mocks.result,
+}));
+vi.mock("@/components/reading-declined-result", () => ({
+  ReadingDeclinedResult: mocks.declined,
 }));
 
 import TarotResultPage from "./page";
@@ -84,6 +88,25 @@ describe("TarotResultPage", () => {
       undefined,
     );
     expect(screen.getByText("tarot result")).toBeInTheDocument();
+  });
+
+  it("renders a completed decline result without requiring tarot sections", async () => {
+    const reading = completedReading();
+    reading.result = {
+      resultType: "declined",
+      reasonCode: "FINANCIAL_DECISION",
+      title: "큰 재정 결정을 리딩으로 정해 드리기는 어려워요",
+      message: "객관적인 정보를 함께 확인해 주세요.",
+      guidance: ["질문을 자기 점검의 관점으로 바꿔보세요."],
+      disclaimer: "전문적인 금융 조언을 대신하지 않습니다.",
+    } as unknown as typeof reading.result;
+    mocks.get.mockResolvedValue(reading);
+
+    await renderPage();
+
+    expect(mocks.declined).toHaveBeenCalled();
+    expect(mocks.result).not.toHaveBeenCalled();
+    expect(screen.getByText("declined result")).toBeInTheDocument();
   });
 
   it("does not render malformed or non-completed tarot records", async () => {

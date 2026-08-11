@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ReadingRecordActions } from "@/components/reading-record-actions";
+import { ReadingDeclinedResult } from "@/components/reading-declined-result";
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
 import { SajuReadingResult } from "@/components/saju-reading-result";
 import { parseSajuReadingView } from "@/domain/saju/result";
+import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
@@ -112,12 +114,24 @@ export default async function ReadingDetailPage({
     : "저장된 리딩";
   const tarotView = getTarotRecordView(reading);
   const sajuView = parseSajuReadingView(reading);
+  const declinedView = parseDeclinedReadingView(reading);
   const unreadableTarot = reading.kind === "tarot"
     && reading.status === "completed"
     && !tarotView;
   const unreadableSaju = reading.kind === "saju"
     && reading.status === "completed"
     && !sajuView;
+
+  if (declinedView) {
+    return (
+      <ReadingDeclinedResult
+        backHref="/records"
+        backLabel="내 기록"
+        footer={<ReadingRecordActions readingId={reading.id} retryable={false} />}
+        view={declinedView}
+      />
+    );
+  }
 
   if (sajuView) {
     return (
