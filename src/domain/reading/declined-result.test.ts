@@ -40,4 +40,9 @@ describe("parseDeclinedReadingView", () => {
       result: { ...declinedReading().result, guidance: [] },
     })).toBeNull();
   });
+
+  it("rejects a decline when it does not match the expected result kind", () => {
+    expect(parseDeclinedReadingView(declinedReading(), "tarot")).not.toBeNull();
+    expect(parseDeclinedReadingView(declinedReading(), "saju")).toBeNull();
+  });
 });

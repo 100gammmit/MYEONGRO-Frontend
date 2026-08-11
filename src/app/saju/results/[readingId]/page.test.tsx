@@ -89,6 +89,29 @@ describe("SajuResultPage", () => {
     expect(screen.getByText("saju declined result")).toBeInTheDocument();
   });
 
+  it("does not render a tarot decline on the saju result route", async () => {
+    mocks.get.mockResolvedValue({
+      id: "reading-1",
+      kind: "tarot",
+      schemaVersion: 1,
+      status: "completed",
+      title: "큰 재정 결정을 리딩으로 정해 드리기는 어려워요",
+      input: { question: "전 재산을 투자할까요?" },
+      result: {
+        resultType: "declined",
+        reasonCode: "FINANCIAL_DECISION",
+        title: "큰 재정 결정을 리딩으로 정해 드리기는 어려워요",
+        message: "객관적인 정보를 함께 확인해 주세요.",
+        guidance: ["자기 점검의 관점으로 질문을 바꿔보세요."],
+        disclaimer: "전문적인 금융 조언을 대신하지 않습니다.",
+      },
+    });
+
+    await expect(renderPage()).rejects.toThrow("NOT_FOUND");
+    expect(mocks.declined).not.toHaveBeenCalled();
+    expect(mocks.result).not.toHaveBeenCalled();
+  });
+
   it("does not guess-render unsupported or malformed saju records", async () => {
     mocks.get.mockResolvedValue(sajuReadingRecord({ schemaVersion: 3 }));
 

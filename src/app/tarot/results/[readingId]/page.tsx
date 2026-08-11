@@ -45,7 +45,7 @@ export default async function TarotResultPage({
   } catch {
     return <ProtectedPageUnavailable />;
   }
-  const declinedView = reading ? parseDeclinedReadingView(reading) : null;
+  const declinedView = reading ? parseDeclinedReadingView(reading, "tarot") : null;
   if (declinedView) {
     return (
       <ReadingDeclinedResult

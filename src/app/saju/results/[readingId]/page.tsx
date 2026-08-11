@@ -29,7 +29,7 @@ export default async function SajuResultPage({
   } catch {
     return <ProtectedPageUnavailable />;
   }
-  const declinedView = reading ? parseDeclinedReadingView(reading) : null;
+  const declinedView = reading ? parseDeclinedReadingView(reading, "saju") : null;
   if (declinedView) {
     return (
       <ReadingDeclinedResult

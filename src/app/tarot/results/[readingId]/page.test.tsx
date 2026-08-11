@@ -109,6 +109,27 @@ describe("TarotResultPage", () => {
     expect(screen.getByText("declined result")).toBeInTheDocument();
   });
 
+  it("does not render a saju decline on the tarot result route", async () => {
+    const reading = completedReading();
+    mocks.get.mockResolvedValue({
+      ...reading,
+      kind: "saju",
+      spreadType: null,
+      result: {
+        resultType: "declined",
+        reasonCode: "MEDICAL_DECISION",
+        title: "건강에 관한 중요한 결정은 리딩으로 답하기 어려워요",
+        message: "의료 전문가와 확인해 주세요.",
+        guidance: ["감정을 살펴보는 질문으로 바꿔보세요."],
+        disclaimer: "전문적인 의료 조언을 대신하지 않습니다.",
+      },
+    });
+
+    await expect(renderPage()).rejects.toThrow("NOT_FOUND");
+    expect(mocks.declined).not.toHaveBeenCalled();
+    expect(mocks.result).not.toHaveBeenCalled();
+  });
+
   it("does not render malformed or non-completed tarot records", async () => {
     mocks.get.mockResolvedValue({ ...completedReading(), schemaVersion: 2 });
 

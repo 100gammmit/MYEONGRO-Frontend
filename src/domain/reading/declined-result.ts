@@ -28,8 +28,15 @@ const declinedReadingViewSchema = z.object({
 }).passthrough();
 
 export type DeclinedReadingView = z.infer<typeof declinedReadingViewSchema>;
+export type DeclinedReadingKind = DeclinedReadingView["kind"];
 
-export function parseDeclinedReadingView(value: unknown): DeclinedReadingView | null {
+export function parseDeclinedReadingView(
+  value: unknown,
+  expectedKind?: DeclinedReadingKind,
+): DeclinedReadingView | null {
   const parsed = declinedReadingViewSchema.safeParse(value);
-  return parsed.success ? parsed.data : null;
+  if (!parsed.success || (expectedKind && parsed.data.kind !== expectedKind)) {
+    return null;
+  }
+  return parsed.data;
 }
