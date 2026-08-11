@@ -9,9 +9,15 @@ import {
   type TarotPositionId,
   type TarotSpreadType,
 } from "@/domain/tarot";
+import {
+  readingModeNotice,
+  tarotPositionLabel,
+  type ReadingMode,
+} from "@/domain/reading/reading-mode";
 import { ReadingShell } from "./reading-shell";
 
 export type TarotReadingResultData = {
+  readingMode: ReadingMode;
   title: string;
   summary: string;
   sections: Array<{
@@ -40,6 +46,7 @@ export function TarotReadingResult({
   const definition = TAROT_SPREADS[spreadType];
   const revealedPositions = definition.positions.slice(0, revealedCount);
   const allRevealed = revealedCount === definition.cardCount;
+  const modeNotice = readingModeNotice(result.readingMode);
 
   return (
     <ReadingShell eyebrow={definition.name} title="카드가 전하는 메시지" step={4} totalSteps={4}>
@@ -49,8 +56,8 @@ export function TarotReadingResult({
           const section = result.sections[index];
           return (
             <article className="result-reveal" key={position.id}>
-              <div className="revealed-card" aria-label={`${position.label}: ${card?.name ?? "카드"}`}>
-                <span>{position.label}</span>
+              <div className="revealed-card" aria-label={`${tarotPositionLabel(result.readingMode, position.id, position.label)}: ${card?.name ?? "카드"}`}>
+                <span>{tarotPositionLabel(result.readingMode, position.id, position.label)}</span>
                 <strong>{card?.name}</strong>
               </div>
               <div>
@@ -76,6 +83,7 @@ export function TarotReadingResult({
             <h2>{result.title}</h2>
             <p>{result.summary}</p>
           </div>
+          {modeNotice ? <aside className="reading-mode-notice">{modeNotice}</aside> : null}
           <section className="reading-guidance">
             <h3>오늘부터 시도할 작은 행동</h3>
             <ul>{result.guidance.map((item) => <li key={item}>{item}</li>)}</ul>

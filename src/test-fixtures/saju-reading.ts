@@ -53,6 +53,7 @@ export function sajuReadingRecord(overrides: Record<string, unknown> = {}) {
       },
     },
     result: {
+      readingMode: "standard",
       title: "변화를 준비하며 기준을 세우는 해",
       summary: "가능성을 현실 정보와 함께 살펴보세요.",
       natalSections: [

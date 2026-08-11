@@ -78,6 +78,17 @@ describe("parseSajuReadingView", () => {
     expect(parsed?.result.natalSections.map((section) => section.id)).toEqual([
       "core", "strengths", "relationship", "work",
     ]);
+    expect(parsed?.result.readingMode).toBe("standard");
+  });
+
+  it("accepts one guidance item and rejects more than two", () => {
+    const one = completedSajuRecord();
+    one.result.guidance = ["오늘 할 수 있는 한 가지만 정하세요."];
+    expect(parseSajuReadingView(one)).not.toBeNull();
+
+    const three = completedSajuRecord();
+    three.result.guidance = ["하나", "둘", "셋"];
+    expect(parseSajuReadingView(three)).toBeNull();
   });
 
   it("rejects unsupported versions and mismatched result metadata", () => {

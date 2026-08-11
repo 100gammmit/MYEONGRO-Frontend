@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readingModeSchema } from "@/domain/reading/reading-mode";
 
 const textSchema = z.string().trim().min(1);
 const focusAreaSchema = z.enum(["self", "career", "relationship", "life_money"]);
@@ -122,6 +123,7 @@ const sectionSchema = z.object({
 }).strict();
 
 const resultSchema = z.object({
+  readingMode: readingModeSchema.default("standard"),
   title: textSchema,
   summary: textSchema,
   natalSections: z.array(sectionSchema).length(4),
@@ -137,7 +139,7 @@ const resultSchema = z.object({
     body: textSchema,
     evidenceKeys: evidenceKeysSchema,
   }).strict(),
-  guidance: z.array(textSchema).min(2).max(3),
+  guidance: z.array(textSchema).min(1).max(2),
   disclaimer: textSchema,
 }).strict();
 

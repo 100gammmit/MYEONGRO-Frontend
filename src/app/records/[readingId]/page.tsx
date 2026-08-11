@@ -8,6 +8,12 @@ import { SajuReadingResult } from "@/components/saju-reading-result";
 import { parseSajuReadingView } from "@/domain/saju/result";
 import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
 import {
+  parseReadingMode,
+  readingModeNotice,
+  tarotPositionLabel,
+  type ReadingMode,
+} from "@/domain/reading/reading-mode";
+import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
   type TarotPositionId,
@@ -25,6 +31,7 @@ const CARD_NAMES = new Map<string, string>(
 );
 
 type TarotRecordView = {
+  readingMode: ReadingMode;
   spreadName: string;
   title: string;
   summary: string;
@@ -53,11 +60,12 @@ function getTarotRecordView(reading: PublicReadingRecord): TarotRecordView | nul
   const inputCards = reading.input.cards;
   const result = reading.result;
   const sections = result.sections;
+  const readingMode = parseReadingMode(result.readingMode);
   if (!Array.isArray(inputCards) || inputCards.length !== definition.cardCount
     || !Array.isArray(sections) || sections.length !== definition.cardCount
     || !Array.isArray(result.guidance) || result.guidance.some((item) => typeof item !== "string")
     || typeof result.title !== "string" || typeof result.summary !== "string"
-    || typeof result.disclaimer !== "string") {
+    || typeof result.disclaimer !== "string" || readingMode === null) {
     return null;
   }
 
@@ -74,7 +82,7 @@ function getTarotRecordView(reading: PublicReadingRecord): TarotRecordView | nul
     if (!cardName) return null;
     return {
       position: position.id,
-      positionLabel: position.label,
+      positionLabel: tarotPositionLabel(readingMode, position.id, position.label),
       cardName,
       heading: section.heading,
       body: section.body,
@@ -82,6 +90,7 @@ function getTarotRecordView(reading: PublicReadingRecord): TarotRecordView | nul
   });
   if (items.some((item) => item === null)) return null;
   return {
+    readingMode,
     spreadName: definition.name,
     title: result.title,
     summary: result.summary,
@@ -168,6 +177,11 @@ export default async function ReadingDetailPage({
             <p>{tarotView.summary}</p>
             <blockquote>{question}</blockquote>
           </header>
+          {readingModeNotice(tarotView.readingMode) ? (
+            <aside className="reading-mode-notice">
+              {readingModeNotice(tarotView.readingMode)}
+            </aside>
+          ) : null}
           <div className="reading-sections">
             {tarotView.items.map((item) => (
               <section key={item.position}>

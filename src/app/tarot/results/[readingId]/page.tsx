@@ -7,6 +7,7 @@ import {
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
 import { ReadingDeclinedResult } from "@/components/reading-declined-result";
 import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
+import { parseReadingMode } from "@/domain/reading/reading-mode";
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
@@ -78,6 +79,7 @@ function parseTarotResultView(reading: PublicReadingRecord): TarotResultView | n
   const definition = TAROT_SPREADS[spreadType];
   const cards = reading.input.cards;
   const result = reading.result;
+  const readingMode = parseReadingMode(result.readingMode);
   if (
     !Array.isArray(cards)
     || cards.length !== definition.cardCount
@@ -88,6 +90,7 @@ function parseTarotResultView(reading: PublicReadingRecord): TarotResultView | n
     || typeof result.title !== "string"
     || typeof result.summary !== "string"
     || typeof result.disclaimer !== "string"
+    || readingMode === null
   ) {
     return null;
   }
@@ -125,6 +128,7 @@ function parseTarotResultView(reading: PublicReadingRecord): TarotResultView | n
     spreadType,
     cardIds,
     result: {
+      readingMode,
       title: result.title,
       summary: result.summary,
       sections,

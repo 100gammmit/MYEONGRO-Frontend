@@ -411,6 +411,7 @@ h1, h2, h3, blockquote {
 .reading-sections section, .reading-sections article, .reading-guidance { padding: 28px; border: 1px solid var(--border-default); border-radius: 9px; background: var(--surface-accent-faint); }
 .reading-sections h2, .reading-sections h3, .reading-guidance h2, .reading-guidance h3 { margin-top: 0; }
 .reading-sections p, .reading-guidance li, .reading-disclaimer { color: var(--text-secondary); line-height: 1.8; }
+.reading-mode-notice { margin: 18px 0 24px; padding: 14px 18px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--surface-accent-faint); color: var(--text-secondary); line-height: 1.7; }
 .record-state { margin-top: 35px; padding: 40px; border: 1px solid var(--border-default); border-radius: 10px; background: var(--surface-record); }
 .record-actions { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--border-default); }
 .record-actions > p { color: var(--text-danger); }

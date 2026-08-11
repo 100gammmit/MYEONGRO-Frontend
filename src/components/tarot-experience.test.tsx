@@ -93,6 +93,7 @@ function readingResponse(complete: TarotDrawComplete) {
         cards: complete.cards,
       },
       result: {
+        readingMode: "standard",
         title: "완성된 리딩",
         summary: "카드의 흐름을 연결한 요약입니다.",
         sections: definition.positions.map((position) => ({

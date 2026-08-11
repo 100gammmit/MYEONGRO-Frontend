@@ -64,4 +64,14 @@ describe("SajuReadingResult", () => {
     });
     expect(takeRememberedSajuBirthProfile()).toBeNull();
   });
+
+  it("explains a redirected health fortune without hiding the original question", () => {
+    const view = sajuReadingView();
+    view.result.readingMode = "health_fortune";
+    render(<SajuReadingResult view={view} />);
+
+    expect(screen.getByText("구체적인 의료 결정은 다루지 않고, 지금의 건강운을 중심으로 읽었어요."))
+      .toBeInTheDocument();
+    expect(screen.getByText(view.input.question)).toBeInTheDocument();
+  });
 });
