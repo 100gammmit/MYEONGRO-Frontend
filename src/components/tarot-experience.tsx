@@ -56,6 +56,7 @@ type TarotReadingResponse = {
 type ApiError = {
   readonly code: string;
   readonly message: string;
+  readonly readingId: string | null;
 };
 
 const CARD_IDS = new Set<string>(MAJOR_ARCANA.map((card) => card.id));
@@ -74,6 +75,7 @@ export function TarotExperience() {
   const [choiceOptions, setChoiceOptions] = useState<TarotChoiceOptions>({ a: "", b: "" });
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
   const [requestId, setRequestId] = useState<string | null>(null);
+  const [failedReadingId, setFailedReadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inFlightRequestId = useRef<string | null>(null);
 
@@ -90,6 +92,7 @@ export function TarotExperience() {
     setChoiceOptions({ a: "", b: "" });
     setSelectedSlots([]);
     setRequestId(null);
+    setFailedReadingId(null);
     setError(null);
   }
 
@@ -97,6 +100,7 @@ export function TarotExperience() {
     if (!inputIsValid) return;
     setSelectedSlots([]);
     setRequestId(null);
+    setFailedReadingId(null);
     setError(null);
     setPhase("draw");
   }
@@ -134,6 +138,7 @@ export function TarotExperience() {
     setChoiceOptions({ a: "", b: "" });
     setSelectedSlots([]);
     setRequestId(null);
+    setFailedReadingId(null);
     setError(null);
     setPhase("spread");
     router.push("/tarot");
@@ -163,12 +168,17 @@ export function TarotExperience() {
     setPhase("loading");
 
     try {
-      const response = await fetch("/api/readings", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const response = failedReadingId
+        ? await fetch(`/api/readings/${encodeURIComponent(failedReadingId)}/retry`, {
+          method: "POST",
+          credentials: "same-origin",
+        })
+        : await fetch("/api/readings", {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
       if (response.status === 401) {
         redirectToLogin();
         setPhase("confirm");
@@ -176,6 +186,9 @@ export function TarotExperience() {
       }
       if (!response.ok) {
         const apiError = await readApiError(response);
+        if (response.status === 502 && apiError.readingId) {
+          setFailedReadingId(apiError.readingId);
+        }
         setError(
           READING_ERROR_MESSAGES[response.status]
           ?? apiError.message
@@ -190,6 +203,7 @@ export function TarotExperience() {
         spreadType,
       );
       setRequestId(null);
+      setFailedReadingId(null);
       router.push(`/tarot/results/${encodeURIComponent(validated.readingId)}`);
     } catch (readingError) {
       setError(
@@ -201,7 +215,7 @@ export function TarotExperience() {
     } finally {
       inFlightRequestId.current = null;
     }
-  }, [choiceOptions, definition.cardCount, question, redirectToLogin, requestId, router, selectedSlots, spreadType]);
+  }, [choiceOptions, definition.cardCount, failedReadingId, question, redirectToLogin, requestId, router, selectedSlots, spreadType]);
 
   const handleConsentComplete = useCallback(() => {
     setPhase("spread");
@@ -481,9 +495,12 @@ async function readApiError(response: Response): Promise<ApiError> {
     return {
       code: typeof payload.code === "string" ? payload.code : "UNKNOWN_ERROR",
       message: typeof payload.message === "string" ? payload.message : "",
+      readingId: typeof payload.readingId === "string" && payload.readingId.length > 0
+        ? payload.readingId
+        : null,
     };
   } catch {
-    return { code: "UNKNOWN_ERROR", message: "" };
+    return { code: "UNKNOWN_ERROR", message: "", readingId: null };
   }
 }
 

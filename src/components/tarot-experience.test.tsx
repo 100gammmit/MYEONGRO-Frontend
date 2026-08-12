@@ -154,9 +154,13 @@ describe("TarotExperience", () => {
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
   });
 
-  it("retries with the same requestId and slot order after generation failure", async () => {
+  it("retries the stored failed reading instead of creating it again", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(Response.json({ message: "provider failed" }, { status: 502 }))
+      .mockResolvedValueOnce(Response.json({
+        code: "OPENAI_READING_GENERATION_FAILED",
+        message: "provider failed",
+        readingId: "failed-reading-1",
+      }, { status: 502 }))
       .mockResolvedValueOnce(readingResponse("daily_one_card"));
     await chooseSpreadAndStart("daily_one_card");
     selectSlots([2]);
@@ -166,9 +170,10 @@ describe("TarotExperience", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     const first = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
-    const second = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
-    expect(second.requestId).toBe(first.requestId);
-    expect(second.selectedSlots).toEqual(first.selectedSlots);
+    expect(first.selectedSlots).toEqual([2]);
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/readings/failed-reading-1/retry");
+    expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: "POST" });
+    expect(fetchMock.mock.calls[1][1]).not.toHaveProperty("body");
   });
 
   it("starts over locally without calling an abandon endpoint", async () => {
