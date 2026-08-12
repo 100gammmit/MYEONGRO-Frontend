@@ -110,6 +110,33 @@ function readingResponse(complete: TarotDrawComplete) {
   });
 }
 
+function declinedReadingResponse(complete: TarotDrawComplete) {
+  return Response.json({
+    reading: {
+      id: "declined-reading-1",
+      kind: "tarot",
+      spreadType: complete.spreadType,
+      schemaVersion: 1,
+      status: "completed",
+      title: "이 질문에는 리딩을 제공할 수 없어요",
+      input: {
+        question: "위험한 결정을 대신 내려 주세요.",
+        cards: complete.cards,
+      },
+      result: {
+        resultType: "declined",
+        reasonCode: "HARMFUL_OR_ILLEGAL_ACTION",
+        title: "이 질문에는 리딩을 제공할 수 없어요",
+        message: "안전에 해가 될 수 있는 질문에는 답하지 않아요.",
+        guidance: ["필요하다면 관련 기관에 도움을 요청해 주세요."],
+        disclaimer: "타로는 오락과 자기 성찰을 위한 참고입니다.",
+      },
+      createdAt: "2026-07-17T00:00:00Z",
+      updatedAt: "2026-07-17T00:00:01Z",
+    },
+  });
+}
+
 async function chooseSpreadAndStart(spreadType: TarotSpreadType) {
   const definition = TAROT_SPREADS[spreadType];
   fireEvent.click(await screen.findByRole("button", { name: new RegExp(definition.name) }));
@@ -686,6 +713,25 @@ describe("TarotExperience", () => {
     expect(submittedBody).not.toHaveProperty("candidateToken");
     expect(submittedBody).not.toHaveProperty("position");
     expect(submittedBody).not.toHaveProperty("schemaVersion");
+  });
+
+  it("routes a completed declined reading to its result page", async () => {
+    const complete = makeComplete("daily_one_card");
+    vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      if (input === "/api/me") return AUTHENTICATED.clone();
+      if (input === "/api/tarot/draw-sessions/active") return Response.json(complete);
+      if (input === "/api/readings") return declinedReadingResponse(complete);
+      throw new Error(`unexpected fetch: ${String(input)}`);
+    });
+
+    render(<TarotExperience />);
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+
+    await waitFor(() => {
+      expect(navigation.push).toHaveBeenCalledWith("/tarot/results/declined-reading-1");
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(sessionStorage.getItem("myeongro:tarot-draw-draft-v3")).toBeNull();
   });
 
   it("reuses the persisted reading requestId after a claimed-session reload", async () => {

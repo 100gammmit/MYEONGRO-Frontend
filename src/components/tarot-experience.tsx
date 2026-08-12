@@ -19,6 +19,7 @@ import {
   type TarotPositionId,
   type TarotSpreadType,
 } from "@/domain/tarot";
+import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
 import { ConsentGate } from "./consent-gate";
 import { ReadingShell } from "./reading-shell";
 
@@ -827,9 +828,22 @@ function validateReadingResponse(
     || reading.schemaVersion !== 1
     || !reading.result
     || !Array.isArray(reading.input?.cards)
-    || !Array.isArray(reading.result.sections)
     || reading.input.cards.length !== definition.cardCount
-    || reading.result.sections.length !== definition.cardCount
+  ) {
+    throw new Error("리딩 결과 계약이 선택한 유형과 일치하지 않습니다.");
+  }
+
+  const declinedView = parseDeclinedReadingView(reading, "tarot");
+  const isDeclinedResult = (reading.result as { resultType?: unknown }).resultType === "declined";
+  if (isDeclinedResult && !declinedView) {
+    throw new Error("리딩 결과 계약이 선택한 유형과 일치하지 않습니다.");
+  }
+  if (
+    !declinedView
+    && (
+      !Array.isArray(reading.result.sections)
+      || reading.result.sections.length !== definition.cardCount
+    )
   ) {
     throw new Error("리딩 결과 계약이 선택한 유형과 일치하지 않습니다.");
   }
@@ -845,7 +859,7 @@ function validateReadingResponse(
       || inputCard.reversed !== false
       || seenCardIds.has(inputCard.cardId)
       || (completedCards && inputCard.cardId !== completedCards[index]?.cardId)
-      || reading.result.sections[index]?.position !== position
+      || (!declinedView && reading.result.sections[index]?.position !== position)
     ) {
       throw new Error("리딩 결과의 카드와 해석 위치가 일치하지 않습니다.");
     }
