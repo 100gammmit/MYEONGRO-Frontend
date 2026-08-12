@@ -26,6 +26,13 @@ describe("parseDeclinedReadingView", () => {
       .toBe("FINANCIAL_DECISION");
     expect(parseDeclinedReadingView({ ...declinedReading(), kind: "saju" }))
       .not.toBeNull();
+    expect(parseDeclinedReadingView({
+      ...declinedReading(),
+      result: {
+        ...declinedReading().result,
+        reasonCode: "HIGH_STAKES_DECISION",
+      },
+    })?.result.reasonCode).toBe("HIGH_STAKES_DECISION");
   });
 
   it("rejects unknown reasons, failed records, and malformed copy", () => {

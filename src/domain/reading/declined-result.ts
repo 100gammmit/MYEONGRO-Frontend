@@ -7,6 +7,7 @@ export const readingDeclineReasonSchema = z.enum([
   "MEDICAL_DECISION",
   "LEGAL_DECISION",
   "FINANCIAL_DECISION",
+  "HIGH_STAKES_DECISION",
   "HARMFUL_OR_ILLEGAL_ACTION",
 ]);
 
