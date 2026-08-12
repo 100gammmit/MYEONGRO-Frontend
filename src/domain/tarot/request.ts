@@ -10,7 +10,7 @@ export interface CreateTarotReadingRequestInput {
   readonly question: string;
   readonly choiceOptions?: TarotChoiceOptions;
   readonly requestId: string;
-  readonly drawSessionId: string;
+  readonly selectedSlots: readonly number[];
 }
 
 export interface TarotReadingRequest {
@@ -18,7 +18,7 @@ export interface TarotReadingRequest {
   readonly spreadType: TarotSpreadType;
   readonly question: string;
   readonly requestId: string;
-  readonly drawSessionId: string;
+  readonly selectedSlots: readonly number[];
   readonly choiceOptions?: TarotChoiceOptions;
 }
 
@@ -27,10 +27,10 @@ export function createTarotReadingRequest(
 ): TarotReadingRequest {
   const definition = TAROT_SPREADS[input.spreadType];
   if (
-    input.drawSessionId.length < 1
-    || input.drawSessionId.trim() !== input.drawSessionId
+    input.selectedSlots.length !== definition.cardCount
+    || input.selectedSlots.some((slot) => !Number.isInteger(slot) || slot < 1 || slot > 5)
   ) {
-    throw new Error("완료된 타로 추첨 세션을 확인해 주세요.");
+    throw new Error(`카드 선택 번호 ${definition.cardCount}개를 확인해 주세요.`);
   }
 
   const question = definition.inputMode === "fixed"
@@ -45,7 +45,7 @@ export function createTarotReadingRequest(
     spreadType: input.spreadType,
     question,
     requestId: input.requestId,
-    drawSessionId: input.drawSessionId,
+    selectedSlots: [...input.selectedSlots],
   } as const;
 
   if (definition.inputMode === "choice") {

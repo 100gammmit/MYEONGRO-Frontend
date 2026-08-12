@@ -1,5 +1,5 @@
-import { TarotExperience } from "@/components/tarot-experience";
+import { redirect } from "next/navigation";
 
 export default function TarotDrawPage() {
-  return <TarotExperience route="draw" />;
+  redirect("/tarot");
 }

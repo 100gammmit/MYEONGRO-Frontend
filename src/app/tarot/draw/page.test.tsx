@@ -1,21 +1,15 @@
-import { render } from "@testing-library/react";
 import { vi } from "vitest";
 
-const tarotExperience = vi.hoisted(() => vi.fn(() => <div>draw experience</div>));
+const redirect = vi.hoisted(() => vi.fn());
 
-vi.mock("@/components/tarot-experience", () => ({
-  TarotExperience: tarotExperience,
-}));
+vi.mock("next/navigation", () => ({ redirect }));
 
 import TarotDrawPage from "./page";
 
 describe("TarotDrawPage", () => {
-  it("renders the tarot experience in draw-route mode", () => {
-    render(<TarotDrawPage />);
+  it("redirects the legacy draw route because progress is memory-only", () => {
+    TarotDrawPage();
 
-    expect(tarotExperience).toHaveBeenCalledWith(
-      { route: "draw" },
-      undefined,
-    );
+    expect(redirect).toHaveBeenCalledWith("/tarot");
   });
 });
