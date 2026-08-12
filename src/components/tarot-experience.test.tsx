@@ -176,6 +176,51 @@ describe("TarotExperience", () => {
     expect(fetchMock.mock.calls[1][1]).not.toHaveProperty("body");
   });
 
+  it("recovers the failed reading id when the first 502 response is lost", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockRejectedValueOnce(new TypeError("network response lost"))
+      .mockResolvedValueOnce(Response.json({
+        code: "OPENAI_READING_GENERATION_FAILED",
+        message: "provider failed",
+        readingId: "failed-reading-2",
+      }, { status: 502 }))
+      .mockResolvedValueOnce(readingResponse("daily_one_card"));
+    await chooseSpreadAndStart("daily_one_card");
+    selectSlots([4]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/readings");
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/readings");
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/readings/failed-reading-2/retry");
+    expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+  });
+
+  it("recovers a completed retry when its success response is lost", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json({
+        code: "OPENAI_READING_GENERATION_FAILED",
+        message: "provider failed",
+        readingId: "failed-reading-3",
+      }, { status: 502 }))
+      .mockRejectedValueOnce(new TypeError("retry response lost"))
+      .mockResolvedValueOnce(readingResponse("daily_one_card"));
+    await chooseSpreadAndStart("daily_one_card");
+    selectSlots([1]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/readings/failed-reading-3/retry");
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/readings/failed-reading-3/retry");
+    expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+  });
+
   it("starts over locally without calling an abandon endpoint", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     await chooseSpreadAndStart("mind_three_card");
