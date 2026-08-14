@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -75,6 +75,7 @@ export function TarotExperience() {
   const [question, setQuestion] = useState("");
   const [choiceOptions, setChoiceOptions] = useState<TarotChoiceOptions>({ a: "", b: "" });
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
+  const [focusedSlot, setFocusedSlot] = useState<number | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [failedReadingId, setFailedReadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +93,7 @@ export function TarotExperience() {
     setQuestion("");
     setChoiceOptions({ a: "", b: "" });
     setSelectedSlots([]);
+    setFocusedSlot(null);
     setRequestId(null);
     setFailedReadingId(null);
     setError(null);
@@ -100,51 +102,29 @@ export function TarotExperience() {
   function beginDraw() {
     if (!inputIsValid) return;
     setSelectedSlots([]);
+    setFocusedSlot(null);
     setRequestId(null);
     setFailedReadingId(null);
     setError(null);
     setPhase("draw");
   }
 
-  function submitSelection(slot: number, positionIndex: number) {
-    if (
-      phase !== "draw"
-      || slot < 1
-      || slot > SLOT_COUNT
-    ) return;
-    setSelectedSlots((current) => {
-      if (
-        current.length !== positionIndex
-        || current.length >= definition.cardCount
-      ) return current;
-      return [...current, slot];
-    });
+  function focusSelection(slot: number) {
+    if (phase !== "draw" || slot < 1 || slot > SLOT_COUNT) return;
+    setFocusedSlot(slot);
   }
 
   function handleSlotKeyDown(
     event: KeyboardEvent<HTMLButtonElement>,
     slot: number,
-    positionIndex: number,
   ) {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
-    submitSelection(slot, positionIndex);
+    focusSelection(slot);
   }
 
-  function resetForNewDraw() {
-    setSpreadType("daily_one_card");
-    setQuestion("");
-    setChoiceOptions({ a: "", b: "" });
-    setSelectedSlots([]);
-    setRequestId(null);
-    setFailedReadingId(null);
-    setError(null);
-    setPhase("spread");
-    router.push("/tarot");
-  }
-
-  const submitReading = useCallback(async () => {
-    if (selectedSlots.length !== definition.cardCount || inFlightRequestId.current) return;
+  const submitReading = useCallback(async (slots: readonly number[] = selectedSlots) => {
+    if (slots.length !== definition.cardCount || inFlightRequestId.current) return;
     const nextRequestId = requestId ?? globalThis.crypto.randomUUID();
     let body;
     try {
@@ -153,7 +133,7 @@ export function TarotExperience() {
         question,
         choiceOptions,
         requestId: nextRequestId,
-        selectedSlots,
+        selectedSlots: slots,
       });
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "입력을 확인해 주세요.");
@@ -180,6 +160,8 @@ export function TarotExperience() {
         });
       if (response.status === 401) {
         redirectToLogin();
+        setSelectedSlots(slots.slice(0, -1));
+        setFocusedSlot(slots.at(-1) ?? null);
         setPhase("draw");
         return;
       }
@@ -215,6 +197,17 @@ export function TarotExperience() {
       inFlightRequestId.current = null;
     }
   }, [choiceOptions, definition.cardCount, failedReadingId, question, redirectToLogin, requestId, router, selectedSlots, spreadType]);
+
+  function confirmSelection() {
+    if (focusedSlot === null || selectedSlots.length >= definition.cardCount) return;
+    const nextSelectedSlots = [...selectedSlots, focusedSlot];
+    setSelectedSlots(nextSelectedSlots);
+    if (nextSelectedSlots.length === definition.cardCount) {
+      void submitReading(nextSelectedSlots);
+      return;
+    }
+    setFocusedSlot(null);
+  }
 
   const handleConsentComplete = useCallback(() => {
     setPhase("spread");
@@ -315,11 +308,11 @@ export function TarotExperience() {
     return (
       <DrawScreen
         definition={definition}
+        focusedSlot={focusedSlot}
         selectedSlots={selectedSlots}
-        onReset={resetForNewDraw}
-        onSelect={(slot) => submitSelection(slot, selectedSlots.length)}
+        onConfirm={confirmSelection}
+        onSelect={focusSelection}
         onKeyDown={handleSlotKeyDown}
-        onSubmit={() => void submitReading()}
       />
     );
   }
@@ -360,87 +353,57 @@ export function TarotExperience() {
 
 function DrawScreen({
   definition,
+  focusedSlot,
   selectedSlots,
-  onReset,
+  onConfirm,
   onSelect,
   onKeyDown,
-  onSubmit,
 }: {
   definition: (typeof TAROT_SPREADS)[TarotSpreadType];
+  focusedSlot: number | null;
   selectedSlots: readonly number[];
-  onReset: () => void;
+  onConfirm: () => void;
   onSelect: (slot: number) => void;
   onKeyDown: (
     event: KeyboardEvent<HTMLButtonElement>,
     slot: number,
-    positionIndex: number,
   ) => void;
-  onSubmit: () => void;
 }) {
   const selectedCount = selectedSlots.length;
-  const isComplete = selectedCount === definition.cardCount;
-  const currentPosition = definition.positions[
-    isComplete ? definition.cardCount - 1 : selectedCount
-  ];
-  const completedPositionCount = isComplete ? selectedCount - 1 : selectedCount;
-  const selectedSlot = isComplete ? selectedSlots.at(-1) : null;
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (isComplete) {
-      submitButtonRef.current?.focus();
-    }
-  }, [isComplete]);
+  const isLastPosition = selectedCount === definition.cardCount - 1;
+  const currentPosition = definition.positions[selectedCount];
 
   return (
     <ReadingShell eyebrow={definition.name} title={currentPosition.label} step={3} totalSteps={4}>
       <div className="wizard-card draw-panel">
         <p className="draw-progress" aria-live="polite">
-          {isComplete ? selectedCount : selectedCount + 1} / {definition.cardCount}
+          {selectedCount + 1} / {definition.cardCount}
         </p>
-        {completedPositionCount > 0 ? (
-          <ol className="confirmed-draw-slots" aria-label="확정된 위치">
-            {definition.positions.slice(0, completedPositionCount).map((position) => (
-              <li key={position.id}>
-                <span>{position.label}</span>
-                <span aria-label={`${position.label} 선택 완료 카드 뒷면`} className="confirmed-card-back" role="img">
-                  <i aria-hidden="true">✦</i>
-                </span>
-              </li>
-            ))}
-          </ol>
-        ) : null}
         <p className="draw-instruction">{currentPosition.instruction}</p>
         <div className="tarot-candidates" aria-label={`${currentPosition.label} 카드 선택`}>
           {Array.from({ length: SLOT_COUNT }, (_, index) => index + 1).map((slot) => (
             <button
               aria-label={`숨은 카드 ${slot}`}
-              aria-pressed={isComplete && slot === selectedSlot}
-              className={isComplete && slot === selectedSlot
+              aria-pressed={slot === focusedSlot}
+              className={slot === focusedSlot
                 ? `tarot-back ${styles.selectedCard}`
                 : "tarot-back"}
-              disabled={isComplete}
-              key={`${selectedCount}-${slot}`}
+              key={slot}
               onClick={() => onSelect(slot)}
-              onKeyDown={(event) => onKeyDown(event, slot, selectedCount)}
+              onKeyDown={(event) => onKeyDown(event, slot)}
               type="button"
             >
               <span aria-hidden="true">✦</span>
             </button>
           ))}
         </div>
-        {isComplete ? (
-          <button
-            className="primary-button full-button narrow-button"
-            onClick={onSubmit}
-            ref={submitButtonRef}
-            type="button"
-          >
-            리딩 생성
-          </button>
-        ) : null}
-        <button className="secondary-button full-button narrow-button" onClick={onReset} type="button">
-          처음부터 다시 선택
+        <button
+          className="primary-button full-button narrow-button"
+          disabled={focusedSlot === null}
+          onClick={onConfirm}
+          type="button"
+        >
+          {isLastPosition ? "리딩 생성" : "다음 카드 고르러 가기"}
         </button>
       </div>
     </ReadingShell>

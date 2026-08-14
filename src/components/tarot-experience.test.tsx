@@ -84,6 +84,8 @@ async function chooseSpreadAndStart(spreadType: TarotSpreadType) {
 function selectSlots(slots: readonly number[]) {
   for (const slot of slots) {
     fireEvent.click(screen.getByRole("button", { name: `숨은 카드 ${slot}` }));
+    const nextButton = screen.queryByRole("button", { name: "다음 카드 고르러 가기" });
+    if (nextButton) fireEvent.click(nextButton);
   }
 }
 
@@ -128,13 +130,14 @@ describe("TarotExperience", () => {
       const completedCardBacks = screen.getAllByRole("button", { name: /숨은 카드/ });
       expect(completedCardBacks).toHaveLength(5);
       for (const button of completedCardBacks) {
-        expect(button).toBeDisabled();
+        expect(button).toBeEnabled();
       }
       const selectedCard = screen.getByRole("button", {
         name: `숨은 카드 ${slots.at(-1)}`,
       });
       expect(selectedCard).toHaveAttribute("aria-pressed", "true");
       expect(selectedCard).toHaveClass(styles.selectedCard);
+      expect(screen.queryByLabelText("확정된 위치")).not.toBeInTheDocument();
       for (const card of MAJOR_ARCANA) {
         expect(screen.queryByText(card.name)).not.toBeInTheDocument();
       }
@@ -171,14 +174,14 @@ describe("TarotExperience", () => {
 
     selectSlots([5, 1]);
 
-    expect(screen.queryByRole("button", { name: "리딩 생성" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "리딩 생성" })).toBeDisabled();
     expect(fetchMock).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "숨은 카드 3" }));
 
     const submitButton = await screen.findByRole("button", { name: "리딩 생성" });
     expect(submitButton).toBeEnabled();
-    await waitFor(() => expect(submitButton).toHaveFocus());
+    expect(screen.getByRole("button", { name: "숨은 카드 3" })).toHaveAttribute("aria-pressed", "true");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -249,25 +252,38 @@ describe("TarotExperience", () => {
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
   });
 
-  it("starts over locally without calling an abandon endpoint", async () => {
+  it("does not confirm or advance until the focused card is confirmed", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     await chooseSpreadAndStart("mind_three_card");
-    fireEvent.click(screen.getByRole("button", { name: "숨은 카드 3" }));
+    const nextButton = screen.getByRole("button", { name: "다음 카드 고르러 가기" });
+    expect(nextButton).toBeDisabled();
 
-    fireEvent.click(screen.getByRole("button", { name: "처음부터 다시 선택" }));
+    const focusedCard = screen.getByRole("button", { name: "숨은 카드 3" });
+    focusedCard.focus();
+    fireEvent.click(focusedCard);
 
-    expect(await screen.findByText("어떤 마음을 들여다볼까요?")).toBeInTheDocument();
-    expect(navigation.push).toHaveBeenCalledWith("/tarot");
+    expect(focusedCard).toHaveFocus();
+    expect(focusedCard).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText("1 / 3")).toBeInTheDocument();
+    expect(nextButton).toBeEnabled();
+
+    fireEvent.click(nextButton);
+
+    expect(await screen.findByText("2 / 3")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "다음 카드 고르러 가기" })).toBeDisabled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("does not advance two positions from rapid duplicate clicks", async () => {
+  it("keeps repeated card clicks in the current position until confirmation", async () => {
     await chooseSpreadAndStart("mind_three_card");
     const first = screen.getByRole("button", { name: "숨은 카드 2" });
 
     fireEvent.click(first);
     fireEvent.click(first);
 
+    expect(screen.getByText("1 / 3")).toBeInTheDocument();
+    expect(first).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "다음 카드 고르러 가기" }));
     expect(await screen.findByText("2 / 3")).toBeInTheDocument();
     expect(screen.queryByText("카드 선택을 마쳤어요")).not.toBeInTheDocument();
   });

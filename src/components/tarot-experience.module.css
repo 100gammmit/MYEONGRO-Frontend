@@ -1,11 +1,11 @@
-.selectedCard:disabled {
+.selectedCard {
   opacity: 1;
   border-color: var(--text-primary);
   box-shadow: var(--shadow-tarot-hover);
   transform: translateY(-6px);
 }
 
-.selectedCard:disabled span {
+.selectedCard span {
   border-color: var(--text-primary);
   color: var(--text-primary);
 }
