@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -16,6 +16,7 @@ import {
 import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
 import { ConsentGate } from "./consent-gate";
 import { ReadingShell } from "./reading-shell";
+import styles from "./tarot-experience.module.css";
 
 const MAX_QUESTION_LENGTH = 300;
 const MAX_CHOICE_LENGTH = 100;
@@ -383,6 +384,14 @@ function DrawScreen({
   ];
   const completedPositionCount = isComplete ? selectedCount - 1 : selectedCount;
   const selectedSlot = isComplete ? selectedSlots.at(-1) : null;
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isComplete) {
+      submitButtonRef.current?.focus();
+    }
+  }, [isComplete]);
+
   return (
     <ReadingShell eyebrow={definition.name} title={currentPosition.label} step={3} totalSteps={4}>
       <div className="wizard-card draw-panel">
@@ -407,7 +416,9 @@ function DrawScreen({
             <button
               aria-label={`숨은 카드 ${slot}`}
               aria-pressed={isComplete && slot === selectedSlot}
-              className="tarot-back"
+              className={isComplete && slot === selectedSlot
+                ? `tarot-back ${styles.selectedCard}`
+                : "tarot-back"}
               disabled={isComplete}
               key={`${selectedCount}-${slot}`}
               onClick={() => onSelect(slot)}
@@ -419,7 +430,12 @@ function DrawScreen({
           ))}
         </div>
         {isComplete ? (
-          <button className="primary-button full-button narrow-button" onClick={onSubmit} type="button">
+          <button
+            className="primary-button full-button narrow-button"
+            onClick={onSubmit}
+            ref={submitButtonRef}
+            type="button"
+          >
             리딩 생성
           </button>
         ) : null}

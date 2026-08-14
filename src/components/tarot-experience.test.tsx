@@ -23,6 +23,7 @@ vi.mock("./consent-gate", () => ({
 }));
 
 import { TarotExperience } from "./tarot-experience";
+import styles from "./tarot-experience.module.css";
 
 function readingResponse(spreadType: TarotSpreadType) {
   const definition = TAROT_SPREADS[spreadType];
@@ -129,6 +130,11 @@ describe("TarotExperience", () => {
       for (const button of completedCardBacks) {
         expect(button).toBeDisabled();
       }
+      const selectedCard = screen.getByRole("button", {
+        name: `숨은 카드 ${slots.at(-1)}`,
+      });
+      expect(selectedCard).toHaveAttribute("aria-pressed", "true");
+      expect(selectedCard).toHaveClass(styles.selectedCard);
       for (const card of MAJOR_ARCANA) {
         expect(screen.queryByText(card.name)).not.toBeInTheDocument();
       }
@@ -170,7 +176,9 @@ describe("TarotExperience", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "숨은 카드 3" }));
 
-    expect(await screen.findByRole("button", { name: "리딩 생성" })).toBeEnabled();
+    const submitButton = await screen.findByRole("button", { name: "리딩 생성" });
+    expect(submitButton).toBeEnabled();
+    await waitFor(() => expect(submitButton).toHaveFocus());
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
