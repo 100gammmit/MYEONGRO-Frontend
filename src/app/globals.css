@@ -112,6 +112,8 @@ body {
   background: var(--background-page);
   font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Segoe UI", sans-serif;
   letter-spacing: -0.02em;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 body::before {
   content: "";
@@ -148,7 +150,7 @@ h1, h2, h3, blockquote {
 .landing-page h2,
 .landing-page h3 {
   font-family: var(--landing-serif);
-  font-weight: 400;
+  font-weight: 300;
 }
 
 .site-header {
