@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -372,6 +372,13 @@ function DrawScreen({
   const selectedCount = selectedSlots.length;
   const isLastPosition = selectedCount === definition.cardCount - 1;
   const currentPosition = definition.positions[selectedCount];
+  const firstCardRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (selectedCount > 0 && focusedSlot === null) {
+      firstCardRef.current?.focus();
+    }
+  }, [focusedSlot, selectedCount]);
 
   return (
     <ReadingShell eyebrow={definition.name} title={currentPosition.label} step={3} totalSteps={4}>
@@ -391,6 +398,7 @@ function DrawScreen({
               key={slot}
               onClick={() => onSelect(slot)}
               onKeyDown={(event) => onKeyDown(event, slot)}
+              ref={slot === 1 ? firstCardRef : undefined}
               type="button"
             >
               <span aria-hidden="true">✦</span>

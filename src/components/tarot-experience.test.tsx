@@ -274,6 +274,27 @@ describe("TarotExperience", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it.each(["Enter", " "])(
+    "moves keyboard focus to the next position after confirming with %s",
+    async (key) => {
+      await chooseSpreadAndStart("mind_three_card");
+      const card = screen.getByRole("button", { name: "숨은 카드 3" });
+      card.focus();
+
+      fireEvent.keyDown(card, { key });
+
+      expect(card).toHaveAttribute("aria-pressed", "true");
+      const nextButton = screen.getByRole("button", { name: "다음 카드 고르러 가기" });
+      nextButton.focus();
+      fireEvent.click(nextButton, { detail: 0 });
+
+      expect(await screen.findByText("2 / 3")).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole("button", { name: "숨은 카드 1" })).toHaveFocus();
+      });
+    },
+  );
+
   it("keeps repeated card clicks in the current position until confirmation", async () => {
     await chooseSpreadAndStart("mind_three_card");
     const first = screen.getByRole("button", { name: "숨은 카드 2" });
