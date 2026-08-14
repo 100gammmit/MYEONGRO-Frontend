@@ -122,8 +122,13 @@ describe("TarotExperience", () => {
       expect(screen.getAllByRole("button", { name: /숨은 카드/ })).toHaveLength(5);
       selectSlots(slots);
 
-      expect(await screen.findByText("카드 선택을 마쳤어요")).toBeInTheDocument();
-      expect(screen.getByText("선택한 카드는 리딩 결과에서 처음 공개됩니다.")).toBeInTheDocument();
+      expect(screen.queryByText("카드 선택을 마쳤어요")).not.toBeInTheDocument();
+      expect(await screen.findByRole("button", { name: "리딩 생성" })).toBeEnabled();
+      const completedCardBacks = screen.getAllByRole("button", { name: /숨은 카드/ });
+      expect(completedCardBacks).toHaveLength(5);
+      for (const button of completedCardBacks) {
+        expect(button).toBeDisabled();
+      }
       for (const card of MAJOR_ARCANA) {
         expect(screen.queryByText(card.name)).not.toBeInTheDocument();
       }
@@ -152,6 +157,21 @@ describe("TarotExperience", () => {
     expect(body).not.toHaveProperty("cardIds");
     expect(body).not.toHaveProperty("candidateSets");
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+  });
+
+  it("does not show or trigger reading generation before the last card", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    await chooseSpreadAndStart("mind_three_card");
+
+    selectSlots([5, 1]);
+
+    expect(screen.queryByRole("button", { name: "리딩 생성" })).not.toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "숨은 카드 3" }));
+
+    expect(await screen.findByRole("button", { name: "리딩 생성" })).toBeEnabled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("retries the stored failed reading instead of creating it again", async () => {

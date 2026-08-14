@@ -21,7 +21,7 @@ const MAX_QUESTION_LENGTH = 300;
 const MAX_CHOICE_LENGTH = 100;
 const SLOT_COUNT = 5;
 
-type Phase = "spread" | "input" | "draw" | "confirm" | "consent" | "loading" | "error";
+type Phase = "spread" | "input" | "draw" | "consent" | "loading" | "error";
 
 type TarotReadingSection = {
   position: TarotPositionId;
@@ -116,9 +116,7 @@ export function TarotExperience() {
         current.length !== positionIndex
         || current.length >= definition.cardCount
       ) return current;
-      const next = [...current, slot];
-      if (next.length === definition.cardCount) setPhase("confirm");
-      return next;
+      return [...current, slot];
     });
   }
 
@@ -181,7 +179,7 @@ export function TarotExperience() {
         });
       if (response.status === 401) {
         redirectToLogin();
-        setPhase("confirm");
+        setPhase("draw");
         return;
       }
       if (!response.ok) {
@@ -312,43 +310,16 @@ export function TarotExperience() {
     );
   }
 
-  if (phase === "draw" && selectedSlots.length < definition.cardCount) {
+  if (phase === "draw") {
     return (
       <DrawScreen
         definition={definition}
-        selectedCount={selectedSlots.length}
+        selectedSlots={selectedSlots}
         onReset={resetForNewDraw}
         onSelect={(slot) => submitSelection(slot, selectedSlots.length)}
         onKeyDown={handleSlotKeyDown}
+        onSubmit={() => void submitReading()}
       />
-    );
-  }
-
-  if (phase === "confirm" && selectedSlots.length === definition.cardCount) {
-    return (
-      <ReadingShell eyebrow={definition.name} title="카드 선택을 마쳤어요" step={4} totalSteps={4}>
-        <div className="wizard-card confirmation-card">
-          <div className="draw-complete-grid">
-            {definition.positions.map((position) => (
-              <article className="revealed-card" key={position.id}>
-                <span>{position.label}</span>
-                <span aria-label={`${position.label} 선택 완료 카드 뒷면`} className="confirmed-card-back" role="img">
-                  <i aria-hidden="true">✦</i>
-                </span>
-              </article>
-            ))}
-          </div>
-          <p className="notice">선택한 카드는 리딩 결과에서 처음 공개됩니다.</p>
-          <div className="result-actions">
-            <button className="primary-button" disabled={!inputIsValid} onClick={() => void submitReading()} type="button">
-              리딩 생성
-            </button>
-            <button className="secondary-button" onClick={resetForNewDraw} type="button">
-              새 선택 시작
-            </button>
-          </div>
-        </div>
-      </ReadingShell>
     );
   }
 
@@ -388,13 +359,14 @@ export function TarotExperience() {
 
 function DrawScreen({
   definition,
-  selectedCount,
+  selectedSlots,
   onReset,
   onSelect,
   onKeyDown,
+  onSubmit,
 }: {
   definition: (typeof TAROT_SPREADS)[TarotSpreadType];
-  selectedCount: number;
+  selectedSlots: readonly number[];
   onReset: () => void;
   onSelect: (slot: number) => void;
   onKeyDown: (
@@ -402,15 +374,24 @@ function DrawScreen({
     slot: number,
     positionIndex: number,
   ) => void;
+  onSubmit: () => void;
 }) {
-  const currentPosition = definition.positions[selectedCount];
+  const selectedCount = selectedSlots.length;
+  const isComplete = selectedCount === definition.cardCount;
+  const currentPosition = definition.positions[
+    isComplete ? definition.cardCount - 1 : selectedCount
+  ];
+  const completedPositionCount = isComplete ? selectedCount - 1 : selectedCount;
+  const selectedSlot = isComplete ? selectedSlots.at(-1) : null;
   return (
     <ReadingShell eyebrow={definition.name} title={currentPosition.label} step={3} totalSteps={4}>
       <div className="wizard-card draw-panel">
-        <p className="draw-progress" aria-live="polite">{selectedCount + 1} / {definition.cardCount}</p>
-        {selectedCount > 0 ? (
+        <p className="draw-progress" aria-live="polite">
+          {isComplete ? selectedCount : selectedCount + 1} / {definition.cardCount}
+        </p>
+        {completedPositionCount > 0 ? (
           <ol className="confirmed-draw-slots" aria-label="확정된 위치">
-            {definition.positions.slice(0, selectedCount).map((position) => (
+            {definition.positions.slice(0, completedPositionCount).map((position) => (
               <li key={position.id}>
                 <span>{position.label}</span>
                 <span aria-label={`${position.label} 선택 완료 카드 뒷면`} className="confirmed-card-back" role="img">
@@ -425,7 +406,9 @@ function DrawScreen({
           {Array.from({ length: SLOT_COUNT }, (_, index) => index + 1).map((slot) => (
             <button
               aria-label={`숨은 카드 ${slot}`}
+              aria-pressed={isComplete && slot === selectedSlot}
               className="tarot-back"
+              disabled={isComplete}
               key={`${selectedCount}-${slot}`}
               onClick={() => onSelect(slot)}
               onKeyDown={(event) => onKeyDown(event, slot, selectedCount)}
@@ -435,6 +418,11 @@ function DrawScreen({
             </button>
           ))}
         </div>
+        {isComplete ? (
+          <button className="primary-button full-button narrow-button" onClick={onSubmit} type="button">
+            리딩 생성
+          </button>
+        ) : null}
         <button className="secondary-button full-button narrow-button" onClick={onReset} type="button">
           처음부터 다시 선택
         </button>
