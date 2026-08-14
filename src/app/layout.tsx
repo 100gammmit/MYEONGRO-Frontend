@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
 import "@kfonts/maruburi";
+import "@fontsource-variable/noto-serif-kr";
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 

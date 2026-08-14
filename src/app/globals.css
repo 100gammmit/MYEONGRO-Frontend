@@ -130,7 +130,7 @@ a { color: inherit; text-decoration: none; }
 button, input, textarea { font: inherit; }
 button { cursor: pointer; }
 h1, h2, h3, blockquote {
-  font-family: "Noto Serif KR", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  font-family: "Noto Serif KR Variable", "마루 부리", serif;
   font-weight: 400;
 }
 :focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 4px; }
@@ -140,7 +140,7 @@ h1, h2, h3, blockquote {
 .ambient-two { width: 280px; height: 280px; background: var(--background-ambient-secondary); left: -170px; top: 64%; }
 
 .landing-page {
-  --landing-serif: "마루 부리", "Noto Serif KR", "Iowan Old Style", serif;
+  --landing-serif: "Noto Serif KR Variable", "마루 부리", serif;
   --landing-sans: "Pretendard Variable", Pretendard, "Apple SD Gothic Neo", sans-serif;
   font-family: var(--landing-sans);
   letter-spacing: -0.01em;
@@ -317,7 +317,7 @@ h1, h2, h3, blockquote {
 .spread-option:hover { border-color: var(--border-strong); transform: translateY(-2px); }
 .spread-option.active { border-color: var(--accent-primary); background: var(--surface-selection); box-shadow: var(--effect-spread-glow); }
 .spread-option strong, .spread-option span, .spread-option small { display: block; }
-.spread-option strong { font: 24px Georgia, "Noto Serif KR", serif; color: var(--text-accent-strong); }
+.spread-option strong { font: 24px "Noto Serif KR Variable", Georgia, serif; color: var(--text-accent-strong); }
 .spread-option span { margin: 14px 0 20px; color: var(--text-secondary); line-height: 1.65; font-size: 14px; }
 .spread-option small { color: var(--text-muted); }
 .choice-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
