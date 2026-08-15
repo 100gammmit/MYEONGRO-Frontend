@@ -12,6 +12,12 @@ const FORWARDED_RESPONSE_HEADERS = [
   "set-cookie",
 ] as const;
 
+const SPRING_SESSION_COOKIE_NAMES = new Set([
+  "MYEONGRO_SESSION",
+  "JSESSIONID",
+  "SESSION",
+]);
+
 export async function proxyBackendRequest(input: {
   request: Request;
   path: string;
@@ -67,7 +73,7 @@ function getSpringSessionCookie(cookieHeader: string): string | null {
   const sessionCookies = cookieHeader
     .split(";")
     .map((cookie) => cookie.trim())
-    .filter((cookie) => cookie.startsWith("JSESSIONID=") || cookie.startsWith("SESSION="));
+    .filter((cookie) => SPRING_SESSION_COOKIE_NAMES.has(cookie.split("=", 1)[0] ?? ""));
   return sessionCookies.length > 0 ? sessionCookies.join("; ") : null;
 }
 

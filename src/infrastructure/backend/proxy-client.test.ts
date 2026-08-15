@@ -15,7 +15,7 @@ describe("proxyBackendRequest", () => {
         {
           status: 201,
           headers: {
-            "set-cookie": "JSESSIONID=renewed; HttpOnly; SameSite=Lax; Path=/",
+            "set-cookie": "MYEONGRO_SESSION=renewed; HttpOnly; SameSite=Lax; Path=/",
           },
         },
       ),
@@ -27,7 +27,7 @@ describe("proxyBackendRequest", () => {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          cookie: "JSESSIONID=session; theme=dark",
+          cookie: "MYEONGRO_SESSION=session; theme=dark",
           "x-forwarded-for": "203.0.113.8",
         },
         body: JSON.stringify({ kind: "tarot" }),
@@ -39,14 +39,14 @@ describe("proxyBackendRequest", () => {
       method: "POST",
       headers: expect.objectContaining({
         "content-type": "application/json",
-        cookie: "JSESSIONID=session",
+        cookie: "MYEONGRO_SESSION=session",
         "x-forwarded-for": "203.0.113.8",
       }),
       body: JSON.stringify({ kind: "tarot" }),
       cache: "no-store",
     });
     expect(response.status).toBe(201);
-    expect(response.headers.get("set-cookie")).toContain("JSESSIONID=renewed");
+    expect(response.headers.get("set-cookie")).toContain("MYEONGRO_SESSION=renewed");
     expect(await response.json()).toEqual({ reading: { id: "reading-1" } });
   });
 
