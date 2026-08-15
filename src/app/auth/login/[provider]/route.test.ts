@@ -4,18 +4,18 @@ import { GET } from "./route";
 
 describe("GET /auth/login/[provider]", () => {
   beforeEach(() => {
-    vi.stubEnv("BACKEND_API_URL", "https://spring.test/");
+    vi.stubEnv("BACKEND_API_URL", "https://api.example.com/");
   });
 
-  it("redirects to Spring Kakao OAuth with a normalized next path", async () => {
+  it("redirects from the frontend host to the sibling Spring OAuth host", async () => {
     const response = await GET(
-      new Request("https://front.test/auth/login/kakao?next=%2Frecords%2Freading-1%3Ftab%3Ddetail"),
+      new Request("https://www.example.com/auth/login/kakao?next=%2Frecords%2Freading-1%3Ftab%3Ddetail"),
       { params: Promise.resolve({ provider: "kakao" }) },
     );
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe(
-      "https://spring.test/oauth2/authorization/kakao?next=%2Frecords%2Freading-1%3Ftab%3Ddetail",
+      "https://api.example.com/oauth2/authorization/kakao?next=%2Frecords%2Freading-1%3Ftab%3Ddetail",
     );
   });
 
@@ -27,7 +27,7 @@ describe("GET /auth/login/[provider]", () => {
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe(
-      "https://spring.test/oauth2/authorization/google?next=%2Faccount",
+      "https://api.example.com/oauth2/authorization/google?next=%2Faccount",
     );
   });
 
@@ -38,7 +38,7 @@ describe("GET /auth/login/[provider]", () => {
     );
 
     expect(response.headers.get("location")).toBe(
-      "https://spring.test/oauth2/authorization/kakao?next=%2Frecords",
+      "https://api.example.com/oauth2/authorization/kakao?next=%2Frecords",
     );
   });
 
