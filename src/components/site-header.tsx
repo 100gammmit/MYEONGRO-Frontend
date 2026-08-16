@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Suspense } from "react";
+
+import { ReturnAwareLoginLink } from "./return-aware-login-link";
 
 export function SiteHeader({ authenticated }: { authenticated: boolean }) {
   return (
@@ -19,9 +22,15 @@ export function SiteHeader({ authenticated }: { authenticated: boolean }) {
             </form>
           </>
         ) : (
-          <Link href="/login" className="nav-cta">
-            로그인
-          </Link>
+          <Suspense
+            fallback={(
+              <Link href="/login" className="nav-cta">
+                로그인
+              </Link>
+            )}
+          >
+            <ReturnAwareLoginLink />
+          </Suspense>
         )}
       </nav>
     </header>
