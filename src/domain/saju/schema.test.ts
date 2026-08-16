@@ -33,7 +33,6 @@ describe("saju v2 schemas", () => {
 
   it("requires time for exact/approximate and omits it for unknown", () => {
     const base = {
-      kind: "saju",
       requestId: "11111111-1111-4111-8111-111111111111",
       question: "올해 이직을 준비해도 괜찮을까요?",
       focusArea: "career",
@@ -61,6 +60,15 @@ describe("saju v2 schemas", () => {
         ...base.birthProfile,
         birthTimePrecision: "unknown",
         birthTime: "14:30",
+      },
+    })).toThrow();
+
+    expect(() => parseSajuReadingCreateRequest({
+      ...base,
+      kind: "saju",
+      birthProfile: {
+        ...base.birthProfile,
+        birthTimePrecision: "unknown",
       },
     })).toThrow();
   });

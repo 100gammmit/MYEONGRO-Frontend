@@ -58,7 +58,6 @@ const birthProfileSchema = z.object({
 });
 
 const readingCreateRequestSchema = z.object({
-  kind: z.literal("saju"),
   requestId: z.string().uuid(),
   question: z.string().trim().min(1).max(300),
   focusArea: z.enum(["self", "career", "relationship", "life_money"]),

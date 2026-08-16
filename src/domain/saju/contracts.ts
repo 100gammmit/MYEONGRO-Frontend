@@ -29,7 +29,6 @@ export interface SajuBirthProfile {
 }
 
 export interface SajuReadingCreateRequest {
-  readonly kind: "saju";
   readonly requestId: string;
   readonly question: string;
   readonly focusArea: SajuFocusArea;

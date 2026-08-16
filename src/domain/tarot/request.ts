@@ -14,7 +14,6 @@ export interface CreateTarotReadingRequestInput {
 }
 
 export interface TarotReadingRequest {
-  readonly kind: "tarot";
   readonly spreadType: TarotSpreadType;
   readonly question: string;
   readonly requestId: string;
@@ -41,7 +40,6 @@ export function createTarotReadingRequest(
   }
 
   const request = {
-    kind: "tarot",
     spreadType: input.spreadType,
     question,
     requestId: input.requestId,

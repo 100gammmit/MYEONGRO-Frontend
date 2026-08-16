@@ -155,10 +155,9 @@ describe("TarotExperience", () => {
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    expect(fetchMock.mock.calls[0][0]).toBe("/api/readings");
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/tarot/readings");
     const body = JSON.parse(String(fetchMock.mock.calls[0][1]?.body)) as Record<string, unknown>;
     expect(body).toMatchObject({
-      kind: "tarot",
       spreadType: "relationship_three_card",
       selectedSlots: [5, 1, 3],
     });
@@ -224,8 +223,8 @@ describe("TarotExperience", () => {
     fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
-    expect(fetchMock.mock.calls[0][0]).toBe("/api/readings");
-    expect(fetchMock.mock.calls[1][0]).toBe("/api/readings");
+    expect(fetchMock.mock.calls[0][0]).toBe("/api/tarot/readings");
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/tarot/readings");
     expect(fetchMock.mock.calls[2][0]).toBe("/api/readings/failed-reading-2/retry");
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
   });

@@ -1,8 +1,8 @@
 import { proxyBackendRequest } from "@/infrastructure/backend/proxy-client";
 
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   return proxyBackendRequest({
     request,
-    path: "/api/readings",
+    path: "/api/tarot/readings",
   });
 }

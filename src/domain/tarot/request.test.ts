@@ -12,7 +12,6 @@ describe("createTarotReadingRequest", () => {
       requestId,
       selectedSlots: [4],
     })).toEqual({
-      kind: "tarot",
       spreadType: "daily_one_card",
       question: "오늘 내가 살펴볼 마음과 작은 행동은 무엇인가요?",
       requestId,
@@ -30,7 +29,6 @@ describe("createTarotReadingRequest", () => {
     });
 
     expect(request).toEqual({
-      kind: "tarot",
       spreadType: "choice_five_card",
       question: "어느 방향을 준비할지 고민돼요.",
       requestId,

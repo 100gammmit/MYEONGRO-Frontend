@@ -148,9 +148,9 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
+    expect(fetchMock.mock.calls[2]?.[0]).toBe("/api/saju/readings");
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     expect(body).toEqual({
-      kind: "saju",
       requestId: REQUEST_ID,
       question: "올해 이직을 준비해도 괜찮을까요?",
       focusArea: "career",

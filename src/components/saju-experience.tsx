@@ -215,7 +215,7 @@ export function SajuExperience() {
 
     try {
       const body = buildRequest(form, ensureRequestId(requestIdRef));
-      const response = await fetch("/api/readings", {
+      const response = await fetch("/api/saju/readings", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
@@ -558,7 +558,6 @@ export function SajuExperience() {
 
 function buildRequest(form: SajuFormState, requestId: string): SajuReadingCreateRequest {
   const request = {
-    kind: "saju",
     requestId,
     question: form.question.trim(),
     focusArea: form.focusArea,

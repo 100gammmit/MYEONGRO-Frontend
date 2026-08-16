@@ -152,7 +152,7 @@ export function TarotExperience() {
           method: "POST",
           credentials: "same-origin",
         })
-        : await fetch("/api/readings", {
+        : await fetch("/api/tarot/readings", {
           method: "POST",
           credentials: "same-origin",
           headers: { "Content-Type": "application/json" },
