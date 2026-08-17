@@ -63,6 +63,8 @@
   --accent-primary: #7c6ff0;
   --accent-strong: #a79ef6;
   --accent-cta: #e8b54a;
+  --accent-cta-hover: #f0c168;
+  --accent-progress-start: #5847b8;
   --focus-outline: #a79ef6;
   --focus-ring: 0 0 0 4px rgba(124, 111, 240, 0.16);
   --focus-field-ring: 0 0 0 3px rgba(124, 111, 240, 0.12);
@@ -177,8 +179,8 @@ h1, h2, h3, blockquote {
 
 .eyebrow { color: var(--text-accent); letter-spacing: .28em; font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; margin: 0 0 20px; text-transform: uppercase; }
 .primary-button, .secondary-button { border: 0; display: inline-flex; align-items: center; justify-content: space-between; gap: 28px; padding: 16px 22px; background: var(--accent-cta); color: var(--text-inverse); font-weight: 700; border-radius: 10px; transition: .2s ease; }
-.primary-button:hover { background: #f0c168; transform: translateY(-1px); box-shadow: var(--shadow-primary-hover); }
-.primary-button:disabled { opacity: .35; cursor: not-allowed; transform: none; box-shadow: none; background: var(--surface-segment); color: var(--text-faint); }
+.primary-button:hover { background: var(--accent-cta-hover); transform: translateY(-1px); box-shadow: var(--shadow-primary-hover); }
+.primary-button:disabled { cursor: not-allowed; transform: none; box-shadow: none; background: var(--surface-segment); color: var(--text-faint); }
 .secondary-button { background: var(--surface-accent-subtle); color: var(--text-primary); border: 1px solid var(--border-strong); }
 .secondary-button:hover { background: var(--surface-accent-hover); border-color: var(--accent-strong); }
 
@@ -254,7 +256,7 @@ h1, h2, h3, blockquote {
 .back-link:hover { color: var(--text-primary); }
 .progress-meta { display: flex; justify-content: space-between; color: var(--text-accent); font: 600 10px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .18em; text-transform: uppercase; margin-top: 38px; }
 .progress-track { height: 2px; border-radius: 2px; background: var(--border-progress); margin-top: 13px; overflow: hidden; }
-.progress-track span { display: block; height: 2px; border-radius: 2px; background: linear-gradient(90deg, #5847b8, var(--accent-primary)); box-shadow: var(--shadow-progress); transition: width .4s; }
+.progress-track span { display: block; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--accent-progress-start), var(--accent-primary)); box-shadow: var(--shadow-progress); transition: width .4s; }
 .wizard-heading { text-align: center; margin: 70px auto 40px; }
 .wizard-heading h1 { font-size: clamp(32px, 5vw, 52px); margin: 0 0 16px; letter-spacing: -.035em; font-weight: 300; }
 .wizard-heading p { color: var(--text-secondary); line-height: 1.75; }
