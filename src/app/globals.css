@@ -65,6 +65,7 @@
   --accent-cta: #e8b54a;
   --accent-cta-hover: #f0c168;
   --accent-progress-start: #5847b8;
+  --accent-secondary: #5d7bb5;
   --focus-outline: #a79ef6;
   --focus-ring: 0 0 0 4px rgba(124, 111, 240, 0.16);
   --focus-field-ring: 0 0 0 3px rgba(124, 111, 240, 0.12);
@@ -210,7 +211,7 @@ h1, h2, h3, blockquote {
 .landing-page .hero-actions .secondary-button { background: var(--surface-accent-hero); }
 
 .landing-page .hero-question {
-  display: inline-flex; align-items: center; gap: 9px; margin: 22px auto 0; padding: 12px 20px;
+  display: inline-flex; align-items: center; gap: 9px; margin-top: 22px; padding: 12px 20px;
   border-radius: 999px; background: var(--surface-accent-soft); border: 1px solid var(--border-default);
   max-width: 100%;
 }
@@ -222,7 +223,7 @@ h1, h2, h3, blockquote {
 .landing-page .pick-row { display: flex; gap: 14px; align-items: flex-start; }
 .landing-page .pick-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; flex: 0 0 auto; }
 .landing-page .pick-dot-tarot { background: var(--accent-primary); box-shadow: var(--effect-accent-dot-glow); }
-.landing-page .pick-dot-saju { background: #5d7bb5; }
+.landing-page .pick-dot-saju { background: var(--accent-secondary); }
 .landing-page .pick-row strong { display: block; font-size: 15px; margin-bottom: 5px; }
 .landing-page .pick-row span { color: var(--text-secondary); font-size: 13.5px; line-height: 1.7; }
 .landing-page .picks-summary {

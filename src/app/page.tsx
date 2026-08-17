@@ -117,8 +117,11 @@ export default function HomePage() {
 
       {/* Static illustrative sample, not a real reading — labeled as such below. */}
       <section className="reading-peek page-width" aria-labelledby="reading-peek-title">
+        <h2 className="sr-only" id="reading-peek-title">
+          리딩 예시
+        </h2>
         <div className="reading-peek-card">
-          <p className="reading-peek-label" id="reading-peek-title">
+          <p className="reading-peek-label" aria-hidden="true">
             리딩 예시
           </p>
           <blockquote>
