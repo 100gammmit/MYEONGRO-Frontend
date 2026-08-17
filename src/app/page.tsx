@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeroQuestionRotator } from "@/components/hero-question-rotator";
 
 const features = [
   {
@@ -25,13 +26,13 @@ export default function HomePage() {
         <div className="hero-copy">
           <p className="eyebrow">AI TAROT · SAJU</p>
           <h1 id="landing-title">
-            지금의 마음을
+            지금,
             <br />
-            별빛 아래 펼쳐보세요
+            뭐가 궁금하세요?
           </h1>
+          <HeroQuestionRotator />
           <p className="hero-description">
-            질문 하나와 생년월일시로 시작하는 조용한 리딩. 복잡한 마음을
-            천천히 바라볼 수 있도록 명로가 곁에서 해석합니다.
+            어떤 질문이든, 카드와 사주로 함께 답을 찾아볼게요.
           </p>
           <div className="hero-actions">
             <Link href="/tarot" className="primary-button">
@@ -42,6 +43,31 @@ export default function HomePage() {
             </Link>
           </div>
         </div>
+      </section>
+
+      <section className="reading-picks page-width" aria-labelledby="reading-picks-title">
+        <h2 className="sr-only" id="reading-picks-title">
+          왜 둘 다 보나요?
+        </h2>
+        <div className="picks-grid">
+          <div className="pick-row">
+            <span className="pick-dot pick-dot-tarot" aria-hidden="true" />
+            <div>
+              <strong>타로는 지금을 봐요</strong>
+              <span>이번 주, 이번 달. 눈앞의 선택에 답을 줘요.</span>
+            </div>
+          </div>
+          <div className="pick-row">
+            <span className="pick-dot pick-dot-saju" aria-hidden="true" />
+            <div>
+              <strong>사주는 흐름을 봐요</strong>
+              <span>타고난 결과 올해의 큰 방향. 멀리서 지도를 보는 쪽이에요.</span>
+            </div>
+          </div>
+        </div>
+        <p className="picks-summary">
+          가까이서 한 번, <strong>멀리서 한 번</strong> 보면 같은 고민도 다르게 보여요.
+        </p>
       </section>
 
       <section className="reading-choice page-width" aria-labelledby="reading-choice-title">
@@ -86,6 +112,20 @@ export default function HomePage() {
           <span>소셜 로그인 후 시작</span>
           <span>완료한 리딩 기록 저장</span>
           <span>선택을 돕는 성찰형 해석</span>
+        </div>
+      </section>
+
+      {/* Static illustrative sample, not a real reading — labeled as such below. */}
+      <section className="reading-peek page-width" aria-labelledby="reading-peek-title">
+        <div className="reading-peek-card">
+          <p className="reading-peek-label" id="reading-peek-title">
+            리딩 예시
+          </p>
+          <blockquote>
+            이 시기의 당신은 무언가를 끝내는 중이에요. 끝내는 일은 잃는 일과
+            달라요.
+          </blockquote>
+          <p className="reading-peek-from">3장 리딩 · 현재 자리 해석 중에서</p>
         </div>
       </section>
 

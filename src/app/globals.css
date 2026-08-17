@@ -138,6 +138,7 @@ h1, h2, h3, blockquote {
 }
 :focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 4px; }
 .page-width { width: min(1180px, calc(100% - 64px)); margin-inline: auto; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .ambient { position: fixed; z-index: -1; border-radius: 50%; filter: blur(110px); pointer-events: none; opacity: .18; }
 .ambient-one { width: 360px; height: 360px; background: var(--background-ambient-primary); right: -140px; top: 16%; }
 .ambient-two { width: 280px; height: 280px; background: var(--background-ambient-secondary); left: -170px; top: 64%; }
@@ -208,6 +209,28 @@ h1, h2, h3, blockquote {
 .landing-page .hero-actions a { min-width: 148px; min-height: 48px; justify-content: center; border-radius: 999px; font-family: var(--landing-sans); font-size: 14px; font-weight: 600; }
 .landing-page .hero-actions .secondary-button { background: var(--surface-accent-hero); }
 
+.landing-page .hero-question {
+  display: inline-flex; align-items: center; gap: 9px; margin: 22px auto 0; padding: 12px 20px;
+  border-radius: 999px; background: var(--surface-accent-soft); border: 1px solid var(--border-default);
+  max-width: 100%;
+}
+.landing-page .hero-question-mark { font-family: var(--landing-serif); font-size: 20px; line-height: 1; color: var(--text-accent); flex: 0 0 auto; }
+.landing-page .hero-question-text { font-size: 14px; color: var(--text-primary); }
+
+.landing-page .reading-picks { padding: 46px 0 0; }
+.landing-page .picks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; max-width: 780px; margin: 0 auto; }
+.landing-page .pick-row { display: flex; gap: 14px; align-items: flex-start; }
+.landing-page .pick-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; flex: 0 0 auto; }
+.landing-page .pick-dot-tarot { background: var(--accent-primary); box-shadow: var(--effect-accent-dot-glow); }
+.landing-page .pick-dot-saju { background: #5d7bb5; }
+.landing-page .pick-row strong { display: block; font-size: 15px; margin-bottom: 5px; }
+.landing-page .pick-row span { color: var(--text-secondary); font-size: 13.5px; line-height: 1.7; }
+.landing-page .picks-summary {
+  max-width: 480px; margin: 30px auto 0; padding: 16px; border-radius: 14px;
+  background: var(--surface-accent-faint); text-align: center; color: var(--text-secondary); font-size: 14px; line-height: 1.7;
+}
+.landing-page .picks-summary strong { color: var(--text-accent); }
+
 .landing-page .reading-choice { padding: 42px 0 62px; }
 .landing-page .section-heading { margin-bottom: 32px; text-align: center; }
 .landing-page .section-heading h2 { margin: 0; font-size: clamp(34px, 3.6vw, 48px); line-height: 1.25; letter-spacing: -.04em; }
@@ -220,7 +243,7 @@ h1, h2, h3, blockquote {
   position: relative;
   overflow: hidden;
   border: 1px solid var(--border-default);
-  border-radius: 12px;
+  border-radius: 22px;
   background: var(--gradient-landing-card);
   box-shadow: var(--shadow-landing-card);
   transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
@@ -236,9 +259,21 @@ h1, h2, h3, blockquote {
 .landing-page .reading-card li::before { content: ""; width: 3px; height: 3px; display: inline-block; margin: 0 10px 3px 1px; border-radius: 50%; background: var(--accent-primary); box-shadow: var(--effect-accent-dot-glow); }
 .landing-page .reading-card .primary-button,
 .landing-page .reading-card .secondary-button { width: fit-content; margin-top: auto; position: relative; z-index: 1; font-family: var(--landing-sans); font-size: 13px; font-weight: 600; }
-.landing-page .landing-trust { margin-top: 26px; padding: 17px 20px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 34px; border-block: 1px solid var(--border-divider); color: var(--text-trust); font-size: 12px; }
-.landing-page .landing-trust span { display: inline-flex; align-items: center; gap: 9px; }
-.landing-page .landing-trust span::before { content: ""; width: 3px; height: 3px; border-radius: 50%; background: var(--accent-primary); box-shadow: var(--effect-trust-dot-glow); }
+.landing-page .landing-trust { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.landing-page .landing-trust span {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+  border: 1px solid var(--border-default); color: var(--text-trust); font-size: 12px;
+}
+.landing-page .landing-trust span::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--accent-primary); box-shadow: var(--effect-trust-dot-glow); }
+
+.landing-page .reading-peek { padding: 0 0 20px; }
+.landing-page .reading-peek-card {
+  max-width: 720px; margin: 0 auto; padding: 40px; border-radius: 24px; text-align: center;
+  background: var(--gradient-panel); border: 1px solid var(--border-default); box-shadow: var(--shadow-panel);
+}
+.landing-page .reading-peek-label { margin: 0 0 16px; color: var(--text-accent); font: 600 10px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
+.landing-page .reading-peek-card blockquote { margin: 0 0 16px; font-size: clamp(20px, 2.6vw, 26px); line-height: 1.75; font-weight: 300; color: var(--text-accent-strong); }
+.landing-page .reading-peek-from { margin: 0; color: var(--text-muted); font-size: 12.5px; }
 
 .landing-page .how-it-works { padding: 42px 0 124px; }
 .landing-page .feature-row { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-default); }
@@ -487,6 +522,10 @@ h1, h2, h3, blockquote {
   .landing-page .hero-description { margin-block: 22px 25px; font-size: 14px; line-height: 1.75; }
   .landing-page .hero-actions { gap: 10px; }
   .landing-page .hero-actions a { min-width: 144px; min-height: 46px; padding-inline: 18px; }
+  .landing-page .hero-question { margin-top: 18px; padding: 10px 16px; }
+  .landing-page .hero-question-text { font-size: 13px; }
+  .landing-page .picks-grid { grid-template-columns: 1fr; gap: 20px; }
+  .landing-page .reading-peek-card { padding: 28px 22px; border-radius: 20px; }
   .landing-page .choice-grid, .landing-page .feature-row, .result-cards { grid-template-columns: 1fr; }
   .landing-page .reading-choice { padding: 34px 0 50px; }
   .landing-page .section-heading { margin-bottom: 28px; }

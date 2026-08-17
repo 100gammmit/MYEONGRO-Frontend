@@ -8,9 +8,10 @@ describe("HomePage", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "지금의 마음을 별빛 아래 펼쳐보세요",
+        name: "지금, 뭐가 궁금하세요?",
       }),
     ).toBeInTheDocument();
+    expect(screen.getByText("이 사람과 잘 될까요?")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "타로로 시작" })).toHaveAttribute(
       "href",
       "/tarot",
@@ -19,6 +20,13 @@ describe("HomePage", () => {
       "href",
       "/saju",
     );
+  });
+
+  it("explains why both readings are worth checking", () => {
+    render(<HomePage />);
+
+    expect(screen.getByText("타로는 지금을 봐요")).toBeInTheDocument();
+    expect(screen.getByText("사주는 흐름을 봐요")).toBeInTheDocument();
   });
 
   it("keeps both reading journeys and explains the service flow", () => {
