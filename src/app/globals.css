@@ -451,7 +451,7 @@ h1, h2, h3, blockquote {
 .record-card { display: flex; justify-content: space-between; gap: 30px; padding: 30px; border: 1px solid var(--border-default); border-radius: 20px; background: var(--surface-record); transition: border-color .2s, transform .2s; }
 .record-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
 .record-kind { color: var(--text-accent); font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
-.record-card h2 { margin: 10px 0; font-size: 24px; font-weight: 400; }
+.record-card h2 { margin: 10px 0; font-size: 24px; }
 .record-card p { margin: 0; color: var(--text-muted); }
 .record-meta { display: flex; min-width: 120px; flex-direction: column; align-items: flex-end; justify-content: space-between; color: var(--text-record-meta); font-size: 12px; }
 .record-status { padding: 6px 10px; border: 1px solid var(--border-default); border-radius: 999px; }
