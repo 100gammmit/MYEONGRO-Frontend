@@ -15,14 +15,18 @@ const evidenceKeySchema = z.enum([
   "uncertainty",
 ]);
 
-const birthProfileSchema = z.object({
+const birthProfileCommon = {
   calendarType: z.literal("solar"),
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  luckDirectionBasis: z.enum(["male", "female", "unspecified"]),
+} as const;
+
+const legacyBirthProfileSchema = z.object({
+  ...birthProfileCommon,
   birthTimePrecision: z.enum(["exact", "approximate", "unknown"]),
   birthTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
-  provinceCode: z.string().regex(/^\d{2}$/).optional(),
-  cityCode: z.string().regex(/^\d{5}$/).optional(),
-  luckDirectionBasis: z.enum(["male", "female", "unspecified"]),
+  provinceCode: z.string().regex(/^\d{2}$/),
+  cityCode: z.string().regex(/^\d{5}$/),
 }).strict().superRefine((profile, context) => {
   const requiresTime = profile.birthTimePrecision !== "unknown";
   if (requiresTime !== (profile.birthTime !== undefined)) {
@@ -32,15 +36,7 @@ const birthProfileSchema = z.object({
       message: "Birth time must match its precision.",
     });
   }
-  if (requiresTime && profile.provinceCode === undefined) {
-    context.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["provinceCode"],
-      message: "A known birth time requires a province.",
-    });
-  }
-  if (profile.cityCode !== undefined
-    && (profile.provinceCode === undefined || !profile.cityCode.startsWith(profile.provinceCode))) {
+  if (!profile.cityCode.startsWith(profile.provinceCode)) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["cityCode"],
@@ -48,6 +44,25 @@ const birthProfileSchema = z.object({
     });
   }
 });
+
+const currentBirthProfileSchema = z.discriminatedUnion("birthTimePrecision", [
+  z.object({
+    ...birthProfileCommon,
+    birthTimePrecision: z.literal("exact"),
+    birthTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+    provinceCode: z.string().regex(/^\d{2}$/),
+  }).strict(),
+  z.object({
+    ...birthProfileCommon,
+    birthTimePrecision: z.literal("approximate"),
+    birthTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+    provinceCode: z.string().regex(/^\d{2}$/),
+  }).strict(),
+  z.object({
+    ...birthProfileCommon,
+    birthTimePrecision: z.literal("unknown"),
+  }).strict(),
+]);
 
 const pillarSchema = z.object({
   ganZhi: textSchema,
@@ -151,20 +166,38 @@ const resultSchema = z.object({
   disclaimer: textSchema,
 }).strict();
 
-const completedSajuRecordSchema = z.object({
+const completedRecordCommon = {
   id: textSchema,
   kind: z.literal("saju"),
-  schemaVersion: z.union([z.literal(2), z.literal(3)]),
   status: z.literal("completed"),
-  input: z.object({
-    question: textSchema,
-    focusArea: focusAreaSchema,
-    birthProfile: birthProfileSchema,
-    targetYear: z.number().int(),
-    calculationSnapshot: calculationSnapshotSchema,
-  }).strict(),
   result: resultSchema,
-}).passthrough().superRefine((reading, context) => {
+} as const;
+
+const completedInputCommon = {
+  question: textSchema,
+  focusArea: focusAreaSchema,
+  targetYear: z.number().int(),
+  calculationSnapshot: calculationSnapshotSchema,
+} as const;
+
+const completedSajuRecordSchema = z.union([
+  z.object({
+    ...completedRecordCommon,
+    schemaVersion: z.literal(2),
+    input: z.object({
+      ...completedInputCommon,
+      birthProfile: legacyBirthProfileSchema,
+    }).strict(),
+  }).passthrough(),
+  z.object({
+    ...completedRecordCommon,
+    schemaVersion: z.literal(3),
+    input: z.object({
+      ...completedInputCommon,
+      birthProfile: currentBirthProfileSchema,
+    }).strict(),
+  }).passthrough(),
+]).superRefine((reading, context) => {
   const snapshot = reading.input.calculationSnapshot;
   const expectedSections = ["core", "strengths", "relationship", "work"];
   if (reading.result.natalSections.some((section, index) => section.id !== expectedSections[index])) {
@@ -221,7 +254,8 @@ const completedSajuRecordSchema = z.object({
 export type SajuReadingView = z.infer<typeof completedSajuRecordSchema>;
 export type SajuCalculationSnapshot = z.infer<typeof calculationSnapshotSchema>;
 export type SajuEvidenceKey = z.infer<typeof evidenceKeySchema>;
-export type SajuBirthProfile = z.infer<typeof birthProfileSchema>;
+export type SajuBirthProfile = z.infer<typeof legacyBirthProfileSchema>
+  | z.infer<typeof currentBirthProfileSchema>;
 
 export function parseSajuReadingView(value: unknown): SajuReadingView | null {
   const parsed = completedSajuRecordSchema.safeParse(value);

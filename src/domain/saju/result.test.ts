@@ -84,12 +84,37 @@ describe("parseSajuReadingView", () => {
   it("decodes a current v3 unknown-time record without a birth place", () => {
     const current = completedSajuRecord();
     current.schemaVersion = 3;
-    current.input.birthProfile.provinceCode = undefined as unknown as string;
-    current.input.birthProfile.cityCode = undefined as unknown as string;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).provinceCode;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).cityCode;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).birthTime;
     current.input.calculationSnapshot.calculationVersion = "saju-ko-v3";
     current.input.calculationSnapshot.cityCatalogVersion = "kr-admin-v1-province";
 
     expect(parseSajuReadingView(current)).not.toBeNull();
+  });
+
+  it("enforces the birth-place shape for each stored schema version", () => {
+    const legacyWithoutCity = completedSajuRecord();
+    delete (legacyWithoutCity.input.birthProfile as Partial<
+      typeof legacyWithoutCity.input.birthProfile
+    >).cityCode;
+    expect(parseSajuReadingView(legacyWithoutCity)).toBeNull();
+
+    const currentUnknownWithPlace = completedSajuRecord();
+    currentUnknownWithPlace.schemaVersion = 3;
+    expect(parseSajuReadingView(currentUnknownWithPlace)).toBeNull();
+
+    const currentKnown = completedSajuRecord();
+    currentKnown.schemaVersion = 3;
+    currentKnown.input.birthProfile.birthTimePrecision = "exact";
+    currentKnown.input.birthProfile.birthTime = "14:30";
+    delete (currentKnown.input.birthProfile as Partial<
+      typeof currentKnown.input.birthProfile
+    >).cityCode;
+    expect(parseSajuReadingView(currentKnown)).not.toBeNull();
+
+    currentKnown.input.birthProfile.cityCode = "36110";
+    expect(parseSajuReadingView(currentKnown)).toBeNull();
   });
 
   it("accepts one guidance item and rejects more than two", () => {

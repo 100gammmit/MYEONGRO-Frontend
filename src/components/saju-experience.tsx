@@ -152,7 +152,7 @@ export function SajuExperience() {
       ...current,
       birthDate: remembered.birthDate,
       birthTimePrecision: remembered.birthTimePrecision,
-      birthTime: remembered.birthTime ?? "",
+      birthTime: "birthTime" in remembered ? remembered.birthTime ?? "" : "",
       provinceCode: remembered.birthTimePrecision === "unknown"
         ? ""
         : remembered.provinceCode ?? "",
