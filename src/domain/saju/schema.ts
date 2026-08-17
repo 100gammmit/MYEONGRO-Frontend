@@ -9,15 +9,9 @@ import type {
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
-const citySchema = z.object({
-  cityCode: z.string().regex(/^\d{5}$/),
-  cityName: z.string().min(1),
-}).strict();
-
 const provinceSchema = z.object({
   provinceCode: z.string().regex(/^\d{2}$/),
   provinceName: z.string().min(1),
-  cities: z.array(citySchema).min(1),
 }).strict();
 
 const birthPlacesSchema = z.object({
@@ -30,8 +24,7 @@ const birthProfileSchema = z.object({
   birthDate: dateSchema,
   birthTimePrecision: z.enum(["exact", "approximate", "unknown"]),
   birthTime: timeSchema.optional(),
-  provinceCode: z.string().regex(/^\d{2}$/),
-  cityCode: z.string().regex(/^\d{5}$/),
+  provinceCode: z.string().regex(/^\d{2}$/).optional(),
   luckDirectionBasis: z.enum(["male", "female", "unspecified"]),
 }).strict().superRefine((profile, context) => {
   if (profile.birthTimePrecision === "unknown" && profile.birthTime !== undefined) {
@@ -48,11 +41,18 @@ const birthProfileSchema = z.object({
       message: "출생 시각이 필요합니다.",
     });
   }
-  if (!profile.cityCode.startsWith(profile.provinceCode)) {
+  if (profile.birthTimePrecision === "unknown" && profile.provinceCode !== undefined) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
-      path: ["cityCode"],
-      message: "시·도와 시·군·구가 일치하지 않습니다.",
+      path: ["provinceCode"],
+      message: "시간 미상에는 출생지를 보내지 않습니다.",
+    });
+  }
+  if (profile.birthTimePrecision !== "unknown" && profile.provinceCode === undefined) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["provinceCode"],
+      message: "출생 시·도가 필요합니다.",
     });
   }
 });
@@ -68,7 +68,7 @@ const readingCreatedResponseSchema = z.object({
   reading: z.object({
     id: z.string().min(1),
     kind: z.literal("saju"),
-    schemaVersion: z.literal(2),
+    schemaVersion: z.literal(3),
     status: z.enum(["generating", "completed", "failed"]),
   }).passthrough(),
 }).strict();

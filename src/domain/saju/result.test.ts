@@ -81,6 +81,17 @@ describe("parseSajuReadingView", () => {
     expect(parsed?.result.readingMode).toBe("standard");
   });
 
+  it("decodes a current v3 unknown-time record without a birth place", () => {
+    const current = completedSajuRecord();
+    current.schemaVersion = 3;
+    current.input.birthProfile.provinceCode = undefined as unknown as string;
+    current.input.birthProfile.cityCode = undefined as unknown as string;
+    current.input.calculationSnapshot.calculationVersion = "saju-ko-v3";
+    current.input.calculationSnapshot.cityCatalogVersion = "kr-admin-v1-province";
+
+    expect(parseSajuReadingView(current)).not.toBeNull();
+  });
+
   it("accepts one guidance item and rejects more than two", () => {
     const one = completedSajuRecord();
     one.result.guidance = ["오늘 할 수 있는 한 가지만 정하세요."];

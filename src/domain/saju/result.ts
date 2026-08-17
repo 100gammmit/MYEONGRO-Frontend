@@ -20,8 +20,8 @@ const birthProfileSchema = z.object({
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   birthTimePrecision: z.enum(["exact", "approximate", "unknown"]),
   birthTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/).optional(),
-  provinceCode: z.string().regex(/^\d{2}$/),
-  cityCode: z.string().regex(/^\d{5}$/),
+  provinceCode: z.string().regex(/^\d{2}$/).optional(),
+  cityCode: z.string().regex(/^\d{5}$/).optional(),
   luckDirectionBasis: z.enum(["male", "female", "unspecified"]),
 }).strict().superRefine((profile, context) => {
   const requiresTime = profile.birthTimePrecision !== "unknown";
@@ -32,11 +32,19 @@ const birthProfileSchema = z.object({
       message: "Birth time must match its precision.",
     });
   }
-  if (!profile.cityCode.startsWith(profile.provinceCode)) {
+  if (requiresTime && profile.provinceCode === undefined) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["provinceCode"],
+      message: "A known birth time requires a province.",
+    });
+  }
+  if (profile.cityCode !== undefined
+    && (profile.provinceCode === undefined || !profile.cityCode.startsWith(profile.provinceCode))) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["cityCode"],
-      message: "Birth place codes do not belong to the same region.",
+      message: "Legacy birth place codes do not belong to the same region.",
     });
   }
 });
@@ -146,7 +154,7 @@ const resultSchema = z.object({
 const completedSajuRecordSchema = z.object({
   id: textSchema,
   kind: z.literal("saju"),
-  schemaVersion: z.literal(2),
+  schemaVersion: z.union([z.literal(2), z.literal(3)]),
   status: z.literal("completed"),
   input: z.object({
     question: textSchema,

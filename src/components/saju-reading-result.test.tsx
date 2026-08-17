@@ -28,6 +28,7 @@ describe("SajuReadingResult", () => {
     expect(within(pillarGrid as HTMLElement).getByText("연주")).toBeInTheDocument();
     expect(within(pillarGrid as HTMLElement).queryByText("시주")).not.toBeInTheDocument();
     expect(screen.getByText("출생 시각 미상")).toBeInTheDocument();
+    expect(screen.queryByText("출생지 기준")).not.toBeInTheDocument();
     expect(screen.getAllByText("이 해석에 사용한 계산 근거")).toHaveLength(6);
   });
 

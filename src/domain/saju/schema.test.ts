@@ -6,27 +6,22 @@ import {
   parseSajuReadingCreatedResponse,
 } from "./schema";
 
-describe("saju v2 schemas", () => {
-  it("parses the two-depth birth-place catalog without internal coordinates", () => {
+describe("saju v3 schemas", () => {
+  it("parses the province-only birth-place catalog without internal coordinates", () => {
     expect(parseSajuBirthPlaces({
-      version: "kr-admin-v1",
+      version: "kr-admin-v1-province",
       provinces: [{
         provinceCode: "11",
         provinceName: "서울특별시",
-        cities: [{ cityCode: "11110", cityName: "종로구" }],
       }],
-    }).provinces[0]?.cities[0]?.cityName).toBe("종로구");
+    }).provinces[0]?.provinceName).toBe("서울특별시");
 
     expect(() => parseSajuBirthPlaces({
-      version: "kr-admin-v1",
+      version: "kr-admin-v1-province",
       provinces: [{
         provinceCode: "11",
         provinceName: "서울특별시",
-        cities: [{
-          cityCode: "11110",
-          cityName: "종로구",
-          latitude: 37.5,
-        }],
+        longitude: 127,
       }],
     })).toThrow();
   });
@@ -40,7 +35,6 @@ describe("saju v2 schemas", () => {
         calendarType: "solar",
         birthDate: "1992-08-17",
         provinceCode: "11",
-        cityCode: "11110",
         luckDirectionBasis: "unspecified",
       },
     };
@@ -58,6 +52,7 @@ describe("saju v2 schemas", () => {
       ...base,
       birthProfile: {
         ...base.birthProfile,
+        provinceCode: undefined,
         birthTimePrecision: "unknown",
         birthTime: "14:30",
       },
@@ -68,17 +63,18 @@ describe("saju v2 schemas", () => {
       kind: "saju",
       birthProfile: {
         ...base.birthProfile,
+        provinceCode: undefined,
         birthTimePrecision: "unknown",
       },
     })).toThrow();
   });
 
-  it("accepts only a saju schema v2 creation response", () => {
+  it("accepts only a saju schema v3 creation response", () => {
     expect(parseSajuReadingCreatedResponse({
       reading: {
         id: "reading-id",
         kind: "saju",
-        schemaVersion: 2,
+        schemaVersion: 3,
         status: "completed",
         input: {},
         result: {},

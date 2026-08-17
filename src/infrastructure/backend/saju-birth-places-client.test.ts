@@ -10,11 +10,10 @@ afterEach(() => vi.restoreAllMocks());
 describe("fetchSajuBirthPlaces", () => {
   it("uses the authenticated same-origin proxy and parses the response", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
-      version: "kr-admin-v1",
+      version: "kr-admin-v1-province",
       provinces: [{
         provinceCode: "36",
         provinceName: "세종특별자치시",
-        cities: [{ cityCode: "36110", cityName: "세종특별자치시" }],
       }],
     }));
 

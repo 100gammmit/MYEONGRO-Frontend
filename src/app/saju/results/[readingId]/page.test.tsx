@@ -113,7 +113,7 @@ describe("SajuResultPage", () => {
   });
 
   it("does not guess-render unsupported or malformed saju records", async () => {
-    mocks.get.mockResolvedValue(sajuReadingRecord({ schemaVersion: 3 }));
+    mocks.get.mockResolvedValue(sajuReadingRecord({ schemaVersion: 4 }));
 
     await expect(renderPage()).rejects.toThrow("NOT_FOUND");
     expect(mocks.result).not.toHaveBeenCalled();

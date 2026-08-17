@@ -32,14 +32,13 @@ import { ReadingShell } from "./reading-shell";
 
 type Phase = "consent" | "birth-date" | "birth-time" | "birth-place" | "question" | "review" | "loading";
 type CatalogStatus = "idle" | "loading" | "ready" | "error";
-type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "cityCode" | "luckDirectionBasis" | "focusArea" | "question" | "request";
+type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request";
 
 interface SajuFormState {
   birthDate: string;
   birthTimePrecision: BirthTimePrecision | "";
   birthTime: string;
   provinceCode: string;
-  cityCode: string;
   luckDirectionBasis: LuckDirectionBasis;
   focusArea: SajuFocusArea | "";
   question: string;
@@ -52,7 +51,6 @@ const initialForm: SajuFormState = {
   birthTimePrecision: "",
   birthTime: "",
   provinceCode: "",
-  cityCode: "",
   luckDirectionBasis: "unspecified",
   focusArea: "",
   question: "",
@@ -89,7 +87,6 @@ const FIELD_PHASE: Partial<Record<string, Phase>> = {
   "birthProfile.birthTimePrecision": "birth-time",
   "birthProfile.birthTime": "birth-time",
   "birthProfile.provinceCode": "birth-place",
-  "birthProfile.cityCode": "birth-place",
   "birthProfile.luckDirectionBasis": "birth-place",
   focusArea: "question",
   question: "question",
@@ -100,7 +97,6 @@ const FIELD_KEY: Partial<Record<string, FieldKey>> = {
   "birthProfile.birthTimePrecision": "birthTimePrecision",
   "birthProfile.birthTime": "birthTime",
   "birthProfile.provinceCode": "provinceCode",
-  "birthProfile.cityCode": "cityCode",
   "birthProfile.luckDirectionBasis": "luckDirectionBasis",
   focusArea: "focusArea",
   question: "question",
@@ -157,16 +153,25 @@ export function SajuExperience() {
       birthDate: remembered.birthDate,
       birthTimePrecision: remembered.birthTimePrecision,
       birthTime: remembered.birthTime ?? "",
-      provinceCode: remembered.provinceCode,
-      cityCode: remembered.cityCode,
+      provinceCode: remembered.birthTimePrecision === "unknown"
+        ? ""
+        : remembered.provinceCode ?? "",
       luckDirectionBasis: remembered.luckDirectionBasis,
     }));
   }, []);
 
   const handleConsentComplete = useCallback(() => {
-    if (catalogStatus === "idle") void loadBirthPlaces();
     setPhase(followUpDraftRef.current ? "question" : "birth-date");
-  }, [catalogStatus, loadBirthPlaces]);
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "consent"
+      && form.birthTimePrecision
+      && form.birthTimePrecision !== "unknown"
+      && catalogStatus === "idle") {
+      void loadBirthPlaces();
+    }
+  }, [catalogStatus, form.birthTimePrecision, loadBirthPlaces, phase]);
 
   useEffect(() => {
     if (phase !== "loading") return;
@@ -193,16 +198,12 @@ export function SajuExperience() {
   function selectPrecision(value: BirthTimePrecision) {
     updateForm({
       birthTimePrecision: value,
-      ...(value === "unknown" ? { birthTime: "" } : {}),
+      ...(value === "unknown" ? { birthTime: "", provinceCode: "" } : {}),
     });
   }
 
   function selectProvince(provinceCode: string) {
-    const province = catalog?.provinces.find((item) => item.provinceCode === provinceCode);
-    updateForm({
-      provinceCode,
-      cityCode: province?.cities.length === 1 ? province.cities[0]?.cityCode ?? "" : "",
-    });
+    updateForm({ provinceCode });
   }
 
   async function submitReading() {
@@ -378,26 +379,27 @@ export function SajuExperience() {
   }
 
   if (phase === "birth-place") {
-    const province = catalog?.provinces.find((item) => item.provinceCode === form.provinceCode);
-    const placeReady = catalogStatus === "ready" && Boolean(form.provinceCode && form.cityCode);
+    const birthPlaceRequired = form.birthTimePrecision !== "unknown";
+    const placeReady = !birthPlaceRequired
+      || (catalogStatus === "ready" && Boolean(form.provinceCode));
     return (
       <ReadingShell
         eyebrow="BIRTH PLACE"
-        title="태어난 도시와 계산 기준을 선택해 주세요"
-        description="도시는 진태양시 보정에 사용하고, 내부 좌표는 화면이나 요청에 노출하지 않아요."
+        title={birthPlaceRequired ? "태어난 시·도와 계산 기준을 선택해 주세요" : "대운 계산 기준을 선택해 주세요"}
+        description={birthPlaceRequired ? "출생 시·도는 태어난 시각을 보정하는 데 사용됩니다." : "출생 시각을 모르면 출생지는 입력하지 않아도 돼요."}
         step={4}
         totalSteps={TOTAL_STEPS}
       >
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
-          {catalogStatus === "loading" ? <p className="notice" aria-live="polite">출생지 목록을 불러오고 있어요.</p> : null}
-          {catalogStatus === "error" ? (
+          {birthPlaceRequired && catalogStatus === "loading" ? <p className="notice" aria-live="polite">출생지 목록을 불러오고 있어요.</p> : null}
+          {birthPlaceRequired && catalogStatus === "error" ? (
             <div role="alert" className="notice">
               <p>{catalogError}</p>
               <button className="secondary-button" onClick={() => void loadBirthPlaces()} type="button">다시 불러오기</button>
             </div>
           ) : null}
-          <div className="saju-place-grid">
+          {birthPlaceRequired ? <div className="saju-place-grid">
             <label className="field" htmlFor="saju-province">
               <span>출생 시·도</span>
               <select
@@ -413,22 +415,7 @@ export function SajuExperience() {
               </select>
               <FieldError id="province-error" message={fieldErrors.provinceCode} />
             </label>
-            <label className="field" htmlFor="saju-city">
-              <span>출생 시·군·구</span>
-              <select
-                id="saju-city"
-                aria-describedby={fieldErrors.cityCode ? "city-error" : undefined}
-                aria-invalid={Boolean(fieldErrors.cityCode)}
-                disabled={!province}
-                onChange={(event) => updateForm({ cityCode: event.target.value })}
-                value={form.cityCode}
-              >
-                <option value="">시·군·구 선택</option>
-                {province?.cities.map((item) => <option key={item.cityCode} value={item.cityCode}>{item.cityName}</option>)}
-              </select>
-              <FieldError id="city-error" message={fieldErrors.cityCode} />
-            </label>
-          </div>
+          </div> : null}
           <fieldset
             className="field"
             aria-describedby={fieldErrors.luckDirectionBasis ? "luck-help luck-error" : "luck-help"}
@@ -527,7 +514,6 @@ export function SajuExperience() {
   }
 
   const province = catalog?.provinces.find((item) => item.provinceCode === form.provinceCode);
-  const city = province?.cities.find((item) => item.cityCode === form.cityCode);
   const focus = FOCUS_OPTIONS.find((item) => item.value === form.focusArea);
   return (
     <ReadingShell
@@ -542,7 +528,7 @@ export function SajuExperience() {
         <dl className="saju-review-list">
           <div><dt>생년월일</dt><dd>{form.birthDate} · 양력</dd></div>
           <div><dt>출생 시각</dt><dd>{timeSummary(form)}</dd></div>
-          <div><dt>출생지</dt><dd>{province?.provinceName} {city?.cityName}</dd></div>
+          {form.birthTimePrecision !== "unknown" ? <div><dt>출생지</dt><dd>{province?.provinceName}</dd></div> : null}
           <div><dt>대운</dt><dd>{luckSummary(form.luckDirectionBasis)}</dd></div>
           <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
           <div><dt>질문</dt><dd>{form.question.trim()}</dd></div>
@@ -566,8 +552,7 @@ function buildRequest(form: SajuFormState, requestId: string): SajuReadingCreate
       birthDate: form.birthDate,
       birthTimePrecision: form.birthTimePrecision,
       ...(form.birthTimePrecision === "unknown" ? {} : { birthTime: form.birthTime }),
-      provinceCode: form.provinceCode,
-      cityCode: form.cityCode,
+      ...(form.birthTimePrecision === "unknown" ? {} : { provinceCode: form.provinceCode }),
       luckDirectionBasis: form.luckDirectionBasis,
     },
   };

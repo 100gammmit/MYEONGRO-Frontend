@@ -2,15 +2,9 @@ export type BirthTimePrecision = "exact" | "approximate" | "unknown";
 export type LuckDirectionBasis = "male" | "female" | "unspecified";
 export type SajuFocusArea = "self" | "career" | "relationship" | "life_money";
 
-export interface SajuBirthPlaceCity {
-  readonly cityCode: string;
-  readonly cityName: string;
-}
-
 export interface SajuBirthPlaceProvince {
   readonly provinceCode: string;
   readonly provinceName: string;
-  readonly cities: readonly SajuBirthPlaceCity[];
 }
 
 export interface SajuBirthPlacesResponse {
@@ -23,8 +17,7 @@ export interface SajuBirthProfile {
   readonly birthDate: string;
   readonly birthTimePrecision: BirthTimePrecision;
   readonly birthTime?: string;
-  readonly provinceCode: string;
-  readonly cityCode: string;
+  readonly provinceCode?: string;
   readonly luckDirectionBasis: LuckDirectionBasis;
 }
 
@@ -39,7 +32,7 @@ export interface SajuReadingCreatedResponse {
   readonly reading: {
     readonly id: string;
     readonly kind: "saju";
-    readonly schemaVersion: 2;
+    readonly schemaVersion: 3;
     readonly status: "generating" | "completed" | "failed";
   };
 }

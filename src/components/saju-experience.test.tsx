@@ -37,20 +37,15 @@ function consentStatus(hasAcceptedRequired: boolean) {
 
 function birthPlaces() {
   return {
-    version: "kr-admin-v1",
+    version: "kr-admin-v1-province",
     provinces: [
       {
         provinceCode: "11",
         provinceName: "서울특별시",
-        cities: [
-          { cityCode: "11110", cityName: "종로구" },
-          { cityCode: "11680", cityName: "강남구" },
-        ],
       },
       {
         provinceCode: "36",
         provinceName: "세종특별자치시",
-        cities: [{ cityCode: "36110", cityName: "세종특별자치시" }],
       },
     ],
   };
@@ -61,7 +56,7 @@ function createdReading() {
     reading: {
       id: "reading-1",
       kind: "saju",
-      schemaVersion: 2,
+      schemaVersion: 3,
       status: "completed",
     },
   };
@@ -82,10 +77,6 @@ afterEach(() => {
 async function startWithAcceptedConsent() {
   render(<SajuExperience />);
   await screen.findByRole("heading", { name: "양력 생년월일을 알려주세요" });
-  await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledWith("/api/saju/birth-places", {
-    credentials: "same-origin",
-    cache: "no-store",
-  }));
 }
 
 async function reachBirthPlace(precision: "exact" | "approximate" | "unknown" = "unknown") {
@@ -100,13 +91,21 @@ async function reachBirthPlace(precision: "exact" | "approximate" | "unknown" = 
     fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
   }
   fireEvent.click(screen.getByRole("button", { name: "다음" }));
-  await screen.findByRole("heading", { name: "태어난 도시와 계산 기준을 선택해 주세요" });
+  await screen.findByRole("heading", {
+    name: precision === "unknown"
+      ? "대운 계산 기준을 선택해 주세요"
+      : "태어난 시·도와 계산 기준을 선택해 주세요",
+  });
+  if (precision !== "unknown") {
+    await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
+  }
 }
 
-async function reachReview(precision: "exact" | "approximate" | "unknown" = "unknown") {
+async function reachReview(precision: "exact" | "approximate" | "unknown" = "exact") {
   await reachBirthPlace(precision);
-  fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
-  expect(screen.getByLabelText("출생 시·군·구")).toHaveValue("36110");
+  if (precision !== "unknown") {
+    fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
+  }
   fireEvent.click(screen.getByRole("button", { name: "다음" }));
   fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
   fireEvent.change(screen.getByRole("textbox", { name: /질문 한 가지/ }), {
@@ -134,11 +133,10 @@ describe("SajuExperience", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/consents", { credentials: "same-origin" });
   });
 
-  it("builds the nested v2 payload and omits birthTime when it is unknown", async () => {
+  it("builds the nested v3 payload and omits birth time and place when unknown", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
-      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
       .mockResolvedValueOnce(jsonResponse(createdReading()));
     await startWithAcceptedConsent();
     await reachReview("unknown");
@@ -148,8 +146,8 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
-    expect(fetchMock.mock.calls[2]?.[0]).toBe("/api/saju/readings");
-    const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("/api/saju/readings");
+    const body = JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body));
     expect(body).toEqual({
       requestId: REQUEST_ID,
       question: "올해 이직을 준비해도 괜찮을까요?",
@@ -158,8 +156,6 @@ describe("SajuExperience", () => {
         calendarType: "solar",
         birthDate: "1992-08-17",
         birthTimePrecision: "unknown",
-        provinceCode: "36",
-        cityCode: "36110",
         luckDirectionBasis: "unspecified",
       },
     });
@@ -180,6 +176,7 @@ describe("SajuExperience", () => {
     expect(screen.getByText(/앞뒤 60분을 함께 계산/)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
     fireEvent.click(screen.getByRole("radio", { name: "여성 기준" }));
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
@@ -197,18 +194,18 @@ describe("SajuExperience", () => {
     });
   });
 
-  it("resets the city and auto-selects a sole child when province changes", async () => {
+  it("requires only a province when birth time is known", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
       .mockResolvedValueOnce(jsonResponse(birthPlaces()));
     await startWithAcceptedConsent();
-    await reachBirthPlace();
+    await reachBirthPlace("exact");
 
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "11" } });
-    fireEvent.change(screen.getByLabelText("출생 시·군·구"), { target: { value: "11680" } });
-    expect(screen.getByLabelText("출생 시·군·구")).toHaveValue("11680");
+    expect(screen.getByLabelText("출생 시·도")).toHaveValue("11");
+    expect(screen.queryByLabelText("출생 시·군·구")).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
-    expect(screen.getByLabelText("출생 시·군·구")).toHaveValue("36110");
+    expect(screen.getByLabelText("출생 시·도")).toHaveValue("36");
   });
 
   it("blocks duplicate submits and reuses the request id for a network retry", async () => {
@@ -350,8 +347,8 @@ describe("SajuExperience", () => {
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /일·진로/ })).not.toBeChecked();
     fireEvent.click(screen.getByRole("button", { name: "이전" }));
-    await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toHaveValue("36"));
-    expect(screen.getByLabelText("출생 시·군·구")).toHaveValue("36110");
+    expect(await screen.findByRole("heading", { name: "대운 계산 기준을 선택해 주세요" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("출생 시·도")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "이전" }));
     expect(screen.getByRole("radio", { name: /시간을 몰라요/ })).toBeChecked();
   });

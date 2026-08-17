@@ -126,7 +126,6 @@ export function SajuReadingResult({
           <dl>
             <div><dt>계산 규칙</dt><dd>{snapshot.calculationVersion}</dd></div>
             <div><dt>계산 엔진</dt><dd>{snapshot.engine} {snapshot.engineVersion}</dd></div>
-            <div><dt>출생지 기준</dt><dd>{snapshot.cityCatalogVersion} · 시·군·구 대표 좌표</dd></div>
             <div><dt>출생 시각 정확도</dt><dd>{uncertaintyText(snapshot)}</dd></div>
           </dl>
         </details>
