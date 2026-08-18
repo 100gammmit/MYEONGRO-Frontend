@@ -16,7 +16,6 @@
 
   --surface-accent-faint: rgba(124, 111, 240, 0.05);
   --surface-accent-subtle: rgba(124, 111, 240, 0.08);
-  --surface-accent-hero: rgba(124, 111, 240, 0.09);
   --surface-accent-soft: rgba(124, 111, 240, 0.13);
   --surface-accent-hover: rgba(124, 111, 240, 0.16);
   --surface-accent-selected: rgba(124, 111, 240, 0.14);
@@ -239,7 +238,6 @@ h1, h2, h3, blockquote {
   border-color: var(--accent-secondary-hover);
   color: var(--accent-secondary-hover);
 }
-.landing-page .hero-actions .secondary-button { background: var(--surface-accent-hero); }
 
 .landing-page .hero-question {
   display: inline-flex; align-items: center; gap: 9px; margin-top: 22px; padding: 12px 20px;
