@@ -26,8 +26,8 @@ export default function HomePage() {
         <div className="hero-copy">
           <p className="eyebrow">AI TAROT · SAJU</p>
           <h1 id="landing-title">
-            지금,
-            <br />
+            지금,{" "}
+            <br className="hero-title-break" />
             뭐가 궁금하세요?
           </h1>
           <HeroQuestionRotator />
