@@ -35,10 +35,10 @@ export default function HomePage() {
             어떤 질문이든, 카드와 사주로 함께 답을 찾아볼게요.
           </p>
           <div className="hero-actions">
-            <Link href="/tarot" className="primary-button">
+            <Link href="/tarot" className="primary-button cta-tarot">
               타로로 시작
             </Link>
-            <Link href="/saju" className="secondary-button">
+            <Link href="/saju" className="secondary-button cta-saju">
               사주로 시작
             </Link>
           </div>
@@ -65,9 +65,6 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-        <p className="picks-summary">
-          가까이서 한 번, <strong>멀리서 한 번</strong> 보면 같은 고민도 다르게 보여요.
-        </p>
       </section>
 
       <section className="reading-choice page-width" aria-labelledby="reading-choice-title">
@@ -106,12 +103,6 @@ export default function HomePage() {
               사주 리딩 시작 <span aria-hidden="true">→</span>
             </Link>
           </article>
-        </div>
-
-        <div className="landing-trust" aria-label="서비스 이용 안내">
-          <span>소셜 로그인 후 시작</span>
-          <span>완료한 리딩 기록 저장</span>
-          <span>선택을 돕는 성찰형 해석</span>
         </div>
       </section>
 

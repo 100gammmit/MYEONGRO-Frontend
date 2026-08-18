@@ -22,7 +22,6 @@
   --surface-accent-selected: rgba(124, 111, 240, 0.14);
   --surface-input: rgba(16, 20, 31, 0.7);
   --surface-segment: #171e2e;
-  --surface-selection: rgba(124, 111, 240, 0.18);
   --surface-record: rgba(23, 30, 46, 0.78);
   --surface-danger-subtle: rgba(240, 112, 138, 0.06);
 
@@ -34,7 +33,6 @@
   --text-auth-note: #8790a8;
   --text-faint: #7a87a3;
   --text-card-list: #b7c0dc;
-  --text-trust: #9ba7c1;
   --text-record-meta: #8790a8;
   --text-inverse: #141a28;
   --text-inverse-control: #141a28;
@@ -62,10 +60,19 @@
 
   --accent-primary: #7c6ff0;
   --accent-strong: #a79ef6;
+  --accent-strong-hover: #c0b8f9;
+  /* Reserved for real commit moments only (primary CTA fill, consent
+     checkbox) -- everything else (selection, progress, info) uses
+     --accent-primary/--accent-strong. Do not spread this to new buttons. */
   --accent-cta: #e8b54a;
   --accent-cta-hover: #f0c168;
   --accent-progress-start: #5847b8;
-  --accent-secondary: #5d7bb5;
+  /* Secondary topic color (currently: saju, vs. tarot's --accent-primary).
+     Bright enough to double as text/border, not just a decorative dot. */
+  --accent-secondary: #6e8ac4;
+  --accent-secondary-hover: #82a2d4;
+  --surface-secondary-soft: rgba(110, 138, 196, 0.1);
+  --surface-secondary-hover: rgba(110, 138, 196, 0.16);
   --focus-outline: #a79ef6;
   --focus-ring: 0 0 0 4px rgba(124, 111, 240, 0.16);
   --focus-field-ring: 0 0 0 3px rgba(124, 111, 240, 0.12);
@@ -83,9 +90,7 @@
   --effect-card-inset-border: rgba(124, 111, 240, 0.1);
   --effect-card-aura: radial-gradient(ellipse, rgba(124, 111, 240, 0.16), transparent 68%);
   --effect-accent-dot-glow: 0 0 7px rgba(124, 111, 240, 0.7);
-  --effect-trust-dot-glow: 0 0 8px rgba(124, 111, 240, 0.75);
   --effect-selected-inset: inset 0 0 24px rgba(124, 111, 240, 0.06);
-  --effect-spread-glow: 0 0 35px rgba(124, 111, 240, 0.1);
   --effect-tarot-inner-border: rgba(124, 111, 240, 0.35);
 
   --shadow-panel: 0 28px 90px rgba(0, 0, 0, 0.5);
@@ -208,6 +213,32 @@ h1, h2, h3, blockquote {
 .landing-page .hero-description { max-width: 590px; margin: 26px auto 28px; color: var(--text-secondary); font-size: 15px; line-height: 1.8; text-wrap: pretty; }
 .landing-page .hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 .landing-page .hero-actions a { min-width: 148px; min-height: 48px; justify-content: center; border-radius: 999px; font-family: var(--landing-sans); font-size: 14px; font-weight: 600; }
+
+/* Tarot/saju CTAs read by topic, not by gold-CTA hierarchy: tarot takes
+   the periwinkle brand color, saju takes the secondary topic color. Scoped
+   to the landing page only -- .primary-button/.secondary-button stay gold
+   everywhere else (consent, wizard nav, results actions). */
+.landing-page .cta-tarot,
+.landing-page .tarot-card .primary-button {
+  background: var(--accent-strong);
+  color: var(--text-inverse);
+}
+.landing-page .cta-tarot:hover,
+.landing-page .tarot-card .primary-button:hover {
+  background: var(--accent-strong-hover);
+}
+.landing-page .cta-saju,
+.landing-page .saju-card .secondary-button {
+  background: var(--surface-secondary-soft);
+  border-color: var(--accent-secondary);
+  color: var(--accent-secondary);
+}
+.landing-page .cta-saju:hover,
+.landing-page .saju-card .secondary-button:hover {
+  background: var(--surface-secondary-hover);
+  border-color: var(--accent-secondary-hover);
+  color: var(--accent-secondary-hover);
+}
 .landing-page .hero-actions .secondary-button { background: var(--surface-accent-hero); }
 
 .landing-page .hero-question {
@@ -218,7 +249,7 @@ h1, h2, h3, blockquote {
 .landing-page .hero-question-mark { font-family: var(--landing-serif); font-size: 20px; line-height: 1; color: var(--text-accent); flex: 0 0 auto; }
 .landing-page .hero-question-text { font-size: 14px; color: var(--text-primary); }
 
-.landing-page .reading-picks { padding: 46px 0 0; }
+.landing-page .reading-picks { padding: 46px 0 20px; }
 .landing-page .picks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; max-width: 780px; margin: 0 auto; }
 .landing-page .pick-row { display: flex; gap: 14px; align-items: flex-start; }
 .landing-page .pick-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; flex: 0 0 auto; }
@@ -226,11 +257,6 @@ h1, h2, h3, blockquote {
 .landing-page .pick-dot-saju { background: var(--accent-secondary); }
 .landing-page .pick-row strong { display: block; font-size: 15px; margin-bottom: 5px; }
 .landing-page .pick-row span { color: var(--text-secondary); font-size: 13.5px; line-height: 1.7; }
-.landing-page .picks-summary {
-  max-width: 480px; margin: 30px auto 0; padding: 16px; border-radius: 14px;
-  background: var(--surface-accent-faint); text-align: center; color: var(--text-secondary); font-size: 14px; line-height: 1.7;
-}
-.landing-page .picks-summary strong { color: var(--text-accent); }
 
 .landing-page .reading-choice { padding: 42px 0 62px; }
 .landing-page .section-heading { margin-bottom: 32px; text-align: center; }
@@ -260,13 +286,6 @@ h1, h2, h3, blockquote {
 .landing-page .reading-card li::before { content: ""; width: 3px; height: 3px; display: inline-block; margin: 0 10px 3px 1px; border-radius: 50%; background: var(--accent-primary); box-shadow: var(--effect-accent-dot-glow); }
 .landing-page .reading-card .primary-button,
 .landing-page .reading-card .secondary-button { width: fit-content; margin-top: auto; position: relative; z-index: 1; font-family: var(--landing-sans); font-size: 13px; font-weight: 600; }
-.landing-page .landing-trust { margin-top: 30px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
-.landing-page .landing-trust span {
-  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
-  border: 1px solid var(--border-default); color: var(--text-trust); font-size: 12px;
-}
-.landing-page .landing-trust span::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--accent-primary); box-shadow: var(--effect-trust-dot-glow); }
-
 .landing-page .reading-peek { padding: 0 0 20px; }
 .landing-page .reading-peek-card {
   max-width: 720px; margin: 0 auto; padding: 40px; border-radius: 24px; text-align: center;
@@ -336,7 +355,7 @@ h1, h2, h3, blockquote {
 .saju-place-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .saju-choice-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .saju-choice { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 12px; border: 1px solid var(--border-control); border-radius: 12px; cursor: pointer; transition: border-color .2s ease, background .2s ease; }
-.saju-choice:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-accent-selected); }
+.saju-choice:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-accent-selected); box-shadow: var(--effect-selected-inset); }
 .saju-category { position: relative; cursor: pointer; }
 .saju-category input { position: absolute; top: 14px; right: 14px; }
 .saju-error-summary { margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-danger); border-radius: 14px; background: var(--surface-danger-subtle); color: var(--text-danger); outline: none; }
@@ -354,7 +373,7 @@ h1, h2, h3, blockquote {
 .spread-grid { list-style: none; padding: 0; margin: 0 auto 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 780px; }
 .spread-option { width: 100%; min-height: 176px; padding: 25px; text-align: left; color: var(--text-primary); border: 1px solid var(--border-card); border-radius: 20px; background: var(--gradient-spread-card); transition: border-color .2s ease, background .2s ease, transform .2s ease; }
 .spread-option:hover { border-color: var(--border-strong); transform: translateY(-2px); }
-.spread-option.active { border-color: var(--accent-primary); background: var(--surface-selection); box-shadow: var(--effect-spread-glow); }
+.spread-option.active { border-color: var(--accent-primary); background: var(--surface-accent-selected); box-shadow: var(--effect-selected-inset); }
 .spread-option strong, .spread-option span { display: block; }
 .spread-option strong { font: 400 24px "Noto Serif KR Variable", Georgia, serif; color: var(--text-accent-strong); }
 .spread-option span { margin: 14px 0 16px; color: var(--text-secondary); line-height: 1.65; font-size: 14px; }
@@ -551,7 +570,6 @@ h1, h2, h3, blockquote {
   .landing-page .section-heading h2 { font-size: 34px; }
   .landing-page .reading-card { min-height: 310px; padding: 28px 24px; }
   .landing-page .reading-card h3 { margin-top: 26px; font-size: 30px; }
-  .landing-page .landing-trust { gap: 10px 18px; padding-inline: 10px; }
   .landing-page .how-it-works { padding: 34px 0 90px; }
   .landing-page .feature { padding: 28px 10px; border-right: 0; border-bottom: 1px solid var(--border-default); }
   .landing-page .feature:last-child { border-bottom: 0; }
