@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { ReadingCreditProvider, useReadingCredits } from "./reading-credit-provider";
@@ -21,7 +21,12 @@ const status = {
 
 function Consumer() {
   const credits = useReadingCredits();
-  return <p>{credits.state.data?.balance.total ?? credits.state.status}</p>;
+  return (
+    <>
+      <p>{credits.state.data?.balance.total ?? credits.state.status}</p>
+      <button onClick={() => void credits.refresh()} type="button">refresh</button>
+    </>
+  );
 }
 
 describe("ReadingCreditProvider", () => {
@@ -44,5 +49,18 @@ describe("ReadingCreditProvider", () => {
 
     await waitFor(() => expect(screen.getByText("idle")).toBeInTheDocument());
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("invalidates a previous balance when a later refresh fails", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(status))
+      .mockResolvedValueOnce(new Response(null, { status: 503 }));
+    render(<ReadingCreditProvider authenticated><Consumer /></ReadingCreditProvider>);
+
+    expect(await screen.findByText("9")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "refresh" }));
+
+    expect(await screen.findByText("error")).toBeInTheDocument();
+    expect(screen.queryByText("9")).not.toBeInTheDocument();
   });
 });

@@ -183,6 +183,19 @@ describe("SajuExperience", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
   });
 
+  it("blocks the input journey and offers retry when credit refresh fails after prior data", async () => {
+    credits.state.status = "error";
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+
+    render(<SajuExperience />);
+
+    expect(await screen.findByRole("heading", { name: "사주 리딩 크레딧을 확인해요" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("크레딧을 확인하지 못했어요");
+    expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "다시 확인" }));
+    expect(credits.refresh).toHaveBeenCalledTimes(1);
+  });
+
   it("builds the nested v3 payload and omits birth time and place when unknown", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
     const fetchMock = vi.spyOn(globalThis, "fetch")

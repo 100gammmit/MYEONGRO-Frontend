@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, vi } from "vitest";
 
 const navigation = vi.hoisted(() => ({
@@ -7,7 +7,7 @@ const navigation = vi.hoisted(() => ({
 }));
 const credits = vi.hoisted(() => ({
   state: {
-    status: "ready" as const,
+    status: "ready" as "ready" | "error",
     data: {
       balance: { free: 7, paid: 2, total: 9 },
     },
@@ -30,6 +30,8 @@ describe("SiteHeader", () => {
   beforeEach(() => {
     navigation.pathname = "/tarot";
     navigation.search = "spread=three-card";
+    credits.state.status = "ready";
+    credits.refresh.mockReset();
   });
 
   it("renders the Myeongro brand", () => {
@@ -63,6 +65,16 @@ describe("SiteHeader", () => {
     );
     expect(screen.getByRole("button", { name: "로그아웃" })).toBeInTheDocument();
     expect(screen.getByText("크레딧")).toHaveTextContent("크레딧 9");
+  });
+
+  it("offers a retry instead of showing stale credit data after an error", () => {
+    credits.state.status = "error";
+
+    render(<SiteHeader authenticated />);
+    fireEvent.click(screen.getByRole("button", { name: "크레딧 다시 확인" }));
+
+    expect(screen.queryByText("크레딧 9")).not.toBeInTheDocument();
+    expect(credits.refresh).toHaveBeenCalledTimes(1);
   });
 
   it("does not make the login page its own return destination", () => {

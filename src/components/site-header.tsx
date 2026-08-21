@@ -52,18 +52,18 @@ function CreditIndicator({
   state: ReturnType<typeof useReadingCredits>["state"];
   onRetry: () => void;
 }) {
-  if (state.data) {
-    return (
-      <span className="credit-indicator" title={`무료 ${state.data.balance.free} · 지급 ${state.data.balance.paid}`}>
-        크레딧 <strong>{state.data.balance.total}</strong>
-      </span>
-    );
-  }
   if (state.status === "error") {
     return (
       <button className="credit-indicator credit-indicator-button" onClick={onRetry} type="button">
         크레딧 다시 확인
       </button>
+    );
+  }
+  if (state.status === "ready") {
+    return (
+      <span className="credit-indicator" title={`무료 ${state.data.balance.free} · 지급 ${state.data.balance.paid}`}>
+        크레딧 <strong>{state.data.balance.total}</strong>
+      </span>
     );
   }
   return <span className="credit-indicator" aria-label="크레딧 확인 중">크레딧 ···</span>;

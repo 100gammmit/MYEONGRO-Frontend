@@ -158,6 +158,16 @@ describe("TarotExperience", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
   });
 
+  it("blocks spread entry and offers retry when credit refresh fails after prior data", async () => {
+    credits.state.status = "error";
+    render(<TarotExperience />);
+
+    expect(await screen.findByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent("크레딧을 확인하지 못했어요");
+    fireEvent.click(screen.getByRole("button", { name: "다시 확인" }));
+    expect(credits.refresh).toHaveBeenCalledTimes(1);
+  });
+
   it.each([
     ["daily_one_card", [4]],
     ["mind_three_card", [5, 1, 3]],

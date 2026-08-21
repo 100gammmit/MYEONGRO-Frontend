@@ -126,11 +126,11 @@ export function SajuExperience() {
   const inFlightRef = useRef(false);
   const followUpDraftRef = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
-  const creditCost = credits.state.data?.costs.saju ?? null;
+  const creditData = credits.state.status === "ready" ? credits.state.data : null;
+  const creditCost = creditData?.costs.saju ?? null;
   const creditAccess = getReadingCreditAccess(
-    credits.state.data,
-    (credits.state.status === "idle" || credits.state.status === "loading")
-      && !credits.state.data,
+    creditData,
+    credits.state.status === "idle" || credits.state.status === "loading",
     creditCost,
   );
 

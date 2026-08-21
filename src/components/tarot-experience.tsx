@@ -87,11 +87,11 @@ export function TarotExperience() {
 
   const definition = TAROT_SPREADS[spreadType];
   const inputIsValid = hasValidTarotInput(spreadType, question, choiceOptions);
-  const creditCost = credits.state.data?.costs.tarot[spreadType] ?? null;
+  const creditData = credits.state.status === "ready" ? credits.state.data : null;
+  const creditCost = creditData?.costs.tarot[spreadType] ?? null;
   const creditAccess = getReadingCreditAccess(
-    credits.state.data,
-    (credits.state.status === "idle" || credits.state.status === "loading")
-      && !credits.state.data,
+    creditData,
+    credits.state.status === "idle" || credits.state.status === "loading",
     creditCost,
   );
 
@@ -246,7 +246,7 @@ export function TarotExperience() {
                 <strong>{spread.name}</strong>
                 <span>{spread.summary}</span>
                 <small>
-                  {spread.metaLabel} · {credits.state.data?.costs.tarot[spread.id] ?? "…"} 크레딧
+                  {spread.metaLabel} · {creditData?.costs.tarot[spread.id] ?? "…"} 크레딧
                 </small>
               </button>
             </li>

@@ -19,7 +19,7 @@ type ReadingCreditState =
   | { status: "idle"; data: null }
   | { status: "loading"; data: ReadingCreditStatus | null }
   | { status: "ready"; data: ReadingCreditStatus }
-  | { status: "error"; data: ReadingCreditStatus | null };
+  | { status: "error"; data: null };
 
 interface ReadingCreditContextValue {
   state: ReadingCreditState;
@@ -54,7 +54,7 @@ export function ReadingCreditProvider({
         data: parseReadingCreditStatus(await response.json()),
       });
     } catch {
-      setState((current) => ({ status: "error", data: current.data }));
+      setState({ status: "error", data: null });
     }
   }, [authenticated]);
 
