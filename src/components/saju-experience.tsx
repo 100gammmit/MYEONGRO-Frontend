@@ -22,15 +22,18 @@ import {
   parseSajuReadingCreatedResponse,
   parseSajuReadingCreateRequest,
 } from "@/domain/saju/schema";
+import { getReadingCreditAccess } from "@/domain/reading-credit";
 import {
   fetchSajuBirthPlaces,
   SajuBirthPlacesClientError,
 } from "@/infrastructure/backend/saju-birth-places-client";
 
 import { ConsentGate } from "./consent-gate";
+import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
+import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 
-type Phase = "consent" | "birth-date" | "birth-time" | "birth-place" | "question" | "review" | "loading";
+type Phase = "consent" | "credit" | "birth-date" | "birth-time" | "birth-place" | "question" | "review" | "loading";
 type CatalogStatus = "idle" | "loading" | "ready" | "error";
 type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request";
 
@@ -109,6 +112,7 @@ function ensureRequestId(requestIdRef: MutableRefObject<string | null>): string 
 
 export function SajuExperience() {
   const router = useRouter();
+  const credits = useReadingCredits();
   const [phase, setPhase] = useState<Phase>("consent");
   const [form, setForm] = useState<SajuFormState>(initialForm);
   const [catalog, setCatalog] = useState<SajuBirthPlacesResponse | null>(null);
@@ -122,6 +126,13 @@ export function SajuExperience() {
   const inFlightRef = useRef(false);
   const followUpDraftRef = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
+  const creditCost = credits.state.data?.costs.saju ?? null;
+  const creditAccess = getReadingCreditAccess(
+    credits.state.data,
+    (credits.state.status === "idle" || credits.state.status === "loading")
+      && !credits.state.data,
+    creditCost,
+  );
 
   const redirectToLogin = useCallback(() => {
     router.push("/login?next=%2Fsaju");
@@ -161,8 +172,16 @@ export function SajuExperience() {
   }, []);
 
   const handleConsentComplete = useCallback(() => {
-    setPhase(followUpDraftRef.current ? "question" : "birth-date");
-  }, []);
+    setPhase(creditAccess.status === "allowed"
+      ? followUpDraftRef.current ? "question" : "birth-date"
+      : "credit");
+  }, [creditAccess.status]);
+
+  useEffect(() => {
+    if (phase === "credit" && creditAccess.status === "allowed") {
+      setPhase(followUpDraftRef.current ? "question" : "birth-date");
+    }
+  }, [creditAccess.status, phase]);
 
   useEffect(() => {
     if (phase !== "consent"
@@ -228,10 +247,17 @@ export function SajuExperience() {
       }
       if (!response.ok) {
         const apiError = await readApiError(response);
+        if (
+          apiError.code === "READING_GENERATION_IN_PROGRESS"
+          || apiError.code === "INSUFFICIENT_READING_CREDITS"
+        ) {
+          void credits.refresh();
+        }
         handleSubmissionError(apiError);
         return;
       }
       const created = parseSajuReadingCreatedResponse(await response.json());
+      void credits.refresh();
       router.push(`/saju/results/${encodeURIComponent(created.reading.id)}`);
     } catch (error) {
       setGeneralError(
@@ -257,7 +283,13 @@ export function SajuExperience() {
       setPhase(errorPhase);
       return;
     }
-    setGeneralError(error.message || "리딩 요청을 처리하지 못했어요.");
+    setGeneralError(
+      error.code === "READING_GENERATION_IN_PROGRESS"
+        ? "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요."
+        : error.code === "INSUFFICIENT_READING_CREDITS"
+          ? "크레딧이 부족해 이 리딩을 생성할 수 없어요."
+          : error.message || "리딩 요청을 처리하지 못했어요.",
+    );
     setPhase("review");
   }
 
@@ -271,6 +303,25 @@ export function SajuExperience() {
         totalSteps={TOTAL_STEPS}
       >
         <ConsentGate onComplete={handleConsentComplete} onUnauthenticated={redirectToLogin} />
+      </ReadingShell>
+    );
+  }
+
+  if (phase === "credit") {
+    return (
+      <ReadingShell
+        eyebrow="AI SAJU"
+        title="사주 리딩 크레딧을 확인해요"
+        description="사주 리딩은 현재 설정 기준의 크레딧을 사용합니다."
+        step={1}
+        totalSteps={TOTAL_STEPS}
+      >
+        <div className="wizard-card">
+          <ReadingCreditAccessNotice
+            access={creditAccess}
+            onRetry={() => void credits.refresh()}
+          />
+        </div>
       </ReadingShell>
     );
   }
@@ -535,8 +586,15 @@ export function SajuExperience() {
         </dl>
         <div className="result-actions">
           <button className="secondary-button" disabled={submitting} onClick={() => setPhase("question")} type="button">이전</button>
-          <button className="primary-button" disabled={submitting} onClick={() => void submitReading()} type="button">사주 리딩 생성</button>
+          <button
+            aria-label="사주 리딩 생성"
+            className="primary-button"
+            disabled={submitting || creditAccess.status !== "allowed"}
+            onClick={() => void submitReading()}
+            type="button"
+          >사주 리딩 생성 · {creditCost ?? "…"} 크레딧</button>
         </div>
+        <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
       </div>
     </ReadingShell>
   );

@@ -9,9 +9,34 @@ import {
 import { SajuExperience } from "./saju-experience";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
+const credits = vi.hoisted(() => ({
+  state: {
+    status: "ready",
+    data: {
+      dailyFreeGrant: 10,
+      balance: { free: 10, paid: 0, total: 10 },
+      nextResetAt: "2026-08-22T00:00:00+09:00",
+      generationInProgress: false,
+      costs: {
+        tarot: {
+          daily_one_card: 1,
+          mind_three_card: 2,
+          relationship_three_card: 2,
+          choice_five_card: 3,
+        },
+        saju: 4,
+      },
+    },
+  },
+  refresh: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => navigation,
+}));
+
+vi.mock("./reading-credit-provider", () => ({
+  useReadingCredits: () => credits,
 }));
 
 const REQUIRED_CONSENTS = ["terms", "privacy", "sensitive-data"] as const;
@@ -72,6 +97,10 @@ afterEach(() => {
   vi.restoreAllMocks();
   navigation.push.mockReset();
   clearRememberedSajuBirthProfile();
+  credits.state.status = "ready";
+  credits.state.data.balance = { free: 10, paid: 0, total: 10 };
+  credits.state.data.generationInProgress = false;
+  credits.refresh.mockReset();
 });
 
 async function startWithAcceptedConsent() {
@@ -131,6 +160,27 @@ describe("SajuExperience", () => {
 
     expect(await screen.findByLabelText("양력 생년월일")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/consents", { credentials: "same-origin" });
+  });
+
+  it("blocks the input journey when the saju cost exceeds the current balance", async () => {
+    credits.state.data.balance = { free: 3, paid: 0, total: 3 };
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+
+    render(<SajuExperience />);
+
+    expect(await screen.findByRole("heading", { name: "사주 리딩 크레딧을 확인해요" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("4 크레딧이 필요");
+    expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
+  });
+
+  it("blocks the input journey while another reading is generating", async () => {
+    credits.state.data.generationInProgress = true;
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+
+    render(<SajuExperience />);
+
+    expect(await screen.findByRole("heading", { name: "사주 리딩 크레딧을 확인해요" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
   });
 
   it("builds the nested v3 payload and omits birth time and place when unknown", async () => {
@@ -312,6 +362,27 @@ describe("SajuExperience", () => {
     expect(alert).toHaveFocus();
     expect(screen.getByLabelText(/태어난 시각/)).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText(/태어난 시각/)).toHaveAttribute("aria-describedby", "birth-time-error");
+  });
+
+  it("shows the stable credit error and refreshes shared status after a 429", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(jsonResponse({
+        code: "INSUFFICIENT_READING_CREDITS",
+        message: "리딩 크레딧이 부족합니다.",
+        required: 4,
+        balance: { free: 2, paid: 0, total: 2 },
+        nextResetAt: "2026-08-22T00:00:00+09:00",
+      }, { status: 429 }));
+    await startWithAcceptedConsent();
+    await reachReview("exact");
+
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("크레딧이 부족");
+    expect(credits.refresh).toHaveBeenCalledTimes(1);
   });
 
   it("redirects to login when consent status is unauthenticated", async () => {

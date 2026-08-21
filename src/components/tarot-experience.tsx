@@ -14,7 +14,10 @@ import {
   type TarotSpreadType,
 } from "@/domain/tarot";
 import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
+import { getReadingCreditAccess } from "@/domain/reading-credit";
 import { ConsentGate } from "./consent-gate";
+import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
+import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 import styles from "./tarot-experience.module.css";
 
@@ -70,6 +73,7 @@ const READING_ERROR_MESSAGES: Readonly<Record<number, string>> = {
 
 export function TarotExperience() {
   const router = useRouter();
+  const credits = useReadingCredits();
   const [phase, setPhase] = useState<Phase>("consent");
   const [spreadType, setSpreadType] = useState<TarotSpreadType>("daily_one_card");
   const [question, setQuestion] = useState("");
@@ -83,6 +87,13 @@ export function TarotExperience() {
 
   const definition = TAROT_SPREADS[spreadType];
   const inputIsValid = hasValidTarotInput(spreadType, question, choiceOptions);
+  const creditCost = credits.state.data?.costs.tarot[spreadType] ?? null;
+  const creditAccess = getReadingCreditAccess(
+    credits.state.data,
+    (credits.state.status === "idle" || credits.state.status === "loading")
+      && !credits.state.data,
+    creditCost,
+  );
 
   const redirectToLogin = useCallback(() => {
     router.push("/login?next=%2Ftarot");
@@ -100,7 +111,7 @@ export function TarotExperience() {
   }
 
   function beginDraw() {
-    if (!inputIsValid) return;
+    if (!inputIsValid || creditAccess.status !== "allowed") return;
     setSelectedSlots([]);
     setFocusedSlot(null);
     setRequestId(null);
@@ -167,11 +178,17 @@ export function TarotExperience() {
       }
       if (!response.ok) {
         const apiError = await readApiError(response);
+        if (
+          apiError.code === "READING_GENERATION_IN_PROGRESS"
+          || apiError.code === "INSUFFICIENT_READING_CREDITS"
+        ) {
+          void credits.refresh();
+        }
         if (response.status === 502 && apiError.readingId) {
           setFailedReadingId(apiError.readingId);
         }
         setError(
-          READING_ERROR_MESSAGES[response.status]
+          readingErrorMessage(response.status, apiError)
           ?? apiError.message
           ?? "리딩 요청을 처리하지 못했어요.",
         );
@@ -185,6 +202,7 @@ export function TarotExperience() {
       );
       setRequestId(null);
       setFailedReadingId(null);
+      void credits.refresh();
       router.push(`/tarot/results/${encodeURIComponent(validated.readingId)}`);
     } catch (readingError) {
       setError(
@@ -196,7 +214,7 @@ export function TarotExperience() {
     } finally {
       inFlightRequestId.current = null;
     }
-  }, [choiceOptions, definition.cardCount, failedReadingId, question, redirectToLogin, requestId, router, selectedSlots, spreadType]);
+  }, [choiceOptions, credits, definition.cardCount, failedReadingId, question, redirectToLogin, requestId, router, selectedSlots, spreadType]);
 
   function confirmSelection() {
     if (focusedSlot === null || selectedSlots.length >= definition.cardCount) return;
@@ -227,12 +245,20 @@ export function TarotExperience() {
               >
                 <strong>{spread.name}</strong>
                 <span>{spread.summary}</span>
-                <small>{spread.metaLabel}</small>
+                <small>
+                  {spread.metaLabel} · {credits.state.data?.costs.tarot[spread.id] ?? "…"} 크레딧
+                </small>
               </button>
             </li>
           ))}
         </ul>
-        <button className="primary-button full-button narrow-button" onClick={() => setPhase("input")} type="button">
+        <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+        <button
+          className="primary-button full-button narrow-button"
+          disabled={creditAccess.status !== "allowed"}
+          onClick={() => setPhase("input")}
+          type="button"
+        >
           이 유형으로 시작
         </button>
       </ReadingShell>
@@ -293,7 +319,7 @@ export function TarotExperience() {
           ) : null}
           <button
             className="primary-button full-button"
-            disabled={!inputIsValid}
+            disabled={!inputIsValid || creditAccess.status !== "allowed"}
             onClick={beginDraw}
             type="button"
           >
@@ -340,15 +366,31 @@ export function TarotExperience() {
       <ReadingShell eyebrow={definition.name} title="리딩을 이어가지 못했어요" step={4} totalSteps={4}>
         <div className="wizard-card" role="alert">
           <p>{error}</p>
-          <button className="secondary-button full-button" onClick={() => void submitReading()} type="button">
+          <button
+            className="secondary-button full-button"
+            disabled={creditAccess.status !== "allowed"}
+            onClick={() => void submitReading()}
+            type="button"
+          >
             같은 선택으로 다시 시도
           </button>
+          <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
         </div>
       </ReadingShell>
     );
   }
 
   return null;
+}
+
+function readingErrorMessage(status: number, error: ApiError): string | undefined {
+  if (error.code === "READING_GENERATION_IN_PROGRESS") {
+    return "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요.";
+  }
+  if (error.code === "INSUFFICIENT_READING_CREDITS") {
+    return "크레딧이 부족해 이 리딩을 생성할 수 없어요.";
+  }
+  return READING_ERROR_MESSAGES[status];
 }
 
 function DrawScreen({

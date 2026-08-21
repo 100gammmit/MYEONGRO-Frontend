@@ -94,4 +94,26 @@ describe("proxyBackendRequest", () => {
     expect(response.status).toBe(204);
     expect(await response.text()).toBe("");
   });
+
+  it("preserves credit cache and retry headers from Spring", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(
+      { code: "INSUFFICIENT_READING_CREDITS" },
+      {
+        status: 429,
+        headers: {
+          "cache-control": "no-store",
+          "retry-after": "3600",
+        },
+      },
+    )));
+
+    const response = await proxyBackendRequest({
+      request: new Request("https://front.test/api/reading-credits"),
+      path: "/api/reading-credits",
+    });
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(response.headers.get("retry-after")).toBe("3600");
+  });
 });

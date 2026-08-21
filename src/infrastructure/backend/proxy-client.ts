@@ -8,7 +8,9 @@ const FORWARDED_REQUEST_HEADERS = [
 ] as const;
 
 const FORWARDED_RESPONSE_HEADERS = [
+  "cache-control",
   "content-type",
+  "retry-after",
   "set-cookie",
 ] as const;
 

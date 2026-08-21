@@ -5,10 +5,23 @@ const navigation = vi.hoisted(() => ({
   pathname: "/tarot",
   search: "spread=three-card",
 }));
+const credits = vi.hoisted(() => ({
+  state: {
+    status: "ready" as const,
+    data: {
+      balance: { free: 7, paid: 2, total: 9 },
+    },
+  },
+  refresh: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
   usePathname: () => navigation.pathname,
   useSearchParams: () => new URLSearchParams(navigation.search),
+}));
+
+vi.mock("./reading-credit-provider", () => ({
+  useReadingCredits: () => credits,
 }));
 
 import { SiteHeader } from "./site-header";
@@ -49,6 +62,7 @@ describe("SiteHeader", () => {
       "/account",
     );
     expect(screen.getByRole("button", { name: "로그아웃" })).toBeInTheDocument();
+    expect(screen.getByText("크레딧")).toHaveTextContent("크레딧 9");
   });
 
   it("does not make the login page its own return destination", () => {

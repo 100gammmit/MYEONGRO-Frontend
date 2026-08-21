@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ReadingCreditProvider } from "@/components/reading-credit-provider";
 import { SiteHeader } from "@/components/site-header";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
@@ -25,17 +26,19 @@ export default async function RootLayout({
       <body>
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
-        <SiteHeader authenticated={authenticated} />
-        <main>{children}</main>
-        <footer className="site-footer">
-          <p>
-            명로의 해석은 자기 성찰을 위한 콘텐츠이며 중요한 결정을 대신하지 않습니다.
-          </p>
-          <div>
-            <Link href="/privacy">개인정보 처리방침</Link>
-            <span>© 2026 MYEONGRO</span>
-          </div>
-        </footer>
+        <ReadingCreditProvider authenticated={authenticated}>
+          <SiteHeader authenticated={authenticated} />
+          <main>{children}</main>
+          <footer className="site-footer">
+            <p>
+              명로의 해석은 자기 성찰을 위한 콘텐츠이며 중요한 결정을 대신하지 않습니다.
+            </p>
+            <div>
+              <Link href="/privacy">개인정보 처리방침</Link>
+              <span>© 2026 MYEONGRO</span>
+            </div>
+          </footer>
+        </ReadingCreditProvider>
       </body>
     </html>
   );

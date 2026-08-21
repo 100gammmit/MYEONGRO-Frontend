@@ -3,8 +3,12 @@ import { vi } from "vitest";
 
 const refresh = vi.fn();
 const push = vi.fn();
+const refreshCredits = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh, push }),
+}));
+vi.mock("./reading-credit-provider", () => ({
+  useReadingCredits: () => ({ refresh: refreshCredits }),
 }));
 
 import { ReadingRecordActions } from "./reading-record-actions";
@@ -14,6 +18,7 @@ describe("ReadingRecordActions", () => {
     vi.restoreAllMocks();
     refresh.mockReset();
     push.mockReset();
+    refreshCredits.mockReset();
   });
 
   it("deletes a reading and returns to records", async () => {
@@ -58,5 +63,19 @@ describe("ReadingRecordActions", () => {
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/saju/results/reading-1"));
     expect(refresh).toHaveBeenCalled();
+    expect(refreshCredits).toHaveBeenCalled();
+  });
+
+  it("preserves a retry credit rejection and refreshes the shared balance", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
+      code: "INSUFFICIENT_READING_CREDITS",
+      message: "리딩 크레딧이 부족합니다.",
+    }, { status: 429 }));
+    render(<ReadingRecordActions readingId="reading-1" retryable />);
+
+    fireEvent.click(screen.getByRole("button", { name: "다시 생성" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("크레딧이 부족");
+    expect(refreshCredits).toHaveBeenCalledTimes(1);
   });
 });

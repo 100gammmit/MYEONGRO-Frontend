@@ -6,6 +6,27 @@ import { MAJOR_ARCANA, TAROT_SPREADS, type TarotSpreadType } from "@/domain/taro
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
 const consent = vi.hoisted(() => ({ autoComplete: true }));
+const credits = vi.hoisted(() => ({
+  state: {
+    status: "ready",
+    data: {
+      dailyFreeGrant: 10,
+      balance: { free: 10, paid: 0, total: 10 },
+      nextResetAt: "2026-08-22T00:00:00+09:00",
+      generationInProgress: false,
+      costs: {
+        tarot: {
+          daily_one_card: 1,
+          mind_three_card: 2,
+          relationship_three_card: 2,
+          choice_five_card: 3,
+        },
+        saju: 4,
+      },
+    },
+  },
+  refresh: vi.fn(),
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => navigation,
@@ -20,6 +41,10 @@ vi.mock("./consent-gate", () => ({
       ? null
       : <button onClick={onComplete} type="button">동의 완료</button>;
   },
+}));
+
+vi.mock("./reading-credit-provider", () => ({
+  useReadingCredits: () => credits,
 }));
 
 import { TarotExperience } from "./tarot-experience";
@@ -95,6 +120,10 @@ describe("TarotExperience", () => {
     navigation.push.mockReset();
     navigation.replace.mockReset();
     consent.autoComplete = true;
+    credits.state.status = "ready";
+    credits.state.data.balance = { free: 10, paid: 0, total: 10 };
+    credits.state.data.generationInProgress = false;
+    credits.refresh.mockReset();
     sessionStorage.clear();
     localStorage.clear();
   });
@@ -109,6 +138,24 @@ describe("TarotExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "동의 완료" }));
     expect(await screen.findByText("어떤 마음을 들여다볼까요?")).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("shows configured spread costs and blocks an unaffordable spread before input", async () => {
+    credits.state.data.balance = { free: 2, paid: 0, total: 2 };
+    render(<TarotExperience />);
+    fireEvent.click(await screen.findByRole("button", { name: /선택 리딩/ }));
+
+    expect(screen.getByText(/카드 5장.*3 크레딧/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent("현재 2 크레딧");
+  });
+
+  it("blocks a new spread while another reading is generating", async () => {
+    credits.state.data.generationInProgress = true;
+    render(<TarotExperience />);
+
+    expect(await screen.findByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
   });
 
   it.each([
@@ -204,6 +251,37 @@ describe("TarotExperience", () => {
     expect(fetchMock.mock.calls[1][0]).toBe("/api/readings/failed-reading-1/retry");
     expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: "POST" });
     expect(fetchMock.mock.calls[1][1]).not.toHaveProperty("body");
+  });
+
+  it("shows the stable credit error and refreshes shared status after a 429", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
+      code: "INSUFFICIENT_READING_CREDITS",
+      message: "리딩 크레딧이 부족합니다.",
+      required: 1,
+      balance: { free: 0, paid: 0, total: 0 },
+      nextResetAt: "2026-08-22T00:00:00+09:00",
+    }, { status: 429 }));
+    await chooseSpreadAndStart("daily_one_card");
+    selectSlots([2]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("크레딧이 부족");
+    expect(credits.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the active-generation conflict and refreshes shared status after a 409", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
+      code: "READING_GENERATION_IN_PROGRESS",
+      message: "이미 생성 중인 리딩이 있습니다.",
+    }, { status: 409 }));
+    await chooseSpreadAndStart("daily_one_card");
+    selectSlots([3]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
+    expect(credits.refresh).toHaveBeenCalledTimes(1);
   });
 
   it("recovers the failed reading id when the first 502 response is lost", async () => {

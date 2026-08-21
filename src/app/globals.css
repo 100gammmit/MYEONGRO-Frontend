@@ -178,6 +178,10 @@ h1, h2, h3, blockquote {
 .site-header nav { display: flex; align-items: center; gap: 28px; font-size: 13px; color: var(--text-secondary); }
 .site-header nav a, .nav-button { transition: color .2s ease, border-color .2s ease, background .2s ease; }
 .site-header nav a:hover, .nav-button:hover { color: var(--text-primary); }
+.credit-indicator { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.credit-indicator strong { color: var(--text-accent-strong); font-size: 14px; }
+.credit-indicator-button { padding: 0; border: 0; background: transparent; color: var(--text-secondary); font: inherit; cursor: pointer; }
+.credit-indicator-button:hover { color: var(--text-primary); }
 .nav-cta { border: 1px solid var(--border-default); border-radius: 10px; padding: 10px 17px; color: var(--text-primary); background: var(--surface-accent-subtle); }
 .nav-cta:hover { border-color: var(--border-strong); background: var(--surface-accent-selected); }
 .nav-button { background: transparent; }
@@ -345,6 +349,9 @@ h1, h2, h3, blockquote {
 .segmented button.active, .gender-row button.active { color: var(--text-inverse-control); background: var(--accent-strong); }
 .gender-row { grid-template-columns: repeat(3, 1fr); }
 .notice { color: var(--text-accent-strong); background: var(--surface-accent-soft); border-left: 2px solid var(--accent-primary); border-radius: 0 10px 10px 0; padding: 14px 16px; font-size: 13px; line-height: 1.5; }
+.credit-notice { max-width: 780px; margin: 14px auto; color: var(--text-secondary); text-align: center; font-size: 13px; line-height: 1.6; }
+.credit-notice p { margin: 0 0 10px; }
+.credit-notice .secondary-button { margin: auto; padding: 10px 15px; }
 .saju-option-list { display: grid; gap: 10px; }
 .saju-option { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 12px; padding: 16px; border: 1px solid var(--border-control); border-radius: 16px; background: var(--surface-accent-faint); cursor: pointer; transition: border-color .2s ease, background .2s ease; }
 .saju-option:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-accent-selected); box-shadow: var(--effect-selected-inset); }

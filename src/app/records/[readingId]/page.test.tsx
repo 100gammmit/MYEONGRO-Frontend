@@ -35,6 +35,9 @@ vi.mock("@/infrastructure/backend/reading-records-client", () => ({
     get = mocks.get;
   },
 }));
+vi.mock("@/components/reading-credit-provider", () => ({
+  useReadingCredits: () => ({ refresh: vi.fn() }),
+}));
 
 import ReadingDetailPage from "./page";
 
