@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -36,31 +37,64 @@ export function ReadingCreditProvider({
   children: ReactNode;
 }) {
   const [state, setState] = useState<ReadingCreditState>({ status: "idle", data: null });
+  const refreshInFlight = useRef<Promise<void> | null>(null);
+  const refreshedResetAt = useRef<string | null>(null);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback((): Promise<void> => {
     if (!authenticated) {
       setState({ status: "idle", data: null });
-      return;
+      return Promise.resolve();
     }
-    setState((current) => ({ status: "loading", data: current.data }));
-    try {
-      const response = await fetch("/api/reading-credits", {
-        credentials: "same-origin",
-        cache: "no-store",
-      });
-      if (!response.ok) throw new Error("credit status failed");
-      setState({
-        status: "ready",
-        data: parseReadingCreditStatus(await response.json()),
-      });
-    } catch {
-      setState({ status: "error", data: null });
-    }
+    if (refreshInFlight.current) return refreshInFlight.current;
+
+    const request = (async () => {
+      setState((current) => ({ status: "loading", data: current.data }));
+      try {
+        const response = await fetch("/api/reading-credits", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("credit status failed");
+        setState({
+          status: "ready",
+          data: parseReadingCreditStatus(await response.json()),
+        });
+      } catch {
+        setState({ status: "error", data: null });
+      }
+    })();
+    refreshInFlight.current = request;
+    void request.finally(() => {
+      if (refreshInFlight.current === request) refreshInFlight.current = null;
+    });
+    return request;
   }, [authenticated]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+    return () => document.removeEventListener("visibilitychange", refreshWhenVisible);
+  }, [authenticated, refresh]);
+
+  const nextResetAt = state.status === "ready" ? state.data.nextResetAt : null;
+  useEffect(() => {
+    if (!authenticated || !nextResetAt || refreshedResetAt.current === nextResetAt) return;
+    const resetTime = Date.parse(nextResetAt);
+    if (!Number.isFinite(resetTime)) return;
+
+    const timer = globalThis.setTimeout(() => {
+      refreshedResetAt.current = nextResetAt;
+      void refresh();
+    }, Math.max(resetTime - Date.now() + 100, 0));
+    return () => globalThis.clearTimeout(timer);
+  }, [authenticated, nextResetAt, refresh]);
 
   const value = useMemo(() => ({ state, refresh }), [refresh, state]);
   return (

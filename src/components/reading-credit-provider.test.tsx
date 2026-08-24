@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { ReadingCreditProvider, useReadingCredits } from "./reading-credit-provider";
@@ -30,7 +30,10 @@ function Consumer() {
 }
 
 describe("ReadingCreditProvider", () => {
-  afterEach(() => vi.restoreAllMocks());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
 
   it("loads authenticated credit status without caching", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json(status));
@@ -62,5 +65,67 @@ describe("ReadingCreditProvider", () => {
 
     expect(await screen.findByText("error")).toBeInTheDocument();
     expect(screen.queryByText("9")).not.toBeInTheDocument();
+  });
+
+  it("refreshes credit status when the next reset time arrives", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2026-08-21T14:59:59Z"));
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(status))
+      .mockResolvedValueOnce(Response.json({
+        ...status,
+        balance: { free: 10, paid: 2, total: 12 },
+        nextResetAt: "2026-08-23T00:00:00+09:00",
+      }));
+    render(<ReadingCreditProvider authenticated><Consumer /></ReadingCreditProvider>);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(screen.getByText("9")).toBeInTheDocument();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_100);
+    });
+
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("refreshes credit status when a hidden tab becomes visible", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(status))
+      .mockResolvedValueOnce(Response.json({
+        ...status,
+        balance: { free: 10, paid: 2, total: 12 },
+      }));
+    const visibility = vi.spyOn(document, "visibilityState", "get")
+      .mockReturnValue("visible");
+    render(<ReadingCreditProvider authenticated><Consumer /></ReadingCreditProvider>);
+
+    expect(await screen.findByText("9")).toBeInTheDocument();
+    visibility.mockReturnValue("hidden");
+    fireEvent(document, new Event("visibilitychange"));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    visibility.mockReturnValue("visible");
+    fireEvent(document, new Event("visibilitychange"));
+
+    expect(await screen.findByText("12")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("shares an in-flight refresh when the tab becomes visible", async () => {
+    let resolveResponse: ((response: Response) => void) | undefined;
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockReturnValue(new Promise((resolve) => {
+      resolveResponse = resolve;
+    }));
+    vi.spyOn(document, "visibilityState", "get").mockReturnValue("visible");
+    render(<ReadingCreditProvider authenticated><Consumer /></ReadingCreditProvider>);
+
+    fireEvent(document, new Event("visibilitychange"));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    resolveResponse?.(Response.json(status));
+    expect(await screen.findByText("9")).toBeInTheDocument();
   });
 });
