@@ -6,7 +6,7 @@ import { ReadingCreditProvider, useReadingCredits } from "./reading-credit-provi
 const status = {
   dailyFreeGrant: 10,
   balance: { free: 7, paid: 2, total: 9 },
-  nextResetAt: "2026-08-22T00:00:00+09:00",
+  nextResetAt: new Date(Date.now() + 60_000).toISOString(),
   generationInProgress: false,
   costs: {
     tarot: {
@@ -70,8 +70,12 @@ describe("ReadingCreditProvider", () => {
   it("refreshes credit status when the next reset time arrives", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date("2026-08-21T14:59:59Z"));
+    const preResetStatus = {
+      ...status,
+      nextResetAt: "2026-08-22T00:00:00+09:00",
+    };
     const fetchMock = vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(Response.json(status))
+      .mockResolvedValueOnce(Response.json(preResetStatus))
       .mockResolvedValueOnce(Response.json({
         ...status,
         balance: { free: 10, paid: 2, total: 12 },
@@ -89,6 +93,44 @@ describe("ReadingCreditProvider", () => {
 
     expect(screen.getByText("12")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("starts a post-reset refresh after a pre-reset request finishes", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2026-08-21T14:59:59Z"));
+    const preResetStatus = {
+      ...status,
+      nextResetAt: "2026-08-22T00:00:00+09:00",
+    };
+    let resolvePreResetRefresh: ((response: Response) => void) | undefined;
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(preResetStatus))
+      .mockReturnValueOnce(new Promise((resolve) => {
+        resolvePreResetRefresh = resolve;
+      }))
+      .mockResolvedValueOnce(Response.json({
+        ...status,
+        balance: { free: 10, paid: 2, total: 12 },
+        nextResetAt: "2026-08-23T00:00:00+09:00",
+      }));
+    render(<ReadingCreditProvider authenticated><Consumer /></ReadingCreditProvider>);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "refresh" }));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_100);
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      resolvePreResetRefresh?.(Response.json(preResetStatus));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+    expect(await screen.findByText("12")).toBeInTheDocument();
   });
 
   it("refreshes credit status when a hidden tab becomes visible", async () => {

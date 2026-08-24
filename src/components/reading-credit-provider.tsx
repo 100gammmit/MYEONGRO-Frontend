@@ -70,6 +70,15 @@ export function ReadingCreditProvider({
     return request;
   }, [authenticated]);
 
+  const refreshAfterInFlight = useCallback(async (): Promise<void> => {
+    const currentRequest = refreshInFlight.current;
+    if (currentRequest) {
+      await currentRequest;
+      if (refreshInFlight.current === currentRequest) refreshInFlight.current = null;
+    }
+    await refresh();
+  }, [refresh]);
+
   useEffect(() => {
     void refresh();
   }, [refresh]);
@@ -83,18 +92,19 @@ export function ReadingCreditProvider({
     return () => document.removeEventListener("visibilitychange", refreshWhenVisible);
   }, [authenticated, refresh]);
 
-  const nextResetAt = state.status === "ready" ? state.data.nextResetAt : null;
+  const nextResetAt = state.data?.nextResetAt ?? null;
   useEffect(() => {
     if (!authenticated || !nextResetAt || refreshedResetAt.current === nextResetAt) return;
     const resetTime = Date.parse(nextResetAt);
     if (!Number.isFinite(resetTime)) return;
 
     const timer = globalThis.setTimeout(() => {
-      refreshedResetAt.current = nextResetAt;
-      void refresh();
+      void refreshAfterInFlight().then(() => {
+        refreshedResetAt.current = nextResetAt;
+      });
     }, Math.max(resetTime - Date.now() + 100, 0));
     return () => globalThis.clearTimeout(timer);
-  }, [authenticated, nextResetAt, refresh]);
+  }, [authenticated, nextResetAt, refreshAfterInFlight]);
 
   const value = useMemo(() => ({ state, refresh }), [refresh, state]);
   return (
