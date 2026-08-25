@@ -27,6 +27,7 @@ type State =
 export function DailyCardExperience() {
   const [state, setState] = useState<State>({ status: "choosing", selectedSlot: null });
   const requestInFlight = useRef(false);
+  const resultHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const restore = useCallback(() => {
     let stored: StoredDailyCard | null = null;
@@ -43,14 +44,24 @@ export function DailyCardExperience() {
 
   useEffect(() => {
     restore();
-    const untilTomorrow = millisecondsUntilNextKoreanDay();
-    const timer = window.setTimeout(restore, untilTomorrow);
+    let timer: number | undefined;
+    const scheduleNextDay = () => {
+      if (timer !== undefined) window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        restore();
+        scheduleNextDay();
+      }, millisecondsUntilNextKoreanDay());
+    };
+    scheduleNextDay();
     const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") restore();
+      if (document.visibilityState === "visible") {
+        restore();
+        scheduleNextDay();
+      }
     };
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
-      window.clearTimeout(timer);
+      if (timer !== undefined) window.clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [restore]);
@@ -58,6 +69,10 @@ export function DailyCardExperience() {
   const content = useMemo(() => state.status === "result"
     ? getDailyCardContent(state.stored.cardId, state.stored.variantIndex)
     : null, [state]);
+
+  useEffect(() => {
+    if (state.status === "result" && content) resultHeadingRef.current?.focus();
+  }, [content, state.status]);
 
   async function confirmSelection(selectedSlot: number, existingDrawId?: string) {
     if (requestInFlight.current) return;
@@ -81,6 +96,15 @@ export function DailyCardExperience() {
           : "오늘의 카드를 확인하지 못했어요. 잠시 뒤 다시 시도해 주세요.");
       }
       const selection = parseDailyCardSelectionResponse(await response.json());
+      if (selection.dateKst !== getKoreanDate()) {
+        try {
+          localStorage.removeItem(DAILY_CARD_STORAGE_KEY);
+        } catch {
+          // Storage can be unavailable; discarding the stale in-memory response is enough.
+        }
+        setState({ status: "choosing", selectedSlot: null });
+        return;
+      }
       const stored: StoredDailyCard = {
         schemaVersion: 1,
         drawId,
@@ -111,7 +135,7 @@ export function DailyCardExperience() {
       <ReadingShell eyebrow="FREE DAILY TAROT" title={content.title} step={2} totalSteps={2}>
         <article className={`wizard-card ${styles.result}`}>
           <p className={styles.cardName}>오늘의 카드 · {content.cardName}</p>
-          <h2>{content.today.heading}</h2>
+          <h2 ref={resultHeadingRef} tabIndex={-1}>{content.today.heading}</h2>
           <p>{content.today.body}</p>
           <p className={styles.guidance}>{content.guidance[0]}</p>
           <small>{content.disclaimer}</small>
