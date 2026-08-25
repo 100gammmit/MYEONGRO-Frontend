@@ -1,0 +1,49 @@
+.cards {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+.card {
+  aspect-ratio: 2 / 3;
+  min-width: 0;
+}
+
+.selected {
+  opacity: 1;
+  border-color: var(--text-primary);
+  box-shadow: var(--shadow-tarot-hover);
+  transform: translateY(-6px);
+}
+
+.result {
+  display: grid;
+  gap: 1rem;
+}
+
+.cardName {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.guidance {
+  padding: 1rem;
+  border-radius: 16px;
+  background: var(--surface-accent-subtle);
+}
+
+.advertisement {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  border: 1px dashed var(--border-subtle);
+  border-radius: 16px;
+}
+
+@media (max-width: 640px) {
+  .cards {
+    gap: 0.35rem;
+  }
+}

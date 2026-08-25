@@ -9,6 +9,7 @@ import {
   TAROT_SPREAD_LIST,
   TAROT_SPREADS,
   createTarotReadingRequest,
+  isAiTarotSpreadType,
   type TarotChoiceOptions,
   type TarotPositionId,
   type TarotSpreadType,
@@ -74,7 +75,7 @@ const READING_ERROR_MESSAGES: Readonly<Record<number, string>> = {
 export function TarotExperience() {
   const router = useRouter();
   const credits = useReadingCredits();
-  const [phase, setPhase] = useState<Phase>("consent");
+  const [phase, setPhase] = useState<Phase>("spread");
   const [spreadType, setSpreadType] = useState<TarotSpreadType>("daily_one_card");
   const [question, setQuestion] = useState("");
   const [choiceOptions, setChoiceOptions] = useState<TarotChoiceOptions>({ a: "", b: "" });
@@ -88,12 +89,17 @@ export function TarotExperience() {
   const definition = TAROT_SPREADS[spreadType];
   const inputIsValid = hasValidTarotInput(spreadType, question, choiceOptions);
   const creditData = credits.state.status === "ready" ? credits.state.data : null;
-  const creditCost = creditData?.costs.tarot[spreadType] ?? null;
-  const creditAccess = getReadingCreditAccess(
-    creditData,
-    credits.state.status === "idle" || credits.state.status === "loading",
-    creditCost,
-  );
+  const isAiSpread = isAiTarotSpreadType(spreadType);
+  const creditCost = isAiSpread ? creditData?.costs.tarot[spreadType] ?? null : 0;
+  const creditAccess = isAiSpread
+    ? credits.state.status === "idle"
+      ? { status: "allowed", required: 0, remaining: 0 } as const
+      : getReadingCreditAccess(
+      creditData,
+      credits.state.status === "loading",
+      creditCost,
+      )
+    : { status: "allowed", required: 0, remaining: creditData?.balance.total ?? 0 } as const;
 
   const redirectToLogin = useCallback(() => {
     router.push("/login?next=%2Ftarot");
@@ -118,6 +124,15 @@ export function TarotExperience() {
     setFailedReadingId(null);
     setError(null);
     setPhase("draw");
+  }
+
+  function beginSelectedSpread() {
+    if (spreadType === "daily_one_card") {
+      router.push("/tarot/daily");
+      return;
+    }
+    if (creditAccess.status !== "allowed") return;
+    setPhase("consent");
   }
 
   function focusSelection(slot: number) {
@@ -228,7 +243,7 @@ export function TarotExperience() {
   }
 
   const handleConsentComplete = useCallback(() => {
-    setPhase("spread");
+    setPhase("input");
   }, []);
 
   if (phase === "spread") {
@@ -246,17 +261,21 @@ export function TarotExperience() {
                 <strong>{spread.name}</strong>
                 <span>{spread.summary}</span>
                 <small>
-                  {spread.metaLabel} · {creditData?.costs.tarot[spread.id] ?? "…"} 크레딧
+                  {spread.metaLabel} · {spread.id === "daily_one_card"
+                    ? "무료"
+                    : `${creditData?.costs.tarot[spread.id] ?? "…"} 크레딧`}
                 </small>
               </button>
             </li>
           ))}
         </ul>
-        <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+        {isAiSpread ? (
+          <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+        ) : null}
         <button
           className="primary-button full-button narrow-button"
           disabled={creditAccess.status !== "allowed"}
-          onClick={() => setPhase("input")}
+          onClick={beginSelectedSpread}
           type="button"
         >
           이 유형으로 시작

@@ -16,7 +16,6 @@ const credits = vi.hoisted(() => ({
       generationInProgress: false,
       costs: {
         tarot: {
-          daily_one_card: 1,
           mind_three_card: 2,
           relationship_three_card: 2,
           choice_five_card: 3,
@@ -89,7 +88,7 @@ async function chooseSpreadAndStart(spreadType: TarotSpreadType) {
   fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
 
   if (definition.inputMode !== "fixed") {
-    fireEvent.change(screen.getByRole("textbox", { name: "카드에게 묻고 싶은 질문" }), {
+    fireEvent.change(await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" }), {
       target: { value: "지금 제 마음에서 살펴볼 흐름이 궁금해요." },
     });
   }
@@ -128,16 +127,44 @@ describe("TarotExperience", () => {
     localStorage.clear();
   });
 
-  it("checks consent before showing spread choices and makes no draw request", async () => {
+  it("shows spread choices before consent and checks consent only for AI readings", async () => {
     consent.autoComplete = false;
     const fetchMock = vi.spyOn(globalThis, "fetch");
 
     render(<TarotExperience />);
 
-    expect(screen.queryByText("어떤 마음을 들여다볼까요?")).not.toBeInTheDocument();
+    expect(screen.getByText("어떤 마음을 들여다볼까요?")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
+    fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
+    expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "동의 완료" }));
-    expect(await screen.findByText("어떤 마음을 들여다볼까요?")).toBeInTheDocument();
+    expect(await screen.findByText("상황을 들려주세요")).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("routes the free daily card without consent or credit checks", () => {
+    consent.autoComplete = false;
+    credits.state.status = "error";
+    render(<TarotExperience />);
+
+    expect(screen.getByText(/카드 1장.*무료/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
+
+    expect(navigation.push).toHaveBeenCalledWith("/tarot/daily");
+    expect(screen.queryByText("리딩 전 필수 동의를 확인해요")).not.toBeInTheDocument();
+  });
+
+  it("lets a guest enter the consent boundary for an AI spread", () => {
+    consent.autoComplete = false;
+    credits.state.status = "idle";
+    render(<TarotExperience />);
+
+    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
+    const start = screen.getByRole("button", { name: "이 유형으로 시작" });
+    expect(start).toBeEnabled();
+    fireEvent.click(start);
+
+    expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
   });
 
   it("shows configured spread costs and blocks an unaffordable spread before input", async () => {
@@ -153,6 +180,7 @@ describe("TarotExperience", () => {
   it("blocks a new spread while another reading is generating", async () => {
     credits.state.data.generationInProgress = true;
     render(<TarotExperience />);
+    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
 
     expect(await screen.findByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
     expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
@@ -161,6 +189,7 @@ describe("TarotExperience", () => {
   it("blocks spread entry and offers retry when credit refresh fails after prior data", async () => {
     credits.state.status = "error";
     render(<TarotExperience />);
+    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
 
     expect(await screen.findByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
     expect(screen.getByRole("alert")).toHaveTextContent("크레딧을 확인하지 못했어요");
@@ -169,7 +198,6 @@ describe("TarotExperience", () => {
   });
 
   it.each([
-    ["daily_one_card", [4]],
     ["mind_three_card", [5, 1, 3]],
     ["relationship_three_card", [2, 4, 1]],
     ["choice_five_card", [5, 4, 3, 2, 1]],
@@ -248,16 +276,16 @@ describe("TarotExperience", () => {
         message: "provider failed",
         readingId: "failed-reading-1",
       }, { status: 502 }))
-      .mockResolvedValueOnce(readingResponse("daily_one_card"));
-    await chooseSpreadAndStart("daily_one_card");
-    selectSlots([2]);
+      .mockResolvedValueOnce(readingResponse("mind_three_card"));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([2, 3, 4]);
 
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
     fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     const first = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
-    expect(first.selectedSlots).toEqual([2]);
+    expect(first.selectedSlots).toEqual([2, 3, 4]);
     expect(fetchMock.mock.calls[1][0]).toBe("/api/readings/failed-reading-1/retry");
     expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: "POST" });
     expect(fetchMock.mock.calls[1][1]).not.toHaveProperty("body");
@@ -271,8 +299,8 @@ describe("TarotExperience", () => {
       balance: { free: 0, paid: 0, total: 0 },
       nextResetAt: "2026-08-22T00:00:00+09:00",
     }, { status: 429 }));
-    await chooseSpreadAndStart("daily_one_card");
-    selectSlots([2]);
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([2, 3, 4]);
 
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
 
@@ -285,8 +313,8 @@ describe("TarotExperience", () => {
       code: "READING_GENERATION_IN_PROGRESS",
       message: "이미 생성 중인 리딩이 있습니다.",
     }, { status: 409 }));
-    await chooseSpreadAndStart("daily_one_card");
-    selectSlots([3]);
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([3, 2, 1]);
 
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
 
@@ -302,9 +330,9 @@ describe("TarotExperience", () => {
         message: "provider failed",
         readingId: "failed-reading-2",
       }, { status: 502 }))
-      .mockResolvedValueOnce(readingResponse("daily_one_card"));
-    await chooseSpreadAndStart("daily_one_card");
-    selectSlots([4]);
+      .mockResolvedValueOnce(readingResponse("mind_three_card"));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([4, 2, 5]);
 
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
     fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
@@ -325,9 +353,9 @@ describe("TarotExperience", () => {
         readingId: "failed-reading-3",
       }, { status: 502 }))
       .mockRejectedValueOnce(new TypeError("retry response lost"))
-      .mockResolvedValueOnce(readingResponse("daily_one_card"));
-    await chooseSpreadAndStart("daily_one_card");
-    selectSlots([1]);
+      .mockResolvedValueOnce(readingResponse("mind_three_card"));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([1, 2, 3]);
 
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
     fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));

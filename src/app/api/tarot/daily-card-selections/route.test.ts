@@ -6,17 +6,17 @@ vi.mock("@/infrastructure/backend/proxy-client", () => ({
   proxyBackendRequest,
 }));
 
-describe("/api/tarot/readings route", () => {
+describe("/api/tarot/daily-card-selections route", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
   });
 
-  it("proxies tarot creation to its Spring endpoint", async () => {
-    proxyBackendRequest.mockResolvedValue(Response.json({ reading: { id: "tarot-reading" } }));
-    const request = new Request("https://front.test/api/tarot/readings", {
+  it("proxies the guest-safe selection request to Spring", async () => {
+    proxyBackendRequest.mockResolvedValue(Response.json({ selection: {} }));
+    const request = new Request("https://front.test/api/tarot/daily-card-selections", {
       method: "POST",
-      body: JSON.stringify({ spreadType: "mind_three_card" }),
+      body: "{}",
     });
     const { POST } = await import("./route");
 
@@ -24,7 +24,7 @@ describe("/api/tarot/readings route", () => {
 
     expect(proxyBackendRequest).toHaveBeenCalledWith({
       request,
-      path: "/api/tarot/readings",
+      path: "/api/tarot/daily-card-selections",
     });
     expect(response.status).toBe(200);
   });

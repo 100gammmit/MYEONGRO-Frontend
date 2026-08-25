@@ -4,6 +4,14 @@ export type TarotSpreadType =
   | "relationship_three_card"
   | "choice_five_card";
 
+export type AiTarotSpreadType = Exclude<TarotSpreadType, "daily_one_card">;
+
+export function isAiTarotSpreadType(
+  spreadType: TarotSpreadType,
+): spreadType is AiTarotSpreadType {
+  return spreadType !== "daily_one_card";
+}
+
 export type TarotPositionId =
   | "today"
   | "emotion"

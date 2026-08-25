@@ -19,7 +19,6 @@ const readingCreditStatusSchema = z.object({
   generationInProgress: z.boolean(),
   costs: z.object({
     tarot: z.object({
-      daily_one_card: positiveCost,
       mind_three_card: positiveCost,
       relationship_three_card: positiveCost,
       choice_five_card: positiveCost,

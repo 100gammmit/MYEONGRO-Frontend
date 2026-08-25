@@ -1,4 +1,4 @@
-import type { TarotSpreadType } from "@/domain/tarot";
+import type { AiTarotSpreadType } from "@/domain/tarot";
 
 export interface ReadingCreditStatus {
   dailyFreeGrant: number;
@@ -10,7 +10,7 @@ export interface ReadingCreditStatus {
   nextResetAt: string;
   generationInProgress: boolean;
   costs: {
-    tarot: Record<TarotSpreadType, number>;
+    tarot: Record<AiTarotSpreadType, number>;
     saju: number;
   };
 }

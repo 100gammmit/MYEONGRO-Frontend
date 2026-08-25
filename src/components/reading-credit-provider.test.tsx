@@ -10,7 +10,6 @@ const status = {
   generationInProgress: false,
   costs: {
     tarot: {
-      daily_one_card: 1,
       mind_three_card: 2,
       relationship_three_card: 2,
       choice_five_card: 3,

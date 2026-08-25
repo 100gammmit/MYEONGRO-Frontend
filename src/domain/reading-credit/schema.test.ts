@@ -9,7 +9,6 @@ const status = {
   generationInProgress: false,
   costs: {
     tarot: {
-      daily_one_card: 1,
       mind_three_card: 2,
       relationship_three_card: 2,
       choice_five_card: 3,
@@ -30,7 +29,7 @@ describe("reading credit contract", () => {
     })).toThrow();
     expect(() => parseReadingCreditStatus({
       ...status,
-      costs: { tarot: { daily_one_card: 1 }, saju: 4 },
+      costs: { tarot: { mind_three_card: 2 }, saju: 4 },
     })).toThrow();
   });
 
