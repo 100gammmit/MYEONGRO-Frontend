@@ -1,12 +1,11 @@
 {
   "contentVersion" : "daily-one-card-static-v1",
-  "model" : "gpt-5.6-luna",
-  "promptVersion" : "common-ko-v18+major-arcana-ko-v4+daily-one-card-ko-v6",
-  "generatedAt" : "2026-08-25T12:52:54.247262200Z",
+  "authoringMethod" : "codex-agent-authored",
+  "promptVersion" : "daily-static-agent-ko-v1+major-arcana-ko-v4",
+  "authoredAt" : "2026-08-26",
   "entryCount" : 132,
   "reviewStatus" : "quality-filter-passed",
-  "reviewedAt" : "2026-08-25",
+  "reviewedAt" : "2026-08-26",
   "reviewedEntryCount" : 132,
-  "editoriallyCorrectedEntryCount" : 9,
-  "evaluationVersion" : 1
+  "evaluationVersion" : 2
 }

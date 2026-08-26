@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DAILY_CARD_CONTENT_VERSION,
   DAILY_CARD_STORAGE_KEY,
+  getDailyCardContent,
   getKoreanDate,
 } from "@/domain/daily-card-free";
 import { DailyCardExperience } from "./daily-card-experience";
@@ -44,7 +45,11 @@ describe("DailyCardExperience", () => {
       contentVersion: DAILY_CARD_CONTENT_VERSION,
     });
     expect(localStorage.getItem(DAILY_CARD_STORAGE_KEY)).toContain("major-17-star");
-    expect(screen.getByRole("heading", { name: "편안한 교류가 이어져요" })).toHaveFocus();
+    const expectedContent = getDailyCardContent("major-17-star", 3);
+    if (!expectedContent) {
+      throw new Error("Expected fixture content to exist.");
+    }
+    expect(screen.getByRole("heading", { name: expectedContent.today.heading })).toHaveFocus();
   });
 
   it("restores today's result without another API call", async () => {
