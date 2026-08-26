@@ -1,4 +1,4 @@
-import { DAILY_QUESTION, TAROT_SPREADS, type TarotSpreadType } from "./definitions";
+import { TAROT_SPREADS, type AiTarotSpreadType } from "./definitions";
 
 export interface TarotChoiceOptions {
   readonly a: string;
@@ -6,7 +6,7 @@ export interface TarotChoiceOptions {
 }
 
 export interface CreateTarotReadingRequestInput {
-  readonly spreadType: TarotSpreadType;
+  readonly spreadType: AiTarotSpreadType;
   readonly question: string;
   readonly choiceOptions?: TarotChoiceOptions;
   readonly requestId: string;
@@ -14,7 +14,7 @@ export interface CreateTarotReadingRequestInput {
 }
 
 export interface TarotReadingRequest {
-  readonly spreadType: TarotSpreadType;
+  readonly spreadType: AiTarotSpreadType;
   readonly question: string;
   readonly requestId: string;
   readonly selectedSlots: readonly number[];
@@ -32,9 +32,7 @@ export function createTarotReadingRequest(
     throw new Error(`카드 선택 번호 ${definition.cardCount}개를 확인해 주세요.`);
   }
 
-  const question = definition.inputMode === "fixed"
-    ? DAILY_QUESTION
-    : input.question.trim();
+  const question = input.question.trim();
   if (question.length < 1 || question.length > 300) {
     throw new Error("질문은 1자 이상 300자 이하여야 합니다.");
   }

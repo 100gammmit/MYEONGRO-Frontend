@@ -42,8 +42,6 @@ export interface TarotSpreadDefinition {
   readonly positions: readonly TarotPositionDefinition[];
 }
 
-export const DAILY_QUESTION = "오늘 내가 살펴볼 마음과 작은 행동은 무엇인가요?";
-
 export const TAROT_SPREADS: Readonly<Record<TarotSpreadType, TarotSpreadDefinition>> = {
   daily_one_card: {
     id: "daily_one_card",

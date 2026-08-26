@@ -6,8 +6,8 @@ import { useState } from "react";
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
+  type AiTarotSpreadType,
   type TarotPositionId,
-  type TarotSpreadType,
 } from "@/domain/tarot";
 import {
   readingModeNotice,
@@ -38,7 +38,7 @@ export function TarotReadingResult({
   cardIds,
   result,
 }: {
-  spreadType: TarotSpreadType;
+  spreadType: AiTarotSpreadType;
   cardIds: string[];
   result: TarotReadingResultData;
 }) {

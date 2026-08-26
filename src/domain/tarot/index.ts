@@ -1,6 +1,5 @@
 export { MAJOR_ARCANA } from "./deck";
 export {
-  DAILY_QUESTION,
   TAROT_SPREAD_LIST,
   TAROT_SPREADS,
   isAiTarotSpreadType,

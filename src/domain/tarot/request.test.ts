@@ -5,20 +5,6 @@ import { createTarotReadingRequest } from "./request";
 const requestId = "11111111-1111-4111-8111-111111111111";
 
 describe("createTarotReadingRequest", () => {
-  it("uses the daily fixed question and submits one selected slot", () => {
-    expect(createTarotReadingRequest({
-      spreadType: "daily_one_card",
-      question: "ignored",
-      requestId,
-      selectedSlots: [4],
-    })).toEqual({
-      spreadType: "daily_one_card",
-      question: "오늘 내가 살펴볼 마음과 작은 행동은 무엇인가요?",
-      requestId,
-      selectedSlots: [4],
-    });
-  });
-
   it("includes choiceOptions only for choice_five_card", () => {
     const request = createTarotReadingRequest({
       spreadType: "choice_five_card",

@@ -11,6 +11,8 @@ import { parseReadingMode } from "@/domain/reading/reading-mode";
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
+  isAiTarotSpreadType,
+  type AiTarotSpreadType,
   type TarotPositionId,
   type TarotSpreadType,
 } from "@/domain/tarot";
@@ -24,7 +26,7 @@ import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 const CARD_IDS = new Set<string>(MAJOR_ARCANA.map((card) => card.id));
 
 type TarotResultView = {
-  spreadType: TarotSpreadType;
+  spreadType: AiTarotSpreadType;
   cardIds: string[];
   result: TarotReadingResultData;
 };
@@ -76,6 +78,7 @@ function parseTarotResultView(reading: PublicReadingRecord): TarotResultView | n
   }
 
   const spreadType = reading.spreadType as TarotSpreadType;
+  if (!isAiTarotSpreadType(spreadType)) return null;
   const definition = TAROT_SPREADS[spreadType];
   const cards = reading.input.cards;
   const result = reading.result;

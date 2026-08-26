@@ -45,18 +45,26 @@ function completedReading() {
   return {
     id: "reading-1",
     kind: "tarot",
-    spreadType: "daily_one_card",
+    spreadType: "mind_three_card",
     schemaVersion: 1,
     status: "completed",
     title: "오늘의 리딩",
     input: {
       question: "오늘의 흐름",
-      cards: [{ cardId: "major-00-fool", position: "today", reversed: false }],
+      cards: [
+        { cardId: "major-00-fool", position: "emotion", reversed: false },
+        { cardId: "major-01-magician", position: "underlying_need", reversed: false },
+        { cardId: "major-02-high-priestess", position: "self_action", reversed: false },
+      ],
     },
     result: {
       title: "오늘의 리딩",
       summary: "오늘의 흐름을 확인했어요.",
-      sections: [{ position: "today", heading: "오늘의 흐름", body: "천천히 살펴보세요." }],
+      sections: [
+        { position: "emotion", heading: "지금의 감정", body: "감정을 살펴봐요." },
+        { position: "underlying_need", heading: "감정 뒤의 욕구", body: "바라는 점을 살펴봐요." },
+        { position: "self_action", heading: "나를 위한 행동", body: "작은 행동을 살펴봐요." },
+      ],
       guidance: ["작은 행동을 시작하세요."],
       disclaimer: "자기 성찰을 위한 참고 정보입니다.",
     },
@@ -82,8 +90,8 @@ describe("TarotResultPage", () => {
     expect(mocks.get).toHaveBeenCalledWith("reading-1");
     expect(mocks.result).toHaveBeenCalledWith(
       expect.objectContaining({
-        spreadType: "daily_one_card",
-        cardIds: ["major-00-fool"],
+        spreadType: "mind_three_card",
+        cardIds: ["major-00-fool", "major-01-magician", "major-02-high-priestess"],
       }),
       undefined,
     );

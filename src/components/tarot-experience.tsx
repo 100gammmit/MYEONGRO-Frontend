@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "re
 import { useRouter } from "next/navigation";
 
 import {
-  DAILY_QUESTION,
   MAJOR_ARCANA,
   TAROT_SPREAD_LIST,
   TAROT_SPREADS,
@@ -150,7 +149,9 @@ export function TarotExperience() {
   }
 
   const submitReading = useCallback(async (slots: readonly number[] = selectedSlots) => {
-    if (slots.length !== definition.cardCount || inFlightRequestId.current) return;
+    if (!isAiTarotSpreadType(spreadType)
+      || slots.length !== definition.cardCount
+      || inFlightRequestId.current) return;
     const nextRequestId = requestId ?? globalThis.crypto.randomUUID();
     let body;
     try {
@@ -288,27 +289,23 @@ export function TarotExperience() {
     return (
       <ReadingShell
         eyebrow={definition.name}
-        title={definition.inputMode === "fixed" ? "오늘의 메시지를 만나볼까요?" : "상황을 들려주세요"}
+        title="상황을 들려주세요"
         description="입력 내용과 카드 선택은 리딩 요청 전까지 이 브라우저의 현재 화면에서만 유지됩니다."
         step={2}
         totalSteps={4}
       >
         <div className="wizard-card">
-          {definition.inputMode === "fixed" ? (
-            <p className="notice">{DAILY_QUESTION}</p>
-          ) : (
-            <label className="field">
-              <span>카드에게 묻고 싶은 질문</span>
-              <textarea
-                aria-label="카드에게 묻고 싶은 질문"
-                maxLength={MAX_QUESTION_LENGTH}
-                value={question}
-                onChange={(event) => setQuestion(event.target.value)}
-                placeholder="지금 들여다보고 싶은 상황을 적어주세요."
-              />
-              <small>{question.length} / {MAX_QUESTION_LENGTH}</small>
-            </label>
-          )}
+          <label className="field">
+            <span>카드에게 묻고 싶은 질문</span>
+            <textarea
+              aria-label="카드에게 묻고 싶은 질문"
+              maxLength={MAX_QUESTION_LENGTH}
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              placeholder="지금 들여다보고 싶은 상황을 적어주세요."
+            />
+            <small>{question.length} / {MAX_QUESTION_LENGTH}</small>
+          </label>
           {definition.inputMode === "choice" ? (
             <div className="choice-fields">
               <label className="field">

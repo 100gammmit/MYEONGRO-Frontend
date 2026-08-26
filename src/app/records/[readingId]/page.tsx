@@ -16,6 +16,7 @@ import {
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
+  isAiTarotSpreadType,
   type TarotPositionId,
   type TarotSpreadType,
 } from "@/domain/tarot";
@@ -56,7 +57,9 @@ function getTarotRecordView(reading: PublicReadingRecord): TarotRecordView | nul
   ) {
     return null;
   }
-  const definition = TAROT_SPREADS[reading.spreadType as TarotSpreadType];
+  const spreadType = reading.spreadType as TarotSpreadType;
+  if (!isAiTarotSpreadType(spreadType)) return null;
+  const definition = TAROT_SPREADS[spreadType];
   const inputCards = reading.input.cards;
   const result = reading.result;
   const sections = result.sections;
