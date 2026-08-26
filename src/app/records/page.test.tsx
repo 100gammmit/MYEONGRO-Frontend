@@ -86,6 +86,24 @@ describe("RecordsPage", () => {
     expect(screen.queryByRole("link", { name: /로그인/ })).not.toBeInTheDocument();
   });
 
+  it("does not list a legacy daily AI record", async () => {
+    mocks.list.mockResolvedValue([{
+      id: "legacy-daily",
+      kind: "tarot",
+      spreadType: "daily_one_card",
+      schemaVersion: 1,
+      status: "failed",
+      title: "Generating...",
+      input: { question: "과거 오늘의 한 장" },
+      createdAt: "2026-06-12T00:00:00.000Z",
+    }]);
+
+    await renderRecordsPage();
+
+    expect(screen.getByText("아직 저장된 이야기가 없어요")).toBeInTheDocument();
+    expect(screen.queryByText("과거 오늘의 한 장")).not.toBeInTheDocument();
+  });
+
   it("does not load records for guests", async () => {
     mocks.getSessionState.mockResolvedValue({ status: "unauthenticated", user: null });
 

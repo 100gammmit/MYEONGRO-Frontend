@@ -132,7 +132,7 @@ describe("ReadingDetailPage", () => {
       .not.toBeInTheDocument();
   });
 
-  it("does not guess-render a legacy tarot payload", async () => {
+  it("returns not found for an unsupported legacy tarot payload", async () => {
     mocks.get.mockResolvedValue({
       id: "reading-1",
       kind: "tarot",
@@ -152,9 +152,7 @@ describe("ReadingDetailPage", () => {
       updatedAt: "2026-06-12T00:00:01.000Z",
     });
 
-    await renderPage();
-
-    expect(screen.getByRole("alert")).toHaveTextContent("새 타로 결과 형식으로 표시할 수 없어요");
+    await expect(renderPage()).rejects.toThrow("NOT_FOUND");
     expect(screen.queryByText("추측하면 안 되는 본문")).not.toBeInTheDocument();
   });
 
@@ -195,6 +193,34 @@ describe("ReadingDetailPage", () => {
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "다시 생성" })).toBeInTheDocument();
   });
+
+  it.each(["completed", "failed"] as const)(
+    "returns not found for a legacy daily AI record with %s status",
+    async (status) => {
+      mocks.get.mockResolvedValue({
+        id: "legacy-daily",
+        kind: "tarot",
+        spreadType: "daily_one_card",
+        schemaVersion: 1,
+        status,
+        title: "과거 오늘의 한 장",
+        input: { question: "과거 오늘의 한 장" },
+        result: status === "completed" ? {
+          resultType: "declined",
+          reasonCode: "FINANCIAL_DECISION",
+          title: "거절된 과거 오늘의 한 장",
+          message: "안내 문구",
+          guidance: ["다른 질문을 살펴보세요."],
+          disclaimer: "참고 정보입니다.",
+        } : undefined,
+        createdAt: "2026-06-12T00:00:00.000Z",
+        updatedAt: "2026-06-12T00:00:01.000Z",
+      });
+
+      await expect(renderPage()).rejects.toThrow("NOT_FOUND");
+      expect(screen.queryByRole("button", { name: "다시 생성" })).not.toBeInTheDocument();
+    },
+  );
 
   it("returns not found for guests", async () => {
     mocks.getSessionState.mockResolvedValue({ status: "unauthenticated", user: null });

@@ -120,6 +120,11 @@ export default async function ReadingDetailPage({
 
   const reading = await new BackendReadingRecordsClient(cookieHeader).get(readingId);
   if (!reading) notFound();
+  if (reading.kind === "tarot" && (
+    typeof reading.spreadType !== "string"
+    || !(reading.spreadType in TAROT_SPREADS)
+    || !isAiTarotSpreadType(reading.spreadType as TarotSpreadType)
+  )) notFound();
 
   const question = typeof reading.input.question === "string"
     ? reading.input.question

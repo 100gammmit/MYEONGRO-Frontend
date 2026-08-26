@@ -1,8 +1,11 @@
 import Link from "next/link";
 
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
-import { TAROT_SPREADS, type TarotSpreadType } from "@/domain/tarot";
-import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
+import { TAROT_SPREADS, isAiTarotSpreadType, type TarotSpreadType } from "@/domain/tarot";
+import {
+  BackendReadingRecordsClient,
+  type PublicReadingRecord,
+} from "@/infrastructure/backend/reading-records-client";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 
@@ -24,6 +27,13 @@ function getReadingTypeLabel(kind: "tarot" | "saju", spreadType?: string | null)
   return "AI 타로";
 }
 
+function isSupportedRecord(reading: PublicReadingRecord): boolean {
+  if (reading.kind === "saju") return true;
+  return typeof reading.spreadType === "string"
+    && reading.spreadType in TAROT_SPREADS
+    && isAiTarotSpreadType(reading.spreadType as TarotSpreadType);
+}
+
 export default async function RecordsPage() {
   const cookieHeader = await getBackendCookieHeader();
   const session = await getSpringSessionState(cookieHeader);
@@ -32,13 +42,14 @@ export default async function RecordsPage() {
   const readings = session.status === "authenticated"
     ? await new BackendReadingRecordsClient(cookieHeader).list()
     : [];
+  const supportedReadings = readings.filter(isSupportedRecord);
 
   return (
     <section className="simple-page page-width records-page">
       <p className="eyebrow">MY READINGS</p>
       <h1>나의 리딩 기록</h1>
 
-      {readings.length === 0 ? (
+      {supportedReadings.length === 0 ? (
         <div className="empty-state">
           <span>◇</span>
           <h2>아직 저장된 이야기가 없어요</h2>
@@ -49,7 +60,7 @@ export default async function RecordsPage() {
         </div>
       ) : (
         <div className="records-list">
-          {readings.map((reading) => (
+          {supportedReadings.map((reading) => (
             <Link
               className="record-card"
               href={`/records/${reading.id}`}

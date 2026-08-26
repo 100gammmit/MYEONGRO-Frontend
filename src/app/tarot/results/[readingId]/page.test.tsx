@@ -117,6 +117,24 @@ describe("TarotResultPage", () => {
     expect(screen.getByText("declined result")).toBeInTheDocument();
   });
 
+  it("does not render a legacy daily decline", async () => {
+    const reading = completedReading();
+    reading.spreadType = "daily_one_card";
+    reading.result = {
+      resultType: "declined",
+      reasonCode: "FINANCIAL_DECISION",
+      title: "거절된 과거 오늘의 한 장",
+      message: "안내 문구",
+      guidance: ["다른 질문을 살펴보세요."],
+      disclaimer: "참고 정보입니다.",
+    } as unknown as typeof reading.result;
+    mocks.get.mockResolvedValue(reading);
+
+    await expect(renderPage()).rejects.toThrow("NOT_FOUND");
+    expect(mocks.declined).not.toHaveBeenCalled();
+    expect(mocks.result).not.toHaveBeenCalled();
+  });
+
   it("does not render a saju decline on the tarot result route", async () => {
     const reading = completedReading();
     mocks.get.mockResolvedValue({

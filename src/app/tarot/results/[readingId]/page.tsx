@@ -48,7 +48,13 @@ export default async function TarotResultPage({
   } catch {
     return <ProtectedPageUnavailable />;
   }
-  const declinedView = reading ? parseDeclinedReadingView(reading, "tarot") : null;
+  const supportedTarotReading = reading?.kind === "tarot"
+    && typeof reading.spreadType === "string"
+    && reading.spreadType in TAROT_SPREADS
+    && isAiTarotSpreadType(reading.spreadType as TarotSpreadType);
+  const declinedView = supportedTarotReading
+    ? parseDeclinedReadingView(reading, "tarot")
+    : null;
   if (declinedView) {
     return (
       <ReadingDeclinedResult
