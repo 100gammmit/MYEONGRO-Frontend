@@ -89,6 +89,30 @@ describe("DailyCardExperience", () => {
     expect(localStorage.getItem(guestStorageKey)).not.toBeNull();
   });
 
+  it("does not persist or restore a result when the viewer identity is unavailable", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
+      selection: {
+        dateKst: getKoreanDate(),
+        cardId: "major-17-star",
+        variantIndex: 3,
+        contentVersion: DAILY_CARD_CONTENT_VERSION,
+      },
+    }));
+    const firstView = render(<DailyCardExperience storageScope={null} />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "숨은 카드 3" }));
+    fireEvent.click(screen.getByRole("button", { name: "이 카드로 확인" }));
+    expect(await screen.findByText("오늘의 카드 · 별")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(localStorage.length).toBe(0);
+
+    firstView.unmount();
+    render(<DailyCardExperience storageScope={null} />);
+
+    expect(await screen.findByRole("button", { name: "숨은 카드 1" })).toBeInTheDocument();
+    expect(screen.queryByText("오늘의 카드 · 별")).not.toBeInTheDocument();
+  });
+
   it("reuses the same draw id when the selection response is lost", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockRejectedValueOnce(new TypeError("response lost"))

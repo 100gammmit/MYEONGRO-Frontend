@@ -10,7 +10,6 @@ const DAILY_CARD_STORAGE_KEY_PREFIX = "myeongro:daily-card:v2";
 
 export type DailyCardStorageScope =
   | "guest"
-  | "unavailable"
   | `user:${string}`;
 
 export function getDailyCardStorageKey(scope: DailyCardStorageScope): string {

@@ -14,8 +14,8 @@ vi.mock("@/infrastructure/backend/session-auth", () => ({
   getSpringSessionState: mocks.getSessionState,
 }));
 vi.mock("@/components/daily-card-experience", () => ({
-  DailyCardExperience: ({ storageScope }: { storageScope: string }) => (
-    <div>{storageScope}</div>
+  DailyCardExperience: ({ storageScope }: { storageScope: string | null }) => (
+    <div>{storageScope ?? "memory-only"}</div>
   ),
 }));
 
@@ -58,7 +58,7 @@ describe("DailyTarotPage", () => {
 
     await renderPage();
 
-    expect(screen.getByText("unavailable")).toBeInTheDocument();
+    expect(screen.getByText("memory-only")).toBeInTheDocument();
     expect(screen.queryByText("guest")).not.toBeInTheDocument();
   });
 });

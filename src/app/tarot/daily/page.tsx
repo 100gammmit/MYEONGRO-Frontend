@@ -6,11 +6,11 @@ import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 export default async function DailyTarotPage() {
   const cookieHeader = await getBackendCookieHeader();
   const session = await getSpringSessionState(cookieHeader);
-  const storageScope: DailyCardStorageScope = session.status === "authenticated"
+  const storageScope: DailyCardStorageScope | null = session.status === "authenticated"
     ? `user:${session.user.id}`
     : session.status === "unauthenticated"
       ? "guest"
-      : "unavailable";
+      : null;
 
   return <DailyCardExperience storageScope={storageScope} />;
 }

@@ -28,14 +28,18 @@ type State =
 export function DailyCardExperience({
   storageScope,
 }: {
-  storageScope: DailyCardStorageScope;
+  storageScope: DailyCardStorageScope | null;
 }) {
   const [state, setState] = useState<State>({ status: "choosing", selectedSlot: null });
   const requestInFlight = useRef(false);
   const resultHeadingRef = useRef<HTMLHeadingElement>(null);
-  const storageKey = getDailyCardStorageKey(storageScope);
+  const storageKey = storageScope === null ? null : getDailyCardStorageKey(storageScope);
 
   const restore = useCallback(() => {
+    if (storageKey === null) {
+      setState({ status: "choosing", selectedSlot: null });
+      return;
+    }
     let stored: StoredDailyCard | null = null;
     try {
       stored = parseStoredDailyCard(localStorage.getItem(storageKey));
@@ -103,10 +107,12 @@ export function DailyCardExperience({
       }
       const selection = parseDailyCardSelectionResponse(await response.json());
       if (selection.dateKst !== getKoreanDate()) {
-        try {
-          localStorage.removeItem(storageKey);
-        } catch {
-          // Storage can be unavailable; discarding the stale in-memory response is enough.
+        if (storageKey !== null) {
+          try {
+            localStorage.removeItem(storageKey);
+          } catch {
+            // Storage can be unavailable; discarding the stale in-memory response is enough.
+          }
         }
         setState({ status: "choosing", selectedSlot: null });
         return;
@@ -116,10 +122,12 @@ export function DailyCardExperience({
         drawId,
         ...selection,
       };
-      try {
-        localStorage.setItem(storageKey, serializeStoredDailyCard(stored));
-      } catch {
-        // Keep the result in memory if localStorage is unavailable.
+      if (storageKey !== null) {
+        try {
+          localStorage.setItem(storageKey, serializeStoredDailyCard(stored));
+        } catch {
+          // Keep the result in memory if localStorage is unavailable.
+        }
       }
       setState({ status: "result", stored });
     } catch (error) {
