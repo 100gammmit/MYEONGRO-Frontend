@@ -3,13 +3,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   DAILY_CARD_CONTENT_VERSION,
-  DAILY_CARD_STORAGE_KEY,
+  getDailyCardStorageKey,
   getDailyCardContent,
   getKoreanDate,
 } from "@/domain/daily-card-free";
 import { DailyCardExperience } from "./daily-card-experience";
 
 const drawId = "82ed11d5-2269-438c-9815-42e6f13735f4";
+const guestStorageKey = getDailyCardStorageKey("guest");
 
 describe("DailyCardExperience", () => {
   beforeEach(() => {
@@ -31,7 +32,7 @@ describe("DailyCardExperience", () => {
         contentVersion: DAILY_CARD_CONTENT_VERSION,
       },
     }));
-    render(<DailyCardExperience />);
+    render(<DailyCardExperience storageScope="guest" />);
 
     fireEvent.click(await screen.findByRole("button", { name: "숨은 카드 3" }));
     expect(fetchMock).not.toHaveBeenCalled();
@@ -44,7 +45,7 @@ describe("DailyCardExperience", () => {
       selectedSlot: 3,
       contentVersion: DAILY_CARD_CONTENT_VERSION,
     });
-    expect(localStorage.getItem(DAILY_CARD_STORAGE_KEY)).toContain("major-17-star");
+    expect(localStorage.getItem(guestStorageKey)).toContain("major-17-star");
     const expectedContent = getDailyCardContent("major-17-star", 3);
     if (!expectedContent) {
       throw new Error("Expected fixture content to exist.");
@@ -53,7 +54,7 @@ describe("DailyCardExperience", () => {
   });
 
   it("restores today's result without another API call", async () => {
-    localStorage.setItem(DAILY_CARD_STORAGE_KEY, JSON.stringify({
+    localStorage.setItem(guestStorageKey, JSON.stringify({
       schemaVersion: 1,
       contentVersion: DAILY_CARD_CONTENT_VERSION,
       dateKst: getKoreanDate(),
@@ -63,10 +64,29 @@ describe("DailyCardExperience", () => {
     }));
     const fetchMock = vi.spyOn(globalThis, "fetch");
 
-    render(<DailyCardExperience />);
+    render(<DailyCardExperience storageScope="guest" />);
 
     expect(await screen.findByText("오늘의 카드 · 태양")).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).not.toHaveBeenCalled());
+  });
+
+  it("does not restore a guest result for an authenticated user", async () => {
+    localStorage.setItem(guestStorageKey, JSON.stringify({
+      schemaVersion: 1,
+      contentVersion: DAILY_CARD_CONTENT_VERSION,
+      dateKst: getKoreanDate(),
+      drawId,
+      cardId: "major-19-sun",
+      variantIndex: 0,
+    }));
+
+    render(<DailyCardExperience
+      storageScope="user:11111111-1111-4111-8111-111111111111"
+    />);
+
+    expect(await screen.findByRole("button", { name: "숨은 카드 1" })).toBeInTheDocument();
+    expect(screen.queryByText("오늘의 카드 · 태양")).not.toBeInTheDocument();
+    expect(localStorage.getItem(guestStorageKey)).not.toBeNull();
   });
 
   it("reuses the same draw id when the selection response is lost", async () => {
@@ -80,7 +100,7 @@ describe("DailyCardExperience", () => {
           contentVersion: DAILY_CARD_CONTENT_VERSION,
         },
       }));
-    render(<DailyCardExperience />);
+    render(<DailyCardExperience storageScope="guest" />);
 
     fireEvent.click(await screen.findByRole("button", { name: "숨은 카드 2" }));
     fireEvent.click(screen.getByRole("button", { name: "이 카드로 확인" }));
@@ -96,7 +116,7 @@ describe("DailyCardExperience", () => {
   it("reschedules expiration across consecutive Korean midnights", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-08-25T14:59:59.000Z"));
-    localStorage.setItem(DAILY_CARD_STORAGE_KEY, JSON.stringify({
+    localStorage.setItem(guestStorageKey, JSON.stringify({
       schemaVersion: 1,
       contentVersion: DAILY_CARD_CONTENT_VERSION,
       dateKst: "2026-08-25",
@@ -112,7 +132,7 @@ describe("DailyCardExperience", () => {
         contentVersion: DAILY_CARD_CONTENT_VERSION,
       },
     }));
-    render(<DailyCardExperience />);
+    render(<DailyCardExperience storageScope="guest" />);
 
     expect(screen.getByText("오늘의 카드 · 태양")).toBeInTheDocument();
     await act(() => vi.advanceTimersByTimeAsync(1_000));
@@ -135,7 +155,7 @@ describe("DailyCardExperience", () => {
     vi.spyOn(globalThis, "fetch").mockReturnValue(new Promise((resolve) => {
       resolveFetch = resolve;
     }));
-    render(<DailyCardExperience />);
+    render(<DailyCardExperience storageScope="guest" />);
 
     fireEvent.click(screen.getByRole("button", { name: "숨은 카드 3" }));
     fireEvent.click(screen.getByRole("button", { name: "이 카드로 확인" }));
@@ -151,6 +171,6 @@ describe("DailyCardExperience", () => {
 
     expect(screen.getByRole("button", { name: "숨은 카드 1" })).toBeInTheDocument();
     expect(screen.queryByText("오늘의 카드 · 별")).not.toBeInTheDocument();
-    expect(localStorage.getItem(DAILY_CARD_STORAGE_KEY)).toBeNull();
+    expect(localStorage.getItem(guestStorageKey)).toBeNull();
   });
 });

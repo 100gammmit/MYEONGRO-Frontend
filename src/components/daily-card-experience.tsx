@@ -5,12 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   DAILY_CARD_CONTENT_VERSION,
-  DAILY_CARD_STORAGE_KEY,
+  getDailyCardStorageKey,
   getDailyCardContent,
   getKoreanDate,
   parseDailyCardSelectionResponse,
   parseStoredDailyCard,
   serializeStoredDailyCard,
+  type DailyCardStorageScope,
   type StoredDailyCard,
 } from "@/domain/daily-card-free";
 import { ReadingShell } from "./reading-shell";
@@ -24,23 +25,28 @@ type State =
   | { status: "result"; stored: StoredDailyCard }
   | { status: "error"; selectedSlot: number; drawId: string; message: string };
 
-export function DailyCardExperience() {
+export function DailyCardExperience({
+  storageScope,
+}: {
+  storageScope: DailyCardStorageScope;
+}) {
   const [state, setState] = useState<State>({ status: "choosing", selectedSlot: null });
   const requestInFlight = useRef(false);
   const resultHeadingRef = useRef<HTMLHeadingElement>(null);
+  const storageKey = getDailyCardStorageKey(storageScope);
 
   const restore = useCallback(() => {
     let stored: StoredDailyCard | null = null;
     try {
-      stored = parseStoredDailyCard(localStorage.getItem(DAILY_CARD_STORAGE_KEY));
-      if (!stored) localStorage.removeItem(DAILY_CARD_STORAGE_KEY);
+      stored = parseStoredDailyCard(localStorage.getItem(storageKey));
+      if (!stored) localStorage.removeItem(storageKey);
     } catch {
       // Storage can be unavailable in privacy-focused browsers; the current view still works.
     }
     setState(stored
       ? { status: "result", stored }
       : { status: "choosing", selectedSlot: null });
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     restore();
@@ -98,7 +104,7 @@ export function DailyCardExperience() {
       const selection = parseDailyCardSelectionResponse(await response.json());
       if (selection.dateKst !== getKoreanDate()) {
         try {
-          localStorage.removeItem(DAILY_CARD_STORAGE_KEY);
+          localStorage.removeItem(storageKey);
         } catch {
           // Storage can be unavailable; discarding the stale in-memory response is enough.
         }
@@ -111,7 +117,7 @@ export function DailyCardExperience() {
         ...selection,
       };
       try {
-        localStorage.setItem(DAILY_CARD_STORAGE_KEY, serializeStoredDailyCard(stored));
+        localStorage.setItem(storageKey, serializeStoredDailyCard(stored));
       } catch {
         // Keep the result in memory if localStorage is unavailable.
       }

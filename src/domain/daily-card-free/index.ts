@@ -6,9 +6,9 @@ export {
 export type { DailyCardContent } from "./content";
 export { parseDailyCardSelectionResponse } from "./selection";
 export {
-  DAILY_CARD_STORAGE_KEY,
+  getDailyCardStorageKey,
   getKoreanDate,
   parseStoredDailyCard,
   serializeStoredDailyCard,
 } from "./storage";
-export type { StoredDailyCard } from "./storage";
+export type { DailyCardStorageScope, StoredDailyCard } from "./storage";

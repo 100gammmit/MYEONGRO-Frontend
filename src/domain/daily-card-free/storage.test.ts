@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DAILY_CARD_CONTENT_VERSION,
+  getDailyCardStorageKey,
   getDailyCardContent,
   parseStoredDailyCard,
   serializeStoredDailyCard,
@@ -17,6 +18,13 @@ const stored = {
 } as const;
 
 describe("daily card static contract", () => {
+  it("uses separate storage keys for guests and authenticated users", () => {
+    expect(getDailyCardStorageKey("guest"))
+      .not.toBe(getDailyCardStorageKey("user:11111111-1111-4111-8111-111111111111"));
+    expect(getDailyCardStorageKey("user:11111111-1111-4111-8111-111111111111"))
+      .not.toBe(getDailyCardStorageKey("user:22222222-2222-4222-8222-222222222222"));
+  });
+
   it("provides every canonical card variant", () => {
     const cardIds = [
       "major-00-fool", "major-01-magician", "major-02-high-priestess",
