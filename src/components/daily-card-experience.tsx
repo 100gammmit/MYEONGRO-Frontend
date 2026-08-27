@@ -37,7 +37,10 @@ export function DailyCardExperience({
 
   const restore = useCallback(() => {
     if (storageKey === null) {
-      setState({ status: "choosing", selectedSlot: null });
+      setState((current) => current.status === "result"
+        && current.stored.dateKst === getKoreanDate()
+        ? current
+        : { status: "choosing", selectedSlot: null });
       return;
     }
     let stored: StoredDailyCard | null = null;

@@ -113,6 +113,32 @@ describe("DailyCardExperience", () => {
     expect(screen.queryByText("오늘의 카드 · 별")).not.toBeInTheDocument();
   });
 
+  it("keeps an unavailable viewer result on same-day visibility changes until Korean midnight", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-25T14:59:58.000Z"));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
+      selection: {
+        dateKst: "2026-08-25",
+        cardId: "major-17-star",
+        variantIndex: 3,
+        contentVersion: DAILY_CARD_CONTENT_VERSION,
+      },
+    }));
+    render(<DailyCardExperience storageScope={null} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "숨은 카드 3" }));
+    fireEvent.click(screen.getByRole("button", { name: "이 카드로 확인" }));
+    await act(() => Promise.resolve());
+    expect(screen.getByText("오늘의 카드 · 별")).toBeInTheDocument();
+
+    act(() => document.dispatchEvent(new Event("visibilitychange")));
+    expect(screen.getByText("오늘의 카드 · 별")).toBeInTheDocument();
+
+    await act(() => vi.advanceTimersByTimeAsync(2_000));
+    expect(screen.getByRole("button", { name: "숨은 카드 1" })).toBeInTheDocument();
+    expect(screen.queryByText("오늘의 카드 · 별")).not.toBeInTheDocument();
+  });
+
   it("reuses the same draw id when the selection response is lost", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockRejectedValueOnce(new TypeError("response lost"))
