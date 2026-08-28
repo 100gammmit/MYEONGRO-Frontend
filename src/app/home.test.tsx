@@ -41,7 +41,7 @@ describe("HomePage", () => {
     expect(
       screen.getByRole("link", { name: "타로 리딩 시작" }),
     ).toHaveAttribute("href", "/tarot");
-    expect(screen.getByText("로그인 없이 보는 무료 오늘의 한 장"))
+    expect(screen.getByText("로그인 없이 보는 무료 오늘의 운세"))
       .toBeInTheDocument();
     expect(screen.getByText("질문을 담아 기록하는 AI 3장 · 5장 리딩"))
       .toBeInTheDocument();
