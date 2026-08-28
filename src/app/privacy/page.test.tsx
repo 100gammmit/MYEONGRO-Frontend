@@ -10,5 +10,9 @@ describe("PrivacyPage", () => {
     expect(screen.queryByText(/후속 마일스톤/)).not.toBeInTheDocument();
     expect(screen.getByText(/계정 설정에서 계정 전체 삭제를 요청할 수 있습니다/))
       .toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "최소한으로 수집합니다" }))
+      .toHaveAttribute("id", "collection");
+    expect(screen.getByRole("heading", { name: "리딩 입력 정보는 생성과 기록에만 사용합니다" }))
+      .toHaveAttribute("id", "reading-inputs");
   });
 });

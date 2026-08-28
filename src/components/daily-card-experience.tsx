@@ -157,7 +157,6 @@ export function DailyCardExperience({
           <p className={styles.guidance}>{content.guidance[0]}</p>
           <small>{content.disclaimer}</small>
         </article>
-        <aside aria-label="광고" className={styles.advertisement}>광고 영역</aside>
         <Link className="secondary-button full-button" href="/tarot">
           다른 타로 리딩 살펴보기
         </Link>

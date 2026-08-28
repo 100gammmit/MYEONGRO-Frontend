@@ -85,7 +85,7 @@ describe("ConsentGate", () => {
     render(<ConsentGate onComplete={onComplete} />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "동의 상태를 불러오지 못했어요. 다시 시도해주세요.",
+      "동의 상태를 불러오지 못했어요. 다시 시도해 주세요.",
     );
 
     fireEvent.click(screen.getByRole("button", { name: "다시 시도" }));
@@ -115,6 +115,13 @@ describe("ConsentGate", () => {
 
     render(<ConsentGate onComplete={onComplete} />);
 
+    expect(await screen.findAllByRole("link", { name: "내용 보기" }))
+      .toHaveLength(3);
+    expect(screen.getAllByRole("link", { name: "내용 보기" }).map((link) => link.getAttribute("href")))
+      .toEqual(["/terms", "/privacy#collection", "/privacy#reading-inputs"]);
+    expect(screen.getByText("[필수] 출생 정보와 질문 내용 처리 동의"))
+      .toBeInTheDocument();
+
     for (const checkbox of await screen.findAllByRole("checkbox")) {
       fireEvent.click(checkbox);
     }
@@ -123,7 +130,7 @@ describe("ConsentGate", () => {
 
     expect(onComplete).not.toHaveBeenCalled();
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "동의 저장에 실패했어요. 다시 시도해주세요.",
+      "동의 저장에 실패했어요. 다시 시도해 주세요.",
     );
 
     fireEvent.click(screen.getByRole("button", { name: "다시 시도" }));

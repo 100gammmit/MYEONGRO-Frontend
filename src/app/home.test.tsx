@@ -12,6 +12,9 @@ describe("HomePage", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByText("이 사람과 잘 될까요?")).toBeInTheDocument();
+    expect(
+      screen.getByText("마음에 머무는 질문을 카드와 사주로 차분히 풀어볼게요."),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "타로로 시작" })).toHaveAttribute(
       "href",
       "/tarot",
@@ -27,6 +30,9 @@ describe("HomePage", () => {
 
     expect(screen.getByText("타로는 지금을 봐요")).toBeInTheDocument();
     expect(screen.getByText("사주는 흐름을 봐요")).toBeInTheDocument();
+    expect(screen.getByText("타고난 성향과 올해의 큰 흐름을 넓게 살펴봐요."))
+      .toBeInTheDocument();
+    expect(screen.getByText("현재 양력 생일만 지원")).toBeInTheDocument();
   });
 
   it("keeps both reading journeys and explains the service flow", () => {

@@ -235,7 +235,7 @@ describe("SajuExperience", () => {
     fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     fireEvent.click(screen.getByRole("radio", { name: /대략적으로 알아요/ }));
-    expect(screen.getByText(/앞뒤 60분을 함께 계산/)).toBeInTheDocument();
+    expect(screen.getByText(/전후 60분을 함께 계산/)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());

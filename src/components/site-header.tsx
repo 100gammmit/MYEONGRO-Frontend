@@ -61,7 +61,7 @@ function CreditIndicator({
   }
   if (state.status === "ready") {
     return (
-      <span className="credit-indicator" title={`무료 ${state.data.balance.free} · 지급 ${state.data.balance.paid}`}>
+      <span className="credit-indicator" title={`오늘 무료 ${state.data.balance.free} · 추가 ${state.data.balance.paid}`}>
         크레딧 <strong>{state.data.balance.total}</strong>
       </span>
     );

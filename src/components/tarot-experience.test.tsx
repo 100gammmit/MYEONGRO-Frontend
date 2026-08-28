@@ -322,6 +322,29 @@ describe("TarotExperience", () => {
     expect(credits.refresh).toHaveBeenCalledTimes(1);
   });
 
+  it("shows an actionable message instead of an internal result-contract error", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
+      reading: {
+        id: "reading-1",
+        kind: "tarot",
+        spreadType: "choice_five_card",
+        schemaVersion: 1,
+        status: "completed",
+        input: { question: "질문", cards: [] },
+        result: { title: "잘못된 결과", sections: [] },
+      },
+    }));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([3, 2, 1]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "리딩 결과를 확인하는 중 문제가 생겼어요. 같은 선택으로 다시 시도해 주세요.",
+    );
+    expect(screen.queryByText(/리딩 결과 계약/)).not.toBeInTheDocument();
+  });
+
   it("recovers the failed reading id when the first 502 response is lost", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockRejectedValueOnce(new TypeError("network response lost"))

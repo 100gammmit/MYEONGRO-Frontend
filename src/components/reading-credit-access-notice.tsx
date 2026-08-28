@@ -10,7 +10,7 @@ export function ReadingCreditAccessNotice({
   onRetry: () => void;
 }) {
   if (access.status === "allowed") {
-    return <p className="credit-notice">필요 {access.required} · 남은 크레딧 {access.remaining}</p>;
+    return <p className="credit-notice">{access.required}크레딧 사용 · 현재 {access.remaining}크레딧</p>;
   }
   if (access.status === "loading") {
     return <p className="credit-notice" aria-live="polite">크레딧을 확인하고 있어요.</p>;

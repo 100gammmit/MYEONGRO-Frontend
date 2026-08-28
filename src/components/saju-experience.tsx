@@ -298,7 +298,7 @@ export function SajuExperience() {
       <ReadingShell
         eyebrow="AI SAJU"
         title="사주 리딩을 시작하기 전에"
-        description="출생정보는 리딩 생성과 기록 복원을 위해 저장되며, 내 기록에서 언제든 삭제할 수 있어요."
+        description="출생 정보는 리딩 생성과 기록 복원을 위해 저장되며, 내 기록에서 언제든 삭제할 수 있어요."
         step={1}
         totalSteps={TOTAL_STEPS}
       >
@@ -312,7 +312,7 @@ export function SajuExperience() {
       <ReadingShell
         eyebrow="AI SAJU"
         title="사주 리딩 크레딧을 확인해요"
-        description="사주 리딩은 현재 설정 기준의 크레딧을 사용합니다."
+        description={`사주 리딩 1회에 ${creditCost ?? "…"}크레딧을 사용해요.`}
         step={1}
         totalSteps={TOTAL_STEPS}
       >
@@ -416,8 +416,8 @@ export function SajuExperience() {
           ) : null}
           <p className="muted" id="birth-time-help">
             {form.birthTimePrecision === "approximate"
-              ? "입력한 시각을 중심으로 서버가 앞뒤 60분을 함께 계산해 공통되는 내용만 보여줘요."
-              : "오전·오후 정도만 안다면 거짓 정밀도를 만들지 않도록 ‘시간을 몰라요’를 선택해 주세요."}
+              ? "입력한 시각 전후 60분을 함께 계산해 공통되는 내용만 보여줘요."
+              : "태어난 시각이 확실하지 않다면 ‘시간을 몰라요’를 선택해 주세요."}
           </p>
           <NavigationButtons
             back={() => setPhase("birth-date")}
@@ -570,7 +570,7 @@ export function SajuExperience() {
     <ReadingShell
       eyebrow="REVIEW"
       title="입력한 내용을 확인해 주세요"
-      description="생성 후에는 이 정보와 계산 snapshot이 내 기록에 저장됩니다."
+      description="리딩을 만들면 입력한 정보와 계산 기준이 내 기록에 저장돼요."
       step={6}
       totalSteps={TOTAL_STEPS}
     >

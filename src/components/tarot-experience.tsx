@@ -67,7 +67,7 @@ const CARD_IDS = new Set<string>(MAJOR_ARCANA.map((card) => card.id));
 
 const READING_ERROR_MESSAGES: Readonly<Record<number, string>> = {
   403: "필수 동의를 완료한 뒤 다시 리딩을 생성해 주세요.",
-  409: "같은 요청이 처리 중이거나 입력이 변경됐어요. 잠시 뒤 다시 확인해 주세요.",
+  409: "요청 상태가 바뀌었어요. 입력 내용을 확인한 뒤 다시 시도해 주세요.",
   502: "리딩 생성에 실패했어요. 잠시 뒤 다시 시도해 주세요.",
 };
 
@@ -223,7 +223,7 @@ export function TarotExperience() {
     } catch (readingError) {
       setError(
         readingError instanceof Error && readingError.message.startsWith("리딩 결과")
-          ? readingError.message
+          ? "리딩 결과를 확인하는 중 문제가 생겼어요. 같은 선택으로 다시 시도해 주세요."
           : "리딩 서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
       );
       setPhase("error");
@@ -290,7 +290,7 @@ export function TarotExperience() {
       <ReadingShell
         eyebrow={definition.name}
         title="상황을 들려주세요"
-        description="입력 내용과 카드 선택은 리딩 요청 전까지 이 브라우저의 현재 화면에서만 유지됩니다."
+        description="입력한 내용과 카드 선택은 리딩을 요청하기 전까지 저장되지 않아요."
         step={2}
         totalSteps={4}
       >

@@ -32,7 +32,7 @@ export default function HomePage() {
           </h1>
           <HeroQuestionRotator />
           <p className="hero-description">
-            어떤 질문이든, 카드와 사주로 함께 답을 찾아볼게요.
+            마음에 머무는 질문을 카드와 사주로 차분히 풀어볼게요.
           </p>
           <div className="hero-actions">
             <Link href="/tarot" className="primary-button cta-tarot">
@@ -54,14 +54,14 @@ export default function HomePage() {
             <span className="pick-dot pick-dot-tarot" aria-hidden="true" />
             <div>
               <strong>타로는 지금을 봐요</strong>
-              <span>이번 주, 이번 달. 눈앞의 선택에 답을 줘요.</span>
+              <span>이번 주나 이번 달처럼 가까운 고민에 생각할 실마리를 건네요.</span>
             </div>
           </div>
           <div className="pick-row">
             <span className="pick-dot pick-dot-saju" aria-hidden="true" />
             <div>
               <strong>사주는 흐름을 봐요</strong>
-              <span>타고난 결과 올해의 큰 방향. 멀리서 지도를 보는 쪽이에요.</span>
+              <span>타고난 성향과 올해의 큰 흐름을 넓게 살펴봐요.</span>
             </div>
           </div>
         </div>
@@ -96,8 +96,8 @@ export default function HomePage() {
               살펴보세요.
             </p>
             <ul>
-              <li>양력 기준 근사 베타 리딩</li>
-              <li>어려운 용어를 줄인 쉬운 해설</li>
+              <li>현재 양력 생일만 지원</li>
+              <li>출생 시각의 정확도에 맞춘 해석</li>
             </ul>
             <Link href="/saju" className="secondary-button" aria-label="사주 리딩 시작">
               사주 리딩 시작 <span aria-hidden="true">→</span>

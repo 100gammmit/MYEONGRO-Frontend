@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const AGREEMENT_IDS = ["terms", "privacy", "sensitive-data"] as const;
@@ -17,18 +18,21 @@ type ConsentError = {
   message: string;
 };
 
-const agreementDetails: Record<AgreementId, { label: string; detail: string }> = {
+const agreementDetails: Record<AgreementId, { label: string; detail: string; href: string }> = {
   terms: {
     label: "서비스 이용약관 동의",
     detail: "리딩 콘텐츠의 성격과 이용 조건을 확인합니다.",
+    href: "/terms",
   },
   privacy: {
     label: "개인정보 수집·이용 동의",
     detail: "입력 정보의 수집 목적과 보관 기간을 확인합니다.",
+    href: "/privacy#collection",
   },
   "sensitive-data": {
-    label: "출생 정보·고민 내용 처리 동의",
-    detail: "리딩 생성에 필요한 민감한 입력의 처리를 허용합니다.",
+    label: "출생 정보와 질문 내용 처리 동의",
+    detail: "리딩 생성에 필요한 출생 정보와 질문 내용을 처리합니다.",
+    href: "/privacy#reading-inputs",
   },
 };
 
@@ -82,7 +86,7 @@ export function ConsentGate({
     } catch {
       setError({
         mode: "load",
-        message: "동의 상태를 불러오지 못했어요. 다시 시도해주세요.",
+        message: "동의 상태를 불러오지 못했어요. 다시 시도해 주세요.",
       });
     } finally {
       setLoading(false);
@@ -119,7 +123,7 @@ export function ConsentGate({
     } catch {
       setError({
         mode: "submit",
-        message: "동의 저장에 실패했어요. 다시 시도해주세요.",
+        message: "동의 저장에 실패했어요. 다시 시도해 주세요.",
       });
     } finally {
       setSubmitting(false);
@@ -152,21 +156,26 @@ export function ConsentGate({
       </p>
       <div className="agreement-list">
         {requiredAgreements.map((agreementId) => (
-          <label key={agreementId} className="agreement">
-            <input
-              type="checkbox"
-              checked={Boolean(checked[agreementId])}
-              disabled={submitting}
-              onChange={(event) =>
-                setChecked((current) => ({ ...current, [agreementId]: event.target.checked }))
-              }
-            />
-            <span className="custom-check">✓</span>
-            <span>
-              <strong>[필수] {agreementDetails[agreementId].label}</strong>
-              <small>{agreementDetails[agreementId].detail}</small>
-            </span>
-          </label>
+          <div key={agreementId} className="agreement">
+            <label className="agreement-choice">
+              <input
+                type="checkbox"
+                checked={Boolean(checked[agreementId])}
+                disabled={submitting}
+                onChange={(event) =>
+                  setChecked((current) => ({ ...current, [agreementId]: event.target.checked }))
+                }
+              />
+              <span className="custom-check">✓</span>
+              <span>
+                <strong>[필수] {agreementDetails[agreementId].label}</strong>
+                <small>{agreementDetails[agreementId].detail}</small>
+              </span>
+            </label>
+            <Link className="agreement-link" href={agreementDetails[agreementId].href}>
+              내용 보기
+            </Link>
+          </div>
         ))}
       </div>
       {error ? (

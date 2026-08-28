@@ -65,6 +65,7 @@ describe("SiteHeader", () => {
     );
     expect(screen.getByRole("button", { name: "로그아웃" })).toBeInTheDocument();
     expect(screen.getByText("크레딧")).toHaveTextContent("크레딧 9");
+    expect(screen.getByTitle("오늘 무료 7 · 추가 2")).toBeInTheDocument();
   });
 
   it("offers a retry instead of showing stale credit data after an error", () => {

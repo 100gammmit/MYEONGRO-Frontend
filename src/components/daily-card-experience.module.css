@@ -33,15 +33,6 @@
   background: var(--surface-accent-subtle);
 }
 
-.advertisement {
-  min-height: 120px;
-  display: grid;
-  place-items: center;
-  color: var(--text-muted);
-  border: 1px dashed var(--border-subtle);
-  border-radius: 16px;
-}
-
 @media (max-width: 640px) {
   .cards {
     gap: 0.35rem;

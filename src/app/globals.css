@@ -324,13 +324,15 @@ h1, h2, h3, blockquote {
 .lock-icon { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 14px; background: var(--surface-accent-soft); border: 1px solid var(--border-strong); display: grid; place-items: center; color: var(--text-accent); }
 .muted { color: var(--text-muted); line-height: 1.75; font-size: 14px; }
 .agreement-list { border-top: 1px solid var(--border-agreement); margin: 22px 0 20px; }
-.agreement { display: flex; gap: 14px; align-items: flex-start; padding: 18px 0; border-bottom: 1px solid var(--border-agreement); cursor: pointer; }
+.agreement { display: flex; gap: 14px; align-items: flex-start; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--border-agreement); }
+.agreement-choice { display: flex; gap: 14px; align-items: flex-start; min-width: 0; cursor: pointer; }
 .agreement input { position: absolute; opacity: 0; }
 .custom-check { width: 22px; height: 22px; margin-top: 1px; border: 1.5px solid var(--border-check); color: transparent; display: grid; place-items: center; flex: 0 0 auto; border-radius: 7px; transition: background .2s ease, border-color .2s ease; }
 .agreement input:focus-visible + .custom-check { outline: 2px solid var(--focus-outline); outline-offset: 3px; }
 .agreement input:checked + .custom-check { background: var(--accent-cta); color: var(--text-inverse-check); border-color: var(--accent-cta); }
 .agreement strong { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 4px; }
 .agreement small { color: var(--text-agreement); line-height: 1.55; font-size: 12px; }
+.agreement-link { flex: 0 0 auto; color: var(--text-accent); font-size: 12px; line-height: 22px; text-decoration: underline; text-underline-offset: 3px; }
 .form-error { color: var(--text-danger); font-size: 13px; }
 .full-button { width: 100%; }
 .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; }
