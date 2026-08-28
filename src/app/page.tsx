@@ -15,7 +15,7 @@ const features = [
   {
     number: "03",
     title: "나만의 해석을 읽어요",
-    copy: "AI가 정리한 리딩을 읽고 완료한 기록을 다시 확인합니다.",
+    copy: "AI 타로·사주는 해석을 읽고 완료한 기록을 다시 확인합니다.",
   },
 ];
 
@@ -75,14 +75,14 @@ export default function HomePage() {
         <div className="choice-grid">
           <article className="reading-card tarot-card">
             <p className="card-kicker">INTUITIVE READING</p>
-            <h3>마음의 질문, AI 타로</h3>
+            <h3>오늘의 한 장과 AI 타로</h3>
             <p>
-              카드를 직접 고르고 지금 가장 궁금한 마음과 선택을 차분히
-              들여다보세요.
+              무료 오늘의 한 장으로 가볍게 시작하거나, 질문에 맞는 AI 리딩으로
+              마음과 선택을 차분히 들여다보세요.
             </p>
             <ul>
-              <li>목적에 맞는 1장 · 3장 · 5장 리딩</li>
-              <li>카드를 직접 고르고 단계별로 확인</li>
+              <li>로그인 없이 보는 무료 오늘의 한 장</li>
+              <li>질문을 담아 기록하는 AI 3장 · 5장 리딩</li>
             </ul>
             <Link href="/tarot" className="primary-button" aria-label="타로 리딩 시작">
               타로 리딩 시작 <span aria-hidden="true">→</span>

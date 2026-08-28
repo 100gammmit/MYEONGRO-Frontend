@@ -175,7 +175,7 @@ describe("ReadingDetailPage", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("현재 형식으로 표시할 수 없어요");
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "이전 형식으로 저장된 사주 결과라 지금은 표시할 수 없어요.",
+      "저장된 사주 결과를 확인할 수 없어 지금은 표시할 수 없어요.",
     );
     expect(screen.queryByText(/schema version/i)).not.toBeInTheDocument();
     expect(screen.queryByText("중심을 살펴봅니다.")).not.toBeInTheDocument();

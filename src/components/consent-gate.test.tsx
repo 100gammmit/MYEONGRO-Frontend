@@ -115,10 +115,14 @@ describe("ConsentGate", () => {
 
     render(<ConsentGate onComplete={onComplete} />);
 
-    expect(await screen.findAllByRole("link", { name: "내용 보기" }))
-      .toHaveLength(3);
-    expect(screen.getAllByRole("link", { name: "내용 보기" }).map((link) => link.getAttribute("href")))
-      .toEqual(["/terms", "/privacy#collection", "/privacy#reading-inputs"]);
+    expect(await screen.findByRole("link", { name: "서비스 이용약관 동의 내용 보기" }))
+      .toHaveAttribute("href", "/terms");
+    expect(screen.getByRole("link", { name: "개인정보 수집·이용 동의 내용 보기" }))
+      .toHaveAttribute("href", "/privacy");
+    expect(screen.getByRole("link", { name: "출생 정보와 질문 내용 처리 동의 내용 보기" }))
+      .toHaveAttribute("href", "/privacy");
+    expect(screen.getByText("입력 정보의 처리 목적과 이용 범위를 확인합니다."))
+      .toBeInTheDocument();
     expect(screen.getByText("[필수] 출생 정보와 질문 내용 처리 동의"))
       .toBeInTheDocument();
 

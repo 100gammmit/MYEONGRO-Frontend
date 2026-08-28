@@ -174,8 +174,8 @@ export default async function ReadingDetailPage({
         <div className="record-state" role="alert">
           <h1>이 리딩은 현재 형식으로 표시할 수 없어요</h1>
           <p>{unreadableTarot
-            ? "이전 형식으로 저장된 타로 결과라 지금은 표시할 수 없어요."
-            : "이전 형식으로 저장된 사주 결과라 지금은 표시할 수 없어요."}</p>
+            ? "저장된 타로 결과를 확인할 수 없어 지금은 표시할 수 없어요."
+            : "저장된 사주 결과를 확인할 수 없어 지금은 표시할 수 없어요."}</p>
         </div>
       ) : reading.status === "completed" && tarotView ? (
         <>

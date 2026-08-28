@@ -7,7 +7,10 @@ describe("TermsPage", () => {
     render(<TermsPage />);
 
     expect(screen.getByRole("heading", { name: "서비스 이용약관" })).toBeInTheDocument();
+    expect(screen.getByText("문서 버전 2026-08-28")).toBeInTheDocument();
     expect(screen.getByText(/자기 성찰과 오락을 위한 참고 정보/)).toBeInTheDocument();
+    expect(screen.getByText(/무료 오늘의 한 장은 로그인 없이 이용하며 내 기록에 저장되지 않습니다/))
+      .toBeInTheDocument();
     expect(screen.getByText(/화면에 안내된 크레딧이 사용됩니다/)).toBeInTheDocument();
   });
 });

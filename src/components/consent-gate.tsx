@@ -26,13 +26,13 @@ const agreementDetails: Record<AgreementId, { label: string; detail: string; hre
   },
   privacy: {
     label: "개인정보 수집·이용 동의",
-    detail: "입력 정보의 수집 목적과 보관 기간을 확인합니다.",
-    href: "/privacy#collection",
+    detail: "입력 정보의 처리 목적과 이용 범위를 확인합니다.",
+    href: "/privacy",
   },
   "sensitive-data": {
     label: "출생 정보와 질문 내용 처리 동의",
     detail: "리딩 생성에 필요한 출생 정보와 질문 내용을 처리합니다.",
-    href: "/privacy#reading-inputs",
+    href: "/privacy",
   },
 };
 
@@ -172,7 +172,11 @@ export function ConsentGate({
                 <small>{agreementDetails[agreementId].detail}</small>
               </span>
             </label>
-            <Link className="agreement-link" href={agreementDetails[agreementId].href}>
+            <Link
+              aria-label={`${agreementDetails[agreementId].label} 내용 보기`}
+              className="agreement-link"
+              href={agreementDetails[agreementId].href}
+            >
               내용 보기
             </Link>
           </div>
