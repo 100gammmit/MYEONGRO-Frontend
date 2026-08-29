@@ -161,7 +161,7 @@ export function ConsentGate({
             <div key={agreementId} className="agreement">
               <div className="agreement-copy">
                 <span aria-hidden="true" className="agreement-mark">
-                  {accepted[agreementId] ? "✓" : "◇"}
+                  {accepted[agreementId] ? "✓" : null}
                 </span>
                 <span className="agreement-text">
                   <strong>[필수] {agreementDetails[agreementId].label}</strong>
