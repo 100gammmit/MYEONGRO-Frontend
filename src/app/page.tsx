@@ -69,7 +69,6 @@ export default function HomePage() {
 
       <section className="reading-choice page-width" aria-labelledby="reading-choice-title">
         <div className="section-heading">
-          <p className="eyebrow">CHOOSE YOUR PATH</p>
           <h2 id="reading-choice-title">지금 무엇을 살펴보고 싶나요?</h2>
         </div>
         <div className="choice-grid">
