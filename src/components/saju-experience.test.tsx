@@ -154,7 +154,14 @@ describe("SajuExperience", () => {
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(screen.getByText(/내 기록에서 언제든 삭제/)).toBeInTheDocument();
 
-    for (const checkbox of await screen.findAllByRole("checkbox")) fireEvent.click(checkbox);
+    for (const agreement of [
+      "서비스 이용약관 동의",
+      "개인정보 수집·이용 동의",
+      "출생 정보와 질문 내용 처리 동의",
+    ]) {
+      fireEvent.click(await screen.findByRole("button", { name: `${agreement} 내용 확인` }));
+      fireEvent.click(screen.getByRole("button", { name: `${agreement} 확인하고 동의` }));
+    }
     fireEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));
 
     expect(await screen.findByLabelText("양력 생년월일")).toBeInTheDocument();

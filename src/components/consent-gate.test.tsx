@@ -99,6 +99,50 @@ describe("ConsentGate", () => {
     fetchMock.mockRestore();
   });
 
+  it("requires an explicit agreement action inside each document modal", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({
+      status: {
+        acceptedDocumentTypes: [],
+        requiredDocumentTypes: ["terms", "privacy", "sensitive-data"],
+        hasAcceptedRequired: false,
+      },
+    }), { status: 200 }));
+
+    render(<ConsentGate onComplete={vi.fn()} />);
+
+    const continueButton = await screen.findByRole("button", { name: "동의하고 계속" });
+    const termsReview = screen.getByRole("button", { name: "서비스 이용약관 동의 내용 확인" });
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(continueButton).toBeDisabled();
+
+    fireEvent.click(termsReview);
+    expect(screen.getByRole("dialog", { name: "서비스 이용약관 동의" }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/문서 버전 2026-08-28/)).toBeInTheDocument();
+
+    const agreeButton = screen.getByRole("button", {
+      name: "서비스 이용약관 동의 확인하고 동의",
+    });
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    expect(agreeButton).toHaveFocus();
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(termsReview).toHaveFocus();
+    expect(continueButton).toBeDisabled();
+
+    fireEvent.click(termsReview);
+    fireEvent.click(screen.getByRole("button", {
+      name: "서비스 이용약관 동의 확인하고 동의",
+    }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "서비스 이용약관 동의 상태" }))
+      .toHaveTextContent("동의 완료");
+    expect(continueButton).toBeDisabled();
+  });
+
   it("waits for POST success before continuing and allows retry after a failure", async () => {
     const submit = deferred<Response>();
     const fetchMock = vi.spyOn(globalThis, "fetch")
@@ -115,19 +159,19 @@ describe("ConsentGate", () => {
 
     render(<ConsentGate onComplete={onComplete} />);
 
-    expect(await screen.findByRole("link", { name: "서비스 이용약관 동의 내용 보기" }))
-      .toHaveAttribute("href", "/terms");
-    expect(screen.getByRole("link", { name: "개인정보 수집·이용 동의 내용 보기" }))
-      .toHaveAttribute("href", "/privacy");
-    expect(screen.getByRole("link", { name: "출생 정보와 질문 내용 처리 동의 내용 보기" }))
-      .toHaveAttribute("href", "/privacy");
+    await screen.findByRole("button", { name: "서비스 이용약관 동의 내용 확인" });
     expect(screen.getByText("입력 정보의 처리 목적과 이용 범위를 확인합니다."))
       .toBeInTheDocument();
     expect(screen.getByText("[필수] 출생 정보와 질문 내용 처리 동의"))
       .toBeInTheDocument();
 
-    for (const checkbox of await screen.findAllByRole("checkbox")) {
-      fireEvent.click(checkbox);
+    for (const agreement of [
+      "서비스 이용약관 동의",
+      "개인정보 수집·이용 동의",
+      "출생 정보와 질문 내용 처리 동의",
+    ]) {
+      fireEvent.click(screen.getByRole("button", { name: `${agreement} 내용 확인` }));
+      fireEvent.click(screen.getByRole("button", { name: `${agreement} 확인하고 동의` }));
     }
 
     fireEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));

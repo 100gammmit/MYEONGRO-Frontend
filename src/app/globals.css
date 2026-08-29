@@ -23,6 +23,7 @@
   --surface-segment: #171e2e;
   --surface-record: rgba(23, 30, 46, 0.78);
   --surface-danger-subtle: rgba(240, 112, 138, 0.06);
+  --surface-modal-backdrop: rgba(6, 8, 14, 0.82);
 
   --text-primary: #e6ebf7;
   --text-secondary: #c3cce6;
@@ -100,6 +101,7 @@
   --shadow-progress: 0 0 12px rgba(124, 111, 240, 0.7);
   --shadow-tarot-hover: 0 16px 34px rgba(0, 0, 0, 0.45), 0 0 24px rgba(124, 111, 240, 0.16);
   --shadow-revealed-card: 0 20px 40px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 30px 100px rgba(0, 0, 0, 0.58);
 
   --brand-kakao-background: #fee500;
   --brand-kakao-text: #191919;
@@ -324,15 +326,32 @@ h1, h2, h3, blockquote {
 .lock-icon { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 14px; background: var(--surface-accent-soft); border: 1px solid var(--border-strong); display: grid; place-items: center; color: var(--text-accent); }
 .muted { color: var(--text-muted); line-height: 1.75; font-size: 14px; }
 .agreement-list { border-top: 1px solid var(--border-agreement); margin: 22px 0 20px; }
-.agreement { display: flex; gap: 14px; align-items: flex-start; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--border-agreement); }
-.agreement-choice { display: flex; gap: 14px; align-items: flex-start; min-width: 0; cursor: pointer; }
-.agreement input { position: absolute; opacity: 0; }
-.custom-check { width: 22px; height: 22px; margin-top: 1px; border: 1.5px solid var(--border-check); color: transparent; display: grid; place-items: center; flex: 0 0 auto; border-radius: 7px; transition: background .2s ease, border-color .2s ease; }
-.agreement input:focus-visible + .custom-check { outline: 2px solid var(--focus-outline); outline-offset: 3px; }
-.agreement input:checked + .custom-check { background: var(--accent-cta); color: var(--text-inverse-check); border-color: var(--accent-cta); }
+.agreement { display: flex; gap: 18px; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--border-agreement); }
+.agreement-copy { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
+.agreement-mark { width: 24px; height: 24px; display: grid; place-items: center; flex: 0 0 auto; color: var(--text-accent); border: 1px solid var(--border-strong); border-radius: 50%; }
+.agreement-text { min-width: 0; }
 .agreement strong { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 4px; }
 .agreement small { color: var(--text-agreement); line-height: 1.55; font-size: 12px; }
-.agreement-link { flex: 0 0 auto; color: var(--text-accent); font-size: 12px; line-height: 22px; text-decoration: underline; text-underline-offset: 3px; }
+.agreement-action { display: grid; justify-items: end; gap: 7px; flex: 0 0 auto; }
+.agreement-status { color: var(--text-subtle); font-size: 11px; font-weight: 600; }
+.agreement-status.accepted { color: var(--text-accent-strong); }
+.agreement-review-button { min-width: 108px; padding: 10px 14px; color: var(--text-accent-strong); background: var(--surface-accent-soft); border: 1px solid var(--border-strong); border-radius: 10px; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.agreement-review-button:hover:not(:disabled) { background: var(--surface-accent-hover); border-color: var(--accent-strong); transform: translateY(-1px); }
+.agreement-review-button:focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 3px; }
+.consent-modal-backdrop { position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center; padding: 24px; background: var(--surface-modal-backdrop); }
+.consent-modal { width: min(680px, 100%); max-height: min(86vh, 760px); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; background: var(--gradient-panel); border: 1px solid var(--border-strong); border-radius: 24px; box-shadow: var(--shadow-modal); }
+.consent-modal:focus { outline: none; }
+.consent-modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 24px 26px 18px; border-bottom: 1px solid var(--border-content-divider); }
+.consent-modal-header h2 { margin: 5px 0 0; font-size: 24px; font-weight: 400; }
+.consent-modal-close { width: 40px; height: 40px; display: grid; place-items: center; flex: 0 0 auto; padding: 0; color: var(--text-secondary); background: var(--surface-accent-faint); border: 1px solid var(--border-control); border-radius: 50%; font: inherit; font-size: 24px; cursor: pointer; }
+.consent-modal-close:hover { color: var(--text-primary); background: var(--surface-accent-hover); }
+.consent-modal-close:focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 3px; }
+.consent-modal-body { min-height: 0; overflow-y: auto; padding: 22px 26px; overscroll-behavior: contain; }
+.consent-document-content > :first-child { margin-top: 0; }
+.consent-document-content > :last-child { margin-bottom: 0; }
+.consent-document-content h2, .consent-document-content h3 { margin: 24px 0 8px; color: var(--text-primary); font-size: 17px; font-weight: 600; }
+.consent-document-content p { color: var(--text-secondary); line-height: 1.75; font-size: 14px; }
+.consent-modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 18px 26px 24px; border-top: 1px solid var(--border-content-divider); }
 .form-error { color: var(--text-danger); font-size: 13px; }
 .full-button { width: 100%; }
 .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; }
@@ -586,6 +605,16 @@ h1, h2, h3, blockquote {
   .reading-shell { padding-top: 28px; }
   .wizard-heading { margin-top: 46px; }
   .consent-panel, .wizard-card { padding: 26px 20px; }
+  .agreement { align-items: stretch; flex-direction: column; }
+  .agreement-action { grid-template-columns: 1fr auto; align-items: center; justify-items: start; }
+  .agreement-review-button { min-width: 132px; }
+  .consent-modal-backdrop { align-items: end; padding: 12px; }
+  .consent-modal { max-height: 92vh; border-radius: 22px 22px 16px 16px; }
+  .consent-modal-header { padding: 20px 20px 16px; }
+  .consent-modal-header h2 { font-size: 21px; }
+  .consent-modal-body { padding: 18px 20px; }
+  .consent-modal-actions { padding: 14px 20px 20px; }
+  .consent-modal-actions button { flex: 1; }
   .category-grid, .spread-grid, .choice-fields, .saju-place-grid, .saju-choice-row { grid-template-columns: 1fr; }
   .saju-review-list div { grid-template-columns: 1fr; gap: 6px; }
   .saju-result { padding-top: 28px; }
