@@ -317,6 +317,33 @@ describe("TarotExperience", () => {
     expect(credits.refresh).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    ["mind_three_card", "question", "카드에게 묻고 싶은 질문"],
+    ["choice_five_card", "choiceOptions.a", "선택 A"],
+  ] as const)(
+    "returns a blocked %s reading to editable field %s",
+    async (spreadType, field, accessibleName) => {
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
+        code: "SENSITIVE_HEALTH_INFORMATION",
+        field,
+        message: "상세 건강정보를 지우고 다시 시도해 주세요.",
+      }, { status: 400 }));
+      await chooseSpreadAndStart(spreadType);
+      selectSlots(spreadType === "choice_five_card" ? [5, 4, 3, 2, 1] : [2, 3, 4]);
+
+      fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+
+      const editable = await screen.findByRole("textbox", { name: accessibleName });
+      expect(editable).toHaveFocus();
+      expect(editable).toHaveAttribute("aria-invalid", "true");
+      expect(screen.getByRole("alert")).toHaveTextContent("상세 건강정보를 지우고 다시 시도");
+
+      fireEvent.change(editable, { target: { value: "민감정보를 지운 질문" } });
+      expect(editable).toHaveAttribute("aria-invalid", "false");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    },
+  );
+
   it("shows the active-generation conflict and refreshes shared status after a 409", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
       code: "READING_GENERATION_IN_PROGRESS",

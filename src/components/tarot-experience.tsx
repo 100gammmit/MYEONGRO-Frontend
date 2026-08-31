@@ -59,9 +59,21 @@ type TarotReadingResponse = {
 
 type ApiError = {
   readonly code: string;
+  readonly field: string | null;
   readonly message: string;
   readonly readingId: string | null;
 };
+
+type EditableInputField = "question" | "choiceOptions.a" | "choiceOptions.b";
+
+const SENSITIVE_INPUT_CODES = new Set([
+  "IMMEDIATE_SAFETY_RISK",
+  "HARMFUL_OR_ILLEGAL_REQUEST",
+  "DIRECT_IDENTIFIER_NOT_ALLOWED",
+  "SENSITIVE_HEALTH_INFORMATION",
+  "SENSITIVE_SEXUAL_INFORMATION",
+  "SENSITIVE_BELIEF_INFORMATION",
+]);
 
 const CARD_IDS = new Set<string>(MAJOR_ARCANA.map((card) => card.id));
 
@@ -83,7 +95,11 @@ export function TarotExperience() {
   const [requestId, setRequestId] = useState<string | null>(null);
   const [failedReadingId, setFailedReadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [inputErrorField, setInputErrorField] = useState<EditableInputField | null>(null);
   const inFlightRequestId = useRef<string | null>(null);
+  const questionInputRef = useRef<HTMLTextAreaElement>(null);
+  const choiceAInputRef = useRef<HTMLInputElement>(null);
+  const choiceBInputRef = useRef<HTMLInputElement>(null);
 
   const definition = TAROT_SPREADS[spreadType];
   const inputIsValid = hasValidTarotInput(spreadType, question, choiceOptions);
@@ -113,6 +129,7 @@ export function TarotExperience() {
     setRequestId(null);
     setFailedReadingId(null);
     setError(null);
+    setInputErrorField(null);
   }
 
   function beginDraw() {
@@ -122,6 +139,7 @@ export function TarotExperience() {
     setRequestId(null);
     setFailedReadingId(null);
     setError(null);
+    setInputErrorField(null);
     setPhase("draw");
   }
 
@@ -194,6 +212,14 @@ export function TarotExperience() {
       }
       if (!response.ok) {
         const apiError = await readApiError(response);
+        if (isEditableSensitiveInputError(apiError)) {
+          setError(apiError.message || "입력 내용을 확인해 주세요.");
+          setInputErrorField(apiError.field);
+          setRequestId(null);
+          setFailedReadingId(null);
+          setPhase("input");
+          return;
+        }
         if (
           apiError.code === "READING_GENERATION_IN_PROGRESS"
           || apiError.code === "INSUFFICIENT_READING_CREDITS"
@@ -247,6 +273,22 @@ export function TarotExperience() {
     setPhase("input");
   }, []);
 
+  useEffect(() => {
+    if (phase !== "input" || inputErrorField === null) return;
+    const target = inputErrorField === "question"
+      ? questionInputRef.current
+      : inputErrorField === "choiceOptions.a"
+        ? choiceAInputRef.current
+        : choiceBInputRef.current;
+    target?.focus();
+  }, [inputErrorField, phase]);
+
+  function clearInputError(field: EditableInputField) {
+    if (inputErrorField !== field) return;
+    setInputErrorField(null);
+    setError(null);
+  }
+
   if (phase === "spread") {
     return (
       <ReadingShell eyebrow="AI TAROT" title="어떤 마음을 들여다볼까요?" step={1} totalSteps={4}>
@@ -298,11 +340,18 @@ export function TarotExperience() {
           <label className="field">
             <span>카드에게 묻고 싶은 질문</span>
             <textarea
-              aria-describedby="tarot-question-guidance"
+              aria-describedby={inputErrorField === "question"
+                ? "tarot-question-guidance tarot-input-error"
+                : "tarot-question-guidance"}
+              aria-invalid={inputErrorField === "question"}
               aria-label="카드에게 묻고 싶은 질문"
               maxLength={MAX_QUESTION_LENGTH}
+              ref={questionInputRef}
               value={question}
-              onChange={(event) => setQuestion(event.target.value)}
+              onChange={(event) => {
+                setQuestion(event.target.value);
+                clearInputError("question");
+              }}
               placeholder="지금 들여다보고 싶은 상황을 적어주세요."
             />
             <p className="field-guidance" id="tarot-question-guidance">
@@ -315,20 +364,32 @@ export function TarotExperience() {
               <label className="field">
                 <span>선택 A</span>
                 <input
+                  aria-describedby={inputErrorField === "choiceOptions.a" ? "tarot-input-error" : undefined}
+                  aria-invalid={inputErrorField === "choiceOptions.a"}
                   aria-label="선택 A"
                   maxLength={MAX_CHOICE_LENGTH}
+                  ref={choiceAInputRef}
                   value={choiceOptions.a}
-                  onChange={(event) => setChoiceOptions((current) => ({ ...current, a: event.target.value }))}
+                  onChange={(event) => {
+                    setChoiceOptions((current) => ({ ...current, a: event.target.value }));
+                    clearInputError("choiceOptions.a");
+                  }}
                 />
                 <small>{choiceOptions.a.length} / {MAX_CHOICE_LENGTH}</small>
               </label>
               <label className="field">
                 <span>선택 B</span>
                 <input
+                  aria-describedby={inputErrorField === "choiceOptions.b" ? "tarot-input-error" : undefined}
+                  aria-invalid={inputErrorField === "choiceOptions.b"}
                   aria-label="선택 B"
                   maxLength={MAX_CHOICE_LENGTH}
+                  ref={choiceBInputRef}
                   value={choiceOptions.b}
-                  onChange={(event) => setChoiceOptions((current) => ({ ...current, b: event.target.value }))}
+                  onChange={(event) => {
+                    setChoiceOptions((current) => ({ ...current, b: event.target.value }));
+                    clearInputError("choiceOptions.b");
+                  }}
                 />
                 <small>{choiceOptions.b.length} / {MAX_CHOICE_LENGTH}</small>
               </label>
@@ -336,6 +397,9 @@ export function TarotExperience() {
                 <p className="form-error" role="alert">선택 A와 B를 서로 다르게 적어주세요.</p>
               ) : null}
             </div>
+          ) : null}
+          {inputErrorField && error ? (
+            <p className="form-error" id="tarot-input-error" role="alert">{error}</p>
           ) : null}
           <button
             className="primary-button full-button"
@@ -531,14 +595,24 @@ async function readApiError(response: Response): Promise<ApiError> {
     const payload = await response.json() as Partial<ApiError>;
     return {
       code: typeof payload.code === "string" ? payload.code : "UNKNOWN_ERROR",
+      field: typeof payload.field === "string" ? payload.field : null,
       message: typeof payload.message === "string" ? payload.message : "",
       readingId: typeof payload.readingId === "string" && payload.readingId.length > 0
         ? payload.readingId
         : null,
     };
   } catch {
-    return { code: "UNKNOWN_ERROR", message: "", readingId: null };
+    return { code: "UNKNOWN_ERROR", field: null, message: "", readingId: null };
   }
+}
+
+function isEditableSensitiveInputError(
+  error: ApiError,
+): error is ApiError & { field: EditableInputField } {
+  return SENSITIVE_INPUT_CODES.has(error.code)
+    && (error.field === "question"
+      || error.field === "choiceOptions.a"
+      || error.field === "choiceOptions.b");
 }
 
 function hasValidTarotInput(
