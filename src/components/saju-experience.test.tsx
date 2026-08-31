@@ -435,7 +435,7 @@ describe("SajuExperience", () => {
       name: "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?",
     })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /질문 한 가지/ }))
-      .toHaveAccessibleDescription(/이름·연락처.*진단·복약 정보/);
+      .toHaveAccessibleDescription(/개인정보는 제외.*OpenAI API로 전송.*일부 식별정보 형식만 확인/);
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /일·진로/ })).not.toBeChecked();
     fireEvent.click(screen.getByRole("button", { name: "이전" }));
@@ -443,5 +443,24 @@ describe("SajuExperience", () => {
     expect(screen.queryByLabelText("출생 시·도")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "이전" }));
     expect(screen.getByRole("radio", { name: /시간을 몰라요/ })).toBeChecked();
+  });
+
+  it("blocks a verifiable identifier in the browser before review or API submission", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+    await startWithAcceptedConsent();
+    await reachBirthPlace("unknown");
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
+    const question = screen.getByRole("textbox", { name: /질문 한 가지/ });
+    fireEvent.change(question, { target: { value: "reader@example.com으로 답을 보내주세요" } });
+    fireEvent.click(screen.getByRole("button", { name: "입력 검토" }));
+
+    expect(screen.getByRole("heading", {
+      name: "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?",
+    })).toBeInTheDocument();
+    expect(question).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("alert")).toHaveTextContent("형식이 확인되는 개인정보");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

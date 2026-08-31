@@ -14,6 +14,10 @@ import {
   type TarotSpreadType,
 } from "@/domain/tarot";
 import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
+import {
+  containsDirectIdentifier,
+  DIRECT_IDENTIFIER_INPUT_MESSAGE,
+} from "@/domain/reading/direct-identifier";
 import { getReadingCreditAccess } from "@/domain/reading-credit";
 import { ConsentGate } from "./consent-gate";
 import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
@@ -66,14 +70,7 @@ type ApiError = {
 
 type EditableInputField = "question" | "choiceOptions.a" | "choiceOptions.b";
 
-const SENSITIVE_INPUT_CODES = new Set([
-  "IMMEDIATE_SAFETY_RISK",
-  "HARMFUL_OR_ILLEGAL_REQUEST",
-  "DIRECT_IDENTIFIER_NOT_ALLOWED",
-  "SENSITIVE_HEALTH_INFORMATION",
-  "SENSITIVE_SEXUAL_INFORMATION",
-  "SENSITIVE_BELIEF_INFORMATION",
-]);
+const EDITABLE_INPUT_CODES = new Set(["DIRECT_IDENTIFIER_NOT_ALLOWED"]);
 
 const CARD_IDS = new Set<string>(MAJOR_ARCANA.map((card) => card.id));
 
@@ -134,6 +131,12 @@ export function TarotExperience() {
 
   function beginDraw() {
     if (!inputIsValid || creditAccess.status !== "allowed") return;
+    const blockedField = directIdentifierField(question, choiceOptions, definition.inputMode);
+    if (blockedField) {
+      setError(DIRECT_IDENTIFIER_INPUT_MESSAGE);
+      setInputErrorField(blockedField);
+      return;
+    }
     setSelectedSlots([]);
     setFocusedSlot(null);
     setRequestId(null);
@@ -212,7 +215,7 @@ export function TarotExperience() {
       }
       if (!response.ok) {
         const apiError = await readApiError(response);
-        if (isEditableSensitiveInputError(apiError)) {
+        if (isEditableInputError(apiError)) {
           setError(apiError.message || "입력 내용을 확인해 주세요.");
           setInputErrorField(apiError.field);
           setRequestId(null);
@@ -355,7 +358,10 @@ export function TarotExperience() {
               placeholder="지금 들여다보고 싶은 상황을 적어주세요."
             />
             <p className="field-guidance" id="tarot-question-guidance">
-              이름·연락처, 진단·복약 정보, 성생활, 정치·종교 신념처럼 개인을 알아보거나 민감할 수 있는 내용은 적지 마세요.
+              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문과 선택지는 내 리딩 기록에 저장되고 AI 리딩 생성을 위해 OpenAI API로 전송됩니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
+              {spreadType === "relationship_three_card"
+                ? " 상대방의 실명 대신 친구·연인·직장 동료처럼 관계로 적어주세요."
+                : null}
             </p>
             <small>{question.length} / {MAX_QUESTION_LENGTH}</small>
           </label>
@@ -364,7 +370,9 @@ export function TarotExperience() {
               <label className="field">
                 <span>선택 A</span>
                 <input
-                  aria-describedby={inputErrorField === "choiceOptions.a" ? "tarot-input-error" : undefined}
+                  aria-describedby={inputErrorField === "choiceOptions.a"
+                    ? "tarot-question-guidance tarot-input-error"
+                    : "tarot-question-guidance"}
                   aria-invalid={inputErrorField === "choiceOptions.a"}
                   aria-label="선택 A"
                   maxLength={MAX_CHOICE_LENGTH}
@@ -380,7 +388,9 @@ export function TarotExperience() {
               <label className="field">
                 <span>선택 B</span>
                 <input
-                  aria-describedby={inputErrorField === "choiceOptions.b" ? "tarot-input-error" : undefined}
+                  aria-describedby={inputErrorField === "choiceOptions.b"
+                    ? "tarot-question-guidance tarot-input-error"
+                    : "tarot-question-guidance"}
                   aria-invalid={inputErrorField === "choiceOptions.b"}
                   aria-label="선택 B"
                   maxLength={MAX_CHOICE_LENGTH}
@@ -606,13 +616,25 @@ async function readApiError(response: Response): Promise<ApiError> {
   }
 }
 
-function isEditableSensitiveInputError(
+function isEditableInputError(
   error: ApiError,
 ): error is ApiError & { field: EditableInputField } {
-  return SENSITIVE_INPUT_CODES.has(error.code)
+  return EDITABLE_INPUT_CODES.has(error.code)
     && (error.field === "question"
       || error.field === "choiceOptions.a"
       || error.field === "choiceOptions.b");
+}
+
+function directIdentifierField(
+  question: string,
+  choiceOptions: TarotChoiceOptions,
+  inputMode: "fixed" | "question" | "choice",
+): EditableInputField | null {
+  if (containsDirectIdentifier(question)) return "question";
+  if (inputMode !== "choice") return null;
+  if (containsDirectIdentifier(choiceOptions.a)) return "choiceOptions.a";
+  if (containsDirectIdentifier(choiceOptions.b)) return "choiceOptions.b";
+  return null;
 }
 
 function hasValidTarotInput(

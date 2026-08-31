@@ -24,6 +24,10 @@ import {
 } from "@/domain/saju/schema";
 import { getReadingCreditAccess } from "@/domain/reading-credit";
 import {
+  containsDirectIdentifier,
+  DIRECT_IDENTIFIER_INPUT_MESSAGE,
+} from "@/domain/reading/direct-identifier";
+import {
   fetchSajuBirthPlaces,
   SajuBirthPlacesClientError,
 } from "@/infrastructure/backend/saju-birth-places-client";
@@ -223,6 +227,15 @@ export function SajuExperience() {
 
   function selectProvince(provinceCode: string) {
     updateForm({ provinceCode });
+  }
+
+  function reviewQuestion() {
+    if (containsDirectIdentifier(form.question)) {
+      setFieldErrors({ question: DIRECT_IDENTIFIER_INPUT_MESSAGE });
+      setGeneralError(null);
+      return;
+    }
+    setPhase("review");
   }
 
   async function submitReading() {
@@ -545,12 +558,12 @@ export function SajuExperience() {
               value={form.question}
             />
             <p className="field-guidance" id="saju-question-guidance">
-              이름·연락처, 진단·복약 정보, 성생활, 정치·종교 신념처럼 개인을 알아보거나 민감할 수 있는 내용은 적지 마세요.
+              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문은 내 리딩 기록에 저장되고 AI 리딩 생성을 위해 OpenAI API로 전송됩니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
             </p>
             <small>{form.question.length} / {MAX_QUESTION_LENGTH}자</small>
             <FieldError id="question-error" message={fieldErrors.question} />
           </label>
-          <NavigationButtons back={() => setPhase("birth-place")} next={() => setPhase("review")} nextDisabled={!questionReady} nextLabel="입력 검토" />
+          <NavigationButtons back={() => setPhase("birth-place")} next={reviewQuestion} nextDisabled={!questionReady} nextLabel="입력 검토" />
         </div>
       </ReadingShell>
     );

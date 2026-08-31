@@ -142,13 +142,52 @@ describe("TarotExperience", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("warns before a user enters identifying or sensitive details", async () => {
+  it("warns about storage, external transfer, and the limited identifier check", async () => {
+    render(<TarotExperience />);
+    fireEvent.click(await screen.findByRole("button", { name: /관계 리딩/ }));
+    fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
+
+    const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
+    expect(question).toHaveAccessibleDescription(/개인정보는 제외.*OpenAI API로 전송.*일부 식별정보 형식만 확인/);
+    expect(question).toHaveAccessibleDescription(/상대방의 실명 대신.*관계로 적어주세요/);
+  });
+
+  it("blocks a verifiable identifier in the browser before the draw or API request", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
     render(<TarotExperience />);
     fireEvent.click(await screen.findByRole("button", { name: /마음 정리/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
 
     const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
-    expect(question).toHaveAccessibleDescription(/이름·연락처.*진단·복약 정보/);
+    fireEvent.change(question, { target: { value: "연락처는 010-1234-5678이에요" } });
+    fireEvent.click(screen.getByRole("button", { name: "카드 고르러 가기" }));
+
+    expect(question).toHaveFocus();
+    expect(question).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("alert")).toHaveTextContent("형식이 확인되는 개인정보");
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: /숨은 카드/ })).not.toBeInTheDocument();
+  });
+
+  it("checks both choice fields before the draw or API request", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    render(<TarotExperience />);
+    fireEvent.click(await screen.findByRole("button", { name: /선택 리딩/ }));
+    fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
+    fireEvent.change(await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" }), {
+      target: { value: "두 선택지 중 무엇이 나을까요?" },
+    });
+    const choiceA = screen.getByRole("textbox", { name: "선택 A" });
+    fireEvent.change(choiceA, { target: { value: "reader@example.com에 연락한다" } });
+    fireEvent.change(screen.getByRole("textbox", { name: "선택 B" }), {
+      target: { value: "조금 더 기다린다" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "카드 고르러 가기" }));
+
+    expect(choiceA).toHaveFocus();
+    expect(choiceA).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("alert")).toHaveTextContent("형식이 확인되는 개인정보");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("routes the free daily card without consent or credit checks", () => {
@@ -324,9 +363,9 @@ describe("TarotExperience", () => {
     "returns a blocked %s reading to editable field %s",
     async (spreadType, field, accessibleName) => {
       vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
-        code: "SENSITIVE_HEALTH_INFORMATION",
+        code: "DIRECT_IDENTIFIER_NOT_ALLOWED",
         field,
-        message: "상세 건강정보를 지우고 다시 시도해 주세요.",
+        message: "형식이 확인되는 개인정보를 지우고 다시 시도해 주세요.",
       }, { status: 400 }));
       await chooseSpreadAndStart(spreadType);
       selectSlots(spreadType === "choice_five_card" ? [5, 4, 3, 2, 1] : [2, 3, 4]);
@@ -336,7 +375,7 @@ describe("TarotExperience", () => {
       const editable = await screen.findByRole("textbox", { name: accessibleName });
       expect(editable).toHaveFocus();
       expect(editable).toHaveAttribute("aria-invalid", "true");
-      expect(screen.getByRole("alert")).toHaveTextContent("상세 건강정보를 지우고 다시 시도");
+      expect(screen.getByRole("alert")).toHaveTextContent("형식이 확인되는 개인정보를 지우고 다시 시도");
 
       fireEvent.change(editable, { target: { value: "민감정보를 지운 질문" } });
       expect(editable).toHaveAttribute("aria-invalid", "false");
