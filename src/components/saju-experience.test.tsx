@@ -434,6 +434,8 @@ describe("SajuExperience", () => {
     expect(await screen.findByRole("heading", {
       name: "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?",
     })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /질문 한 가지/ }))
+      .toHaveAccessibleDescription(/이름·연락처.*진단·복약 정보/);
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /일·진로/ })).not.toBeChecked();
     fireEvent.click(screen.getByRole("button", { name: "이전" }));

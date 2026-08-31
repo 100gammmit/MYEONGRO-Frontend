@@ -298,12 +298,16 @@ export function TarotExperience() {
           <label className="field">
             <span>카드에게 묻고 싶은 질문</span>
             <textarea
+              aria-describedby="tarot-question-guidance"
               aria-label="카드에게 묻고 싶은 질문"
               maxLength={MAX_QUESTION_LENGTH}
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
               placeholder="지금 들여다보고 싶은 상황을 적어주세요."
             />
+            <p className="field-guidance" id="tarot-question-guidance">
+              이름·연락처, 진단·복약 정보, 성생활, 정치·종교 신념처럼 개인을 알아보거나 민감할 수 있는 내용은 적지 마세요.
+            </p>
             <small>{question.length} / {MAX_QUESTION_LENGTH}</small>
           </label>
           {definition.inputMode === "choice" ? (

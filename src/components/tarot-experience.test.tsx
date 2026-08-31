@@ -142,6 +142,15 @@ describe("TarotExperience", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("warns before a user enters identifying or sensitive details", async () => {
+    render(<TarotExperience />);
+    fireEvent.click(await screen.findByRole("button", { name: /마음 정리/ }));
+    fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
+
+    const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
+    expect(question).toHaveAccessibleDescription(/이름·연락처.*진단·복약 정보/);
+  });
+
   it("routes the free daily card without consent or credit checks", () => {
     consent.autoComplete = false;
     credits.state.status = "error";

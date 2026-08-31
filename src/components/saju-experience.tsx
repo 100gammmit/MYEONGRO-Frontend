@@ -535,13 +535,18 @@ export function SajuExperience() {
             <span>질문 한 가지</span>
             <textarea
               id="saju-question"
-              aria-describedby={fieldErrors.question ? "question-error" : undefined}
+              aria-describedby={fieldErrors.question
+                ? "saju-question-guidance question-error"
+                : "saju-question-guidance"}
               aria-invalid={Boolean(fieldErrors.question)}
               maxLength={MAX_QUESTION_LENGTH}
               onChange={(event) => updateForm({ question: event.target.value })}
               placeholder={selectedFocus?.example ?? "지금 가장 궁금한 한 가지를 적어주세요."}
               value={form.question}
             />
+            <p className="field-guidance" id="saju-question-guidance">
+              이름·연락처, 진단·복약 정보, 성생활, 정치·종교 신념처럼 개인을 알아보거나 민감할 수 있는 내용은 적지 마세요.
+            </p>
             <small>{form.question.length} / {MAX_QUESTION_LENGTH}자</small>
             <FieldError id="question-error" message={fieldErrors.question} />
           </label>

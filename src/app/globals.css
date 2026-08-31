@@ -364,6 +364,7 @@ h1, h2, h3, blockquote {
 .field textarea, .field input, .field select { width: 100%; color: var(--text-primary); background: var(--surface-input); border: 1px solid var(--border-input); border-radius: 12px; padding: 15px; outline: none; color-scheme: inherit; transition: border-color .2s, box-shadow .2s; }
 .field textarea { min-height: 120px; resize: vertical; line-height: 1.7; }
 .field textarea:focus, .field input:focus, .field select:focus { border-color: var(--accent-primary); box-shadow: var(--focus-field-ring); }
+.field .field-guidance { color: var(--text-muted); font-size: 12px; line-height: 1.65; margin: 8px 0 0; }
 .field small { display: block; color: var(--text-faint); text-align: right; margin-top: 7px; }
 .segmented, .gender-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-control); margin-bottom: 24px; border-radius: 14px; overflow: hidden; }
 .segmented button, .gender-row button { border: 0; background: var(--surface-segment); color: var(--text-muted); padding: 13px; }
