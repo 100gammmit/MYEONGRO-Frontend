@@ -2,57 +2,62 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  CONSENT_DOCUMENT_VERSIONS,
+  type ConsentDocumentType,
+  type ConsentScope,
+} from "@/domain/consent/documents";
 import { ConsentDocumentModal } from "./consent-document-modal";
 
-const AGREEMENT_IDS = ["terms", "privacy", "sensitive-data"] as const;
-
-type AgreementId = typeof AGREEMENT_IDS[number];
-
 type ConsentStatus = {
-  acceptedDocumentTypes: AgreementId[];
-  requiredDocumentTypes: AgreementId[];
+  acceptedDocumentTypes: ConsentDocumentType[];
+  requiredDocumentTypes: ConsentDocumentType[];
   hasAcceptedRequired: boolean;
 };
 
-type ConsentError = {
-  mode: "load" | "submit";
-  message: string;
+const SCOPE_DOCUMENTS: Readonly<Record<ConsentScope, readonly ConsentDocumentType[]>> = {
+  tarot: ["terms", "ai-overseas-transfer"],
+  saju: ["terms", "ai-overseas-transfer", "saju-input"],
 };
 
-const agreementDetails: Record<AgreementId, { label: string; detail: string }> = {
+const agreementDetails: Readonly<Record<ConsentDocumentType, {
+  label: string;
+  detail: string;
+}>> = {
   terms: {
     label: "서비스 이용약관 동의",
     detail: "리딩 콘텐츠의 성격과 이용 조건을 확인합니다.",
   },
-  privacy: {
-    label: "개인정보 수집·이용 동의",
-    detail: "입력 정보의 처리 목적과 이용 범위를 확인합니다.",
+  "ai-overseas-transfer": {
+    label: "AI 리딩 정보 국외이전 동의",
+    detail: "OpenAI로 전송되는 정보, 처리 가능 국가와 보유기간을 확인합니다.",
   },
-  "sensitive-data": {
-    label: "출생 정보와 질문 내용 처리 동의",
-    detail: "리딩 생성에 필요한 출생 정보와 질문 내용을 처리합니다.",
+  "saju-input": {
+    label: "사주 출생정보 처리 동의",
+    detail: "명식 계산과 기록 저장에 필요한 출생정보의 처리 범위를 확인합니다.",
   },
 };
 
 export function ConsentGate({
+  scope,
   onComplete,
   onUnauthenticated,
 }: {
+  scope: ConsentScope;
   onComplete: () => void;
   onUnauthenticated?: () => void;
 }) {
-  const [accepted, setAccepted] = useState<Partial<Record<AgreementId, boolean>>>({});
-  const [activeAgreement, setActiveAgreement] = useState<AgreementId | null>(null);
+  const [accepted, setAccepted] = useState<Partial<Record<ConsentDocumentType, boolean>>>({});
+  const [activeAgreement, setActiveAgreement] = useState<ConsentDocumentType | null>(null);
   const [status, setStatus] = useState<ConsentStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<ConsentError | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [completed, setCompleted] = useState(false);
   const reviewButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const requiredAgreements = useMemo<AgreementId[]>(
-    () => status?.requiredDocumentTypes ?? [...AGREEMENT_IDS],
-    [status],
+  const requiredAgreements = useMemo<readonly ConsentDocumentType[]>(
+    () => status?.requiredDocumentTypes ?? SCOPE_DOCUMENTS[scope],
+    [scope, status],
   );
   const complete = requiredAgreements.every((id) => accepted[id]);
   const closeDocument = useCallback(() => setActiveAgreement(null), []);
@@ -62,14 +67,14 @@ export function ConsentGate({
     setError(null);
 
     try {
-      const response = await fetch("/api/consents", { credentials: "same-origin" });
+      const response = await fetch(`/api/consents?scope=${encodeURIComponent(scope)}`, {
+        credentials: "same-origin",
+      });
       if (response.status === 401) {
         onUnauthenticated?.();
         return;
       }
-      if (!response.ok) {
-        throw new Error("failed");
-      }
+      if (!response.ok) throw new Error("failed");
 
       const payload = await response.json() as { status: ConsentStatus };
       if (payload.status.hasAcceptedRequired) {
@@ -79,56 +84,47 @@ export function ConsentGate({
       }
 
       setStatus(payload.status);
-      setAccepted(
-        Object.fromEntries(
-          payload.status.acceptedDocumentTypes.map((documentType) => [documentType, true] as const),
-        ) as Partial<Record<AgreementId, boolean>>,
-      );
+      setAccepted(Object.fromEntries(
+        payload.status.acceptedDocumentTypes.map((documentType) => [documentType, true] as const),
+      ));
     } catch {
-      setError({
-        mode: "load",
-        message: "동의 상태를 불러오지 못했어요. 다시 시도해 주세요.",
-      });
+      setError("동의 상태를 불러오지 못했어요. 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
-  }, [onComplete, onUnauthenticated]);
+  }, [onComplete, onUnauthenticated, scope]);
 
   useEffect(() => {
     void loadStatus();
   }, [loadStatus]);
 
-  async function submitConsent() {
-    setSubmitting(true);
-    setError(null);
-
+  async function acceptAgreement(documentType: ConsentDocumentType) {
+    let response: Response;
     try {
-      const response = await fetch("/api/consents", {
+      response = await fetch(`/api/consents/${encodeURIComponent(documentType)}`, {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          acceptedDocumentTypes: requiredAgreements,
+          documentVersion: CONSENT_DOCUMENT_VERSIONS[documentType],
         }),
       });
-      if (response.status === 401) {
-        onUnauthenticated?.();
-        return;
-      }
-      if (!response.ok) {
-        throw new Error("failed");
-      }
-
-      setCompleted(true);
-      onComplete();
     } catch {
-      setError({
-        mode: "submit",
-        message: "동의 저장에 실패했어요. 다시 시도해 주세요.",
-      });
-    } finally {
-      setSubmitting(false);
+      throw new Error("동의를 저장하지 못했어요. 다시 시도해 주세요.");
     }
+    if (response.status === 401) {
+      onUnauthenticated?.();
+      throw new Error("로그인이 만료되었어요. 다시 로그인해 주세요.");
+    }
+    if (!response.ok) {
+      const payload = await readConsentError(response);
+      throw new Error(
+        response.status === 409
+          ? "동의 문서가 변경되었어요. 페이지를 새로고침한 뒤 다시 확인해 주세요."
+          : payload ?? "동의를 저장하지 못했어요. 다시 시도해 주세요.",
+      );
+    }
+    setAccepted((current) => ({ ...current, [documentType]: true }));
   }
 
   if (loading) {
@@ -139,22 +135,20 @@ export function ConsentGate({
     );
   }
 
-  if (completed) {
-    return null;
-  }
+  if (completed) return null;
 
   return (
     <>
       <div className="consent-panel">
         <div className="consent-heading">
-          <span className="lock-icon">◇</span>
+          <span aria-hidden="true" className="lock-icon">◇</span>
           <div>
             <p className="eyebrow">BEFORE WE BEGIN</p>
             <h2>당신의 이야기를 안전하게 다룰게요</h2>
           </div>
         </div>
         <p className="muted">
-          아래 항목은 리딩을 시작하기 위해 꼭 필요한 동의입니다. 동의 기록은 문서 버전과 시각을 함께 보관합니다.
+          이 리딩에 필요한 항목만 안내합니다. 각 문서를 확인하고 동의하면 문서 버전과 시각이 바로 저장됩니다.
         </p>
         <div className="agreement-list">
           {requiredAgreements.map((agreementId) => (
@@ -179,60 +173,41 @@ export function ConsentGate({
                 <button
                   aria-label={`${agreementDetails[agreementId].label} 내용 확인`}
                   className="agreement-review-button"
-                  disabled={submitting}
                   onClick={(event) => {
                     reviewButtonRef.current = event.currentTarget;
                     setActiveAgreement(agreementId);
                   }}
                   type="button"
                 >
-                  내용 확인
+                  {accepted[agreementId] ? "다시 보기" : "내용 확인"}
                 </button>
               </div>
             </div>
           ))}
         </div>
+        {error ? <p className="form-error" role="alert">{error}</p> : null}
         {error ? (
-          <p className="form-error" role="alert">
-            {error.message}
-          </p>
-        ) : null}
-        {error ? (
-          <button
-            className="secondary-button full-button"
-            type="button"
-            disabled={submitting}
-            onClick={() => {
-              if (error.mode === "load") {
-                void loadStatus();
-              } else if (complete) {
-                void submitConsent();
-              }
-            }}
-          >
+          <button className="secondary-button full-button" onClick={() => void loadStatus()} type="button">
             다시 시도
           </button>
         ) : null}
         <button
           className="primary-button full-button"
           type="button"
-          disabled={!complete || submitting}
+          disabled={!complete}
           onClick={() => {
-            if (complete) {
-              void submitConsent();
-            }
+            if (!complete) return;
+            setCompleted(true);
+            onComplete();
           }}
         >
-          {submitting ? "동의 저장 중..." : "동의하고 계속"}
+          동의 완료하고 계속
         </button>
       </div>
       {activeAgreement ? (
         <ConsentDocumentModal
           documentType={activeAgreement}
-          onAgree={() => {
-            setAccepted((current) => ({ ...current, [activeAgreement]: true }));
-            closeDocument();
-          }}
+          onAgree={() => acceptAgreement(activeAgreement)}
           onClose={closeDocument}
           returnFocusTo={reviewButtonRef.current}
           title={agreementDetails[activeAgreement].label}
@@ -240,4 +215,15 @@ export function ConsentGate({
       ) : null}
     </>
   );
+}
+
+async function readConsentError(response: Response): Promise<string | null> {
+  try {
+    const payload = await response.json() as { message?: unknown; error?: unknown };
+    if (typeof payload.message === "string") return payload.message;
+    if (typeof payload.error === "string") return payload.error;
+    return null;
+  } catch {
+    return null;
+  }
 }

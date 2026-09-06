@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   ConsentDocumentContent,
@@ -16,11 +16,14 @@ export function ConsentDocumentModal({
 }: {
   documentType: ConsentDocumentType;
   title: string;
-  onAgree: () => void;
+  onAgree: () => Promise<void>;
   onClose: () => void;
   returnFocusTo: HTMLElement | null;
 }) {
   const dialogRef = useRef<HTMLElement>(null);
+  const submittingRef = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const previouslyFocused = document.activeElement instanceof HTMLElement
@@ -33,7 +36,7 @@ export function ConsentDocumentModal({
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
-        onClose();
+        if (!submittingRef.current) onClose();
         return;
       }
       if (event.key !== "Tab" || !dialogRef.current) return;
@@ -66,11 +69,30 @@ export function ConsentDocumentModal({
     };
   }, [onClose, returnFocusTo]);
 
+  async function agree() {
+    submittingRef.current = true;
+    setSubmitting(true);
+    setError(null);
+    try {
+      await onAgree();
+      submittingRef.current = false;
+      onClose();
+    } catch (agreementError) {
+      setError(
+        agreementError instanceof Error
+          ? agreementError.message
+          : "동의를 저장하지 못했어요. 다시 시도해 주세요.",
+      );
+      submittingRef.current = false;
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div
       className="consent-modal-backdrop"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (!submitting && event.target === event.currentTarget) onClose();
       }}
     >
       <section
@@ -89,6 +111,7 @@ export function ConsentDocumentModal({
           <button
             aria-label={`${title} 닫기`}
             className="consent-modal-close"
+            disabled={submitting}
             onClick={onClose}
             type="button"
           >
@@ -98,17 +121,21 @@ export function ConsentDocumentModal({
         <div className="consent-modal-body">
           <ConsentDocumentContent documentType={documentType} headingLevel="h3" />
         </div>
+        <div className="consent-modal-feedback">
+          {error ? <p className="form-error" role="alert">{error}</p> : null}
+        </div>
         <footer className="consent-modal-actions">
-          <button className="secondary-button" onClick={onClose} type="button">
+          <button className="secondary-button" disabled={submitting} onClick={onClose} type="button">
             닫기
           </button>
           <button
             aria-label={`${title} 확인하고 동의`}
             className="primary-button"
-            onClick={onAgree}
+            disabled={submitting}
+            onClick={() => void agree()}
             type="button"
           >
-            확인하고 동의
+            {submitting ? "동의 저장 중..." : "확인하고 동의"}
           </button>
         </footer>
       </section>

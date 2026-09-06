@@ -16,6 +16,9 @@ vi.mock("@/infrastructure/backend/session-auth", () => ({
 vi.mock("./account-delete-button", () => ({
   AccountDeleteButton: () => <button type="button">계정 삭제</button>,
 }));
+vi.mock("./consent-settings", () => ({
+  ConsentSettings: () => <section>AI 리딩 정보 국외이전 관리</section>,
+}));
 
 import AccountPage from "./page";
 
@@ -40,6 +43,7 @@ describe("AccountPage", () => {
 
     expect(mocks.getSessionState).toHaveBeenCalledWith("JSESSIONID=session");
     expect(screen.getByRole("heading", { name: "계정 설정" })).toBeInTheDocument();
+    expect(screen.getByText("AI 리딩 정보 국외이전 관리")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "계정 삭제" })).toBeInTheDocument();
   });
 

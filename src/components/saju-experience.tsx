@@ -315,7 +315,11 @@ export function SajuExperience() {
         step={1}
         totalSteps={TOTAL_STEPS}
       >
-        <ConsentGate onComplete={handleConsentComplete} onUnauthenticated={redirectToLogin} />
+        <ConsentGate
+          scope="saju"
+          onComplete={handleConsentComplete}
+          onUnauthenticated={redirectToLogin}
+        />
       </ReadingShell>
     );
   }

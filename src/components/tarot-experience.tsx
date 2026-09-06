@@ -440,7 +440,11 @@ export function TarotExperience() {
   if (phase === "consent") {
     return (
       <ReadingShell eyebrow={definition.name} title="리딩 전 필수 동의를 확인해요" step={1} totalSteps={4}>
-        <ConsentGate onComplete={handleConsentComplete} onUnauthenticated={redirectToLogin} />
+        <ConsentGate
+          scope="tarot"
+          onComplete={handleConsentComplete}
+          onUnauthenticated={redirectToLogin}
+        />
       </ReadingShell>
     );
   }

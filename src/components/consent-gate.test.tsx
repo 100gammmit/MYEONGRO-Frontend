@@ -1,201 +1,212 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
+import {
+  AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
+  TERMS_DOCUMENT_VERSION,
+} from "@/domain/consent/documents";
 import { ConsentGate } from "./consent-gate";
 
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (reason?: unknown) => void;
-  const promise = new Promise<T>((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
-}
+const tarotStatus = {
+  acceptedDocumentTypes: [],
+  requiredDocumentTypes: ["terms", "ai-overseas-transfer"],
+  hasAcceptedRequired: false,
+};
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("ConsentGate", () => {
-  it("routes a 401 consent response back through the login gate", async () => {
+  it("requests the status for the selected feature scope", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      Response.json({ status: tarotStatus }),
+    );
+
+    render(<ConsentGate scope="tarot" onComplete={vi.fn()} />);
+
+    await screen.findByRole("button", { name: "서비스 이용약관 동의 내용 확인" });
+    expect(fetchMock).toHaveBeenCalledWith("/api/consents?scope=tarot", {
+      credentials: "same-origin",
+    });
+    expect(screen.getByText("[필수] AI 리딩 정보 국외이전 동의")).toBeInTheDocument();
+    expect(screen.queryByText("[필수] 사주 출생정보 처리 동의")).not.toBeInTheDocument();
+    expect(screen.queryByText(/개인정보 수집·이용 동의/)).not.toBeInTheDocument();
+  });
+
+  it("shows the saju-only birth information agreement in the saju scope", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
+      status: {
+        ...tarotStatus,
+        requiredDocumentTypes: ["terms", "ai-overseas-transfer", "saju-input"],
+      },
+    }));
+
+    render(<ConsentGate scope="saju" onComplete={vi.fn()} />);
+
+    expect(await screen.findByText("[필수] 사주 출생정보 처리 동의"))
+      .toBeInTheDocument();
+  });
+
+  it("routes a 401 response back through the login gate", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      Response.json({ code: "UNAUTHENTICATED", message: "로그인이 필요합니다." }, { status: 401 }),
+      Response.json({ code: "UNAUTHENTICATED" }, { status: 401 }),
     );
     const onUnauthenticated = vi.fn();
 
     render(
       <ConsentGate
+        scope="tarot"
         onComplete={vi.fn()}
         onUnauthenticated={onUnauthenticated}
       />,
     );
 
     await waitFor(() => expect(onUnauthenticated).toHaveBeenCalledOnce());
-    expect(screen.queryByText(/게스트/)).not.toBeInTheDocument();
   });
 
-  it("shows a loading state while checking the current consent status", async () => {
-    const pending = deferred<Response>();
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(() => pending.promise);
-
-    render(<ConsentGate onComplete={vi.fn()} />);
-
-    expect(screen.getByText("동의 상태를 확인하고 있어요...")).toBeInTheDocument();
-
-    pending.resolve(new Response(JSON.stringify({
+  it("skips the gate when every current document is already accepted", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
       status: {
-        acceptedDocumentTypes: [],
-        requiredDocumentTypes: ["terms", "privacy", "sensitive-data"],
-        hasAcceptedRequired: false,
+        ...tarotStatus,
+        acceptedDocumentTypes: ["terms", "ai-overseas-transfer"],
+        hasAcceptedRequired: true,
       },
-    }), { status: 200 }));
-
-    await screen.findByRole("button", { name: "동의하고 계속" });
-    fetchMock.mockRestore();
-  });
-
-  it("skips the gate when the current document version is already accepted", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-      new Response(JSON.stringify({
-        status: {
-          acceptedDocumentTypes: ["terms", "privacy", "sensitive-data"],
-          requiredDocumentTypes: ["terms", "privacy", "sensitive-data"],
-          hasAcceptedRequired: true,
-        },
-      }), { status: 200 }),
-    );
+    }));
     const onComplete = vi.fn();
 
-    render(<ConsentGate onComplete={onComplete} />);
+    render(<ConsentGate scope="tarot" onComplete={onComplete} />);
 
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
-    expect(screen.queryByRole("button", { name: "동의하고 계속" })).not.toBeInTheDocument();
-    fetchMock.mockRestore();
+    expect(screen.queryByRole("button", { name: "동의 완료하고 계속" }))
+      .not.toBeInTheDocument();
   });
 
-  it("retries the initial status request after GET failure", async () => {
+  it("does not accept on close and saves one document from its modal", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
-      .mockRejectedValueOnce(new Error("network"))
-      .mockResolvedValueOnce(new Response(JSON.stringify({
-        status: {
-          acceptedDocumentTypes: [],
-          requiredDocumentTypes: ["terms", "privacy", "sensitive-data"],
-          hasAcceptedRequired: false,
-        },
-      }), { status: 200 }));
-    const onComplete = vi.fn();
+      .mockResolvedValueOnce(Response.json({ status: tarotStatus }))
+      .mockResolvedValueOnce(Response.json({ consent: { documentType: "terms" } }));
 
-    render(<ConsentGate onComplete={onComplete} />);
+    render(<ConsentGate scope="tarot" onComplete={vi.fn()} />);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "동의 상태를 불러오지 못했어요. 다시 시도해 주세요.",
-    );
-
-    fireEvent.click(screen.getByRole("button", { name: "다시 시도" }));
-
-    expect(await screen.findByRole("button", { name: "동의하고 계속" })).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock).toHaveBeenLastCalledWith("/api/consents", {
-      credentials: "same-origin",
+    const continueButton = await screen.findByRole("button", {
+      name: "동의 완료하고 계속",
     });
-    expect(onComplete).not.toHaveBeenCalled();
-    fetchMock.mockRestore();
-  });
-
-  it("requires an explicit agreement action inside each document modal", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({
-      status: {
-        acceptedDocumentTypes: [],
-        requiredDocumentTypes: ["terms", "privacy", "sensitive-data"],
-        hasAcceptedRequired: false,
-      },
-    }), { status: 200 }));
-
-    render(<ConsentGate onComplete={vi.fn()} />);
-
-    const continueButton = await screen.findByRole("button", { name: "동의하고 계속" });
-    const termsReview = screen.getByRole("button", { name: "서비스 이용약관 동의 내용 확인" });
-    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    const termsReview = screen.getByRole("button", {
+      name: "서비스 이용약관 동의 내용 확인",
+    });
     expect(continueButton).toBeDisabled();
 
     fireEvent.click(termsReview);
-    expect(screen.getByRole("dialog", { name: "서비스 이용약관 동의" }))
+    const dialog = screen.getByRole("dialog", { name: "서비스 이용약관 동의" });
+    expect(dialog).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`문서 버전 ${TERMS_DOCUMENT_VERSION}`)))
       .toBeInTheDocument();
-    expect(screen.getByText(/문서 버전 2026-08-28/)).toBeInTheDocument();
-
-    const agreeButton = screen.getByRole("button", {
-      name: "서비스 이용약관 동의 확인하고 동의",
-    });
-    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
-    expect(agreeButton).toHaveFocus();
-
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(termsReview).toHaveFocus();
-    expect(continueButton).toBeDisabled();
+    expect(screen.getByRole("status", { name: "서비스 이용약관 동의 상태" }))
+      .toHaveTextContent("내용 확인 필요");
 
     fireEvent.click(termsReview);
     fireEvent.click(screen.getByRole("button", {
       name: "서비스 이용약관 동의 확인하고 동의",
     }));
 
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.getByRole("status", { name: "서비스 이용약관 동의 상태" }))
       .toHaveTextContent("동의 완료");
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/consents/terms",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ documentVersion: TERMS_DOCUMENT_VERSION }),
+      }),
+    );
     expect(continueButton).toBeDisabled();
   });
 
-  it("waits for POST success before continuing and allows retry after a failure", async () => {
-    const submit = deferred<Response>();
+  it("keeps the modal open after a failed save and completes after both saves", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(new Response(JSON.stringify({
-        status: {
-          acceptedDocumentTypes: [],
-          requiredDocumentTypes: ["terms", "privacy", "sensitive-data"],
-          hasAcceptedRequired: false,
-        },
-      }), { status: 200 }))
+      .mockResolvedValueOnce(Response.json({ status: tarotStatus }))
       .mockRejectedValueOnce(new Error("network"))
-      .mockImplementationOnce(() => submit.promise);
+      .mockResolvedValueOnce(Response.json({ consent: { documentType: "terms" } }))
+      .mockResolvedValueOnce(Response.json({
+        consent: { documentType: "ai-overseas-transfer" },
+      }));
     const onComplete = vi.fn();
 
-    render(<ConsentGate onComplete={onComplete} />);
+    render(<ConsentGate scope="tarot" onComplete={onComplete} />);
 
     await screen.findByRole("button", { name: "서비스 이용약관 동의 내용 확인" });
-    expect(screen.getByText("입력 정보의 처리 목적과 이용 범위를 확인합니다."))
-      .toBeInTheDocument();
-    expect(screen.getByText("[필수] 출생 정보와 질문 내용 처리 동의"))
-      .toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", {
+      name: "서비스 이용약관 동의 내용 확인",
+    }));
+    fireEvent.click(screen.getByRole("button", {
+      name: "서비스 이용약관 동의 확인하고 동의",
+    }));
 
-    for (const agreement of [
-      "서비스 이용약관 동의",
-      "개인정보 수집·이용 동의",
-      "출생 정보와 질문 내용 처리 동의",
-    ]) {
-      fireEvent.click(screen.getByRole("button", { name: `${agreement} 내용 확인` }));
-      fireEvent.click(screen.getByRole("button", { name: `${agreement} 확인하고 동의` }));
-    }
-
-    fireEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));
-
-    expect(onComplete).not.toHaveBeenCalled();
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "동의 저장에 실패했어요. 다시 시도해 주세요.",
+      "동의를 저장하지 못했어요. 다시 시도해 주세요.",
     );
+    expect(screen.getByRole("dialog", { name: "서비스 이용약관 동의" }))
+      .toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "다시 시도" }));
+    fireEvent.click(screen.getByRole("button", {
+      name: "서비스 이용약관 동의 확인하고 동의",
+    }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
 
-    expect(onComplete).not.toHaveBeenCalled();
-    submit.resolve(new Response(JSON.stringify({ consents: [] }), { status: 200 }));
+    fireEvent.click(screen.getByRole("button", {
+      name: "AI 리딩 정보 국외이전 동의 내용 확인",
+    }));
+    expect(screen.getByText(new RegExp(
+      `문서 버전 ${AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION}`,
+    ))).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", {
+      name: "AI 리딩 정보 국외이전 동의 확인하고 동의",
+    }));
 
-    await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+    const continueButton = screen.getByRole("button", { name: "동의 완료하고 계속" });
+    await waitFor(() => expect(continueButton).toBeEnabled());
+    fireEvent.click(continueButton);
+
+    expect(onComplete).toHaveBeenCalledOnce();
     expect(fetchMock).toHaveBeenLastCalledWith(
-      "/api/consents",
+      "/api/consents/ai-overseas-transfer",
       expect.objectContaining({
-        method: "POST",
         body: JSON.stringify({
-          acceptedDocumentTypes: ["terms", "privacy", "sensitive-data"],
+          documentVersion: AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
         }),
       }),
     );
-    fetchMock.mockRestore();
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it("asks for a refresh when the server rejects an outdated document version", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json({ status: tarotStatus }))
+      .mockResolvedValueOnce(Response.json(
+        { code: "CONSENT_VERSION_MISMATCH" },
+        { status: 409 },
+      ));
+
+    render(<ConsentGate scope="tarot" onComplete={vi.fn()} />);
+
+    fireEvent.click(await screen.findByRole("button", {
+      name: "AI 리딩 정보 국외이전 동의 내용 확인",
+    }));
+    expect(screen.getByRole("heading", { name: "이전되는 개인정보 항목" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("privacy@openai.com")).toBeInTheDocument();
+    expect(screen.getByText(/무료 오늘의 운세와 기존 기록의 열람·삭제/))
+      .toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", {
+      name: "AI 리딩 정보 국외이전 동의 확인하고 동의",
+    }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "동의 문서가 변경되었어요. 페이지를 새로고침한 뒤 다시 확인해 주세요.",
+    );
   });
 });

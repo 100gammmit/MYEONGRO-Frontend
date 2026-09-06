@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
 import { AccountDeleteButton } from "./account-delete-button";
+import { ConsentSettings } from "./consent-settings";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 
@@ -28,6 +29,7 @@ export default async function AccountPage() {
       <p className="eyebrow">ACCOUNT</p>
       <h1>계정 설정</h1>
       <p>현재 로그인한 계정의 저장 기록과 연결 상태를 관리합니다.</p>
+      <ConsentSettings />
       <AccountDeleteButton />
     </article>
   );

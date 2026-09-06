@@ -38,7 +38,7 @@ vi.mock("./reading-credit-provider", () => ({
   useReadingCredits: () => credits,
 }));
 
-const REQUIRED_CONSENTS = ["terms", "privacy", "sensitive-data"] as const;
+const REQUIRED_CONSENTS = ["terms", "ai-overseas-transfer", "saju-input"] as const;
 const REQUEST_ID = "11111111-1111-4111-8111-111111111111";
 const SECOND_REQUEST_ID = "22222222-2222-4222-8222-222222222222";
 
@@ -148,6 +148,8 @@ describe("SajuExperience", () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(false)))
       .mockResolvedValueOnce(jsonResponse({ ok: true }))
+      .mockResolvedValueOnce(jsonResponse({ ok: true }))
+      .mockResolvedValueOnce(jsonResponse({ ok: true }))
       .mockResolvedValueOnce(jsonResponse(birthPlaces()));
 
     render(<SajuExperience />);
@@ -156,16 +158,19 @@ describe("SajuExperience", () => {
 
     for (const agreement of [
       "서비스 이용약관 동의",
-      "개인정보 수집·이용 동의",
-      "출생 정보와 질문 내용 처리 동의",
+      "AI 리딩 정보 국외이전 동의",
+      "사주 출생정보 처리 동의",
     ]) {
       fireEvent.click(await screen.findByRole("button", { name: `${agreement} 내용 확인` }));
       fireEvent.click(screen.getByRole("button", { name: `${agreement} 확인하고 동의` }));
+      await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     }
-    fireEvent.click(screen.getByRole("button", { name: "동의하고 계속" }));
+    fireEvent.click(screen.getByRole("button", { name: "동의 완료하고 계속" }));
 
     expect(await screen.findByLabelText("양력 생년월일")).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/consents", { credentials: "same-origin" });
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/consents?scope=saju", {
+      credentials: "same-origin",
+    });
   });
 
   it("blocks the input journey when the saju cost exceeds the current balance", async () => {
