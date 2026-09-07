@@ -1,6 +1,7 @@
 import {
   AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
   SAJU_INPUT_DOCUMENT_VERSION,
+  TERMS_DOCUMENT_VERSION,
 } from "./documents";
 import { LEGAL_METADATA } from "./legal-metadata";
 
@@ -12,6 +13,7 @@ type ReleaseLegalConfiguration = {
 const CURRENT_CONFIGURATION: ReleaseLegalConfiguration = {
   legalMetadata: LEGAL_METADATA,
   documentVersions: [
+    TERMS_DOCUMENT_VERSION,
     AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
     SAJU_INPUT_DOCUMENT_VERSION,
   ],
