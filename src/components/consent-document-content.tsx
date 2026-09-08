@@ -79,7 +79,7 @@ export function ConsentDocumentContent({
       <p>AI 리딩 생성에는 OpenAI OpCo, LLC의 Global API를 사용합니다. 아래 국외이전 세부 내용은 로그인하지 않아도 언제든 확인할 수 있습니다.</p>
       <AiOverseasTransferDetails headingLevel={headingLevel} />
       <Heading>보유와 이용자 권리</Heading>
-      <p>저장한 리딩은 개별 삭제할 수 있고 계정 설정에서 계정 삭제를 요청할 수 있습니다. AI 국외이전 동의는 계정 설정에서 별도로 철회할 수 있습니다. 개인정보 관련 문의와 권리 행사는 {LEGAL_METADATA.privacyEmail}로 요청할 수 있습니다.</p>
+      <p>저장한 리딩은 개별 삭제할 수 있습니다. 계정 설정에서 계정 삭제를 요청하면 프로필, 로그인 연결, 리딩과 동의 이력이 명로 운영 데이터베이스에서 즉시 영구 삭제되며 복구할 수 없습니다. AI 국외이전 동의는 계정 설정에서 별도로 철회할 수 있습니다. 개인정보 관련 문의와 권리 행사는 {LEGAL_METADATA.privacyEmail}로 요청할 수 있습니다.</p>
       <Heading>안전성 확보 조치</Heading>
       <p>질문 원문과 출생정보를 운영 로그에 남기지 않고, 인증 비밀 값은 서버 환경에서 관리합니다. 질문 입력 전 일부 직접 식별정보 형식을 자동 검사하지만 모든 개인정보나 민감한 내용을 탐지한다고 보장하지 않습니다.</p>
     </div>
