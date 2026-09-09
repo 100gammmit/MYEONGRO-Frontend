@@ -499,6 +499,13 @@ h1, h2, h3, blockquote {
 .empty-state h2 { font-size: 28px; font-weight: 300; }
 .empty-state p, .auth-page > p, .legal p { color: var(--text-muted); line-height: 1.8; margin-bottom: 28px; }
 .auth-card { display: grid; gap: 12px; }
+.adult-eligibility, .adult-eligibility-result { display: grid; gap: 12px; }
+.adult-eligibility-copy { margin-bottom: 10px; padding-bottom: 22px; border-bottom: 1px solid var(--border-content-divider); }
+.adult-eligibility-copy strong, .adult-eligibility-result strong { color: var(--text-accent-strong); font-size: 18px; font-weight: 500; }
+.adult-eligibility-copy p, .adult-eligibility-result p { margin: 10px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
+.adult-eligibility-button { width: 100%; min-height: 52px; justify-content: center; }
+.adult-eligibility-confirmed { margin: 0 0 4px; color: var(--text-accent-strong); font-size: 13px; }
+.auth-selection-reset { justify-self: center; border: 0; padding: 8px; color: var(--text-muted); background: transparent; font: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .danger-zone { max-width: 640px; margin-top: 60px; padding-top: 28px; border-top: 1px solid var(--border-danger-soft); }
 .danger-zone h2 { font-size: 20px; font-weight: 300; }
 .danger-zone p { color: var(--text-muted); font-size: 13px; }

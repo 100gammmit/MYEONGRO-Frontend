@@ -1,4 +1,7 @@
-﻿import Link from "next/link";
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
 
 import { normalizeNextPath } from "@/infrastructure/auth/next-path";
 
@@ -8,12 +11,66 @@ const LOGIN_PROVIDERS = [
 ] as const;
 
 export function AuthButtons({ next }: { next?: string }) {
+  const [eligibility, setEligibility] = useState<"pending" | "eligible" | "ineligible">(
+    "pending",
+  );
   const loginUrl = new URLSearchParams({
     next: normalizeNextPath(next),
+    adultEligibility: "confirmed",
   });
+
+  if (eligibility === "pending") {
+    return (
+      <div className="adult-eligibility" aria-labelledby="adult-eligibility-title">
+        <div className="adult-eligibility-copy">
+          <strong id="adult-eligibility-title">로그인 전 연령을 확인해 주세요</strong>
+          <p>
+            회원 및 AI 리딩 서비스는 만 19세 이상만 이용할 수 있습니다.
+            생년월일은 수집하지 않습니다.
+          </p>
+        </div>
+        <button
+          className="primary-button adult-eligibility-button"
+          onClick={() => setEligibility("eligible")}
+          type="button"
+        >
+          만 19세 이상입니다
+        </button>
+        <button
+          className="secondary-button adult-eligibility-button"
+          onClick={() => setEligibility("ineligible")}
+          type="button"
+        >
+          만 19세 미만입니다
+        </button>
+      </div>
+    );
+  }
+
+  if (eligibility === "ineligible") {
+    return (
+      <div className="adult-eligibility-result" role="status">
+        <strong>회원 및 AI 리딩 서비스는 만 19세 이상만 이용할 수 있어요.</strong>
+        <p>로그인 없이 제공되는 무료 오늘의 운세는 계속 이용할 수 있습니다.</p>
+        <Link className="secondary-button adult-eligibility-button" href="/tarot/daily">
+          오늘의 운세 보기
+        </Link>
+        <button
+          className="auth-selection-reset"
+          onClick={() => setEligibility("pending")}
+          type="button"
+        >
+          연령 선택 다시 하기
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
+      <p className="adult-eligibility-confirmed" role="status">
+        만 19세 이상 확인 후 소셜 로그인을 진행합니다.
+      </p>
       {LOGIN_PROVIDERS.map((provider) => (
         <Link
           className={`social-button ${provider.id}`}
@@ -24,6 +81,13 @@ export function AuthButtons({ next }: { next?: string }) {
           <span>{provider.label}</span>
         </Link>
       ))}
+      <button
+        className="auth-selection-reset"
+        onClick={() => setEligibility("pending")}
+        type="button"
+      >
+        연령 선택 다시 하기
+      </button>
     </>
   );
 }

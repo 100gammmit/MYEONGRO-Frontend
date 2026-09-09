@@ -12,5 +12,9 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/문서 버전 draft-2026-09-08/)).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
+    expect(screen.getByText(/만 19세 이상 확인 여부와 정책 버전·확인 시각/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/연령 확인을 위해 생년월일이나 신분증 정보는 수집하지 않습니다/))
+      .toBeInTheDocument();
   });
 });
