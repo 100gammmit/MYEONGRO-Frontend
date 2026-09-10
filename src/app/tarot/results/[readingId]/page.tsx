@@ -74,7 +74,7 @@ function parseTarotResultView(reading: PublicReadingRecord): TarotResultView | n
   if (
     reading.kind !== "tarot"
     || reading.status !== "completed"
-    || reading.schemaVersion !== 1
+    || (reading.schemaVersion !== 1 && reading.schemaVersion !== 2)
     || !reading.spreadType
     || !(reading.spreadType in TAROT_SPREADS)
     || !isRecord(reading.input)

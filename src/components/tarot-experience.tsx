@@ -90,7 +90,6 @@ export function TarotExperience() {
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
   const [focusedSlot, setFocusedSlot] = useState<number | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
-  const [failedReadingId, setFailedReadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [inputErrorField, setInputErrorField] = useState<EditableInputField | null>(null);
   const inFlightRequestId = useRef<string | null>(null);
@@ -124,7 +123,6 @@ export function TarotExperience() {
     setSelectedSlots([]);
     setFocusedSlot(null);
     setRequestId(null);
-    setFailedReadingId(null);
     setError(null);
     setInputErrorField(null);
   }
@@ -140,7 +138,6 @@ export function TarotExperience() {
     setSelectedSlots([]);
     setFocusedSlot(null);
     setRequestId(null);
-    setFailedReadingId(null);
     setError(null);
     setInputErrorField(null);
     setPhase("draw");
@@ -195,17 +192,12 @@ export function TarotExperience() {
     setPhase("loading");
 
     try {
-      const response = failedReadingId
-        ? await fetch(`/api/readings/${encodeURIComponent(failedReadingId)}/retry`, {
-          method: "POST",
-          credentials: "same-origin",
-        })
-        : await fetch("/api/tarot/readings", {
-          method: "POST",
-          credentials: "same-origin",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
+      const response = await fetch("/api/tarot/readings", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       if (response.status === 401) {
         redirectToLogin();
         setSelectedSlots(slots.slice(0, -1));
@@ -219,7 +211,6 @@ export function TarotExperience() {
           setError(apiError.message || "입력 내용을 확인해 주세요.");
           setInputErrorField(apiError.field);
           setRequestId(null);
-          setFailedReadingId(null);
           setPhase("input");
           return;
         }
@@ -229,8 +220,8 @@ export function TarotExperience() {
         ) {
           void credits.refresh();
         }
-        if (response.status === 502 && apiError.readingId) {
-          setFailedReadingId(apiError.readingId);
+        if (apiError.code === "OPENAI_READING_GENERATION_FAILED") {
+          setRequestId(null);
         }
         setError(
           readingErrorMessage(response.status, apiError)
@@ -246,20 +237,19 @@ export function TarotExperience() {
         spreadType,
       );
       setRequestId(null);
-      setFailedReadingId(null);
       void credits.refresh();
       router.push(`/tarot/results/${encodeURIComponent(validated.readingId)}`);
     } catch (readingError) {
       setError(
         readingError instanceof Error && readingError.message.startsWith("리딩 결과")
-          ? "리딩 결과를 확인하는 중 문제가 생겼어요. 같은 선택으로 다시 시도해 주세요."
+          ? "리딩 결과를 확인하는 중 문제가 생겼어요. 같은 질문으로 다시 시도해 주세요."
           : "리딩 서버에 연결하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
       );
       setPhase("error");
     } finally {
       inFlightRequestId.current = null;
     }
-  }, [choiceOptions, credits, definition.cardCount, failedReadingId, question, redirectToLogin, requestId, router, selectedSlots, spreadType]);
+  }, [choiceOptions, credits, definition.cardCount, question, redirectToLogin, requestId, router, selectedSlots, spreadType]);
 
   function confirmSelection() {
     if (focusedSlot === null || selectedSlots.length >= definition.cardCount) return;
@@ -358,7 +348,7 @@ export function TarotExperience() {
               placeholder="지금 들여다보고 싶은 상황을 적어주세요."
             />
             <p className="field-guidance" id="tarot-question-guidance">
-              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문과 선택지는 내 리딩 기록에 저장되고 AI 리딩 생성을 위해 OpenAI API로 전송됩니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
+              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문과 선택지는 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
               {spreadType === "relationship_three_card"
                 ? " 상대방의 실명 대신 친구·연인·직장 동료처럼 관계로 적어주세요."
                 : null}
@@ -470,7 +460,7 @@ export function TarotExperience() {
             onClick={() => void submitReading()}
             type="button"
           >
-            같은 선택으로 다시 시도
+            같은 질문으로 다시 시도
           </button>
           <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
         </div>
@@ -569,7 +559,7 @@ function validateReadingResponse(
     || typeof reading.id !== "string"
     || reading.id.length < 1
     || reading.spreadType !== spreadType
-    || reading.schemaVersion !== 1
+    || reading.schemaVersion !== 2
     || !reading.result
     || !Array.isArray(reading.input?.cards)
     || reading.input.cards.length !== definition.cardCount

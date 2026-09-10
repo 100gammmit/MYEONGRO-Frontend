@@ -68,7 +68,7 @@ const readingCreatedResponseSchema = z.object({
   reading: z.object({
     id: z.string().min(1),
     kind: z.literal("saju"),
-    schemaVersion: z.literal(3),
+    schemaVersion: z.literal(4),
     status: z.enum(["generating", "completed", "failed"]),
   }).passthrough(),
 }).strict();

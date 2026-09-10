@@ -12,12 +12,15 @@ import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 const statusLabels = {
   generating: "생성 중",
   completed: "완료",
-  failed: "재시도 필요",
+  failed: "새 질문 필요",
 } as const;
 
-function getQuestion(input: Record<string, unknown>): string {
-  return typeof input.question === "string" ? input.question : "저장된 리딩";
-}
+const SAJU_FOCUS_LABELS: Readonly<Record<string, string>> = {
+  self: "나 자신",
+  career: "직업·생활",
+  relationship: "관계",
+  life_money: "생활·금전",
+};
 
 function getReadingTypeLabel(kind: "tarot" | "saju", spreadType?: string | null): string {
   if (kind === "saju") return "AI 사주";
@@ -25,6 +28,24 @@ function getReadingTypeLabel(kind: "tarot" | "saju", spreadType?: string | null)
     return TAROT_SPREADS[spreadType as TarotSpreadType].name;
   }
   return "AI 타로";
+}
+
+function getRecordTitle(reading: PublicReadingRecord): string {
+  if (reading.status === "completed") return reading.title;
+  return reading.status === "generating" ? "리딩을 생성하고 있어요" : "완료하지 못한 리딩";
+}
+
+function getRecordContext(reading: PublicReadingRecord): string {
+  if (reading.kind === "tarot" && reading.spreadType && reading.spreadType in TAROT_SPREADS) {
+    return TAROT_SPREADS[reading.spreadType as TarotSpreadType].summary;
+  }
+  const focusArea = typeof reading.input.focusArea === "string"
+    ? SAJU_FOCUS_LABELS[reading.input.focusArea]
+    : null;
+  const targetYear = typeof reading.input.targetYear === "number"
+    ? `${reading.input.targetYear}년`
+    : null;
+  return [targetYear, focusArea].filter(Boolean).join(" · ") || "사주 리딩";
 }
 
 function isSupportedRecord(reading: PublicReadingRecord): boolean {
@@ -70,12 +91,8 @@ export default async function RecordsPage() {
                 <span className="record-kind">
                   {getReadingTypeLabel(reading.kind, reading.spreadType)}
                 </span>
-                <h2>
-                  {reading.status === "completed"
-                    ? reading.title
-                    : getQuestion(reading.input)}
-                </h2>
-                <p>{getQuestion(reading.input)}</p>
+                <h2>{getRecordTitle(reading)}</h2>
+                <p>{getRecordContext(reading)}</p>
               </div>
               <div className="record-meta">
                 <span className={`record-status ${reading.status}`}>

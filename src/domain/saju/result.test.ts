@@ -93,6 +93,19 @@ describe("parseSajuReadingView", () => {
     expect(parseSajuReadingView(current)).not.toBeNull();
   });
 
+  it("decodes a current v4 record without a persisted question", () => {
+    const current = completedSajuRecord();
+    current.schemaVersion = 4;
+    delete (current.input as Partial<typeof current.input>).question;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).provinceCode;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).cityCode;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).birthTime;
+    current.input.calculationSnapshot.calculationVersion = "saju-ko-v3";
+    current.input.calculationSnapshot.cityCatalogVersion = "kr-admin-v1-province";
+
+    expect(parseSajuReadingView(current)).not.toBeNull();
+  });
+
   it("enforces the birth-place shape for each stored schema version", () => {
     const legacyWithoutCity = completedSajuRecord();
     delete (legacyWithoutCity.input.birthProfile as Partial<

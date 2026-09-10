@@ -35,10 +35,6 @@ vi.mock("@/infrastructure/backend/reading-records-client", () => ({
     get = mocks.get;
   },
 }));
-vi.mock("@/components/reading-credit-provider", () => ({
-  useReadingCredits: () => ({ refresh: vi.fn() }),
-}));
-
 import ReadingDetailPage from "./page";
 
 async function renderPage() {
@@ -65,11 +61,10 @@ describe("ReadingDetailPage", () => {
       id: "reading-1",
       kind: "tarot",
       spreadType: "mind_three_card",
-      schemaVersion: 1,
+      schemaVersion: 2,
       status: "completed",
       title: "관계의 흐름",
       input: {
-        question: "앞으로 어떻게 흘러갈까요?",
         cards: [
           { cardId: "major-00-fool", position: "emotion", reversed: false },
           { cardId: "major-06-lovers", position: "underlying_need", reversed: false },
@@ -101,16 +96,17 @@ describe("ReadingDetailPage", () => {
     expect(screen.getByText("바보")).toBeInTheDocument();
     expect(screen.getByText("연인")).toBeInTheDocument();
     expect(screen.getByText("별")).toBeInTheDocument();
+    expect(screen.queryByText("앞으로 어떻게 흘러갈까요?")).not.toBeInTheDocument();
   });
 
   it("renders a completed decline as a saved result without retry", async () => {
     mocks.get.mockResolvedValue({
       id: "reading-1",
       kind: "saju",
-      schemaVersion: 2,
+      schemaVersion: 4,
       status: "completed",
       title: "건강에 관한 중요한 결정은 리딩으로 답하기 어려워요",
-      input: { question: "수술을 받아야 할까요?" },
+      input: {},
       result: {
         resultType: "declined",
         reasonCode: "MEDICAL_DECISION",
@@ -156,7 +152,7 @@ describe("ReadingDetailPage", () => {
     expect(screen.queryByText("추측하면 안 되는 본문")).not.toBeInTheDocument();
   });
 
-  it("selects the saju v2 renderer and restores its calculation context", async () => {
+  it("selects the saju v4 renderer and restores its calculation context", async () => {
     mocks.get.mockResolvedValue(sajuReadingRecord());
 
     await renderPage();
@@ -166,7 +162,7 @@ describe("ReadingDetailPage", () => {
     expect(screen.getByText("출생 시각 미상")).toBeInTheDocument();
   });
 
-  it("does not guess-render a malformed saju v2 payload", async () => {
+  it("does not guess-render a malformed saju v4 payload", async () => {
     const malformed = sajuReadingRecord();
     malformed.result.natalSections = malformed.result.natalSections.slice(0, 3);
     mocks.get.mockResolvedValue(malformed);
@@ -181,13 +177,13 @@ describe("ReadingDetailPage", () => {
     expect(screen.queryByText("중심을 살펴봅니다.")).not.toBeInTheDocument();
   });
 
-  it("shows retry only for failed readings", async () => {
+  it("sends failed readings back to a fresh question", async () => {
     mocks.get.mockResolvedValue({
       id: "reading-1",
       kind: "saju",
       status: "failed",
       title: "Generating...",
-      input: { question: "올해의 흐름이 궁금해요." },
+      input: { focusArea: "career", targetYear: 2026 },
       createdAt: "2026-06-12T00:00:00.000Z",
       updatedAt: "2026-06-12T00:00:01.000Z",
     });
@@ -195,7 +191,8 @@ describe("ReadingDetailPage", () => {
     await renderPage();
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "다시 생성" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "새 질문 입력하기" })).toHaveAttribute("href", "/saju");
+    expect(screen.queryByText("올해의 흐름이 궁금해요.")).not.toBeInTheDocument();
   });
 
   it.each(["completed", "failed"] as const)(

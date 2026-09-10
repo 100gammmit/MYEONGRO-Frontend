@@ -50,7 +50,7 @@ type TarotRecordView = {
 function getTarotRecordView(reading: PublicReadingRecord): TarotRecordView | null {
   if (
     reading.kind !== "tarot"
-    || reading.schemaVersion !== 1
+    || (reading.schemaVersion !== 1 && reading.schemaVersion !== 2)
     || !reading.spreadType
     || !(reading.spreadType in TAROT_SPREADS)
     || !isRecord(reading.result)
@@ -126,9 +126,6 @@ export default async function ReadingDetailPage({
     || !isAiTarotSpreadType(reading.spreadType as TarotSpreadType)
   )) notFound();
 
-  const question = typeof reading.input.question === "string"
-    ? reading.input.question
-    : "저장된 리딩";
   const tarotView = getTarotRecordView(reading);
   const sajuView = parseSajuReadingView(reading);
   const declinedView = parseDeclinedReadingView(reading);
@@ -144,7 +141,7 @@ export default async function ReadingDetailPage({
       <ReadingDeclinedResult
         backHref="/records"
         backLabel="내 기록"
-        footer={<ReadingRecordActions readingId={reading.id} retryable={false} />}
+        footer={<ReadingRecordActions readingId={reading.id} />}
         view={declinedView}
       />
     );
@@ -155,7 +152,7 @@ export default async function ReadingDetailPage({
       <SajuReadingResult
         backHref="/records"
         backLabel="내 기록"
-        footer={<ReadingRecordActions readingId={reading.id} retryable={false} />}
+        footer={<ReadingRecordActions readingId={reading.id} />}
         view={sajuView}
       />
     );
@@ -183,7 +180,6 @@ export default async function ReadingDetailPage({
             <p className="record-spread-name">{tarotView.spreadName}</p>
             <h1>{tarotView.title}</h1>
             <p>{tarotView.summary}</p>
-            <blockquote>{question}</blockquote>
           </header>
           {readingModeNotice(tarotView.readingMode) ? (
             <aside className="reading-mode-notice">
@@ -215,7 +211,10 @@ export default async function ReadingDetailPage({
       ) : reading.status === "failed" ? (
         <div className="record-state" role="alert">
           <h1>리딩 생성에 실패했어요</h1>
-          <p>저장된 질문과 입력을 그대로 사용해 다시 생성할 수 있습니다.</p>
+          <p>질문 원문은 저장하지 않아요. 질문 입력 화면에서 새 리딩을 시작해 주세요.</p>
+          <Link className="primary-button" href={reading.kind === "saju" ? "/saju" : "/tarot"}>
+            새 질문 입력하기
+          </Link>
         </div>
       ) : (
         <div className="record-state" aria-live="polite">
@@ -226,8 +225,6 @@ export default async function ReadingDetailPage({
 
       <ReadingRecordActions
         readingId={reading.id}
-        retryable={reading.status === "failed"}
-        retrySuccessHref={reading.kind === "saju" ? `/saju/results/${reading.id}` : undefined}
       />
     </article>
   );

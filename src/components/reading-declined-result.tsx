@@ -14,8 +14,6 @@ export function ReadingDeclinedResult({
   backLabel: string;
   footer?: ReactNode;
 }) {
-  const question = typeof view.input.question === "string" ? view.input.question : null;
-
   return (
     <article className="simple-page page-width record-detail">
       <Link className="back-link" href={backHref}>← {backLabel}</Link>
@@ -23,7 +21,6 @@ export function ReadingDeclinedResult({
         <p className="eyebrow">{view.kind === "tarot" ? "AI TAROT" : "AI SAJU"}</p>
         <h1>{view.result.title}</h1>
         <p>{view.result.message}</p>
-        {question ? <blockquote>{question}</blockquote> : null}
       </header>
       <section className="reading-guidance">
         <h2>지금 할 수 있는 일</h2>

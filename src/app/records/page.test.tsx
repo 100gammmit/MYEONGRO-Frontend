@@ -53,10 +53,10 @@ describe("RecordsPage", () => {
         id: "reading-1",
         kind: "tarot",
         spreadType: "relationship_three_card",
-        schemaVersion: 1,
+        schemaVersion: 2,
         status: "completed",
         title: "관계의 흐름",
-        input: { question: "앞으로의 관계 흐름이 궁금해요." },
+        input: {},
         createdAt: "2026-06-12T00:00:00.000Z",
       },
       {
@@ -64,7 +64,7 @@ describe("RecordsPage", () => {
         kind: "saju",
         status: "failed",
         title: "Generating...",
-        input: { question: "올해 일의 흐름이 궁금해요." },
+        input: { focusArea: "career", targetYear: 2026 },
         createdAt: "2026-06-11T00:00:00.000Z",
       },
     ]);
@@ -78,6 +78,10 @@ describe("RecordsPage", () => {
       "/records/reading-1",
     );
     expect(screen.getByText(TAROT_SPREADS.relationship_three_card.name)).toBeInTheDocument();
+    expect(screen.getByText(TAROT_SPREADS.relationship_three_card.summary)).toBeInTheDocument();
+    expect(screen.getByText("2026년 · 직업·생활")).toBeInTheDocument();
+    expect(screen.queryByText("앞으로의 관계 흐름이 궁금해요.")).not.toBeInTheDocument();
+    expect(screen.queryByText("올해 일의 흐름이 궁금해요.")).not.toBeInTheDocument();
   });
 
   it("shows an authenticated empty state without another login prompt", async () => {

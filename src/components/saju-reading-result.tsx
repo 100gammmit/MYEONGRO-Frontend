@@ -76,7 +76,6 @@ export function SajuReadingResult({
         <p className="eyebrow">AI SAJU · {FOCUS_LABELS[view.input.focusArea]}</p>
         <h1>{view.result.title}</h1>
         <p>{view.result.summary}</p>
-        <blockquote>{view.input.question}</blockquote>
       </header>
 
       {modeNotice ? <aside className="reading-mode-notice">{modeNotice}</aside> : null}

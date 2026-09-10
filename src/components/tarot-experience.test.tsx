@@ -61,10 +61,10 @@ function readingResponse(spreadType: TarotSpreadType) {
       id: "reading-1",
       kind: "tarot",
       spreadType,
-      schemaVersion: 1,
+      schemaVersion: 2,
       status: "completed",
       title: "완성된 리딩",
-      input: { question: "질문", cards },
+      input: { cards },
       result: {
         readingMode: "standard",
         title: "완성된 리딩",
@@ -149,6 +149,7 @@ describe("TarotExperience", () => {
 
     const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
     expect(question).toHaveAccessibleDescription(/개인정보는 제외.*OpenAI API로 전송.*일부 식별정보 형식만 확인/);
+    expect(question).toHaveAccessibleDescription(/리딩 기록에는 저장되지 않습니다/);
     expect(question).toHaveAccessibleDescription(/상대방의 실명 대신.*관계로 적어주세요/);
   });
 
@@ -317,7 +318,7 @@ describe("TarotExperience", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("retries the stored failed reading instead of creating it again", async () => {
+  it("creates a fresh request from in-memory input after generation fails", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(Response.json({
         code: "OPENAI_READING_GENERATION_FAILED",
@@ -329,14 +330,17 @@ describe("TarotExperience", () => {
     selectSlots([2, 3, 4]);
 
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
-    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     const first = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     expect(first.selectedSlots).toEqual([2, 3, 4]);
-    expect(fetchMock.mock.calls[1][0]).toBe("/api/readings/failed-reading-1/retry");
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/tarot/readings");
     expect(fetchMock.mock.calls[1][1]).toMatchObject({ method: "POST" });
-    expect(fetchMock.mock.calls[1][1]).not.toHaveProperty("body");
+    const second = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
+    expect(second.selectedSlots).toEqual([2, 3, 4]);
+    expect(second.question).toBe(first.question);
+    expect(second.requestId).not.toBe(first.requestId);
   });
 
   it("shows the stable credit error and refreshes shared status after a 429", async () => {
@@ -403,9 +407,9 @@ describe("TarotExperience", () => {
         id: "reading-1",
         kind: "tarot",
         spreadType: "choice_five_card",
-        schemaVersion: 1,
+        schemaVersion: 2,
         status: "completed",
-        input: { question: "질문", cards: [] },
+        input: { cards: [] },
         result: { title: "잘못된 결과", sections: [] },
       },
     }));
@@ -415,7 +419,7 @@ describe("TarotExperience", () => {
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "리딩 결과를 확인하는 중 문제가 생겼어요. 같은 선택으로 다시 시도해 주세요.",
+      "리딩 결과를 확인하는 중 문제가 생겼어요. 같은 질문으로 다시 시도해 주세요.",
     );
     expect(screen.queryByText(/리딩 결과 계약/)).not.toBeInTheDocument();
   });
@@ -433,17 +437,17 @@ describe("TarotExperience", () => {
     selectSlots([4, 2, 5]);
 
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
-    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
-    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
     expect(fetchMock.mock.calls[0][0]).toBe("/api/tarot/readings");
     expect(fetchMock.mock.calls[1][0]).toBe("/api/tarot/readings");
-    expect(fetchMock.mock.calls[2][0]).toBe("/api/readings/failed-reading-2/retry");
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/tarot/readings");
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
   });
 
-  it("recovers a completed retry when its success response is lost", async () => {
+  it("reuses the fresh request id when its success response is lost", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(Response.json({
         code: "OPENAI_READING_GENERATION_FAILED",
@@ -456,12 +460,15 @@ describe("TarotExperience", () => {
     selectSlots([1, 2, 3]);
 
     fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
-    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
-    fireEvent.click(await screen.findByRole("button", { name: "같은 선택으로 다시 시도" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
+    fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
-    expect(fetchMock.mock.calls[1][0]).toBe("/api/readings/failed-reading-3/retry");
-    expect(fetchMock.mock.calls[2][0]).toBe("/api/readings/failed-reading-3/retry");
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/tarot/readings");
+    expect(fetchMock.mock.calls[2][0]).toBe("/api/tarot/readings");
+    const second = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
+    const third = JSON.parse(String(fetchMock.mock.calls[2][1]?.body));
+    expect(third.requestId).toBe(second.requestId);
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
   });
 

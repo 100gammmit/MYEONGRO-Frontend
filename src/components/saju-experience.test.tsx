@@ -80,7 +80,7 @@ function createdReading() {
     reading: {
       id: "reading-1",
       kind: "saju",
-      schemaVersion: 3,
+      schemaVersion: 4,
       status: "completed",
     },
   };
@@ -441,6 +441,8 @@ describe("SajuExperience", () => {
     })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /질문 한 가지/ }))
       .toHaveAccessibleDescription(/개인정보는 제외.*OpenAI API로 전송.*일부 식별정보 형식만 확인/);
+    expect(screen.getByRole("textbox", { name: /질문 한 가지/ }))
+      .toHaveAccessibleDescription(/리딩 기록에는 저장되지 않습니다/);
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /일·진로/ })).not.toBeChecked();
     fireEvent.click(screen.getByRole("button", { name: "이전" }));

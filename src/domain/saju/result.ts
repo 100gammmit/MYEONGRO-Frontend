@@ -174,7 +174,6 @@ const completedRecordCommon = {
 } as const;
 
 const completedInputCommon = {
-  question: textSchema,
   focusArea: focusAreaSchema,
   targetYear: z.number().int(),
   calculationSnapshot: calculationSnapshotSchema,
@@ -186,12 +185,22 @@ const completedSajuRecordSchema = z.union([
     schemaVersion: z.literal(2),
     input: z.object({
       ...completedInputCommon,
+      question: textSchema,
       birthProfile: legacyBirthProfileSchema,
     }).strict(),
   }).passthrough(),
   z.object({
     ...completedRecordCommon,
     schemaVersion: z.literal(3),
+    input: z.object({
+      ...completedInputCommon,
+      question: textSchema,
+      birthProfile: currentBirthProfileSchema,
+    }).strict(),
+  }).passthrough(),
+  z.object({
+    ...completedRecordCommon,
+    schemaVersion: z.literal(4),
     input: z.object({
       ...completedInputCommon,
       birthProfile: currentBirthProfileSchema,

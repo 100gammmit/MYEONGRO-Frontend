@@ -32,7 +32,7 @@ export interface SajuReadingCreatedResponse {
   readonly reading: {
     readonly id: string;
     readonly kind: "saju";
-    readonly schemaVersion: 3;
+    readonly schemaVersion: 4;
     readonly status: "generating" | "completed" | "failed";
   };
 }

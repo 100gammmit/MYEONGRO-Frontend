@@ -74,7 +74,7 @@ describe("saju v3 schemas", () => {
       reading: {
         id: "reading-id",
         kind: "saju",
-        schemaVersion: 3,
+        schemaVersion: 4,
         status: "completed",
         input: {},
         result: {},

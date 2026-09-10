@@ -46,11 +46,10 @@ function completedReading() {
     id: "reading-1",
     kind: "tarot",
     spreadType: "mind_three_card",
-    schemaVersion: 1,
+    schemaVersion: 2,
     status: "completed",
     title: "오늘의 리딩",
     input: {
-      question: "오늘의 흐름",
       cards: [
         { cardId: "major-00-fool", position: "emotion", reversed: false },
         { cardId: "major-01-magician", position: "underlying_need", reversed: false },
@@ -157,7 +156,7 @@ describe("TarotResultPage", () => {
   });
 
   it("does not render malformed or non-completed tarot records", async () => {
-    mocks.get.mockResolvedValue({ ...completedReading(), schemaVersion: 2 });
+    mocks.get.mockResolvedValue({ ...completedReading(), schemaVersion: 3 });
 
     await expect(renderPage()).rejects.toThrow("NOT_FOUND");
     expect(mocks.result).not.toHaveBeenCalled();

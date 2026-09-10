@@ -562,7 +562,7 @@ export function SajuExperience() {
               value={form.question}
             />
             <p className="field-guidance" id="saju-question-guidance">
-              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문은 내 리딩 기록에 저장되고 AI 리딩 생성을 위해 OpenAI API로 전송됩니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
+              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문은 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
             </p>
             <small>{form.question.length} / {MAX_QUESTION_LENGTH}자</small>
             <FieldError id="question-error" message={fieldErrors.question} />
@@ -592,7 +592,7 @@ export function SajuExperience() {
     <ReadingShell
       eyebrow="REVIEW"
       title="입력한 내용을 확인해 주세요"
-      description="리딩을 만들면 입력한 정보와 계산 기준이 내 기록에 저장돼요."
+      description="출생정보와 계산 기준은 내 기록에 저장되지만 질문 원문은 저장되지 않아요."
       step={6}
       totalSteps={TOTAL_STEPS}
     >

@@ -31,6 +31,7 @@ describe("ReadingDeclinedResult", () => {
     })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "질문 바꿔보기" }))
       .toHaveAttribute("href", "/tarot");
+    expect(screen.queryByText("전 재산을 투자할까요?")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "다시 생성" }))
       .not.toBeInTheDocument();
   });

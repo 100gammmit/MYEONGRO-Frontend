@@ -50,14 +50,14 @@ describe("SajuResultPage", () => {
     mocks.get.mockResolvedValue(sajuReadingRecord());
   });
 
-  it("restores a completed saju v2 result by reading ID", async () => {
+  it("restores a completed saju v4 result by reading ID", async () => {
     await renderPage();
 
     expect(mocks.get).toHaveBeenCalledWith("reading-1");
     expect(mocks.result).toHaveBeenCalledWith(
       expect.objectContaining({
         backHref: "/saju",
-        view: expect.objectContaining({ id: "reading-1", schemaVersion: 2 }),
+        view: expect.objectContaining({ id: "reading-1", schemaVersion: 4 }),
       }),
       undefined,
     );
@@ -68,10 +68,10 @@ describe("SajuResultPage", () => {
     mocks.get.mockResolvedValue({
       id: "reading-1",
       kind: "saju",
-      schemaVersion: 2,
+      schemaVersion: 4,
       status: "completed",
       title: "건강에 관한 중요한 결정은 리딩으로 답하기 어려워요",
-      input: { question: "수술을 받아야 할까요?" },
+      input: {},
       result: {
         resultType: "declined",
         reasonCode: "MEDICAL_DECISION",
@@ -113,7 +113,7 @@ describe("SajuResultPage", () => {
   });
 
   it("does not guess-render unsupported or malformed saju records", async () => {
-    mocks.get.mockResolvedValue(sajuReadingRecord({ schemaVersion: 4 }));
+    mocks.get.mockResolvedValue(sajuReadingRecord({ schemaVersion: 5 }));
 
     await expect(renderPage()).rejects.toThrow("NOT_FOUND");
     expect(mocks.result).not.toHaveBeenCalled();

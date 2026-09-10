@@ -59,20 +59,18 @@ describe("SajuReadingResult", () => {
       calendarType: "solar",
       birthDate: "1992-08-17",
       birthTimePrecision: "unknown",
-      provinceCode: "36",
-      cityCode: "36110",
       luckDirectionBasis: "unspecified",
     });
     expect(takeRememberedSajuBirthProfile()).toBeNull();
   });
 
-  it("explains a redirected health fortune without hiding the original question", () => {
+  it("explains a redirected health fortune without rendering the original question", () => {
     const view = sajuReadingView();
     view.result.readingMode = "health_fortune";
     render(<SajuReadingResult view={view} />);
 
     expect(screen.getByText("구체적인 의료 결정은 다루지 않고, 지금의 건강운을 중심으로 읽었어요."))
       .toBeInTheDocument();
-    expect(screen.getByText(view.input.question)).toBeInTheDocument();
+    expect(document.querySelector("blockquote")).not.toBeInTheDocument();
   });
 });

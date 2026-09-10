@@ -65,16 +65,6 @@ export class BackendReadingRecordsClient {
     return response.status === 204;
   }
 
-  async retry(readingId: string): Promise<PublicReadingRecord> {
-    const response = await this.request(
-      `/api/readings/${readingId}/retry`,
-      { method: "POST" },
-      { allowNotFound: false },
-    );
-    const body = await response.json() as ReadingRecordEnvelope;
-    return body.reading;
-  }
-
   private async request(
     path: string,
     init: RequestInit = {},
