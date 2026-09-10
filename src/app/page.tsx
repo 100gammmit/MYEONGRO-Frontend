@@ -81,7 +81,7 @@ export default function HomePage() {
             </p>
             <ul>
               <li>로그인 없이 보는 무료 오늘의 운세</li>
-              <li>질문을 담아 기록하는 AI 3장 · 5장 리딩</li>
+              <li>질문과 함께 진행하는 AI 3장 · 5장 리딩</li>
             </ul>
             <Link href="/tarot" className="primary-button" aria-label="타로 리딩 시작">
               타로 리딩 시작 <span aria-hidden="true">→</span>
