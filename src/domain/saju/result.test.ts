@@ -106,6 +106,19 @@ describe("parseSajuReadingView", () => {
     expect(parseSajuReadingView(current)).not.toBeNull();
   });
 
+  it("decodes a migrated v2 exact-time profile as questionless v4", () => {
+    const migrated = completedSajuRecord();
+    migrated.schemaVersion = 4;
+    migrated.input.birthProfile.birthTimePrecision = "exact";
+    migrated.input.birthProfile.birthTime = "14:30";
+    delete (migrated.input as Partial<typeof migrated.input>).question;
+    delete (migrated.input.birthProfile as Partial<
+      typeof migrated.input.birthProfile
+    >).cityCode;
+
+    expect(parseSajuReadingView(migrated)).not.toBeNull();
+  });
+
   it("enforces the birth-place shape for each stored schema version", () => {
     const legacyWithoutCity = completedSajuRecord();
     delete (legacyWithoutCity.input.birthProfile as Partial<
