@@ -7,3 +7,10 @@ export async function GET(request: Request) {
     path: `/api/consents${search}`,
   });
 }
+
+export async function POST(request: Request) {
+  return proxyBackendRequest({
+    request,
+    path: "/api/consents",
+  });
+}

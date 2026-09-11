@@ -33,4 +33,20 @@ describe("/api/consents route proxy", () => {
     });
   });
 
+  it("proxies one atomic consent completion to Spring", async () => {
+    proxyBackendRequest.mockResolvedValue(Response.json({ status: {} }));
+    const request = new Request("https://front.test/api/consents", {
+      method: "POST",
+      body: JSON.stringify({ scope: "tarot", documentVersions: {} }),
+    });
+    const { POST } = await import("./route");
+
+    await POST(request);
+
+    expect(proxyBackendRequest).toHaveBeenCalledWith({
+      request,
+      path: "/api/consents",
+    });
+  });
+
 });

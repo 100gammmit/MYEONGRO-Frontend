@@ -51,6 +51,7 @@ export function ConsentGate({
   const [activeAgreement, setActiveAgreement] = useState<ConsentDocumentType | null>(null);
   const [status, setStatus] = useState<ConsentStatus | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [completed, setCompleted] = useState(false);
   const reviewButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -98,33 +99,54 @@ export function ConsentGate({
     void loadStatus();
   }, [loadStatus]);
 
-  async function acceptAgreement(documentType: ConsentDocumentType) {
+  async function reviewAgreement(documentType: ConsentDocumentType) {
+    setAccepted((current) => ({ ...current, [documentType]: true }));
+  }
+
+  async function completeAgreements() {
+    if (!complete || submitting) return;
+    setSubmitting(true);
+    setError(null);
+
     let response: Response;
     try {
-      response = await fetch(`/api/consents/${encodeURIComponent(documentType)}`, {
+      response = await fetch("/api/consents", {
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          documentVersion: CONSENT_DOCUMENT_VERSIONS[documentType],
+          scope,
+          documentVersions: Object.fromEntries(
+            requiredAgreements.map((documentType) => [
+              documentType,
+              CONSENT_DOCUMENT_VERSIONS[documentType],
+            ]),
+          ),
         }),
       });
     } catch {
-      throw new Error("동의를 저장하지 못했어요. 다시 시도해 주세요.");
+      setError("동의를 저장하지 못했어요. 다시 시도해 주세요.");
+      setSubmitting(false);
+      return;
     }
     if (response.status === 401) {
       onUnauthenticated?.();
-      throw new Error("로그인이 만료되었어요. 다시 로그인해 주세요.");
+      setError("로그인이 만료되었어요. 다시 로그인해 주세요.");
+      setSubmitting(false);
+      return;
     }
     if (!response.ok) {
       const payload = await readConsentError(response);
-      throw new Error(
+      setError(
         response.status === 409
           ? "동의 문서가 변경되었어요. 페이지를 새로고침한 뒤 다시 확인해 주세요."
           : payload ?? "동의를 저장하지 못했어요. 다시 시도해 주세요.",
       );
+      setSubmitting(false);
+      return;
     }
-    setAccepted((current) => ({ ...current, [documentType]: true }));
+    setCompleted(true);
+    onComplete();
   }
 
   if (loading) {
@@ -148,7 +170,7 @@ export function ConsentGate({
           </div>
         </div>
         <p className="muted">
-          이 리딩에 필요한 항목만 안내합니다. 각 문서를 확인하고 동의하면 문서 버전과 시각이 바로 저장됩니다.
+          이 리딩에 필요한 항목만 안내합니다. 각 문서를 확인한 뒤 마지막 단계에서 모든 동의를 한 번에 저장합니다.
         </p>
         <div className="agreement-list">
           {requiredAgreements.map((agreementId) => (
@@ -173,6 +195,7 @@ export function ConsentGate({
                 <button
                   aria-label={`${agreementDetails[agreementId].label} 내용 확인`}
                   className="agreement-review-button"
+                  disabled={submitting}
                   onClick={(event) => {
                     reviewButtonRef.current = event.currentTarget;
                     setActiveAgreement(agreementId);
@@ -186,7 +209,7 @@ export function ConsentGate({
           ))}
         </div>
         {error ? <p className="form-error" role="alert">{error}</p> : null}
-        {error ? (
+        {error && status === null ? (
           <button className="secondary-button full-button" onClick={() => void loadStatus()} type="button">
             다시 시도
           </button>
@@ -194,20 +217,16 @@ export function ConsentGate({
         <button
           className="primary-button full-button"
           type="button"
-          disabled={!complete}
-          onClick={() => {
-            if (!complete) return;
-            setCompleted(true);
-            onComplete();
-          }}
+          disabled={!complete || submitting}
+          onClick={() => void completeAgreements()}
         >
-          동의 완료하고 계속
+          {submitting ? "동의 저장 중..." : "동의 완료하고 계속"}
         </button>
       </div>
       {activeAgreement ? (
         <ConsentDocumentModal
           documentType={activeAgreement}
-          onAgree={() => acceptAgreement(activeAgreement)}
+          onAgree={() => reviewAgreement(activeAgreement)}
           onClose={closeDocument}
           returnFocusTo={reviewButtonRef.current}
           title={agreementDetails[activeAgreement].label}

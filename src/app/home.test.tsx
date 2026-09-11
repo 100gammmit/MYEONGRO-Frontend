@@ -43,7 +43,7 @@ describe("HomePage", () => {
     ).toHaveAttribute("href", "/tarot");
     expect(screen.getByText("로그인 없이 보는 무료 오늘의 운세"))
       .toBeInTheDocument();
-    expect(screen.getByText("질문을 담아 기록하는 AI 3장 · 5장 리딩"))
+    expect(screen.getByText("질문과 함께 진행하는 AI 3장 · 5장 리딩"))
       .toBeInTheDocument();
     expect(screen.getByText("AI 타로·사주는 해석을 읽고 완료한 기록을 다시 확인합니다."))
       .toBeInTheDocument();
