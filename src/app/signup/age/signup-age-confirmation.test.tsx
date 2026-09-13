@@ -83,13 +83,34 @@ describe("SignupAgeConfirmation", () => {
   });
 
   it("does not offer signup actions after the Redis waiting session expires", async () => {
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }));
+    fetchMock.mockResolvedValueOnce(Response.json(
+      { code: "SIGNUP_ATTEMPT_EXPIRED" },
+      { status: 410 },
+    ));
 
     render(<SignupAgeConfirmation />);
 
     expect(await screen.findByText("가입 대기 시간이 만료되었어요.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "만 19세 이상이며 가입합니다" }))
       .not.toBeInTheDocument();
+  });
+
+  it("shows the expired state when a completion mutation finds an expired attempt", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json({ pending: true, provider: "google" }))
+      .mockResolvedValueOnce(Response.json(
+        { code: "SIGNUP_ATTEMPT_EXPIRED" },
+        { status: 410 },
+      ))
+      .mockResolvedValueOnce(new Response(null, { status: 401 }));
+
+    render(<SignupAgeConfirmation />);
+
+    fireEvent.click(await screen.findByRole("button", {
+      name: "만 19세 이상이며 가입합니다",
+    }));
+
+    expect(await screen.findByText("가입 대기 시간이 만료되었어요.")).toBeInTheDocument();
   });
 
   it("recovers a completed signup when the first completion response is lost", async () => {

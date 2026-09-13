@@ -46,7 +46,7 @@ export function SignupAgeConfirmation() {
           cache: "no-store",
           signal,
         });
-        if (response.status === 401) {
+        if (response.status === 401 || response.status === 410) {
           setViewState("expired");
           return;
         }
@@ -84,7 +84,7 @@ export function SignupAgeConfirmation() {
       });
       if (!response.ok) {
         if (await recoverCompletedSignup()) return;
-        if (response.status === 401) {
+        if (response.status === 401 || response.status === 410) {
           setViewState("expired");
           return;
         }
@@ -125,7 +125,11 @@ export function SignupAgeConfirmation() {
         method: "DELETE",
         credentials: "same-origin",
       });
-      if (!response.ok && response.status !== 401) {
+      if (response.status === 401 || response.status === 410) {
+        setViewState("expired");
+        return;
+      }
+      if (!response.ok) {
         const body = await safeErrorBody(response);
         setErrorMessage(
           body ?? "외부 계정 연결 해제를 확인하지 못했습니다. 계정 설정에서 직접 연결을 해제해 주세요.",
