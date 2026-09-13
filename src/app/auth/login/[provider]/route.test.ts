@@ -9,48 +9,48 @@ describe("GET /auth/login/[provider]", () => {
 
   it("redirects from the frontend host to the sibling Spring OAuth host", async () => {
     const response = await GET(
-      new Request("https://www.example.com/auth/login/kakao?next=%2Frecords%2Freading-1%3Ftab%3Ddetail&adultEligibility=confirmed"),
+      new Request("https://www.example.com/auth/login/kakao?next=%2Frecords%2Freading-1%3Ftab%3Ddetail"),
       { params: Promise.resolve({ provider: "kakao" }) },
     );
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe(
-      "https://api.example.com/oauth2/authorization/kakao?next=%2Frecords%2Freading-1%3Ftab%3Ddetail&adultEligibility=confirmed",
+      "https://api.example.com/oauth2/authorization/kakao?next=%2Frecords%2Freading-1%3Ftab%3Ddetail",
     );
   });
 
   it("redirects to Spring Google OAuth with a normalized next path", async () => {
     const response = await GET(
-      new Request("https://front.test/auth/login/google?next=%2Faccount&adultEligibility=confirmed"),
+      new Request("https://front.test/auth/login/google?next=%2Faccount"),
       { params: Promise.resolve({ provider: "google" }) },
     );
 
     expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe(
-      "https://api.example.com/oauth2/authorization/google?next=%2Faccount&adultEligibility=confirmed",
+      "https://api.example.com/oauth2/authorization/google?next=%2Faccount",
     );
   });
 
   it("falls back to the records page for unsafe next values", async () => {
     const response = await GET(
-      new Request("https://front.test/auth/login/kakao?next=https%3A%2F%2Fevil.test&adultEligibility=confirmed"),
+      new Request("https://front.test/auth/login/kakao?next=https%3A%2F%2Fevil.test"),
       { params: Promise.resolve({ provider: "kakao" }) },
     );
 
     expect(response.headers.get("location")).toBe(
-      "https://api.example.com/oauth2/authorization/kakao?next=%2Frecords&adultEligibility=confirmed",
+      "https://api.example.com/oauth2/authorization/kakao?next=%2Frecords",
     );
   });
 
-  it("returns to the login page when the adult confirmation is missing", async () => {
+  it("does not require age confirmation before starting OAuth", async () => {
     const response = await GET(
       new Request("https://front.test/auth/login/kakao?next=%2Faccount"),
       { params: Promise.resolve({ provider: "kakao" }) },
     );
 
-    expect(response.status).toBe(303);
+    expect(response.status).toBe(302);
     expect(response.headers.get("location")).toBe(
-      "https://front.test/login?next=%2Faccount&reason=adult-eligibility-required",
+      "https://api.example.com/oauth2/authorization/kakao?next=%2Faccount",
     );
   });
 
