@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { normalizeNextPath } from "@/infrastructure/auth/next-path";
 
@@ -10,6 +10,8 @@ type ViewState = "loading" | "ready" | "submitting" | "ineligible" | "expired" |
 
 interface SignupStatusResponse {
   pending?: boolean;
+  completed?: boolean;
+  next?: unknown;
   provider?: unknown;
 }
 
@@ -26,6 +28,11 @@ export function SignupAgeConfirmation() {
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [provider, setProvider] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const navigateToCompletedSignup = useCallback((next: unknown) => {
+    router.replace(normalizeNextPath(typeof next === "string" ? next : undefined));
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -49,6 +56,10 @@ export function SignupAgeConfirmation() {
           return;
         }
         const body = await response.json() as SignupStatusResponse;
+        if (body.completed === true) {
+          navigateToCompletedSignup(body.next);
+          return;
+        }
         if (body.pending !== true) {
           setViewState("expired");
           return;
@@ -61,7 +72,7 @@ export function SignupAgeConfirmation() {
         setViewState("error");
       }
     }
-  }, []);
+  }, [navigateToCompletedSignup]);
 
   async function confirmAdultEligibility() {
     setViewState("submitting");
@@ -71,21 +82,38 @@ export function SignupAgeConfirmation() {
         method: "POST",
         credentials: "same-origin",
       });
-      if (response.status === 401) {
-        setViewState("expired");
-        return;
-      }
       if (!response.ok) {
+        if (await recoverCompletedSignup()) return;
+        if (response.status === 401) {
+          setViewState("expired");
+          return;
+        }
         setErrorMessage("회원 가입을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.");
         setViewState("ready");
         return;
       }
       const body = await response.json() as SignupCompletionResponse;
-      router.replace(normalizeNextPath(typeof body.next === "string" ? body.next : undefined));
-      router.refresh();
+      navigateToCompletedSignup(body.next);
     } catch {
+      if (await recoverCompletedSignup()) return;
       setErrorMessage("회원 가입을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.");
       setViewState("ready");
+    }
+  }
+
+  async function recoverCompletedSignup(): Promise<boolean> {
+    try {
+      const response = await fetch("/api/signup", {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (!response.ok) return false;
+      const body = await response.json() as SignupStatusResponse;
+      if (body.completed !== true) return false;
+      navigateToCompletedSignup(body.next);
+      return true;
+    } catch {
+      return false;
     }
   }
 

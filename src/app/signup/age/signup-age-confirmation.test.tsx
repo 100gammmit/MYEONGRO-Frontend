@@ -91,4 +91,26 @@ describe("SignupAgeConfirmation", () => {
     expect(screen.queryByRole("button", { name: "만 19세 이상이며 가입합니다" }))
       .not.toBeInTheDocument();
   });
+
+  it("recovers a completed signup when the first completion response is lost", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json({ pending: true, provider: "google" }))
+      .mockRejectedValueOnce(new TypeError("response lost"))
+      .mockResolvedValueOnce(Response.json({
+        pending: false,
+        completed: true,
+        next: "/records?tab=latest",
+      }));
+
+    render(<SignupAgeConfirmation />);
+
+    fireEvent.click(await screen.findByRole("button", {
+      name: "만 19세 이상이며 가입합니다",
+    }));
+
+    await waitFor(() => {
+      expect(navigation.replace).toHaveBeenCalledWith("/records?tab=latest");
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+    });
+  });
 });
