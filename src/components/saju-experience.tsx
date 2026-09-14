@@ -300,7 +300,7 @@ export function SajuExperience() {
       error.code === "READING_GENERATION_IN_PROGRESS"
         ? "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요."
         : error.code === "INSUFFICIENT_READING_CREDITS"
-          ? "크레딧이 부족해 이 리딩을 생성할 수 없어요."
+          ? "크레딧이 부족해요. 크레딧은 내일 0시에 다시 채워지니, 내일 다시 시도해 주세요."
           : error.message || "리딩 요청을 처리하지 못했어요.",
     );
     setPhase("review");

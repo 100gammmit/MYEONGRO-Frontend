@@ -137,6 +137,8 @@ describe("TarotExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
     expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
+    expect(screen.getByText("시작하기 전에")).toBeInTheDocument();
+    expect(screen.queryByText("1 / 4")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "동의 완료" }));
     expect(await screen.findByText("상황을 들려주세요")).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
@@ -223,7 +225,8 @@ describe("TarotExperience", () => {
 
     expect(screen.getByText(/카드 5장.*3 크레딧/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
-    expect(screen.getByRole("alert")).toHaveTextContent("현재 2 크레딧");
+    expect(screen.getByRole("alert")).toHaveTextContent("지금 2크레딧이 남아 있어요");
+    expect(screen.getByRole("alert")).toHaveTextContent("내일 다시 시도해 주세요");
   });
 
   it("blocks a new spread while another reading is generating", async () => {

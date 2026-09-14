@@ -20,4 +20,15 @@ describe("ReadingCreditAccessNotice", () => {
     fireEvent.click(screen.getByRole("button", { name: "다시 확인" }));
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
+
+  it("tells the user to try again tomorrow when credits run short", () => {
+    render(<ReadingCreditAccessNotice
+      access={{ status: "insufficient", required: 4, remaining: 2, nextResetAt: "2026-09-16T15:00:00Z" }}
+      onRetry={vi.fn()}
+    />);
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "이 리딩에는 4크레딧이 필요한데 지금 2크레딧이 남아 있어요. 크레딧은 내일 0시에 다시 채워지니, 내일 다시 시도해 주세요.",
+    );
+  });
 });

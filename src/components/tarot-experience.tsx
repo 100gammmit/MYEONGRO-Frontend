@@ -429,7 +429,7 @@ export function TarotExperience() {
 
   if (phase === "consent") {
     return (
-      <ReadingShell eyebrow={definition.name} title="리딩 전 필수 동의를 확인해요" step={1} totalSteps={4}>
+      <ReadingShell eyebrow={definition.name} title="리딩 전 필수 동의를 확인해요" stepLabel="시작하기 전에">
         <ConsentGate
           scope="tarot"
           onComplete={handleConsentComplete}
@@ -476,7 +476,7 @@ function readingErrorMessage(status: number, error: ApiError): string | undefine
     return "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요.";
   }
   if (error.code === "INSUFFICIENT_READING_CREDITS") {
-    return "크레딧이 부족해 이 리딩을 생성할 수 없어요.";
+    return "크레딧이 부족해요. 크레딧은 내일 0시에 다시 채워지니, 내일 다시 시도해 주세요.";
   }
   return READING_ERROR_MESSAGES[status];
 }

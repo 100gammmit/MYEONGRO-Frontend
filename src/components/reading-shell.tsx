@@ -1,39 +1,50 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
+
+type Progress =
+  | { step: number; totalSteps: number; stepLabel?: undefined }
+  | { stepLabel: string; step?: undefined; totalSteps?: undefined };
 
 export function ReadingShell({
   eyebrow,
   title,
   description,
-  step,
-  totalSteps,
+  actions,
+  showHomeLink = true,
   children,
+  ...progress
 }: {
   eyebrow: string;
   title: string;
   description?: string;
-  step: number;
-  totalSteps: number;
-  children: React.ReactNode;
-}) {
+  actions?: ReactNode;
+  showHomeLink?: boolean;
+  children: ReactNode;
+} & Progress) {
+  const { step, totalSteps, stepLabel } = progress;
+  const label = stepLabel ?? `${step} / ${totalSteps}`;
+  const width = stepLabel !== undefined || !step || !totalSteps ? 0 : (step / totalSteps) * 100;
+
   return (
-    <section className="reading-shell page-width">
-      <Link href="/" className="back-link">
-        ← 홈으로
-      </Link>
+    <section className={actions ? "reading-shell page-width has-actions" : "reading-shell page-width"}>
+      {showHomeLink ? (
+        <Link href="/" className="back-link">
+          ← 홈으로
+        </Link>
+      ) : null}
       <div className="progress-meta">
         <span>{eyebrow}</span>
-        <span>
-          {step} / {totalSteps}
-        </span>
+        <span>{label}</span>
       </div>
       <div className="progress-track">
-        <span style={{ width: `${(step / totalSteps) * 100}%` }} />
+        <span style={{ width: `${width}%` }} />
       </div>
       <div className="wizard-heading">
         <h1>{title}</h1>
         {description ? <p>{description}</p> : null}
       </div>
       {children}
+      {actions ? <div className="reading-actions">{actions}</div> : null}
     </section>
   );
 }

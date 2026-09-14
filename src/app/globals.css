@@ -22,6 +22,7 @@
   --surface-record: rgba(24, 25, 30, 0.78);
   --surface-danger-subtle: rgba(240, 112, 138, 0.06);
   --surface-modal-backdrop: rgba(6, 6, 9, 0.82);
+  --surface-sticky: rgba(13, 14, 19, 0.94);
   --surface-secondary-soft: rgba(110, 138, 196, 0.1);
   --surface-secondary-hover: rgba(110, 138, 196, 0.16);
 
@@ -308,6 +309,7 @@ h1, h2, h3, blockquote {
 .site-footer a { display: inline-flex; align-items: center; min-height: 44px; }
 
 .reading-shell { padding: 46px 0 110px; max-width: var(--w-wide); }
+.reading-actions { max-width: var(--w-read); margin: 28px auto 0; display: flex; flex-direction: column; gap: 10px; }
 .back-link { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; color: var(--text-muted); font-size: 13px; }
 .back-link:hover { color: var(--text-primary); }
 .progress-meta { display: flex; justify-content: space-between; color: var(--text-accent); font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .18em; text-transform: uppercase; margin-top: 38px; }
@@ -636,6 +638,8 @@ h1, h2, h3, blockquote {
   .landing-page .feature:last-child { border-bottom: 0; }
   .site-footer { width: calc(100% - 28px); flex-direction: column; align-items: flex-start; padding-bottom: 30px; }
   .reading-shell { padding-top: 28px; }
+  .reading-shell.has-actions { padding-bottom: 150px; }
+  .reading-actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; max-width: none; margin: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); background: var(--surface-sticky); border-top: 1px solid var(--border-hairline); backdrop-filter: blur(12px); }
   .wizard-heading { margin-top: 46px; }
   .consent-panel, .wizard-card { padding: 26px 20px; }
   .agreement { align-items: stretch; flex-direction: column; }

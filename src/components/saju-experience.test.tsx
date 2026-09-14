@@ -180,7 +180,7 @@ describe("SajuExperience", () => {
     render(<SajuExperience />);
 
     expect(await screen.findByRole("heading", { name: "사주 리딩 크레딧을 확인해요" })).toBeInTheDocument();
-    expect(screen.getByRole("alert")).toHaveTextContent("4 크레딧이 필요");
+    expect(screen.getByRole("alert")).toHaveTextContent("4크레딧이 필요");
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
   });
 

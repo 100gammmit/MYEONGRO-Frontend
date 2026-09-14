@@ -21,7 +21,8 @@ export function ReadingCreditAccessNotice({
   if (access.status === "insufficient") {
     return (
       <p className="credit-notice" role="alert">
-        이 리딩은 {access.required} 크레딧이 필요해요. 현재 {access.remaining} 크레딧이 남아 있어요.
+        이 리딩에는 {access.required}크레딧이 필요한데 지금 {access.remaining}크레딧이 남아 있어요.
+        크레딧은 내일 0시에 다시 채워지니, 내일 다시 시도해 주세요.
       </p>
     );
   }
