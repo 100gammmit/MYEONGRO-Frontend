@@ -30,7 +30,7 @@
 .guidance {
   padding: 1rem;
   border-radius: 16px;
-  background: var(--surface-accent-2);
+  background: var(--surface-tint-2);
 }
 
 @media (max-width: 640px) {
