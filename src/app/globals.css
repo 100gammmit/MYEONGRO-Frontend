@@ -324,7 +324,7 @@ h1, h2, h3, blockquote {
 .agreement-list { border-top: 1px solid var(--border-hairline); margin: 22px 0 20px; }
 .agreement { display: flex; gap: 18px; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--border-hairline); }
 .agreement-copy { display: flex; gap: 12px; align-items: flex-start; min-width: 0; }
-.agreement-mark { width: 24px; height: 24px; display: grid; place-items: center; flex: 0 0 auto; color: var(--text-accent); border: 1px solid var(--border-strong); border-radius: 50%; }
+.agreement-mark { width: 24px; height: 24px; display: grid; place-items: center; flex: 0 0 auto; color: var(--text-accent); border: 1px solid var(--text-subtle); border-radius: 50%; }
 .agreement-text { min-width: 0; }
 .agreement strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
 .agreement small { color: var(--text-muted); line-height: 1.55; font-size: 12px; }
@@ -503,7 +503,7 @@ h1, h2, h3, blockquote {
 .adult-eligibility-check:not(:has(.adult-eligibility-check-input:disabled)):hover { border-color: var(--border-strong); background: var(--surface-tint-2); }
 .adult-eligibility-check:has(.adult-eligibility-check-input:checked) { border-color: var(--border-strong); background: var(--surface-tint-3); }
 .adult-eligibility-check:has(.adult-eligibility-check-input:disabled) { cursor: not-allowed; opacity: .65; }
-.adult-eligibility-check-control { width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid var(--border-strong); border-radius: var(--radius-xs); background: var(--surface-input); transition: border-color .2s, background .2s; }
+.adult-eligibility-check-control { width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid var(--text-subtle); border-radius: var(--radius-xs); background: var(--surface-input); transition: border-color .2s, background .2s; }
 .adult-eligibility-check-control::after { content: ""; width: 5px; height: 9px; border: solid var(--text-inverse); border-width: 0 2px 2px 0; opacity: 0; transform: translateY(-1px) rotate(45deg) scale(.7); transition: opacity .15s, transform .15s; }
 .adult-eligibility-check-input:checked + .adult-eligibility-check-control { border-color: var(--accent-cta); background: var(--accent-cta); }
 .adult-eligibility-check-input:checked + .adult-eligibility-check-control::after { opacity: 1; transform: translateY(-1px) rotate(45deg) scale(1); }
