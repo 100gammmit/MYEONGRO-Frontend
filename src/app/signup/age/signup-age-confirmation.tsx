@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { normalizeNextPath } from "@/infrastructure/auth/next-path";
 
-type ViewState = "loading" | "ready" | "submitting" | "ineligible" | "expired" | "error";
+type ViewState = "loading" | "ready" | "submitting" | "expired" | "error";
 
 interface SignupStatusResponse {
   pending?: boolean;
@@ -27,6 +27,7 @@ export function SignupAgeConfirmation() {
   const router = useRouter();
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [provider, setProvider] = useState<string | null>(null);
+  const [isAdultConfirmed, setIsAdultConfirmed] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const navigateToCompletedSignup = useCallback((next: unknown) => {
@@ -75,6 +76,7 @@ export function SignupAgeConfirmation() {
   }, [navigateToCompletedSignup]);
 
   async function confirmAdultEligibility() {
+    if (!isAdultConfirmed || viewState !== "ready") return;
     setViewState("submitting");
     setErrorMessage(null);
     try {
@@ -117,7 +119,7 @@ export function SignupAgeConfirmation() {
     }
   }
 
-  async function cancelSignup(ineligible: boolean) {
+  async function cancelSignup() {
     setViewState("submitting");
     setErrorMessage(null);
     try {
@@ -135,10 +137,6 @@ export function SignupAgeConfirmation() {
           body ?? "외부 계정 연결 해제를 확인하지 못했습니다. 계정 설정에서 직접 연결을 해제해 주세요.",
         );
         setViewState("error");
-        return;
-      }
-      if (ineligible) {
-        setViewState("ineligible");
         return;
       }
       router.replace("/login");
@@ -167,18 +165,6 @@ export function SignupAgeConfirmation() {
     );
   }
 
-  if (viewState === "ineligible") {
-    return (
-      <div className="adult-eligibility-result" role="status">
-        <strong>회원 및 AI 리딩 서비스는 만 19세 이상만 이용할 수 있어요.</strong>
-        <p>MYEONGRO 계정은 생성되지 않았고, 무료 오늘의 운세는 계속 이용할 수 있습니다.</p>
-        <Link className="secondary-button adult-eligibility-button" href="/tarot/daily">
-          오늘의 운세 보기
-        </Link>
-      </div>
-    );
-  }
-
   if (viewState === "error") {
     return (
       <div className="adult-eligibility-result">
@@ -201,26 +187,32 @@ export function SignupAgeConfirmation() {
         </p>
       </div>
       {errorMessage ? <p className="signup-age-error" role="alert">{errorMessage}</p> : null}
+      <label className="adult-eligibility-check">
+        <input
+          checked={isAdultConfirmed}
+          className="sr-only adult-eligibility-check-input"
+          disabled={viewState === "submitting"}
+          onChange={(event) => setIsAdultConfirmed(event.target.checked)}
+          type="checkbox"
+        />
+        <span className="adult-eligibility-check-control" aria-hidden="true" />
+        <span className="adult-eligibility-check-copy">
+          <strong>만 19세 이상임을 확인합니다</strong>
+          <small>만 19세 미만이라면 가입을 취소해 주세요.</small>
+        </span>
+      </label>
       <button
         className="primary-button adult-eligibility-button"
-        disabled={viewState === "submitting"}
+        disabled={viewState === "submitting" || !isAdultConfirmed}
         onClick={() => void confirmAdultEligibility()}
         type="button"
       >
-        만 19세 이상이며 가입합니다
+        확인하고 가입하기
       </button>
       <button
         className="secondary-button adult-eligibility-button"
         disabled={viewState === "submitting"}
-        onClick={() => void cancelSignup(true)}
-        type="button"
-      >
-        만 19세 미만입니다
-      </button>
-      <button
-        className="auth-selection-reset"
-        disabled={viewState === "submitting"}
-        onClick={() => void cancelSignup(false)}
+        onClick={() => void cancelSignup()}
         type="button"
       >
         가입 취소

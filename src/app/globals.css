@@ -503,7 +503,20 @@ h1, h2, h3, blockquote {
 .adult-eligibility-copy { margin-bottom: 10px; padding-bottom: 22px; border-bottom: 1px solid var(--border-content-divider); }
 .adult-eligibility-copy strong, .adult-eligibility-result strong { color: var(--text-accent-strong); font-size: 18px; font-weight: 500; }
 .adult-eligibility-copy p, .adult-eligibility-result p { margin: 10px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
+.adult-eligibility-check { display: grid; grid-template-columns: 22px 1fr; gap: 14px; align-items: center; margin: 4px 0 8px; padding: 18px; border: 1px solid var(--border-control); border-radius: 14px; background: var(--surface-input); cursor: pointer; transition: border-color .2s, background .2s; text-align: left; }
+.adult-eligibility-check:not(:has(.adult-eligibility-check-input:disabled)):hover { border-color: var(--border-strong); background: var(--surface-accent-subtle); }
+.adult-eligibility-check:has(.adult-eligibility-check-input:checked) { border-color: var(--border-strong); background: var(--surface-accent-selected); }
+.adult-eligibility-check:has(.adult-eligibility-check-input:disabled) { cursor: not-allowed; opacity: .65; }
+.adult-eligibility-check-control { width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid var(--border-check); border-radius: 6px; background: var(--surface-input); transition: border-color .2s, background .2s; }
+.adult-eligibility-check-control::after { content: ""; width: 5px; height: 9px; border: solid var(--text-inverse-check); border-width: 0 2px 2px 0; opacity: 0; transform: translateY(-1px) rotate(45deg) scale(.7); transition: opacity .15s, transform .15s; }
+.adult-eligibility-check-input:checked + .adult-eligibility-check-control { border-color: var(--accent-cta); background: var(--accent-cta); }
+.adult-eligibility-check-input:checked + .adult-eligibility-check-control::after { opacity: 1; transform: translateY(-1px) rotate(45deg) scale(1); }
+.adult-eligibility-check-input:focus-visible + .adult-eligibility-check-control { outline: 2px solid var(--focus-outline); outline-offset: 4px; box-shadow: var(--focus-field-ring); }
+.adult-eligibility-check-copy { display: grid; gap: 5px; }
+.adult-eligibility-check-copy strong { color: var(--text-primary); font-size: 14px; font-weight: 600; }
+.adult-eligibility-check-copy small { color: var(--text-muted); font-size: 12px; line-height: 1.55; }
 .adult-eligibility-button { width: 100%; min-height: 52px; justify-content: center; }
+.adult-eligibility .secondary-button:disabled { cursor: not-allowed; opacity: .55; }
 .signup-age-error { margin: 0; color: var(--text-danger); font-size: 13px; line-height: 1.7; }
 .auth-selection-reset { justify-self: center; border: 0; padding: 8px; color: var(--text-muted); background: transparent; font: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .danger-zone { max-width: 640px; margin-top: 60px; padding-top: 28px; border-top: 1px solid var(--border-danger-soft); }

@@ -31,7 +31,13 @@ describe("SignupAgeConfirmation", () => {
 
     expect(await screen.findByText(/Google 계정은 가입 완료 전까지 임시로만 연결됩니다/))
       .toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "만 19세 이상이며 가입합니다" }));
+    const submitButton = screen.getByRole("button", { name: "확인하고 가입하기" });
+    expect(submitButton).toBeDisabled();
+    fireEvent.click(submitButton);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 19세 이상임을 확인합니다/ }));
+    expect(submitButton).toBeEnabled();
+    fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenLastCalledWith("/api/signup", {
@@ -42,24 +48,22 @@ describe("SignupAgeConfirmation", () => {
     });
   });
 
-  it("cancels the pending OAuth connection without creating an underage account", async () => {
+  it("cancels the pending OAuth connection without creating an account", async () => {
     fetchMock
       .mockResolvedValueOnce(Response.json({ pending: true, provider: "kakao" }))
       .mockResolvedValueOnce(new Response(null, { status: 204 }));
 
     render(<SignupAgeConfirmation />);
 
-    fireEvent.click(await screen.findByRole("button", { name: "만 19세 미만입니다" }));
+    fireEvent.click(await screen.findByRole("button", { name: "가입 취소" }));
 
-    expect(await screen.findByText(/MYEONGRO 계정은 생성되지 않았고/)).toBeInTheDocument();
-    expect(fetchMock).toHaveBeenLastCalledWith("/api/signup", {
-      method: "DELETE",
-      credentials: "same-origin",
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenLastCalledWith("/api/signup", {
+        method: "DELETE",
+        credentials: "same-origin",
+      });
+      expect(navigation.replace).toHaveBeenCalledWith("/login");
     });
-    expect(screen.getByRole("link", { name: "오늘의 운세 보기" })).toHaveAttribute(
-      "href",
-      "/tarot/daily",
-    );
   });
 
   it("explains when provider-side unlink cannot be confirmed", async () => {
@@ -76,7 +80,7 @@ describe("SignupAgeConfirmation", () => {
 
     expect(await screen.findByRole("alert"))
       .toHaveTextContent("외부 계정 연결 해제를 확인하지 못했습니다.");
-    expect(screen.queryByRole("button", { name: "만 19세 이상이며 가입합니다" }))
+    expect(screen.queryByRole("button", { name: "확인하고 가입하기" }))
       .not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "로그인 화면으로 돌아가기" }))
       .toHaveAttribute("href", "/login");
@@ -91,7 +95,7 @@ describe("SignupAgeConfirmation", () => {
     render(<SignupAgeConfirmation />);
 
     expect(await screen.findByText("가입 대기 시간이 만료되었어요.")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "만 19세 이상이며 가입합니다" }))
+    expect(screen.queryByRole("button", { name: "확인하고 가입하기" }))
       .not.toBeInTheDocument();
   });
 
@@ -106,9 +110,10 @@ describe("SignupAgeConfirmation", () => {
 
     render(<SignupAgeConfirmation />);
 
-    fireEvent.click(await screen.findByRole("button", {
-      name: "만 19세 이상이며 가입합니다",
+    fireEvent.click(await screen.findByRole("checkbox", {
+      name: /만 19세 이상임을 확인합니다/,
     }));
+    fireEvent.click(screen.getByRole("button", { name: "확인하고 가입하기" }));
 
     expect(await screen.findByText("가입 대기 시간이 만료되었어요.")).toBeInTheDocument();
   });
@@ -125,9 +130,10 @@ describe("SignupAgeConfirmation", () => {
 
     render(<SignupAgeConfirmation />);
 
-    fireEvent.click(await screen.findByRole("button", {
-      name: "만 19세 이상이며 가입합니다",
+    fireEvent.click(await screen.findByRole("checkbox", {
+      name: /만 19세 이상임을 확인합니다/,
     }));
+    fireEvent.click(screen.getByRole("button", { name: "확인하고 가입하기" }));
 
     await waitFor(() => {
       expect(navigation.replace).toHaveBeenCalledWith("/records?tab=latest");
