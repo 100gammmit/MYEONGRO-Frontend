@@ -24,12 +24,12 @@
 
 .cardName {
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 .guidance {
   padding: 1rem;
-  border-radius: 16px;
+  border-radius: var(--radius-md);
   background: var(--surface-tint-2);
 }
 
