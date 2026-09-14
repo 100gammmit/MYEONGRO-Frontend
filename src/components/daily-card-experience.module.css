@@ -13,7 +13,7 @@
 .selected {
   opacity: 1;
   border-color: var(--text-primary);
-  box-shadow: var(--shadow-tarot-hover);
+  box-shadow: var(--elevation-1), var(--glow-accent);
   transform: translateY(-6px);
 }
 
@@ -30,7 +30,7 @@
 .guidance {
   padding: 1rem;
   border-radius: 16px;
-  background: var(--surface-accent-subtle);
+  background: var(--surface-accent-2);
 }
 
 @media (max-width: 640px) {
