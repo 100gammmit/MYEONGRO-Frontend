@@ -562,7 +562,8 @@ describe("SajuExperience", () => {
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("출생 시각을 다시 확인해 주세요.");
-    expect(alert).toHaveFocus();
+    // The response settles outside act, so the focus effect can land a tick after the alert renders.
+    await waitFor(() => expect(alert).toHaveFocus());
     expect(screen.getByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
     expect(screen.getByLabelText(/태어난 시각/)).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText(/태어난 시각/)).toHaveAttribute("aria-describedby", "birth-time-error");
