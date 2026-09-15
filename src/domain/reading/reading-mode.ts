@@ -12,10 +12,10 @@ export type ReadingMode = z.infer<typeof readingModeSchema>;
 
 const NOTICE: Record<ReadingMode, string | null> = {
   standard: null,
-  health_fortune: "구체적인 의료 결정은 다루지 않고, 지금의 건강운을 중심으로 읽었어요.",
-  money_fortune: "구체적인 재정 결정은 다루지 않고, 지금의 금전운을 중심으로 읽었어요.",
-  relationship_fortune: "구체적인 결정을 대신하지 않고, 지금의 관계운을 중심으로 읽었어요.",
-  career_life_fortune: "구체적인 결정을 대신하지 않고, 지금의 직업·생활운을 중심으로 읽었어요.",
+  health_fortune: "리딩은 건강에 관한 결정을 대신할 수 없어요. 진단이나 치료는 의료 전문가와 상의해 주세요.",
+  money_fortune: "리딩은 돈에 관한 결정을 대신할 수 없어요. 돈이 걸린 판단은 정확한 정보와 전문가의 도움을 받아 직접 내려 주세요.",
+  relationship_fortune: "리딩은 관계에 관한 결정을 대신할 수 없어요. 중요한 결정은 충분히 생각한 뒤 직접 내려 주세요.",
+  career_life_fortune: "리딩은 일과 생활에 관한 결정을 대신할 수 없어요. 중요한 결정은 충분히 알아본 뒤 직접 내려 주세요.",
 };
 
 const REDIRECTED_CHOICE_LABELS: Record<string, string> = {
@@ -40,10 +40,10 @@ export function parseReadingMode(value: unknown): ReadingMode | null {
 
 const HEADLINE: Record<ReadingMode, string | null> = {
   standard: null,
-  health_fortune: "건강운으로 바꿔 읽었어요",
-  money_fortune: "금전운으로 바꿔 읽었어요",
-  relationship_fortune: "관계운으로 바꿔 읽었어요",
-  career_life_fortune: "직업·생활운으로 바꿔 읽었어요",
+  health_fortune: "건강운을 중심으로 읽었어요",
+  money_fortune: "금전운을 중심으로 읽었어요",
+  relationship_fortune: "관계운을 중심으로 읽었어요",
+  career_life_fortune: "직업·생활운을 중심으로 읽었어요",
 };
 
 export function readingModeNotice(mode: ReadingMode): string | null {

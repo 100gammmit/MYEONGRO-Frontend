@@ -69,7 +69,7 @@ describe("SajuReadingResult", () => {
     view.result.readingMode = "health_fortune";
     render(<SajuReadingResult view={view} />);
 
-    expect(screen.getByText("구체적인 의료 결정은 다루지 않고, 지금의 건강운을 중심으로 읽었어요."))
+    expect(screen.getByText("리딩은 건강에 관한 결정을 대신할 수 없어요. 진단이나 치료는 의료 전문가와 상의해 주세요."))
       .toBeInTheDocument();
     expect(document.querySelector("blockquote")).not.toBeInTheDocument();
   });
@@ -80,7 +80,7 @@ describe("SajuReadingResult", () => {
     render(<SajuReadingResult view={view} />);
 
     const notice = screen.getByRole("note");
-    expect(notice).toHaveTextContent("건강운으로 바꿔 읽었어요");
+    expect(notice).toHaveTextContent("건강운을 중심으로 읽었어요");
     const title = screen.getByRole("heading", { level: 1 });
     expect(notice.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });

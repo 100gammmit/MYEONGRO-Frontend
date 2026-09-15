@@ -15,7 +15,7 @@ describe("reading mode", () => {
   });
 
   it("provides server-owned redirect copy and neutral choice labels", () => {
-    expect(readingModeNotice("health_fortune")).toContain("건강운");
+    expect(readingModeNotice("health_fortune")).toContain("의료 전문가");
     expect(tarotPositionLabel("money_fortune", "option_a", "선택 A"))
       .toBe("운을 돕는 요소");
     expect(tarotPositionLabel("health_fortune", "emotion", "지금의 감정"))
@@ -25,9 +25,17 @@ describe("reading mode", () => {
     expect(tarotPositionLabel("standard", "option_a", "선택 A")).toBe("선택 A");
   });
 
-  it("names the fortune a redirected reading switched to, and nothing for a standard one", () => {
-    expect(readingModeHeadline("money_fortune")).toBe("금전운으로 바꿔 읽었어요");
-    expect(readingModeHeadline("career_life_fortune")).toBe("직업·생활운으로 바꿔 읽었어요");
+  it("names the fortune a redirected reading focused on, and nothing for a standard one", () => {
+    expect(readingModeHeadline("money_fortune")).toBe("금전운을 중심으로 읽었어요");
+    expect(readingModeHeadline("career_life_fortune")).toBe("직업·생활운을 중심으로 읽었어요");
     expect(readingModeHeadline("standard")).toBeNull();
+  });
+
+  it("tells every fortune reading that a reading cannot make the decision", () => {
+    for (const mode of ["health_fortune", "money_fortune", "relationship_fortune", "career_life_fortune"] as const) {
+      expect(readingModeNotice(mode)).toMatch(/^리딩은 .+에 관한 결정을 대신할 수 없어요\. /);
+      expect(readingModeHeadline(mode)).not.toContain("바꿔");
+    }
+    expect(readingModeNotice("standard")).toBeNull();
   });
 });
