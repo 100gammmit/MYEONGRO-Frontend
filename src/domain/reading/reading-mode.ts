@@ -10,13 +10,8 @@ export const readingModeSchema = z.enum([
 
 export type ReadingMode = z.infer<typeof readingModeSchema>;
 
-const NOTICE: Record<ReadingMode, string | null> = {
-  standard: null,
-  health_fortune: "리딩은 건강에 관한 결정을 대신할 수 없어요. 진단이나 치료는 의료 전문가와 상의해 주세요.",
-  money_fortune: "리딩은 돈에 관한 결정을 대신할 수 없어요. 돈이 걸린 판단은 정확한 정보와 전문가의 도움을 받아 직접 내려 주세요.",
-  relationship_fortune: "리딩은 관계에 관한 결정을 대신할 수 없어요. 중요한 결정은 충분히 생각한 뒤 직접 내려 주세요.",
-  career_life_fortune: "리딩은 일과 생활에 관한 결정을 대신할 수 없어요. 중요한 결정은 충분히 알아본 뒤 직접 내려 주세요.",
-};
+const FORTUNE_NOTICE =
+  "건강·돈·관계·일에 관한 질문은 결정 대신 운의 흐름을 읽어요. 명로는 중대한 결정을 대신할 수 없어요.";
 
 const REDIRECTED_CHOICE_LABELS: Record<string, string> = {
   emotion: "현재의 운",
@@ -47,7 +42,7 @@ const HEADLINE: Record<ReadingMode, string | null> = {
 };
 
 export function readingModeNotice(mode: ReadingMode): string | null {
-  return NOTICE[mode];
+  return mode === "standard" ? null : FORTUNE_NOTICE;
 }
 
 export function readingModeHeadline(mode: ReadingMode): string | null {

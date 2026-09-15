@@ -69,7 +69,7 @@ describe("SajuReadingResult", () => {
     view.result.readingMode = "health_fortune";
     render(<SajuReadingResult view={view} />);
 
-    expect(screen.getByText("리딩은 건강에 관한 결정을 대신할 수 없어요. 진단이나 치료는 의료 전문가와 상의해 주세요."))
+    expect(screen.getByText("건강·돈·관계·일에 관한 질문은 결정 대신 운의 흐름을 읽어요. 명로는 중대한 결정을 대신할 수 없어요."))
       .toBeInTheDocument();
     expect(screen.getByText("AI SAJU · 건강운")).toBeInTheDocument();
     expect(screen.queryByText("AI SAJU · 일·진로")).not.toBeInTheDocument();

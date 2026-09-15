@@ -127,7 +127,7 @@ describe("TarotReadingResult", () => {
 
     const notice = screen.getByRole("note");
     expect(notice).toHaveTextContent("금전운을 중심으로 읽었어요");
-    expect(notice).toHaveTextContent("리딩은 돈에 관한 결정을 대신할 수 없어요.");
+    expect(notice).toHaveTextContent("명로는 중대한 결정을 대신할 수 없어요.");
     const reveal = screen.getByRole("button", { name: "첫 카드 공개" });
     expect(notice.compareDocumentPosition(reveal) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
@@ -181,7 +181,7 @@ describe("TarotReadingResult", () => {
       fireEvent.click(screen.getByRole("button", { name: index === 0 ? "첫 카드 공개" : "다음 카드 공개" }));
     }
 
-    expect(screen.getByText(/리딩은 돈에 관한 결정을 대신할 수 없어요\./)).toBeInTheDocument();
+    expect(screen.getByText(/명로는 중대한 결정을 대신할 수 없어요\./)).toBeInTheDocument();
     expect(screen.getByText("운을 돕는 요소")).toBeInTheDocument();
     expect(screen.queryByText("선택 A")).not.toBeInTheDocument();
   });
