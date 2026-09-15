@@ -285,7 +285,8 @@ export function SajuExperience() {
   useEffect(() => {
     function handlePopState(event: PopStateEvent) {
       const step = (event.state as { sajuStep?: unknown } | null)?.sajuStep;
-      if (!isWizardStep(step) || inFlightRef.current) return;
+      // After a refresh the old step entries survive, but consent and login must be checked again first.
+      if (!isWizardStep(step) || inFlightRef.current || historyPhaseRef.current === "consent") return;
       if (step === historyPhaseRef.current || !canEnterStep(step, formRef.current)) return;
       poppedRef.current = true;
       setFieldErrors({});

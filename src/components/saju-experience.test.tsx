@@ -679,6 +679,17 @@ describe("SajuExperience", () => {
     expect(pushState).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps the consent gate when an old step entry is popped after a refresh", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(false)));
+
+    render(<SajuExperience />);
+    await screen.findByRole("button", { name: "동의 완료하고 계속" });
+    fireEvent(window, new PopStateEvent("popstate", { state: { sajuStep: "question" } }));
+
+    expect(screen.getByRole("button", { name: "동의 완료하고 계속" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: QUESTION_HEADING })).not.toBeInTheDocument();
+  });
+
   it("ignores a forward jump to review while the birth step is incomplete", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
