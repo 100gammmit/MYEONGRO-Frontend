@@ -416,6 +416,8 @@ h1, h2, h3, blockquote {
 .tarot-back { position: relative; aspect-ratio: .621; padding: 0; border: 0; color: inherit; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
 .tarot-back:hover:not(:disabled), .tarot-back:focus-visible { transform: translateY(-10px); box-shadow: var(--elevation-1), var(--glow-accent); }
 .tarot-back:focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 3px; }
+/* The painted back has no border to recolour, so the chosen card carries a ring; keyed on aria-pressed so hover never wipes it. */
+.tarot-back[aria-pressed="true"], .tarot-back[aria-pressed="true"]:hover:not(:disabled) { box-shadow: 0 0 0 2px var(--text-primary), var(--elevation-1), var(--glow-accent); }
 .tarot-back:disabled { opacity: .44; cursor: default; }
 .selection-count { text-align: center; color: var(--text-accent); }
 .confirmed-draw-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; list-style: none; padding: 0; margin: 12px 0 20px; }

@@ -10,10 +10,9 @@
   min-width: 0;
 }
 
-/* The painted back has no border to recolour, so the chosen card gets a ring instead. */
+/* The ring comes from .tarot-back[aria-pressed="true"] in globals.css; the module only lifts the card. */
 .selected {
   opacity: 1;
-  box-shadow: 0 0 0 2px var(--text-primary), var(--elevation-1), var(--glow-accent);
   transform: translateY(-6px);
 }
 
