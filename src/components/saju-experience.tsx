@@ -110,6 +110,20 @@ const FIELD_KEY: Partial<Record<string, FieldKey>> = {
   question: "question",
 };
 
+// Where focus goes when the birth step finds an empty required field.
+const FIELD_INPUT_ID: Partial<Record<FieldKey, string>> = {
+  birthDate: "saju-birth-date",
+  birthTimePrecision: "saju-precision-exact",
+  birthTime: "saju-birth-time",
+  provinceCode: "saju-province",
+};
+
+const REVEAL_ANNOUNCEMENT = "태어난 시각과 출생 시·도 칸이 열렸어요.";
+
+function isTimeKnown(precision: SajuFormState["birthTimePrecision"]): boolean {
+  return precision === "exact" || precision === "approximate";
+}
+
 function ensureRequestId(requestIdRef: MutableRefObject<string | null>): string {
   if (!requestIdRef.current) requestIdRef.current = globalThis.crypto.randomUUID();
   return requestIdRef.current;
@@ -127,10 +141,12 @@ export function SajuExperience() {
   const [loadingIndex, setLoadingIndex] = useState(0);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [revealAnnouncement, setRevealAnnouncement] = useState("");
   const requestIdRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
   const followUpDraftRef = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
+  const focusFieldRef = useRef<string | null>(null);
   const creditData = credits.state.status === "ready" ? credits.state.data : null;
   const creditCost = creditData?.costs.saju ?? null;
   const creditAccess = getReadingCreditAccess(
@@ -187,11 +203,11 @@ export function SajuExperience() {
     setPhase("question");
   }, []);
 
+  // Load the province list as soon as the birth step opens, so choosing a known time never waits on it.
+  // A remembered profile with a known time also needs it on review to show the province name.
   useEffect(() => {
-    if (phase !== "consent"
-      && form.birthTimePrecision
-      && form.birthTimePrecision !== "unknown"
-      && catalogStatus === "idle") {
+    if (catalogStatus !== "idle") return;
+    if (phase === "birth" || (phase !== "consent" && isTimeKnown(form.birthTimePrecision))) {
       void loadBirthPlaces();
     }
   }, [catalogStatus, form.birthTimePrecision, loadBirthPlaces, phase]);
@@ -214,9 +230,15 @@ export function SajuExperience() {
   }, [phase]);
 
   useEffect(() => {
-    if (Object.keys(fieldErrors).length > 0 || generalError) {
-      errorSummaryRef.current?.focus();
+    if (Object.keys(fieldErrors).length === 0 && !generalError) return;
+    const fieldId = focusFieldRef.current;
+    focusFieldRef.current = null;
+    const field = fieldId ? document.getElementById(fieldId) : null;
+    if (field && !(field as HTMLInputElement).disabled) {
+      field.focus();
+      return;
     }
+    errorSummaryRef.current?.focus();
   }, [fieldErrors, generalError, phase]);
 
   function updateForm(patch: Partial<SajuFormState>) {
@@ -227,10 +249,10 @@ export function SajuExperience() {
   }
 
   function selectPrecision(value: BirthTimePrecision) {
-    updateForm({
-      birthTimePrecision: value,
-      ...(value === "unknown" ? { birthTime: "", provinceCode: "" } : {}),
-    });
+    // Keep any time and province already entered; buildRequest leaves them out when the time is unknown.
+    const opening = isTimeKnown(value) && !isTimeKnown(form.birthTimePrecision);
+    setRevealAnnouncement(opening ? REVEAL_ANNOUNCEMENT : "");
+    updateForm({ birthTimePrecision: value });
   }
 
   function selectProvince(provinceCode: string) {
@@ -246,6 +268,25 @@ export function SajuExperience() {
     }
     // A follow-up reading already carries the birth profile, so it goes straight to review.
     setPhase(followUpDraftRef.current ? "review" : "birth");
+  }
+
+  function submitBirth() {
+    const missing: Partial<Record<FieldKey, string>> = {};
+    if (!form.birthDate) missing.birthDate = "양력 생년월일을 입력해 주세요.";
+    if (!form.birthTimePrecision) {
+      missing.birthTimePrecision = "출생 시각의 정확도를 골라 주세요.";
+    } else if (isTimeKnown(form.birthTimePrecision)) {
+      if (!form.birthTime) missing.birthTime = "태어난 시각을 입력해 주세요.";
+      if (!form.provinceCode) missing.provinceCode = "출생 시·도를 선택해 주세요.";
+    }
+    const first = (Object.keys(missing) as FieldKey[])[0];
+    if (first) {
+      focusFieldRef.current = FIELD_INPUT_ID[first] ?? null;
+      setGeneralError(null);
+      setFieldErrors(missing);
+      return;
+    }
+    setPhase("review");
   }
 
   async function submitReading() {
@@ -411,11 +452,7 @@ export function SajuExperience() {
   }
 
   if (phase === "birth") {
-    const timeKnown = form.birthTimePrecision !== "" && form.birthTimePrecision !== "unknown";
-    const timeReady = form.birthTimePrecision === "unknown" || Boolean(timeKnown && form.birthTime);
-    const placeReady = form.birthTimePrecision === "unknown"
-      || (catalogStatus === "ready" && Boolean(form.provinceCode));
-    const birthReady = Boolean(form.birthDate) && timeReady && placeReady;
+    const timeKnown = isTimeKnown(form.birthTimePrecision);
     return (
       <ReadingShell
         eyebrow="AI SAJU"
@@ -424,29 +461,24 @@ export function SajuExperience() {
         step={2}
         totalSteps={TOTAL_STEPS}
         showHomeLink={false}
-        actions={(
-          <NavigationButtons
-            back={() => setPhase("question")}
-            next={() => setPhase("review")}
-            nextDisabled={!birthReady}
-          />
-        )}
+        actions={<NavigationButtons back={() => setPhase("question")} next={submitBirth} />}
       >
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
-          <p className="notice">음력 생일은 아직 지원하지 않아요. 양력 날짜로 입력해 주세요.</p>
-          <label className="field" htmlFor="saju-birth-date">
-            <span>양력 생년월일</span>
+          <p className="sr-only" aria-live="polite">{revealAnnouncement}</p>
+          <div className="field">
+            <label htmlFor="saju-birth-date">양력 생년월일</label>
             <input
               id="saju-birth-date"
-              aria-describedby={fieldErrors.birthDate ? "birth-date-error" : undefined}
+              aria-describedby={fieldErrors.birthDate ? "birth-date-hint birth-date-error" : "birth-date-hint"}
               aria-invalid={Boolean(fieldErrors.birthDate)}
               type="date"
               value={form.birthDate}
               onChange={(event) => updateForm({ birthDate: event.target.value })}
             />
+            <p className="field-guidance" id="birth-date-hint">음력 생일은 아직 지원하지 않아요. 양력 날짜로 입력해 주세요.</p>
             <FieldError id="birth-date-error" message={fieldErrors.birthDate} />
-          </label>
+          </div>
           <fieldset
             className="field"
             aria-describedby={fieldErrors.birthTimePrecision
@@ -459,61 +491,71 @@ export function SajuExperience() {
               {TIME_OPTIONS.map((option) => (
                 <label className="saju-option" key={option.value}>
                   <input
+                    id={`saju-precision-${option.value}`}
                     checked={form.birthTimePrecision === option.value}
                     name="birth-time-precision"
                     onChange={() => selectPrecision(option.value)}
                     type="radio"
                     value={option.value}
                   />
-                  <span><strong>{option.label}</strong><small>{option.detail}</small></span>
+                  <span>
+                    <strong>{option.label}</strong>
+                    {form.birthTimePrecision === option.value ? <small>{option.detail}</small> : null}
+                  </span>
                 </label>
               ))}
             </div>
+            {form.birthTimePrecision === "unknown" ? (
+              <p className="field-guidance">출생 시각을 모르면 출생지는 입력하지 않아도 돼요.</p>
+            ) : null}
+            <p className="field-guidance" id="birth-time-help">
+              {form.birthTimePrecision === "approximate"
+                ? "입력한 시각 전후 60분을 함께 계산해 공통되는 내용만 보여줘요."
+                : "태어난 시각이 확실하지 않다면 ‘시간을 몰라요’를 선택해 주세요."}
+            </p>
             <FieldError id="birth-time-precision-error" message={fieldErrors.birthTimePrecision} />
           </fieldset>
           {timeKnown ? (
-            <label className="field" htmlFor="saju-birth-time">
-              <span>태어난 시각</span>
-              <input
-                id="saju-birth-time"
-                aria-describedby={fieldErrors.birthTime ? "birth-time-error" : "birth-time-help"}
-                aria-invalid={Boolean(fieldErrors.birthTime)}
-                type="time"
-                value={form.birthTime}
-                onChange={(event) => updateForm({ birthTime: event.target.value })}
-              />
-              <FieldError id="birth-time-error" message={fieldErrors.birthTime} />
-            </label>
-          ) : null}
-          <p className="muted" id="birth-time-help">
-            {form.birthTimePrecision === "approximate"
-              ? "입력한 시각 전후 60분을 함께 계산해 공통되는 내용만 보여줘요."
-              : "태어난 시각이 확실하지 않다면 ‘시간을 몰라요’를 선택해 주세요."}
-          </p>
-          {timeKnown && catalogStatus === "loading" ? <p className="notice" aria-live="polite">출생지 목록을 불러오고 있어요.</p> : null}
-          {timeKnown && catalogStatus === "error" ? (
-            <div role="alert" className="notice">
-              <p>{catalogError}</p>
-              <button className="secondary-button" onClick={() => void loadBirthPlaces()} type="button">다시 불러오기</button>
+            <div className="birth-reveal">
+              <div className="field">
+                <label htmlFor="saju-birth-time">태어난 시각</label>
+                <input
+                  id="saju-birth-time"
+                  aria-describedby={fieldErrors.birthTime ? "birth-time-error" : "birth-time-help"}
+                  aria-invalid={Boolean(fieldErrors.birthTime)}
+                  type="time"
+                  value={form.birthTime}
+                  onChange={(event) => updateForm({ birthTime: event.target.value })}
+                />
+                <FieldError id="birth-time-error" message={fieldErrors.birthTime} />
+              </div>
+              <div className="field">
+                <label htmlFor="saju-province">출생 시·도</label>
+                <select
+                  id="saju-province"
+                  aria-describedby={fieldErrors.provinceCode ? "province-hint province-error" : "province-hint"}
+                  aria-invalid={Boolean(fieldErrors.provinceCode)}
+                  disabled={catalogStatus !== "ready"}
+                  onChange={(event) => selectProvince(event.target.value)}
+                  value={form.provinceCode}
+                >
+                  <option value="">시·도 선택</option>
+                  {catalog?.provinces.map((item) => <option key={item.provinceCode} value={item.provinceCode}>{item.provinceName}</option>)}
+                </select>
+                {catalogStatus === "idle" || catalogStatus === "loading" ? (
+                  <p className="field-guidance" aria-live="polite">출생지 목록을 불러오고 있어요.</p>
+                ) : null}
+                {catalogStatus === "error" ? (
+                  <div className="field-inline-error" role="alert">
+                    <p className="form-error">{catalogError}</p>
+                    <button className="secondary-button" onClick={() => void loadBirthPlaces()} type="button">다시 불러오기</button>
+                  </div>
+                ) : null}
+                <p className="field-guidance" id="province-hint">출생 시·도는 태어난 시각을 보정하는 데 사용됩니다.</p>
+                <FieldError id="province-error" message={fieldErrors.provinceCode} />
+              </div>
             </div>
           ) : null}
-          {timeKnown ? <div className="saju-place-grid">
-            <label className="field" htmlFor="saju-province">
-              <span>출생 시·도</span>
-              <select
-                id="saju-province"
-                aria-describedby={fieldErrors.provinceCode ? "province-error" : undefined}
-                aria-invalid={Boolean(fieldErrors.provinceCode)}
-                disabled={catalogStatus !== "ready"}
-                onChange={(event) => selectProvince(event.target.value)}
-                value={form.provinceCode}
-              >
-                <option value="">시·도 선택</option>
-                {catalog?.provinces.map((item) => <option key={item.provinceCode} value={item.provinceCode}>{item.provinceName}</option>)}
-              </select>
-              <FieldError id="province-error" message={fieldErrors.provinceCode} />
-            </label>
-          </div> : null}
           <fieldset
             className="field"
             aria-describedby={fieldErrors.luckDirectionBasis ? "luck-help luck-error" : "luck-help"}
@@ -521,7 +563,7 @@ export function SajuExperience() {
           >
             <legend>대운 계산 기준</legend>
             <p className="muted" id="luck-help">전통 명리학에서 대운의 순행·역행을 계산할 때만 사용합니다. 성격이나 역할을 성별에 따라 다르게 해석하지 않습니다.</p>
-            <div className="saju-choice-row">
+            <div className="saju-choice-row chips">
               {LUCK_OPTIONS.map((option) => (
                 <label className="saju-choice" key={option.value}>
                   <input
@@ -673,18 +715,16 @@ const ErrorSummary = ({
 function NavigationButtons({
   back,
   next,
-  nextDisabled,
   nextLabel = "다음",
 }: {
   back: () => void;
   next: () => void;
-  nextDisabled: boolean;
   nextLabel?: string;
 }) {
   return (
     <div className="wizard-nav">
       <button className="secondary-button" onClick={back} type="button">이전</button>
-      <button className="primary-button" disabled={nextDisabled} onClick={next} type="button">{nextLabel}</button>
+      <button className="primary-button" onClick={next} type="button">{nextLabel}</button>
     </div>
   );
 }
