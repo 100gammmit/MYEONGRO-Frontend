@@ -6,8 +6,8 @@ import type {
   SajuEvidenceKey,
   SajuReadingView,
 } from "@/domain/saju/result";
-import { readingModeNotice } from "@/domain/reading/reading-mode";
 
+import { ReadingModeNotice } from "./reading-mode-notice";
 import { SajuFollowUpAction } from "./saju-follow-up-action";
 
 const FOCUS_LABELS = {
@@ -67,18 +67,17 @@ export function SajuReadingResult({
   const currentLuck = snapshot.luckCycle?.periods.find(
     (period) => period.startYear <= snapshot.targetYear && snapshot.targetYear <= period.endYear,
   );
-  const modeNotice = readingModeNotice(view.result.readingMode);
 
   return (
     <article className="saju-result page-width">
       <Link className="back-link" href={backHref}>← {backLabel}</Link>
+      <ReadingModeNotice mode={view.result.readingMode} />
       <header className="saju-result-hero">
         <p className="eyebrow">AI SAJU · {FOCUS_LABELS[view.input.focusArea]}</p>
         <h1>{view.result.title}</h1>
         <p>{view.result.summary}</p>
       </header>
 
-      {modeNotice ? <aside className="reading-mode-notice">{modeNotice}</aside> : null}
 
       {snapshot.limitations.length > 0 ? (
         <aside className="saju-limitation-summary">

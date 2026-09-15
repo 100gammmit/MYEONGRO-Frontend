@@ -8,11 +8,9 @@ import {
   TAROT_SPREADS,
   type AiTarotSpreadType,
 } from "@/domain/tarot";
-import {
-  readingModeNotice,
-  tarotPositionLabel,
-} from "@/domain/reading/reading-mode";
+import { tarotPositionLabel } from "@/domain/reading/reading-mode";
 import type { TarotReadingResultData } from "@/domain/tarot/result-view";
+import { ReadingModeNotice } from "./reading-mode-notice";
 import { ReadingShell } from "./reading-shell";
 import { TarotCardFace } from "./tarot-card-face";
 
@@ -81,7 +79,6 @@ export function TarotReadingResult({
   const [revealedCount, setRevealedCount] = useState(record ? definition.cardCount : 0);
   const revealedPositions = definition.positions.slice(0, revealedCount);
   const allRevealed = revealedCount === definition.cardCount;
-  const modeNotice = readingModeNotice(result.readingMode);
   const progress = record ? { stepLabel: record.dateLabel } : { step: 4, totalSteps: 4 };
 
   return (
@@ -93,6 +90,8 @@ export function TarotReadingResult({
       showTrack={!record}
       {...progress}
     >
+      {/* The changed focus is explained before the first card, whose position labels already reflect it. */}
+      <ReadingModeNotice mode={result.readingMode} />
       <div className="result-reveal-list">
         {revealedPositions.map((position, index) => {
           const card = CARD_INDEX.get(cardIds[index]);
@@ -128,7 +127,6 @@ export function TarotReadingResult({
             <h2>{result.title}</h2>
             <p>{result.summary}</p>
           </div>
-          {modeNotice ? <aside className="reading-mode-notice">{modeNotice}</aside> : null}
           <section className="reading-guidance">
             <h3>오늘부터 시도할 작은 행동</h3>
             <ul>{result.guidance.map((item) => <li key={item}>{item}</li>)}</ul>

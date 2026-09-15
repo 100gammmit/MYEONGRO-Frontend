@@ -73,4 +73,21 @@ describe("SajuReadingResult", () => {
       .toBeInTheDocument();
     expect(document.querySelector("blockquote")).not.toBeInTheDocument();
   });
+
+  it("puts the redirect notice above the reading title", () => {
+    const view = sajuReadingView();
+    view.result.readingMode = "health_fortune";
+    render(<SajuReadingResult view={view} />);
+
+    const notice = screen.getByRole("note");
+    expect(notice).toHaveTextContent("건강운으로 바꿔 읽었어요");
+    const title = screen.getByRole("heading", { level: 1 });
+    expect(notice.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("shows no redirect notice for a standard saju reading", () => {
+    render(<SajuReadingResult view={sajuReadingView()} />);
+
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+  });
 });

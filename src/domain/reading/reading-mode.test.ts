@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { parseReadingMode, readingModeNotice, tarotPositionLabel } from "./reading-mode";
+import {
+  parseReadingMode,
+  readingModeHeadline,
+  readingModeNotice,
+  tarotPositionLabel,
+} from "./reading-mode";
 
 describe("reading mode", () => {
   it("keeps old records compatible and rejects unknown modes", () => {
@@ -18,5 +23,11 @@ describe("reading mode", () => {
     expect(tarotPositionLabel("career_life_fortune", "relationship_flow", "관계에서 드러난 흐름"))
       .toBe("이어지는 흐름");
     expect(tarotPositionLabel("standard", "option_a", "선택 A")).toBe("선택 A");
+  });
+
+  it("names the fortune a redirected reading switched to, and nothing for a standard one", () => {
+    expect(readingModeHeadline("money_fortune")).toBe("금전운으로 바꿔 읽었어요");
+    expect(readingModeHeadline("career_life_fortune")).toBe("직업·생활운으로 바꿔 읽었어요");
+    expect(readingModeHeadline("standard")).toBeNull();
   });
 });

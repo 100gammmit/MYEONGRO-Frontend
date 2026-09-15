@@ -38,8 +38,20 @@ export function parseReadingMode(value: unknown): ReadingMode | null {
   return parsed.success ? parsed.data : null;
 }
 
+const HEADLINE: Record<ReadingMode, string | null> = {
+  standard: null,
+  health_fortune: "건강운으로 바꿔 읽었어요",
+  money_fortune: "금전운으로 바꿔 읽었어요",
+  relationship_fortune: "관계운으로 바꿔 읽었어요",
+  career_life_fortune: "직업·생활운으로 바꿔 읽었어요",
+};
+
 export function readingModeNotice(mode: ReadingMode): string | null {
   return NOTICE[mode];
+}
+
+export function readingModeHeadline(mode: ReadingMode): string | null {
+  return HEADLINE[mode];
 }
 
 export function tarotPositionLabel(

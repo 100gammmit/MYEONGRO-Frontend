@@ -590,7 +590,14 @@ h1, h2, h3, blockquote {
 .reading-guidance { padding: 28px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); }
 .reading-guidance h2, .reading-guidance h3 { margin-top: 0; }
 .reading-guidance li, .reading-disclaimer { color: var(--text-secondary); line-height: 1.8; }
-.reading-mode-notice { margin: 18px 0 24px; padding: 14px 18px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); color: var(--text-secondary); line-height: 1.7; }
+/* A redirected reading says so before any card or pillar, so the changed focus never reads as an answer to the original question.
+   Periwinkle, not gold: gold is reserved for actions. */
+.reading-mode-notice { display: flex; align-items: flex-start; gap: 12px; max-width: var(--w-read); margin: 0 auto 28px; padding: 16px 18px 16px 16px; border: 1px solid color-mix(in srgb, var(--accent-strong) 30%, transparent); border-left: 3px solid var(--accent-strong); border-radius: var(--radius-md); background: color-mix(in srgb, var(--accent-primary) 10%, transparent); text-align: left; }
+.reading-mode-notice-mark { flex: none; color: var(--accent-strong); font-size: 14px; line-height: 1.7; }
+.reading-mode-notice strong { display: block; color: var(--text-primary); font-size: 16px; font-weight: 600; line-height: 1.5; }
+.reading-mode-notice p { margin: 4px 0 0; color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+.saju-result > .reading-mode-notice { margin-top: 32px; }
+.saju-result > .reading-mode-notice + .saju-result-hero { margin-top: 28px; }
 .record-state { margin-top: 35px; padding: 40px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); }
 .record-actions { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--border-default); }
 .record-actions > p { color: var(--text-danger); }
