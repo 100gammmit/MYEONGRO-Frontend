@@ -35,6 +35,19 @@ describe("ConsentGate", () => {
     expect(screen.queryByText(/개인정보 수집·이용 동의/)).not.toBeInTheDocument();
   });
 
+  it("leaves the heading to the wizard and puts the continue button in the shared action bar", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ status: tarotStatus }));
+
+    render(<ConsentGate scope="tarot" onComplete={vi.fn()} />);
+
+    const continueButton = await screen.findByRole("button", { name: "동의 완료하고 계속" });
+    expect(continueButton.closest(".reading-actions")).not.toBeNull();
+    expect(continueButton.closest(".consent-panel")).toBeNull();
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+    expect(screen.queryByText("BEFORE WE BEGIN")).not.toBeInTheDocument();
+    expect(screen.getByText(/마지막 단계에서 모든 동의를 한 번에 저장합니다/)).toBeInTheDocument();
+  });
+
   it("shows the saju-only birth information agreement in the saju scope", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
       status: {

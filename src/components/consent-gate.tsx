@@ -161,14 +161,8 @@ export function ConsentGate({
 
   return (
     <>
+      {/* The wizard's own title already frames this step, so the panel carries no second heading. */}
       <div className="consent-panel">
-        <div className="consent-heading">
-          <span aria-hidden="true" className="lock-icon">◇</span>
-          <div>
-            <p className="eyebrow">BEFORE WE BEGIN</p>
-            <h2>당신의 이야기를 안전하게 다룰게요</h2>
-          </div>
-        </div>
         <p className="muted">
           이 리딩에 필요한 항목만 안내합니다. 각 문서를 확인한 뒤 마지막 단계에서 모든 동의를 한 번에 저장합니다.
         </p>
@@ -208,6 +202,9 @@ export function ConsentGate({
             </div>
           ))}
         </div>
+      </div>
+      {/* Same place as every wizard step's '다음': pinned to the bottom on phones, under the panel on desktop. */}
+      <div className="reading-actions">
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         {error && status === null ? (
           <button className="secondary-button full-button" onClick={() => void loadStatus()} type="button">
