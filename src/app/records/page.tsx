@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
+import { formatReadingDate } from "@/domain/reading/reading-date";
 import { TAROT_SPREADS, isAiTarotSpreadType, type TarotSpreadType } from "@/domain/tarot";
 import {
   BackendReadingRecordsClient,
@@ -99,9 +100,7 @@ export default async function RecordsPage() {
                   {statusLabels[reading.status]}
                 </span>
                 <time dateTime={reading.createdAt}>
-                  {new Intl.DateTimeFormat("ko-KR", {
-                    dateStyle: "medium",
-                  }).format(new Date(reading.createdAt))}
+                  {formatReadingDate(reading.createdAt)}
                 </time>
               </div>
             </Link>

@@ -67,6 +67,43 @@ describe("TarotReadingResult", () => {
     await waitFor(() => expect(container.querySelector(".card-flip-inner")).toHaveClass("flipped"));
   });
 
+  it("opens a saved record with every card turned and the record's own frame", () => {
+    const definition = TAROT_SPREADS.mind_three_card;
+    const { container } = render(
+      <TarotReadingResult
+        cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
+        record={{
+          backHref: "/records",
+          backLabel: "내 기록",
+          dateLabel: "2026. 9. 15.",
+          footer: <button type="button">기록 삭제</button>,
+        }}
+        result={{
+          readingMode: "standard",
+          title: "오늘의 리딩",
+          summary: "오늘의 흐름을 확인했어요.",
+          sections: definition.positions.map((position) => ({
+            position: position.id,
+            heading: "마음의 흐름",
+            body: "천천히 살펴보세요.",
+          })),
+          guidance: ["작은 행동을 시작하세요."],
+          disclaimer: "자기 성찰을 위한 참고 정보입니다.",
+        }}
+        spreadType="mind_three_card"
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "첫 카드 공개" })).not.toBeInTheDocument();
+    expect(container.querySelectorAll(".card-flip-inner.flipped")).toHaveLength(3);
+    expect(screen.getByRole("link", { name: "← 내 기록" })).toHaveAttribute("href", "/records");
+    expect(screen.getByText("2026. 9. 15.")).toBeInTheDocument();
+    expect(container.querySelector(".progress-track")).toBeNull();
+    expect(screen.getByText("오늘의 리딩")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "기록 삭제" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "새로운 리딩 시작" })).not.toBeInTheDocument();
+  });
+
   it("shows redirected fortune copy and neutral choice labels", () => {
     const definition = TAROT_SPREADS.choice_five_card;
     render(
