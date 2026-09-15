@@ -10,15 +10,19 @@ export function BrandMark({
   lit = STROKES.length,
   size = 64,
   breathing = false,
+  seal = false,
 }: {
   lit?: number;
   size?: number;
   breathing?: boolean;
+  /** The resting brand mark in seal ink, as in the header; it never animates. */
+  seal?: boolean;
 }) {
+  const className = ["mark-glyph", breathing ? "breathing" : "", seal ? "seal" : ""].filter(Boolean).join(" ");
   return (
     <svg
       aria-hidden="true"
-      className={breathing ? "mark-glyph breathing" : "mark-glyph"}
+      className={className}
       focusable="false"
       height={size}
       viewBox="0 0 64 64"
@@ -28,7 +32,7 @@ export function BrandMark({
       <g className="mark-lines">
         {STROKES.map(([x, from, to], index) => (
           <path
-            className={index < lit ? "mark-stroke on" : "mark-stroke"}
+            className={!seal && index < lit ? "mark-stroke on" : "mark-stroke"}
             d={`M${x} ${from}V${to}`}
             key={`${x}-${from}`}
           />

@@ -78,6 +78,57 @@ describe("SiteHeader", () => {
     expect(credits.refresh).toHaveBeenCalledTimes(1);
   });
 
+  it("offers tarot and saju to everyone and marks the section in view", () => {
+    navigation.pathname = "/saju/results/reading-1";
+
+    render(<SiteHeader authenticated={false} />);
+
+    expect(screen.getByRole("link", { name: "사주" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "타로" })).toHaveAttribute("href", "/tarot");
+    expect(screen.getByRole("link", { name: "타로" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("keeps the daily fortune under tarot but not look-alike paths", () => {
+    navigation.pathname = "/tarot/daily";
+    const { unmount } = render(<SiteHeader authenticated={false} />);
+    expect(screen.getByRole("link", { name: "타로" })).toHaveAttribute("aria-current", "page");
+    unmount();
+
+    navigation.pathname = "/tarotology";
+    render(<SiteHeader authenticated={false} />);
+    expect(screen.getByRole("link", { name: "타로" })).not.toHaveAttribute("aria-current");
+  });
+
+  it("opens the account menu and closes it with Escape or an outside press", () => {
+    render(<SiteHeader authenticated />);
+
+    const button = screen.getByRole("button", { name: "계정 메뉴" });
+    const panel = document.getElementById("account-menu-panel");
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveAttribute("aria-controls", "account-menu-panel");
+
+    fireEvent.click(button);
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(panel).toHaveClass("open");
+
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(button).toHaveFocus();
+
+    fireEvent.click(button);
+    fireEvent.pointerDown(document.body);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("closes the account menu once one of its links is followed", () => {
+    render(<SiteHeader authenticated />);
+
+    fireEvent.click(screen.getByRole("button", { name: "계정 메뉴" }));
+    fireEvent.click(screen.getByRole("link", { name: "내 기록" }));
+
+    expect(screen.getByRole("button", { name: "계정 메뉴" })).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("does not make the login page its own return destination", () => {
     navigation.pathname = "/login";
     navigation.search = "next=%2Fsaju";

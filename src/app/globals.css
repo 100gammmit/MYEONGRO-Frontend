@@ -162,7 +162,7 @@ h1, h2, h3, blockquote {
 
 .site-header {
   width: min(var(--w-page), calc(100% - 64px));
-  height: 84px;
+  height: 68px;
   margin: auto;
   display: flex;
   align-items: center;
@@ -171,14 +171,26 @@ h1, h2, h3, blockquote {
   position: relative;
   z-index: 10;
 }
-.brand { display: flex; min-height: 44px; align-items: center; gap: 12px; font-family: "Noto Serif KR Variable", Georgia, serif; font-size: 20px; letter-spacing: .14em; text-transform: uppercase; }
-.brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--border-strong); border-radius: 50%; color: var(--text-accent-strong); font-size: 14px; box-shadow: var(--glow-accent); }
-.site-header nav { display: flex; align-items: center; gap: 28px; font-size: 13px; color: var(--text-secondary); }
-.site-header nav a, .nav-button { transition: color .2s ease, border-color .2s ease, background .2s ease; }
-.site-header nav a:hover, .nav-button:hover { color: var(--text-primary); }
-.credit-indicator { display: inline-flex; align-items: center; gap: 6px; color: var(--text-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.credit-indicator strong { color: var(--text-accent-strong); font-size: 14px; }
-.credit-indicator-button { padding: 0; border: 0; background: transparent; color: var(--text-secondary); font: inherit; cursor: pointer; }
+.brand { display: flex; min-height: 44px; align-items: center; gap: 11px; font-family: "Noto Serif KR Variable", Georgia, serif; font-size: 20px; font-weight: 300; }
+.site-header-start, .site-header-end { display: flex; align-items: center; }
+.site-header-start { gap: 28px; }
+.site-header-end { gap: 6px; font-size: 14px; color: var(--text-secondary); }
+.reading-nav { display: flex; gap: 4px; }
+.reading-nav-link { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; color: var(--text-secondary); font-size: 14px; }
+.reading-nav-link.active { color: var(--text-primary); }
+/* The section in view carries a short rule in the same gold as the main action. */
+.reading-nav-link.active::after { content: ""; position: absolute; left: 50%; bottom: 6px; width: 16px; height: 2px; border-radius: 2px; background: var(--accent-cta); transform: translateX(-50%); }
+.account-menu { position: relative; display: flex; align-items: center; }
+.account-menu-button { display: none; }
+.account-menu-panel { display: flex; align-items: center; gap: 6px; }
+.account-menu-panel a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; }
+.menu-icon { display: grid; gap: 4px; }
+.menu-icon i { display: block; width: 16px; height: 1.5px; border-radius: 1px; background: currentColor; }
+.site-header a, .nav-button { transition: color .2s ease, border-color .2s ease, background .2s ease; }
+.site-header-end a:hover, .reading-nav-link:hover, .nav-button:hover { color: var(--text-primary); }
+.credit-indicator { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin-right: 8px; padding: 0 12px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); color: var(--text-secondary); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.credit-indicator strong { color: var(--accent-cta); font-weight: 600; }
+.credit-indicator-button { min-height: 44px; background: transparent; color: var(--text-secondary); font: inherit; font-size: 13px; cursor: pointer; }
 .credit-indicator-button:hover { color: var(--text-primary); }
 .nav-cta { border: 1px solid var(--border-default); border-radius: var(--radius-sm); display: inline-flex; align-items: center; min-height: 44px; padding: 10px 17px; color: var(--text-primary); background: var(--surface-tint-2); }
 .nav-cta:hover { border-color: var(--border-strong); background: var(--surface-tint-3); }
@@ -436,6 +448,10 @@ h1, h2, h3, blockquote {
 }
 @keyframes mark-draw { from { stroke-dashoffset: 13; } to { stroke-dashoffset: 0; } }
 @keyframes mark-breathe { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+/* Header mark in seal ink, as drawn on the canvas: a heavier frame and the lighter seal for the strokes. */
+.mark-glyph.seal .mark-frame { stroke: var(--accent-seal); stroke-width: 3; }
+.mark-glyph.seal .mark-stroke, .mark-glyph.seal .mark-card, .mark-glyph.seal .mark-gem { stroke: var(--accent-seal-strong); }
+.mark-glyph.seal .mark-gem { stroke-width: 3; }
 
 .spread-grid { list-style: none; padding: 0; margin: 0 auto 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: var(--w-wide); }
 .spread-option { width: 100%; min-height: 176px; padding: 25px; text-align: left; color: var(--text-primary); border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--gradient-panel); transition: border-color .2s ease, background .2s ease, transform .2s ease; }
@@ -647,10 +663,18 @@ h1, h2, h3, blockquote {
 
 @media (max-width: 760px) {
   .page-width { width: min(100% - 28px, 620px); }
-  .site-header { width: calc(100% - 28px); height: 68px; }
-  .brand { font-size: 16px; letter-spacing: .1em; }
-  .brand-mark { width: 32px; height: 32px; }
-  .site-header nav { gap: 12px; }
+  .site-header { width: calc(100% - 28px); height: 56px; }
+  .brand { gap: 9px; font-size: 17px; }
+  .brand .mark-glyph { width: 20px; height: 20px; }
+  .site-header-start, .site-header-end { gap: 2px; }
+  .reading-nav { gap: 0; }
+  .reading-nav-link { justify-content: center; min-width: 44px; padding: 0 9px; font-size: 13px; }
+  .credit-indicator { margin-right: 0; font-size: 12px; }
+  .account-menu-button { display: grid; place-content: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; }
+  .account-menu-panel { display: none; }
+  .account-menu-panel.open { position: absolute; top: calc(100% + 6px); right: 0; z-index: 30; display: flex; flex-direction: column; align-items: stretch; gap: 0; min-width: 180px; padding: 6px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-sticky); box-shadow: var(--elevation-2); backdrop-filter: blur(12px); }
+  .account-menu-panel.open a { padding: 0 14px; border-radius: var(--radius-xs); }
+  .account-menu-panel.open .nav-cta { width: 100%; margin-top: 4px; }
   .nav-cta { padding: 9px 12px; }
   .landing-page .landing-hero { min-height: 390px; padding-block: 58px 46px; }
   .landing-page .landing-hero h1 { font-size: 40px; line-height: 1.18; }
