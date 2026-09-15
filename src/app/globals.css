@@ -64,7 +64,6 @@
 
   --gradient-panel: linear-gradient(160deg, rgba(24, 25, 30, 0.92), rgba(15, 16, 20, 0.92));
   --gradient-tarot-back: linear-gradient(155deg, #1b2340, #101526);
-  --gradient-confirmed-card: repeating-linear-gradient(45deg, rgba(124, 111, 240, 0.07) 0 3px, transparent 3px 6px), #171e2e;
   --gradient-revealed-card: radial-gradient(circle at 50% 38%, rgba(124, 111, 240, 0.16), transparent 40%), linear-gradient(#1c2438, #10141f);
 
   /* Depth: elevation is shadow only, glow is colored light only. */
@@ -74,7 +73,6 @@
   --glow-accent: 0 0 24px rgba(124, 111, 240, 0.16);
   --glow-cta: 0 10px 30px rgba(232, 181, 74, 0.22);
   --glow-dot: 0 0 8px rgba(124, 111, 240, 0.7);
-  --effect-tarot-inner-border: rgba(124, 111, 240, 0.35);
 
   /* Layout ladder: page, wide grid, reading column, input column, action width. */
   --w-page: 1080px;
@@ -330,10 +328,6 @@ h1, h2, h3, blockquote {
 .field textarea:focus, .field input:focus, .field select:focus { border-color: var(--accent-primary); box-shadow: var(--focus-field-ring); }
 .field .field-guidance { color: var(--text-muted); font-size: 12px; line-height: 1.65; margin: 8px 0 0; }
 .field small { display: block; color: var(--text-subtle); text-align: right; margin-top: 7px; }
-.segmented, .gender-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border-default); margin-bottom: 24px; border-radius: var(--radius-md); overflow: hidden; }
-.segmented button, .gender-row button { border: 0; background: var(--surface-segment); color: var(--text-muted); padding: 13px; }
-.segmented button.active, .gender-row button.active { color: var(--text-inverse); background: var(--accent-strong); }
-.gender-row { grid-template-columns: repeat(3, 1fr); }
 .notice { color: var(--text-accent-strong); background: var(--surface-tint-2); border-left: 2px solid var(--accent-primary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 14px 16px; font-size: 13px; line-height: 1.5; }
 .credit-notice { max-width: var(--w-read); margin: 14px auto; color: var(--text-secondary); text-align: center; font-size: 13px; line-height: 1.6; }
 .credit-notice p { margin: 0 0 10px; }
@@ -344,7 +338,6 @@ h1, h2, h3, blockquote {
 .saju-option input, .saju-choice input, .saju-category input { width: auto; margin-top: 3px; accent-color: var(--accent-strong); }
 .saju-option strong, .saju-option small { display: block; }
 .saju-option small { margin-top: 5px; text-align: left; line-height: 1.5; }
-.saju-place-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .saju-choice-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .saju-choice-row.chips .saju-choice { position: relative; justify-content: center; padding: 10px 8px; text-align: center; }
 .saju-choice-row.chips .saju-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
@@ -410,7 +403,6 @@ h1, h2, h3, blockquote {
 .draw-progress { text-align: center; color: var(--text-accent); font-size: 13px; letter-spacing: .14em; font-variant-numeric: tabular-nums; }
 .draw-instruction { max-width: var(--w-input); margin: 12px auto 28px; text-align: center; color: var(--text-secondary); line-height: 1.75; }
 .tarot-candidates { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.tarot-deck { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; max-width: var(--w-wide); margin: 32px auto; }
 /* Card back: the painted geum-dancheong image carries its own gold frame and the well the stone sits in. */
 .tarot-back, .tarot-back-art { border-radius: var(--radius-sm); background: url("/images/tarot/back-480.webp") center / 100% 100% no-repeat, var(--gradient-tarot-back); }
 .tarot-back { position: relative; aspect-ratio: .621; padding: 0; border: 0; color: inherit; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
@@ -419,20 +411,8 @@ h1, h2, h3, blockquote {
 /* The painted back has no border to recolour, so the chosen card carries a ring; keyed on aria-pressed so hover never wipes it. */
 .tarot-back[aria-pressed="true"], .tarot-back[aria-pressed="true"]:hover:not(:disabled) { box-shadow: 0 0 0 2px var(--text-primary), var(--elevation-1), var(--glow-accent); }
 .tarot-back:disabled { opacity: .44; cursor: default; }
-.selection-count { text-align: center; color: var(--text-accent); }
-.confirmed-draw-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; list-style: none; padding: 0; margin: 12px 0 20px; }
-.confirmed-draw-slots li { display: grid; justify-items: center; gap: 6px; color: var(--text-muted); font-size: 12px; }
-.confirmed-card-back { width: 34px; aspect-ratio: .62; display: grid; place-items: center; border: 1px solid var(--border-strong); color: var(--text-accent); background: var(--gradient-confirmed-card); }
-.confirmed-card-back i { font-style: normal; font-size: 11px; }
 .narrow-button { max-width: var(--w-act); margin: 26px auto; display: flex; }
 .confirmation-card { max-width: var(--w-read); }
-.draw-complete-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 14px; margin: 24px 0; }
-.draw-complete-grid .revealed-card { width: 100%; margin: 0; padding: 18px 12px; }
-.draw-complete-grid .revealed-card strong { font-size: 25px; overflow-wrap: anywhere; }
-.selected-card-list { list-style: none; padding: 0; margin: 24px 0; display: grid; gap: 10px; }
-.selected-card-list li { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--border-hairline); }
-.selected-card-list span { color: var(--text-muted); }
-.selected-card-list strong { color: var(--text-accent-strong); }
 .loading-card { text-align: center; position: relative; }
 .loading-card::before {
   content: ""; display: block; width: 14px; height: 14px; margin: 0 auto 22px; border-radius: 50%;
@@ -469,7 +449,6 @@ h1, h2, h3, blockquote {
 .tarot-stone .d1 { background: #000; opacity: .16; }
 .tarot-stone .d2 { background: #000; opacity: .30; }
 .tarot-stone .d3 { background: #000; opacity: .44; }
-.tarot-stone .l1 { background: #242424; mix-blend-mode: color-dodge; }
 .tarot-stone .l2 { background: #454545; mix-blend-mode: color-dodge; }
 .tarot-stone .l3 { background: #6b6b6b; mix-blend-mode: color-dodge; }
 .tarot-stone .rim { background: linear-gradient(138deg, rgba(255, 255, 255, .78) 0 3.5%, transparent 10%), linear-gradient(318deg, rgba(255, 255, 255, .30) 0 2.5%, transparent 8%); }
@@ -544,11 +523,7 @@ h1, h2, h3, blockquote {
 .result-hero { text-align: center; padding: 52px 30px; border-block: 1px solid var(--border-default); }
 .result-hero blockquote { max-width: var(--w-read); margin: 0 auto 18px; font-size: 40px; line-height: 1.5; color: var(--text-accent-strong); }
 .result-hero > p:last-child { color: var(--text-muted); }
-.result-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin: 50px 0; }
-.result-cards article { text-align: center; }
-.result-cards article > span { font-size: 11px; color: var(--text-accent); letter-spacing: .12em; }
 .revealed-card { max-width: 190px; margin: 15px auto 22px; }
-.result-cards article > p { color: var(--text-secondary); line-height: 1.7; font-size: 14px; }
 .result-actions { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
 .wizard-nav { display: flex; gap: 10px; }
 .wizard-nav .secondary-button { flex: 0 0 120px; justify-content: center; }
@@ -559,11 +534,6 @@ h1, h2, h3, blockquote {
 .pillars div:last-child { border: 0; }
 .pillars span, .pillars small { display: block; color: var(--text-muted); }
 .pillars strong { display: block; font-family: "Noto Serif KR Variable", Georgia, serif; font-weight: 400; font-size: 32px; margin: 15px 0 8px; color: var(--text-accent-strong); }
-.saju-insights { display: grid; gap: 14px; margin: 46px 0; }
-.saju-insights article { padding: 30px; display: flex; gap: 25px; align-items: center; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); }
-.saju-insights article > span { width: 66px; height: 66px; flex: 0 0 auto; border: 1px solid var(--border-strong); border-radius: 50%; display: grid; place-items: center; font: 32px "Noto Serif KR Variable", Georgia, serif; color: var(--text-accent-strong); }
-.saju-insights h2 { margin: 0 0 8px; }
-.saju-insights p:last-child { margin: 0; color: var(--text-muted); }
 
 .simple-page { padding: 104px 0 150px; min-height: 65vh; }
 .simple-page > h1 { font-size: 64px; font-weight: 300; margin: 0 0 36px; letter-spacing: -.035em; }
@@ -591,7 +561,6 @@ h1, h2, h3, blockquote {
 .adult-eligibility-button { width: 100%; min-height: 52px; justify-content: center; }
 .adult-eligibility .secondary-button:disabled { cursor: not-allowed; opacity: .55; }
 .signup-age-error { margin: 0; color: var(--text-danger); font-size: 13px; line-height: 1.7; }
-.auth-selection-reset { justify-self: center; border: 0; padding: 8px; color: var(--text-muted); background: transparent; font: inherit; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .danger-zone { max-width: var(--w-read); margin-top: 60px; padding-top: 28px; border-top: 1px solid var(--border-danger); }
 .danger-zone h2 { font-size: 20px; font-weight: 300; }
 .danger-zone p { color: var(--text-muted); font-size: 13px; }
@@ -602,7 +571,6 @@ h1, h2, h3, blockquote {
 .account-consent-confirmation { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-hairline); }
 .danger-button { padding: 12px 16px; color: var(--text-danger); background: transparent; border: 1px solid var(--border-danger); border-radius: var(--radius-sm); font: inherit; cursor: pointer; }
 .danger-button:disabled { opacity: .55; cursor: not-allowed; }
-.records-alert { max-width: var(--w-wide); margin-bottom: 24px; padding: 18px; border: 1px solid var(--border-danger); border-radius: var(--radius-md); color: var(--text-danger); background: var(--surface-danger-subtle); }
 .records-list { display: grid; gap: 14px; max-width: var(--w-wide); }
 .record-card { display: flex; justify-content: space-between; gap: 30px; padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); transition: border-color .2s, transform .2s; }
 .record-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
@@ -638,7 +606,6 @@ h1, h2, h3, blockquote {
 .saju-result-hero h1 { margin: 12px 0 22px; font-size: 64px; font-weight: 300; letter-spacing: -.035em; }
 .saju-result-hero > p, .saju-result-hero blockquote { color: var(--text-secondary); line-height: 1.85; }
 .saju-result-hero blockquote { margin: 26px 0 0; padding-inline: 34px; font-size: 16px; }
-.saju-focus { color: var(--text-accent-strong) !important; font-size: 12px; letter-spacing: .08em; }
 .saju-limitation-summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0 0 22px; padding: 18px 22px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); color: var(--text-secondary); }
 .saju-limitation-summary p { margin: 0; line-height: 1.7; }
 .saju-limitation-summary a { flex: 0 0 auto; color: var(--text-accent-strong); font-size: 13px; }
@@ -663,7 +630,7 @@ h1, h2, h3, blockquote {
 .saju-reading-sections { display: grid; gap: 16px; }
 .saju-reading-sections section { padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-tint-1); }
 .saju-reading-sections h2 { margin: 0 0 14px; font-size: 25px; font-weight: 300; }
-.saju-reading-sections p, .saju-guidance li, .saju-limitations p, .saju-result-disclaimer { color: var(--text-secondary); line-height: 1.85; }
+.saju-reading-sections p, .saju-guidance li, .saju-limitations p { color: var(--text-secondary); line-height: 1.85; }
 .saju-evidence { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-default); }
 .saju-evidence ul { margin-bottom: 0; padding-left: 20px; color: var(--text-muted); font-size: 13px; line-height: 1.8; }
 .saju-guidance { margin: 36px 0 16px; padding: 30px; border: 1px solid var(--border-strong); border-radius: var(--radius-lg); }
@@ -671,7 +638,6 @@ h1, h2, h3, blockquote {
 .saju-limitations { padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); }
 .saju-limitations article + article { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--border-default); }
 .saju-limitations h3 { margin: 0 0 8px; font-size: 16px; }
-.saju-result-disclaimer { margin: 24px 0 0; font-size: 13px; }
 .saju-result-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; padding-top: 28px; border-top: 1px solid var(--border-default); }
 .social-button { border: 0; border-radius: var(--radius-md); padding: 16px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
 .social-logo { width: 20px; height: 20px; flex: 0 0 auto; }
@@ -696,7 +662,6 @@ h1, h2, h3, blockquote {
   .account-menu-panel.open a { padding: 0 14px; border-radius: var(--radius-xs); }
   .account-menu-panel.open .nav-cta { width: 100%; margin-top: 4px; }
   .nav-cta { padding: 9px 12px; }
-  .result-cards { grid-template-columns: 1fr; }
   .site-footer { width: calc(100% - 28px); flex-direction: column; align-items: flex-start; padding-bottom: 30px; }
   .landing-sky { top: -56px; }
   .landing-sky-wide { display: none; }
@@ -742,7 +707,7 @@ h1, h2, h3, blockquote {
   .consent-modal-body { padding: 18px 20px; }
   .consent-modal-actions { padding: 14px 20px 20px; }
   .consent-modal-actions button { flex: 1; }
-  .category-grid, .spread-grid, .choice-fields, .saju-place-grid, .saju-choice-row { grid-template-columns: 1fr; }
+  .category-grid, .spread-grid, .choice-fields, .saju-choice-row { grid-template-columns: 1fr; }
   .category-grid.saju-focus-grid { grid-template-columns: 1fr 1fr; }
   .saju-choice-row.chips { grid-template-columns: repeat(3, 1fr); }
   .saju-review-list div { grid-template-columns: 1fr; gap: 6px; }
@@ -758,15 +723,11 @@ h1, h2, h3, blockquote {
   .spread-option { min-height: auto; }
   .tarot-candidates { gap: 7px; }
   .tarot-candidates .tarot-back { min-width: 0; }
-  .tarot-deck { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .result-reveal { grid-template-columns: 1fr; text-align: center; padding: 22px; }
   .result-reveal .revealed-card { max-width: 170px; margin-inline: auto; }
-  .result-cards { max-width: var(--w-act); margin-inline: auto; }
   .pillars { gap: 0; }
   .pillars div { padding: 18px 5px; }
   .pillars strong { font-size: 25px; }
-  .saju-insights article { align-items: flex-start; padding: 22px; }
-  .saju-insights article > span { width: 52px; height: 52px; }
   .simple-page { padding-top: 72px; }
   .empty-state, .auth-card { padding: 34px 22px; }
   .record-card { flex-direction: column; padding: 22px; }
@@ -776,7 +737,6 @@ h1, h2, h3, blockquote {
   .form-shell .wizard-heading h1 { font-size: 25px; }
   .form-shell .wizard-heading p { font-size: 13px; }
   .saju-option-list, .birth-reveal { grid-template-columns: 1fr; }
-  .draw-complete-grid .revealed-card strong { font-size: 20px; }
   .result-hero blockquote { font-size: 32px; }
   .simple-page > h1 { font-size: 40px; }
   .record-detail-header h1, .record-state h1 { font-size: 40px; }
