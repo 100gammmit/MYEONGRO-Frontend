@@ -184,7 +184,8 @@ export function ConsentGate({
                   className={accepted[agreementId] ? "agreement-status accepted" : "agreement-status"}
                   role="status"
                 >
-                  {accepted[agreementId] ? "동의 완료" : "내용 확인 필요"}
+                  {/* Reading a document only marks it here; consent is saved by the final button. */}
+                  {accepted[agreementId] ? "확인 완료" : "내용 확인 필요"}
                 </span>
                 <button
                   aria-label={`${agreementDetails[agreementId].label} 내용 확인`}

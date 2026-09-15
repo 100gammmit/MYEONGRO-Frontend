@@ -128,7 +128,7 @@ describe("ConsentGate", () => {
 
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(screen.getByRole("status", { name: "서비스 이용약관 동의 상태" }))
-      .toHaveTextContent("동의 완료");
+      .toHaveTextContent("확인 완료");
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(continueButton).toBeDisabled();
   });
