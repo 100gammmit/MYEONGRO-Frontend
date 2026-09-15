@@ -143,6 +143,20 @@ async function reachReview(precision: "exact" | "approximate" | "unknown" = "exa
 }
 
 describe("SajuExperience", () => {
+  beforeEach(() => {
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  });
+
+  it("starts each new step at the top instead of the previous scroll offset", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+    await startWithAcceptedConsent();
+    vi.mocked(window.scrollTo).mockClear();
+
+    await reachBirth();
+
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0 });
+  });
+
   it("keeps saju inputs hidden until authentication and required consent finish", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(false)))

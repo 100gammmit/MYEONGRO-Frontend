@@ -642,7 +642,7 @@ h1, h2, h3, blockquote {
   .landing-page .feature:last-child { border-bottom: 0; }
   .site-footer { width: calc(100% - 28px); flex-direction: column; align-items: flex-start; padding-bottom: 30px; }
   .reading-shell { padding-top: 28px; }
-  .reading-shell.has-actions { padding-bottom: 150px; }
+  body:has(.reading-shell.has-actions) { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
   .reading-actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; max-width: none; margin: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); background: var(--surface-sticky); border-top: 1px solid var(--border-hairline); backdrop-filter: blur(12px); }
   .wizard-heading { margin-top: 46px; }
   .consent-panel, .wizard-card { padding: 26px 20px; }

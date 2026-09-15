@@ -196,6 +196,14 @@ export function SajuExperience() {
     }
   }, [catalogStatus, form.birthTimePrecision, loadBirthPlaces, phase]);
 
+  const shownPhaseRef = useRef<Phase>("consent");
+  useEffect(() => {
+    if (shownPhaseRef.current === phase) return;
+    shownPhaseRef.current = phase;
+    // Steps swap in place; start each one at its title, not at the previous step's scroll offset.
+    window.scrollTo({ top: 0 });
+  }, [phase]);
+
   useEffect(() => {
     if (phase !== "loading") return;
     setLoadingIndex(0);
