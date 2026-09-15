@@ -1,11 +1,6 @@
+/* The painted back has no border to recolour, so the chosen card gets a ring instead. */
 .selectedCard {
   opacity: 1;
-  border-color: var(--text-primary);
-  box-shadow: var(--elevation-1), var(--glow-accent);
+  box-shadow: 0 0 0 2px var(--text-primary), var(--elevation-1), var(--glow-accent);
   transform: translateY(-6px);
-}
-
-.selectedCard span {
-  border-color: var(--text-primary);
-  color: var(--text-primary);
 }

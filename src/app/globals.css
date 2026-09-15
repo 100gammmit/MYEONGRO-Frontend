@@ -219,7 +219,7 @@ h1, h2, h3, blockquote {
 .landing-page .outline-cta:hover { background: color-mix(in srgb, var(--accent-cta) 12%, transparent); }
 .daily-band { padding: 34px 0; border-block: 1px solid var(--border-default); background: color-mix(in srgb, var(--accent-cta) 3.5%, transparent); }
 .daily-band-row { display: flex; align-items: center; gap: 28px; max-width: var(--w-wide); }
-.daily-band-card { flex: none; display: grid; place-items: center; width: 104px; aspect-ratio: .62; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--gradient-tarot-back); color: var(--text-accent-strong); box-shadow: var(--elevation-2); }
+.daily-band-card { position: relative; flex: none; width: 104px; aspect-ratio: .621; box-shadow: var(--elevation-2); }
 .daily-band h2 { margin: 0 0 8px; font-family: var(--landing-sans); font-size: 20px; font-weight: 500; }
 .daily-band p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
 .daily-band .outline-cta { flex: none; margin-left: auto; padding-inline: 22px; }
@@ -411,10 +411,11 @@ h1, h2, h3, blockquote {
 .draw-instruction { max-width: var(--w-input); margin: 12px auto 28px; text-align: center; color: var(--text-secondary); line-height: 1.75; }
 .tarot-candidates { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
 .tarot-deck { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; max-width: var(--w-wide); margin: 32px auto; }
-.tarot-back { aspect-ratio: .62; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); color: var(--text-accent-strong); background: var(--gradient-tarot-back); position: relative; transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
-.tarot-back::before { content: ""; position: absolute; inset: 8px; border: 1px solid var(--effect-tarot-inner-border); border-radius: var(--radius-xs); }
-.tarot-back span { position: relative; z-index: 1; width: 36px; height: 36px; display: inline-grid; place-items: center; border: 1px solid var(--border-strong); border-radius: 50%; }
-.tarot-back:hover:not(:disabled), .tarot-back:focus-visible { transform: translateY(-10px); border-color: var(--text-primary); box-shadow: var(--elevation-1), var(--glow-accent); }
+/* Card back: the painted geum-dancheong image carries its own gold frame and the well the stone sits in. */
+.tarot-back, .tarot-back-art { border-radius: var(--radius-sm); background: url("/images/tarot/back-480.webp") center / 100% 100% no-repeat, var(--gradient-tarot-back); }
+.tarot-back { position: relative; aspect-ratio: .621; padding: 0; border: 0; color: inherit; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
+.tarot-back:hover:not(:disabled), .tarot-back:focus-visible { transform: translateY(-10px); box-shadow: var(--elevation-1), var(--glow-accent); }
+.tarot-back:focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 3px; }
 .tarot-back:disabled { opacity: .44; cursor: default; }
 .selection-count { text-align: center; color: var(--text-accent); }
 .confirmed-draw-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; list-style: none; padding: 0; margin: 12px 0 20px; }
@@ -450,21 +451,101 @@ h1, h2, h3, blockquote {
 .result-reveal-list { display: grid; gap: 20px; }
 .result-reveal { display: grid; grid-template-columns: 190px 1fr; gap: 32px; align-items: center; padding: 28px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-tint-1); animation: reveal-in .45s ease both; }
 .result-reveal .revealed-card { width: 100%; margin: 0; }
-.result-reveal .revealed-card span { color: var(--text-accent); font-size: 11px; letter-spacing: .08em; }
+.result-reveal .revealed-card-label { display: block; margin-bottom: 10px; color: var(--text-accent); font-size: 11px; letter-spacing: .08em; text-align: center; }
 .result-reveal h3 { margin-top: 0; color: var(--text-accent-strong); font-size: 25px; }
 .result-reveal p { color: var(--text-secondary); line-height: 1.8; }
 .reveal-button { margin-inline: auto; }
 .result-summary { animation: reveal-in .45s ease both; }
 @keyframes reveal-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+
+/* ── Stones: five cut stones set in the card-back well (canvas sheets 13–14) ──────────────────
+   Sizes are a share of the card width: well 48.18% × fit 84%, scaled per cut by its circumscribed
+   radius, so a stone sits the same way on a 60px phone card and a 150px desktop card.
+   The stone colours are card-world literals; the app chrome never uses them. */
+.tarot-stone { position: absolute; left: 49.85%; top: 46.17%; display: block; isolation: isolate; background: var(--stone); filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .62)); transform: translate(-50%, -50%); pointer-events: none; }
+.tarot-stone i { position: absolute; inset: 0; display: block; }
+.tarot-stone .d1 { background: #000; opacity: .16; }
+.tarot-stone .d2 { background: #000; opacity: .30; }
+.tarot-stone .d3 { background: #000; opacity: .44; }
+.tarot-stone .l1 { background: #242424; mix-blend-mode: color-dodge; }
+.tarot-stone .l2 { background: #454545; mix-blend-mode: color-dodge; }
+.tarot-stone .l3 { background: #6b6b6b; mix-blend-mode: color-dodge; }
+.tarot-stone .rim { background: linear-gradient(138deg, rgba(255, 255, 255, .78) 0 3.5%, transparent 10%), linear-gradient(318deg, rgba(255, 255, 255, .30) 0 2.5%, transparent 8%); }
+.tarot-stone .tbl { background: #000; opacity: .22; }
+.tarot-stone .fa1, .tarot-stone .fa2 { background: #fff; }
+.stone-brilliant .f1 { clip-path: polygon(30% 0, 70% 0, 62% 24%, 38% 24%); }
+.stone-brilliant .f2 { clip-path: polygon(70% 0, 100% 30%, 76% 38%, 62% 24%); }
+.stone-brilliant .f3 { clip-path: polygon(100% 30%, 100% 70%, 76% 62%, 76% 38%); }
+.stone-brilliant .f4 { clip-path: polygon(100% 70%, 70% 100%, 62% 76%, 76% 62%); }
+.stone-brilliant .f5 { clip-path: polygon(70% 100%, 30% 100%, 38% 76%, 62% 76%); }
+.stone-brilliant .f6 { clip-path: polygon(30% 100%, 0 70%, 24% 62%, 38% 76%); }
+.stone-brilliant .f7 { clip-path: polygon(0 70%, 0 30%, 24% 38%, 24% 62%); }
+.stone-brilliant .f8 { clip-path: polygon(0 30%, 30% 0, 38% 24%, 24% 38%); }
+.stone-brilliant .tbl { clip-path: polygon(38% 24%, 62% 24%, 76% 38%, 76% 62%, 62% 76%, 38% 76%, 24% 62%, 24% 38%); }
+.stone-brilliant .s1 { clip-path: polygon(38% 24%, 62% 24%, 50% 44%); }
+.stone-brilliant .s2 { clip-path: polygon(76% 38%, 76% 62%, 56% 50%); }
+.stone-brilliant .s3 { clip-path: polygon(38% 76%, 62% 76%, 50% 56%); }
+.stone-brilliant .s4 { clip-path: polygon(24% 38%, 24% 62%, 44% 50%); }
+.stone-obsidian { --stone: #152856; width: 41.55%; aspect-ratio: 46 / 43; clip-path: polygon(48% 2%, 82% 13%, 96% 43%, 88% 76%, 60% 97%, 26% 94%, 6% 67%, 4% 33%, 22% 10%); }
+.stone-obsidian .sh { background: radial-gradient(ellipse 78% 70% at 30% 22%, rgba(255, 255, 255, .16), transparent 56%), radial-gradient(ellipse at 70% 80%, rgba(0, 0, 0, .7), transparent 62%); }
+.stone-obsidian .cc { background: repeating-radial-gradient(circle at 14% 8%, transparent 0 11px, rgba(255, 255, 255, .05) 11px 12.5px); opacity: .8; }
+.stone-obsidian .fl { clip-path: polygon(20% 4%, 38% 0, 70% 62%, 58% 74%); background: linear-gradient(160deg, rgba(255, 255, 255, .88), rgba(255, 255, 255, .16) 78%, transparent); }
+.stone-obsidian .fl2 { clip-path: polygon(52% 14%, 60% 12%, 86% 58%, 78% 62%); background: linear-gradient(160deg, rgba(255, 255, 255, .34), transparent 82%); }
+.stone-sapphire { --stone: #003f9d; width: 32.38%; aspect-ratio: 40 / 50; border-radius: 50%; overflow: hidden; }
+.stone-sapphire .fa1 { clip-path: polygon(30% 30%, 45% 26%, 41% 35%, 28% 38%); opacity: .8; }
+.stone-sapphire .fa2 { clip-path: polygon(60% 66%, 70% 63%, 66% 71%); opacity: .3; }
+.stone-ruby { --stone: #cf002e; width: 37.53%; aspect-ratio: 1; clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
+.stone-ruby .fa1 { clip-path: polygon(29% 31%, 44% 26%, 40% 35%, 27% 39%); opacity: .82; }
+.stone-ruby .fa2 { clip-path: polygon(62% 66%, 72% 62%, 68% 70%); opacity: .3; }
+.stone-emerald { --stone: #00ab86; width: 27.37%; aspect-ratio: 38 / 50; clip-path: polygon(16% 0, 84% 0, 100% 10%, 100% 90%, 84% 100%, 16% 100%, 0 90%, 0 10%); }
+.stone-emerald .dl { clip-path: polygon(0 0, 100% 0, 0 100%); background: #3a3a3a; mix-blend-mode: color-dodge; }
+.stone-emerald .dr { clip-path: polygon(100% 0, 100% 100%, 0 100%); background: #000; opacity: .30; }
+.stone-emerald .r1 { clip-path: polygon(evenodd, 0 0, 100% 0, 100% 100%, 0 100%, 13% 10%, 87% 10%, 87% 90%, 13% 90%); background: #000; opacity: .24; }
+.stone-emerald .r2 { clip-path: polygon(evenodd, 13% 10%, 87% 10%, 87% 90%, 13% 90%, 27% 21%, 73% 21%, 73% 79%, 27% 79%); background: #2e2e2e; mix-blend-mode: color-dodge; }
+.stone-emerald .r3 { clip-path: polygon(27% 21%, 73% 21%, 73% 79%, 27% 79%); background: #000; opacity: .26; }
+.stone-emerald .fl { clip-path: polygon(27% 34%, 73% 26%, 73% 33%, 27% 41%); background: #fff; opacity: .5; }
+.stone-pearl { --stone: #ece7e2; width: 40.47%; aspect-ratio: 1; border-radius: 50%; overflow: hidden; }
+.stone-pearl .sh { background: radial-gradient(circle at 66% 74%, rgba(0, 0, 0, .52), transparent 54%), radial-gradient(circle at 50% 50%, transparent 58%, rgba(0, 0, 0, .26) 100%); }
+.stone-pearl .rl { background: radial-gradient(ellipse 30% 22% at 78% 88%, rgba(255, 255, 255, .42), transparent 68%); }
+.stone-pearl .ov { background: radial-gradient(circle at 26% 70%, rgba(255, 110, 185, .3), transparent 42%), radial-gradient(circle at 76% 30%, rgba(104, 234, 200, .26), transparent 40%); }
+.stone-pearl .hl { background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .96) 0 5%, rgba(255, 255, 255, .32) 14%, transparent 32%); }
+
+/* ── Typeset front (canvas sheet 15): number and name only, framed like the back ─────────────── */
+.card-face { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; aspect-ratio: .621; overflow: hidden; container-type: inline-size; border-radius: var(--radius-sm); background: var(--gradient-revealed-card); }
+.card-face i { position: absolute; }
+.card-face .face-frame { inset: 5.5%; border: 1.5px solid color-mix(in srgb, var(--accent-cta) 58%, transparent); border-radius: max(1.5px, .9%); }
+.card-face .face-frame.inner { inset: 9%; border: 1px solid color-mix(in srgb, var(--accent-cta) 18%, transparent); border-radius: max(1px, .6%); }
+.card-face .face-corner { width: 13%; aspect-ratio: 1; border: 0 solid color-mix(in srgb, var(--accent-cta) 45%, transparent); }
+.card-face .face-corner.tl { top: 9%; left: 9%; border-top-width: 1px; border-left-width: 1px; }
+.card-face .face-corner.tr { top: 9%; right: 9%; border-top-width: 1px; border-right-width: 1px; }
+.card-face .face-corner.bl { bottom: 9%; left: 9%; border-bottom-width: 1px; border-left-width: 1px; }
+.card-face .face-corner.br { right: 9%; bottom: 9%; border-right-width: 1px; border-bottom-width: 1px; }
+.card-face .face-number { margin-top: 14%; color: var(--accent-cta); font-size: 5.6cqw; font-variant-numeric: tabular-nums; letter-spacing: .3em; text-indent: .3em; }
+.card-face .face-rule { position: static; flex: none; width: 26%; height: 1px; margin-top: 4.5%; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-cta) 70%, transparent), transparent); }
+/* The bottom padding lines the name up with the back's well (46.17%), so the focus stays put through the flip. */
+.card-face .face-name { flex: 1; display: grid; align-items: center; padding: 3% 12% 19%; color: var(--text-primary); font-family: "Noto Serif KR Variable", Georgia, serif; font-size: 17cqw; font-weight: 300; line-height: 1.22; letter-spacing: -.04em; text-align: center; }
+.card-face.short .face-name { font-size: 24cqw; }
+.card-face.long .face-name { font-size: 13cqw; }
+/* The seal sits in the flow: absolute placement would split its % between width and height. */
+.card-face .face-seal { position: static; flex: none; width: 6.5%; aspect-ratio: 1; margin-bottom: 17%; border-radius: 1px; background: var(--accent-seal); opacity: .9; }
+
+/* ── Flip: back to front in 700ms; the stone leaves with the back ─────────────────────────────── */
+.card-flip { perspective: 1100px; }
+.card-flip-inner { position: relative; width: 100%; aspect-ratio: .621; transform-style: preserve-3d; transition: transform .7s cubic-bezier(.2, .7, .3, 1); }
+.card-flip-inner.flipped { transform: rotateY(180deg); }
+.card-flip-back, .card-flip-front { position: absolute; inset: 0; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.card-flip-front { transform: rotateY(180deg); }
+/* A 3D turn is a classic vestibular trigger, so reduced motion shows the front at once. */
+@media (prefers-reduced-motion: reduce) {
+  .card-flip-inner { transition: none; }
+}
 .result-hero { text-align: center; padding: 52px 30px; border-block: 1px solid var(--border-default); }
 .result-hero blockquote { max-width: var(--w-read); margin: 0 auto 18px; font-size: 40px; line-height: 1.5; color: var(--text-accent-strong); }
 .result-hero > p:last-child { color: var(--text-muted); }
 .result-cards { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; margin: 50px 0; }
 .result-cards article { text-align: center; }
 .result-cards article > span { font-size: 11px; color: var(--text-accent); letter-spacing: .12em; }
-.revealed-card { aspect-ratio: .68; max-width: 190px; margin: 15px auto 22px; border: 1px solid var(--border-strong); border-radius: var(--radius-md); display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 24px; background: var(--gradient-revealed-card); box-shadow: var(--elevation-1); }
-.revealed-card strong { font-family: "Noto Serif KR Variable", Georgia, serif; font-weight: 400; font-size: 25px; }
-.revealed-card i { color: var(--text-accent); font-style: normal; }
+.revealed-card { max-width: 190px; margin: 15px auto 22px; }
 .result-cards article > p { color: var(--text-secondary); line-height: 1.7; font-size: 14px; }
 .result-actions { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
 .wizard-nav { display: flex; gap: 10px; }
@@ -676,8 +757,6 @@ h1, h2, h3, blockquote {
   .tarot-candidates { gap: 7px; }
   .tarot-candidates .tarot-back { min-width: 0; }
   .tarot-deck { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .tarot-back { min-height: 160px; }
-  .tarot-candidates .tarot-back { min-height: 120px; }
   .result-reveal { grid-template-columns: 1fr; text-align: center; padding: 22px; }
   .result-reveal .revealed-card { max-width: 170px; margin-inline: auto; }
   .result-cards { max-width: var(--w-act); margin-inline: auto; }

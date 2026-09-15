@@ -16,6 +16,7 @@ import {
 } from "@/domain/daily-card-free";
 import { ReadingShell } from "./reading-shell";
 import styles from "./daily-card-experience.module.css";
+import { stoneForSlot, TarotStone } from "./tarot-stone";
 
 const SLOT_COUNT = 5;
 
@@ -185,7 +186,7 @@ export function DailyCardExperience({
               onClick={() => setState({ status: "choosing", selectedSlot: slot })}
               type="button"
             >
-              <span aria-hidden="true">✦</span>
+              <TarotStone kind={stoneForSlot(slot)} />
             </button>
           ))}
         </div>

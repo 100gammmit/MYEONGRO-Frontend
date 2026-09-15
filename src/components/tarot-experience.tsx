@@ -20,6 +20,7 @@ import {
 } from "@/domain/reading/direct-identifier";
 import { getReadingCreditAccess } from "@/domain/reading-credit";
 import { ConsentGate } from "./consent-gate";
+import { stoneForSlot, TarotStone } from "./tarot-stone";
 import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
@@ -531,7 +532,7 @@ function DrawScreen({
               ref={slot === 1 ? firstCardRef : undefined}
               type="button"
             >
-              <span aria-hidden="true">✦</span>
+              <TarotStone kind={stoneForSlot(slot)} />
             </button>
           ))}
         </div>

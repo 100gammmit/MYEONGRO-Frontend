@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import { MAJOR_ARCANA, TAROT_SPREADS } from "@/domain/tarot";
 
@@ -35,6 +35,36 @@ describe("TarotReadingResult", () => {
       .toHaveAttribute("href", "/tarot");
     expect(screen.getByRole("link", { name: "내 기록 보기" }))
       .toHaveAttribute("href", "/records");
+  });
+
+  it("turns each revealed card from its back to the typeset front", async () => {
+    const definition = TAROT_SPREADS.mind_three_card;
+    const { container } = render(
+      <TarotReadingResult
+        cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
+        result={{
+          readingMode: "standard",
+          title: "오늘의 리딩",
+          summary: "오늘의 흐름을 확인했어요.",
+          sections: definition.positions.map((position) => ({
+            position: position.id,
+            heading: "마음의 흐름",
+            body: "천천히 살펴보세요.",
+          })),
+          guidance: ["작은 행동을 시작하세요."],
+          disclaimer: "자기 성찰을 위한 참고 정보입니다.",
+        }}
+        spreadType="mind_three_card"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "첫 카드 공개" }));
+
+    const card = screen.getByLabelText(`${definition.positions[0].label}: ${MAJOR_ARCANA[0].name}`);
+    expect(card.querySelector(".card-flip-back")).toHaveAttribute("aria-hidden", "true");
+    expect(card.querySelector(".face-number")).toHaveTextContent("0");
+    expect(card.querySelector(".face-name")).toHaveTextContent(MAJOR_ARCANA[0].name);
+    await waitFor(() => expect(container.querySelector(".card-flip-inner")).toHaveClass("flipped"));
   });
 
   it("shows redirected fortune copy and neutral choice labels", () => {

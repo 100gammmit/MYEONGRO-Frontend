@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { HeroQuestionRotator } from "@/components/hero-question-rotator";
 import { LandingSky } from "@/components/landing-sky";
+import { TarotStone } from "@/components/tarot-stone";
 
 const features = [
   {
@@ -52,7 +53,9 @@ export default function HomePage() {
 
       <section className="daily-band" aria-labelledby="daily-band-title">
         <div className="daily-band-row page-width">
-          <span className="daily-band-card" aria-hidden="true">✦</span>
+          <span className="daily-band-card tarot-back-art" aria-hidden="true">
+            <TarotStone kind="pearl" />
+          </span>
           <div>
             <h2 id="daily-band-title">오늘의 운세는 로그인 없이 무료예요</h2>
             <p>카드 한 장으로 오늘의 흐름을 가볍게 살펴보세요.</p>

@@ -5,21 +5,15 @@
   margin: 1.5rem 0;
 }
 
+/* The shared .tarot-back sets the image's .621 ratio; the column width decides the size. */
 .card {
-  aspect-ratio: 2 / 3;
   min-width: 0;
 }
 
-/* The phone-only .tarot-back min-height is sized for the tarot deck; here it stretched each card
-   past its fifth of the row, so the last card ran off the screen. Let the column width decide. */
-.cards .card {
-  min-height: 0;
-}
-
+/* The painted back has no border to recolour, so the chosen card gets a ring instead. */
 .selected {
   opacity: 1;
-  border-color: var(--text-primary);
-  box-shadow: var(--elevation-1), var(--glow-accent);
+  box-shadow: 0 0 0 2px var(--text-primary), var(--elevation-1), var(--glow-accent);
   transform: translateY(-6px);
 }
 
