@@ -11,6 +11,9 @@ export function ReadingShell({
   description,
   actions,
   showHomeLink = true,
+  backHref = "/",
+  backLabel = "홈으로",
+  showTrack = true,
   form = false,
   children,
   ...progress
@@ -20,6 +23,10 @@ export function ReadingShell({
   description?: string;
   actions?: ReactNode;
   showHomeLink?: boolean;
+  backHref?: string;
+  backLabel?: string;
+  /** A reopened record has no progress to show, only its label. */
+  showTrack?: boolean;
   /** Input wizards sit in one reading column with the title aligned to the card's edge. */
   form?: boolean;
   children: ReactNode;
@@ -31,17 +38,19 @@ export function ReadingShell({
   return (
     <section className={form ? "reading-shell page-width form-shell" : "reading-shell page-width"}>
       {showHomeLink ? (
-        <Link href="/" className="back-link">
-          ← 홈으로
+        <Link href={backHref} className="back-link">
+          ← {backLabel}
         </Link>
       ) : null}
       <div className="progress-meta">
         <span>{eyebrow}</span>
         <span>{label}</span>
       </div>
-      <div className="progress-track">
-        <span style={{ width: `${width}%` }} />
-      </div>
+      {showTrack ? (
+        <div className="progress-track">
+          <span style={{ width: `${width}%` }} />
+        </div>
+      ) : null}
       <div className="wizard-heading">
         <h1>{title}</h1>
         {description ? <p>{description}</p> : null}

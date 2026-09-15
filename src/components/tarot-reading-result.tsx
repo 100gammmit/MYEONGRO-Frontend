@@ -1,33 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import {
   MAJOR_ARCANA,
   TAROT_SPREADS,
   type AiTarotSpreadType,
-  type TarotPositionId,
 } from "@/domain/tarot";
 import {
   readingModeNotice,
   tarotPositionLabel,
-  type ReadingMode,
 } from "@/domain/reading/reading-mode";
+import type { TarotReadingResultData } from "@/domain/tarot/result-view";
 import { ReadingShell } from "./reading-shell";
 import { TarotCardFace } from "./tarot-card-face";
 
-export type TarotReadingResultData = {
-  readingMode: ReadingMode;
-  title: string;
-  summary: string;
-  sections: Array<{
-    position: TarotPositionId;
-    heading: string;
-    body: string;
-  }>;
-  guidance: string[];
-  disclaimer: string;
+// How a saved reading is framed when it is reopened from 내 기록.
+export type TarotRecordFrame = {
+  backHref: string;
+  backLabel: string;
+  dateLabel: string;
+  footer?: ReactNode;
 };
 
 const CARD_INDEX = new Map<string, (typeof MAJOR_ARCANA)[number]>(
@@ -35,14 +29,26 @@ const CARD_INDEX = new Map<string, (typeof MAJOR_ARCANA)[number]>(
 );
 
 // A revealed card lands on its back and turns over to the typeset front, as drawn on the canvas.
-function RevealedCard({ cardId, label, name }: { cardId: string; label: string; name: string }) {
-  const [flipped, setFlipped] = useState(false);
+// A reopened record skips the turn and starts face up.
+function RevealedCard({
+  cardId,
+  label,
+  name,
+  instant = false,
+}: {
+  cardId: string;
+  label: string;
+  name: string;
+  instant?: boolean;
+}) {
+  const [flipped, setFlipped] = useState(instant);
 
   useEffect(() => {
+    if (instant) return;
     // Paint the back first, then turn on the next tick so the 700ms transition actually runs.
     const timer = window.setTimeout(() => setFlipped(true), 40);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [instant]);
 
   return (
     <div className="revealed-card" aria-label={`${label}: ${name}`}>
@@ -63,19 +69,30 @@ export function TarotReadingResult({
   spreadType,
   cardIds,
   result,
+  record,
 }: {
   spreadType: AiTarotSpreadType;
   cardIds: string[];
   result: TarotReadingResultData;
+  record?: TarotRecordFrame;
 }) {
-  const [revealedCount, setRevealedCount] = useState(0);
   const definition = TAROT_SPREADS[spreadType];
+  // The one-by-one reveal is for the first reading; a reopened record shows every card at once.
+  const [revealedCount, setRevealedCount] = useState(record ? definition.cardCount : 0);
   const revealedPositions = definition.positions.slice(0, revealedCount);
   const allRevealed = revealedCount === definition.cardCount;
   const modeNotice = readingModeNotice(result.readingMode);
+  const progress = record ? { stepLabel: record.dateLabel } : { step: 4, totalSteps: 4 };
 
   return (
-    <ReadingShell eyebrow={definition.name} title="카드가 전하는 메시지" step={4} totalSteps={4}>
+    <ReadingShell
+      eyebrow={definition.name}
+      title="카드가 전하는 메시지"
+      backHref={record?.backHref}
+      backLabel={record?.backLabel}
+      showTrack={!record}
+      {...progress}
+    >
       <div className="result-reveal-list">
         {revealedPositions.map((position, index) => {
           const card = CARD_INDEX.get(cardIds[index]);
@@ -84,6 +101,7 @@ export function TarotReadingResult({
             <article className="result-reveal" key={position.id}>
               <RevealedCard
                 cardId={card?.id ?? ""}
+                instant={Boolean(record)}
                 label={tarotPositionLabel(result.readingMode, position.id, position.label)}
                 name={card?.name ?? "카드"}
               />
@@ -116,10 +134,12 @@ export function TarotReadingResult({
             <ul>{result.guidance.map((item) => <li key={item}>{item}</li>)}</ul>
           </section>
           <p className="reading-disclaimer">{result.disclaimer}</p>
-          <div className="result-actions">
-            <Link className="primary-button" href="/tarot">새로운 리딩 시작</Link>
-            <Link className="secondary-button" href="/records">내 기록 보기</Link>
-          </div>
+          {record ? record.footer : (
+            <div className="result-actions">
+              <Link className="primary-button" href="/tarot">새로운 리딩 시작</Link>
+              <Link className="secondary-button" href="/records">내 기록 보기</Link>
+            </div>
+          )}
         </div>
       )}
     </ReadingShell>
