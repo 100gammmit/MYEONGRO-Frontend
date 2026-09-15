@@ -41,6 +41,9 @@ vi.mock("./reading-credit-provider", () => ({
 const REQUIRED_CONSENTS = ["terms", "ai-overseas-transfer", "saju-input"] as const;
 const REQUEST_ID = "11111111-1111-4111-8111-111111111111";
 const SECOND_REQUEST_ID = "22222222-2222-4222-8222-222222222222";
+const QUESTION_HEADING = "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?";
+const BIRTH_HEADING = "출생 정보를 알려주세요";
+const REVIEW_HEADING = "입력한 내용을 확인해 주세요";
 
 function jsonResponse(body: unknown, init: ResponseInit = {}) {
   return new Response(JSON.stringify(body), {
@@ -104,12 +107,22 @@ afterEach(() => {
 
 async function startWithAcceptedConsent() {
   render(<SajuExperience />);
-  await screen.findByRole("heading", { name: "양력 생년월일을 알려주세요" });
+  await screen.findByRole("heading", { name: QUESTION_HEADING });
 }
 
-async function reachBirthPlace(precision: "exact" | "approximate" | "unknown" = "unknown") {
-  fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
+function fillQuestion(value = "올해 이직을 준비해도 괜찮을까요?") {
+  fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
+  fireEvent.change(screen.getByRole("textbox", { name: /질문 한 가지/ }), { target: { value } });
+}
+
+async function reachBirth(question?: string) {
+  fillQuestion(question);
   fireEvent.click(screen.getByRole("button", { name: "다음" }));
+  await screen.findByRole("heading", { name: BIRTH_HEADING });
+}
+
+async function fillBirth(precision: "exact" | "approximate" | "unknown") {
+  fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
   fireEvent.click(screen.getByRole("radio", {
     name: precision === "exact" ? /정확히 알아요/
       : precision === "approximate" ? /대략적으로 알아요/
@@ -117,44 +130,31 @@ async function reachBirthPlace(precision: "exact" | "approximate" | "unknown" = 
   }));
   if (precision !== "unknown") {
     fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
-  }
-  fireEvent.click(screen.getByRole("button", { name: "다음" }));
-  await screen.findByRole("heading", {
-    name: precision === "unknown"
-      ? "대운 계산 기준을 선택해 주세요"
-      : "태어난 시·도와 계산 기준을 선택해 주세요",
-  });
-  if (precision !== "unknown") {
     await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
+    fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
   }
 }
 
 async function reachReview(precision: "exact" | "approximate" | "unknown" = "exact") {
-  await reachBirthPlace(precision);
-  if (precision !== "unknown") {
-    fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
-  }
+  await reachBirth();
+  await fillBirth(precision);
   fireEvent.click(screen.getByRole("button", { name: "다음" }));
-  fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
-  fireEvent.change(screen.getByRole("textbox", { name: /질문 한 가지/ }), {
-    target: { value: "올해 이직을 준비해도 괜찮을까요?" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "입력 검토" }));
-  await screen.findByRole("heading", { name: "입력한 내용을 확인해 주세요" });
+  await screen.findByRole("heading", { name: REVIEW_HEADING });
 }
 
 describe("SajuExperience", () => {
-  it("keeps birth inputs hidden until authentication and required consent finish", async () => {
+  it("keeps saju inputs hidden until authentication and required consent finish", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(false)))
       .mockResolvedValueOnce(jsonResponse({ ok: true }))
       .mockResolvedValueOnce(jsonResponse({ ok: true }))
-      .mockResolvedValueOnce(jsonResponse({ ok: true }))
-      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
+      .mockResolvedValueOnce(jsonResponse({ ok: true }));
 
     render(<SajuExperience />);
-    expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: /질문 한 가지/ })).not.toBeInTheDocument();
     expect(screen.getByText(/내 기록에서 언제든 삭제/)).toBeInTheDocument();
+    expect(screen.getByText("시작하기 전에")).toBeInTheDocument();
+    expect(screen.queryByText(/\d+ \/ 4/)).not.toBeInTheDocument();
 
     for (const agreement of [
       "서비스 이용약관 동의",
@@ -167,40 +167,72 @@ describe("SajuExperience", () => {
     }
     fireEvent.click(screen.getByRole("button", { name: "동의 완료하고 계속" }));
 
-    expect(await screen.findByLabelText("양력 생년월일")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
+    expect(screen.getByText("1 / 4")).toBeInTheDocument();
+    expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/consents?scope=saju", {
       credentials: "same-origin",
     });
   });
 
-  it("blocks the input journey when the saju cost exceeds the current balance", async () => {
+  it("asks the question first and counts question, birth and review as steps 1 to 3", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
+    await startWithAcceptedConsent();
+
+    expect(screen.getByText("1 / 4")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "← 홈으로" })).not.toBeInTheDocument();
+    const creditLine = screen.getByText("4크레딧 사용 · 현재 10크레딧");
+    expect(creditLine.closest(".reading-actions")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
+
+    await reachBirth();
+    expect(screen.getByText("2 / 4")).toBeInTheDocument();
+    expect(screen.getByLabelText("양력 생년월일")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /정확히 알아요/ })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "선택하지 않음" })).toBeChecked();
+    expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
+
+    await fillBirth("exact");
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
+    expect(screen.getByText("3 / 4")).toBeInTheDocument();
+  });
+
+  it("locks the question step when the saju cost exceeds the current balance", async () => {
     credits.state.data.balance = { free: 3, paid: 0, total: 3 };
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
 
     render(<SajuExperience />);
 
-    expect(await screen.findByRole("heading", { name: "사주 리딩 크레딧을 확인해요" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("4크레딧이 필요");
+    expect(screen.getByRole("alert")).toHaveTextContent("내일 다시 시도해 주세요");
+    fillQuestion();
+    expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
   });
 
-  it("blocks the input journey while another reading is generating", async () => {
+  it("locks the question step while another reading is generating", async () => {
     credits.state.data.generationInProgress = true;
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
 
     render(<SajuExperience />);
 
-    expect(await screen.findByRole("heading", { name: "사주 리딩 크레딧을 확인해요" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
+    fillQuestion();
+    expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
   });
 
-  it("blocks the input journey and offers retry when credit refresh fails after prior data", async () => {
+  it("locks the question step and offers retry when credit refresh fails after prior data", async () => {
     credits.state.status = "error";
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
 
     render(<SajuExperience />);
 
-    expect(await screen.findByRole("heading", { name: "사주 리딩 크레딧을 확인해요" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("크레딧을 확인하지 못했어요");
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "다시 확인" }));
@@ -244,20 +276,16 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse(birthPlaces()))
       .mockResolvedValueOnce(jsonResponse(createdReading()));
     await startWithAcceptedConsent();
+    await reachBirth("질문");
     fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
-    fireEvent.click(screen.getByRole("button", { name: "다음" }));
     fireEvent.click(screen.getByRole("radio", { name: /대략적으로 알아요/ }));
     expect(screen.getByText(/전후 60분을 함께 계산/)).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
-    fireEvent.click(screen.getByRole("button", { name: "다음" }));
     await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
     fireEvent.click(screen.getByRole("radio", { name: "여성 기준" }));
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
-    fireEvent.change(screen.getByRole("textbox", { name: /질문 한 가지/ }), { target: { value: "질문" } });
-    fireEvent.click(screen.getByRole("button", { name: "입력 검토" }));
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: "사주 리딩 생성" }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
@@ -273,13 +301,18 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
       .mockResolvedValueOnce(jsonResponse(birthPlaces()));
     await startWithAcceptedConsent();
-    await reachBirthPlace("exact");
+    await reachBirth();
+    fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
+    fireEvent.click(screen.getByRole("radio", { name: /정확히 알아요/ }));
+    fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
+    await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
 
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "11" } });
     expect(screen.getByLabelText("출생 시·도")).toHaveValue("11");
     expect(screen.queryByLabelText("출생 시·군·구")).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
     expect(screen.getByLabelText("출생 시·도")).toHaveValue("36");
+    expect(screen.getByRole("button", { name: "다음" })).toBeEnabled();
   });
 
   it("blocks duplicate submits and reuses the request id for a network retry", async () => {
@@ -336,7 +369,7 @@ describe("SajuExperience", () => {
     expect(second.requestId).toBe(SECOND_REQUEST_ID);
   });
 
-  it("creates a new request id after the user changes an input", async () => {
+  it("creates a new request id after the user goes back and changes the question", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID")
       .mockReturnValueOnce(REQUEST_ID)
       .mockReturnValueOnce(SECOND_REQUEST_ID);
@@ -354,17 +387,23 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("잠시 후 다시 시도해 주세요.");
     fireEvent.click(screen.getByRole("button", { name: "이전" }));
+    await screen.findByRole("heading", { name: BIRTH_HEADING });
+    fireEvent.click(screen.getByRole("button", { name: "이전" }));
+    await screen.findByRole("heading", { name: QUESTION_HEADING });
     fireEvent.change(screen.getByRole("textbox", { name: /질문 한 가지/ }), {
       target: { value: "올해 이직 준비에서 먼저 점검할 것은 무엇인가요?" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "입력 검토" }));
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await screen.findByRole("heading", { name: BIRTH_HEADING });
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    fireEvent.click(await screen.findByRole("button", { name: "사주 리딩 생성" }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
     expect(first.requestId).toBe(REQUEST_ID);
     expect(second.requestId).toBe(SECOND_REQUEST_ID);
+    expect(second.question).toBe("올해 이직 준비에서 먼저 점검할 것은 무엇인가요?");
   });
 
   it("moves a backend field error to its input and focuses the error summary", async () => {
@@ -384,6 +423,7 @@ describe("SajuExperience", () => {
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("출생 시각을 다시 확인해 주세요.");
     expect(alert).toHaveFocus();
+    expect(screen.getByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
     expect(screen.getByLabelText(/태어난 시각/)).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByLabelText(/태어난 시각/)).toHaveAttribute("aria-describedby", "birth-time-error");
   });
@@ -418,10 +458,10 @@ describe("SajuExperience", () => {
     render(<SajuExperience />);
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/login?next=%2Fsaju"));
-    expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: /질문 한 가지/ })).not.toBeInTheDocument();
   });
 
-  it("consumes remembered birth information and starts at a new question", async () => {
+  it("consumes remembered birth information and goes from the question straight to review", async () => {
     rememberSajuBirthProfile({
       calendarType: "solar",
       birthDate: "1992-08-17",
@@ -436,38 +476,36 @@ describe("SajuExperience", () => {
 
     render(<SajuExperience />);
 
-    expect(await screen.findByRole("heading", {
-      name: "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?",
-    })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /질문 한 가지/ }))
       .toHaveAccessibleDescription(/개인정보는 제외.*OpenAI API로 전송.*일부 식별정보 형식만 확인/);
     expect(screen.getByRole("textbox", { name: /질문 한 가지/ }))
       .toHaveAccessibleDescription(/리딩 기록에는 저장되지 않습니다/);
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /일·진로/ })).not.toBeChecked();
+
+    fillQuestion();
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
+    expect(screen.getByText("시간 미상 · 시주 제외")).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "이전" }));
-    expect(await screen.findByRole("heading", { name: "대운 계산 기준을 선택해 주세요" })).toBeInTheDocument();
-    expect(screen.queryByLabelText("출생 시·도")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "이전" }));
+    expect(await screen.findByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /시간을 몰라요/ })).toBeChecked();
+    expect(screen.queryByLabelText("출생 시·도")).not.toBeInTheDocument();
   });
 
-  it("blocks a verifiable identifier in the browser before review or API submission", async () => {
+  it("blocks a verifiable identifier on the question step before any birth input or API call", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)));
     await startWithAcceptedConsent();
-    await reachBirthPlace("unknown");
+    fillQuestion("reader@example.com으로 답을 보내주세요");
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
-    const question = screen.getByRole("textbox", { name: /질문 한 가지/ });
-    fireEvent.change(question, { target: { value: "reader@example.com으로 답을 보내주세요" } });
-    fireEvent.click(screen.getByRole("button", { name: "입력 검토" }));
 
-    expect(screen.getByRole("heading", {
-      name: "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?",
-    })).toBeInTheDocument();
-    expect(question).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /질문 한 가지/ })).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByRole("alert")).toHaveTextContent("형식이 확인되는 개인정보");
+    expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

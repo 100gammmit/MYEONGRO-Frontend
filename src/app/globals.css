@@ -479,6 +479,10 @@ h1, h2, h3, blockquote {
 .revealed-card i { color: var(--text-accent); font-style: normal; }
 .result-cards article > p { color: var(--text-secondary); line-height: 1.7; font-size: 14px; }
 .result-actions { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
+.wizard-nav { display: flex; gap: 10px; }
+.wizard-nav .secondary-button { flex: 0 0 120px; justify-content: center; }
+.wizard-nav .primary-button { flex: 1; justify-content: center; }
+.reading-actions .credit-notice { margin: 0; }
 .pillars { display: grid; grid-template-columns: repeat(4,1fr); max-width: var(--w-read); margin: 42px auto; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--surface-tint-1); }
 .pillars div { text-align: center; padding: 26px 10px; border-right: 1px solid var(--border-default); }
 .pillars div:last-child { border: 0; }
@@ -653,6 +657,7 @@ h1, h2, h3, blockquote {
   .consent-modal-actions { padding: 14px 20px 20px; }
   .consent-modal-actions button { flex: 1; }
   .category-grid, .spread-grid, .choice-fields, .saju-place-grid, .saju-choice-row { grid-template-columns: 1fr; }
+  .category-grid.saju-focus-grid { grid-template-columns: 1fr 1fr; }
   .saju-review-list div { grid-template-columns: 1fr; gap: 6px; }
   .saju-result { padding-top: 28px; }
   .saju-result-hero { margin-top: 42px; text-align: left; }

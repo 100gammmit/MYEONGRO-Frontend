@@ -37,7 +37,7 @@ import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 
-type Phase = "consent" | "credit" | "birth-date" | "birth-time" | "birth-place" | "question" | "review" | "loading";
+type Phase = "consent" | "question" | "birth" | "review" | "loading";
 type CatalogStatus = "idle" | "loading" | "ready" | "error";
 type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request";
 
@@ -51,7 +51,8 @@ interface SajuFormState {
   question: string;
 }
 
-const TOTAL_STEPS = 6;
+// Consent is a one-time threshold, not a step: question 1, birth 2, review 3, loading 4.
+const TOTAL_STEPS = 4;
 const MAX_QUESTION_LENGTH = 300;
 const initialForm: SajuFormState = {
   birthDate: "",
@@ -90,11 +91,11 @@ const LOADING_MESSAGES = [
 ] as const;
 
 const FIELD_PHASE: Partial<Record<string, Phase>> = {
-  "birthProfile.birthDate": "birth-date",
-  "birthProfile.birthTimePrecision": "birth-time",
-  "birthProfile.birthTime": "birth-time",
-  "birthProfile.provinceCode": "birth-place",
-  "birthProfile.luckDirectionBasis": "birth-place",
+  "birthProfile.birthDate": "birth",
+  "birthProfile.birthTimePrecision": "birth",
+  "birthProfile.birthTime": "birth",
+  "birthProfile.provinceCode": "birth",
+  "birthProfile.luckDirectionBasis": "birth",
   focusArea: "question",
   question: "question",
 };
@@ -137,6 +138,13 @@ export function SajuExperience() {
     credits.state.status === "idle" || credits.state.status === "loading",
     creditCost,
   );
+  // Blocking states surface at the top of the question step; allowed and loading stay next to the button.
+  const creditBlocked = creditAccess.status === "insufficient"
+    || creditAccess.status === "generation-in-progress"
+    || creditAccess.status === "unavailable";
+  const questionReady = Boolean(
+    form.focusArea && form.question.trim().length > 0 && form.question.length <= MAX_QUESTION_LENGTH,
+  );
 
   const redirectToLogin = useCallback(() => {
     router.push("/login?next=%2Fsaju");
@@ -176,16 +184,8 @@ export function SajuExperience() {
   }, []);
 
   const handleConsentComplete = useCallback(() => {
-    setPhase(creditAccess.status === "allowed"
-      ? followUpDraftRef.current ? "question" : "birth-date"
-      : "credit");
-  }, [creditAccess.status]);
-
-  useEffect(() => {
-    if (phase === "credit" && creditAccess.status === "allowed") {
-      setPhase(followUpDraftRef.current ? "question" : "birth-date");
-    }
-  }, [creditAccess.status, phase]);
+    setPhase("question");
+  }, []);
 
   useEffect(() => {
     if (phase !== "consent"
@@ -229,13 +229,15 @@ export function SajuExperience() {
     updateForm({ provinceCode });
   }
 
-  function reviewQuestion() {
+  function submitQuestion() {
+    if (!questionReady || creditAccess.status !== "allowed") return;
     if (containsDirectIdentifier(form.question)) {
       setFieldErrors({ question: DIRECT_IDENTIFIER_INPUT_MESSAGE });
       setGeneralError(null);
       return;
     }
-    setPhase("review");
+    // A follow-up reading already carries the birth profile, so it goes straight to review.
+    setPhase(followUpDraftRef.current ? "review" : "birth");
   }
 
   async function submitReading() {
@@ -312,8 +314,7 @@ export function SajuExperience() {
         eyebrow="AI SAJU"
         title="사주 리딩을 시작하기 전에"
         description="출생 정보는 리딩 생성과 기록 복원을 위해 저장되며, 내 기록에서 언제든 삭제할 수 있어요."
-        step={1}
-        totalSteps={TOTAL_STEPS}
+        stepLabel="시작하기 전에"
       >
         <ConsentGate
           scope="saju"
@@ -324,33 +325,104 @@ export function SajuExperience() {
     );
   }
 
-  if (phase === "credit") {
+  if (phase === "question") {
+    const selectedFocus = FOCUS_OPTIONS.find((option) => option.value === form.focusArea);
     return (
       <ReadingShell
         eyebrow="AI SAJU"
-        title="사주 리딩 크레딧을 확인해요"
-        description={`사주 리딩 1회에 ${creditCost ?? "…"}크레딧을 사용해요.`}
+        title="지금 가장 살펴보고 싶은 한 가지는 무엇인가요?"
+        description="관심 분야를 고른 뒤, 현재 선택에 도움이 될 질문을 하나 적어주세요."
         step={1}
         totalSteps={TOTAL_STEPS}
+        showHomeLink={false}
+        actions={(
+          <>
+            {creditBlocked ? null : (
+              <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+            )}
+            <button
+              className="primary-button full-button"
+              disabled={!questionReady || creditAccess.status !== "allowed"}
+              onClick={submitQuestion}
+              type="button"
+            >
+              다음
+            </button>
+          </>
+        )}
       >
+        {creditBlocked ? (
+          <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+        ) : null}
         <div className="wizard-card">
-          <ReadingCreditAccessNotice
-            access={creditAccess}
-            onRetry={() => void credits.refresh()}
-          />
+          <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
+          <fieldset
+            className="field"
+            aria-describedby={fieldErrors.focusArea ? "focus-error" : undefined}
+            aria-invalid={Boolean(fieldErrors.focusArea)}
+          >
+            <legend>관심 분야</legend>
+            <div className="category-grid saju-focus-grid">
+              {FOCUS_OPTIONS.map((option) => (
+                <label className={`category saju-category${form.focusArea === option.value ? " active" : ""}`} key={option.value}>
+                  <input
+                    checked={form.focusArea === option.value}
+                    name="focus-area"
+                    onChange={() => updateForm({ focusArea: option.value })}
+                    type="radio"
+                  />
+                  <strong>{option.label}</strong>
+                  <span>{option.example}</span>
+                </label>
+              ))}
+            </div>
+            <FieldError id="focus-error" message={fieldErrors.focusArea} />
+          </fieldset>
+          <label className="field" htmlFor="saju-question">
+            <span>질문 한 가지</span>
+            <textarea
+              id="saju-question"
+              aria-describedby={fieldErrors.question
+                ? "saju-question-guidance question-error"
+                : "saju-question-guidance"}
+              aria-invalid={Boolean(fieldErrors.question)}
+              maxLength={MAX_QUESTION_LENGTH}
+              onChange={(event) => updateForm({ question: event.target.value })}
+              placeholder={selectedFocus?.example ?? "지금 가장 궁금한 한 가지를 적어주세요."}
+              value={form.question}
+            />
+            <p className="field-guidance" id="saju-question-guidance">
+              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문은 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
+            </p>
+            <small>{form.question.length} / {MAX_QUESTION_LENGTH}자</small>
+            <FieldError id="question-error" message={fieldErrors.question} />
+          </label>
         </div>
       </ReadingShell>
     );
   }
 
-  if (phase === "birth-date") {
+  if (phase === "birth") {
+    const timeKnown = form.birthTimePrecision !== "" && form.birthTimePrecision !== "unknown";
+    const timeReady = form.birthTimePrecision === "unknown" || Boolean(timeKnown && form.birthTime);
+    const placeReady = form.birthTimePrecision === "unknown"
+      || (catalogStatus === "ready" && Boolean(form.provinceCode));
+    const birthReady = Boolean(form.birthDate) && timeReady && placeReady;
     return (
       <ReadingShell
-        eyebrow="BIRTH DATE"
-        title="양력 생년월일을 알려주세요"
-        description="현재는 양력만 지원하며, 날짜는 명식 계산에 사용됩니다."
+        eyebrow="AI SAJU"
+        title="출생 정보를 알려주세요"
+        description="출생 정보는 리딩 생성과 기록 복원을 위해 저장되며, 내 기록에서 언제든 삭제할 수 있어요."
         step={2}
         totalSteps={TOTAL_STEPS}
+        showHomeLink={false}
+        actions={(
+          <NavigationButtons
+            back={() => setPhase("question")}
+            next={() => setPhase("review")}
+            nextDisabled={!birthReady}
+          />
+        )}
       >
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
@@ -367,32 +439,6 @@ export function SajuExperience() {
             />
             <FieldError id="birth-date-error" message={fieldErrors.birthDate} />
           </label>
-          <button
-            className="primary-button full-button"
-            disabled={!form.birthDate}
-            onClick={() => setPhase("birth-time")}
-            type="button"
-          >
-            다음
-          </button>
-        </div>
-      </ReadingShell>
-    );
-  }
-
-  if (phase === "birth-time") {
-    const timeReady = form.birthTimePrecision === "unknown"
-      || Boolean(form.birthTimePrecision && form.birthTime);
-    return (
-      <ReadingShell
-        eyebrow="BIRTH TIME"
-        title="태어난 시각을 얼마나 정확히 아나요?"
-        description="정확도를 먼저 알려주면 알 수 있는 범위만 해석합니다."
-        step={3}
-        totalSteps={TOTAL_STEPS}
-      >
-        <div className="wizard-card">
-          <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
           <fieldset
             className="field"
             aria-describedby={fieldErrors.birthTimePrecision
@@ -417,7 +463,7 @@ export function SajuExperience() {
             </div>
             <FieldError id="birth-time-precision-error" message={fieldErrors.birthTimePrecision} />
           </fieldset>
-          {form.birthTimePrecision && form.birthTimePrecision !== "unknown" ? (
+          {timeKnown ? (
             <label className="field" htmlFor="saju-birth-time">
               <span>태어난 시각</span>
               <input
@@ -436,38 +482,14 @@ export function SajuExperience() {
               ? "입력한 시각 전후 60분을 함께 계산해 공통되는 내용만 보여줘요."
               : "태어난 시각이 확실하지 않다면 ‘시간을 몰라요’를 선택해 주세요."}
           </p>
-          <NavigationButtons
-            back={() => setPhase("birth-date")}
-            next={() => setPhase("birth-place")}
-            nextDisabled={!timeReady}
-          />
-        </div>
-      </ReadingShell>
-    );
-  }
-
-  if (phase === "birth-place") {
-    const birthPlaceRequired = form.birthTimePrecision !== "unknown";
-    const placeReady = !birthPlaceRequired
-      || (catalogStatus === "ready" && Boolean(form.provinceCode));
-    return (
-      <ReadingShell
-        eyebrow="BIRTH PLACE"
-        title={birthPlaceRequired ? "태어난 시·도와 계산 기준을 선택해 주세요" : "대운 계산 기준을 선택해 주세요"}
-        description={birthPlaceRequired ? "출생 시·도는 태어난 시각을 보정하는 데 사용됩니다." : "출생 시각을 모르면 출생지는 입력하지 않아도 돼요."}
-        step={4}
-        totalSteps={TOTAL_STEPS}
-      >
-        <div className="wizard-card">
-          <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
-          {birthPlaceRequired && catalogStatus === "loading" ? <p className="notice" aria-live="polite">출생지 목록을 불러오고 있어요.</p> : null}
-          {birthPlaceRequired && catalogStatus === "error" ? (
+          {timeKnown && catalogStatus === "loading" ? <p className="notice" aria-live="polite">출생지 목록을 불러오고 있어요.</p> : null}
+          {timeKnown && catalogStatus === "error" ? (
             <div role="alert" className="notice">
               <p>{catalogError}</p>
               <button className="secondary-button" onClick={() => void loadBirthPlaces()} type="button">다시 불러오기</button>
             </div>
           ) : null}
-          {birthPlaceRequired ? <div className="saju-place-grid">
+          {timeKnown ? <div className="saju-place-grid">
             <label className="field" htmlFor="saju-province">
               <span>출생 시·도</span>
               <select
@@ -507,67 +529,6 @@ export function SajuExperience() {
             {form.luckDirectionBasis === "unspecified" ? <p className="notice">원국과 올해 흐름은 제공하지만 대운 계산과 해석은 제외합니다.</p> : null}
             <FieldError id="luck-error" message={fieldErrors.luckDirectionBasis} />
           </fieldset>
-          <NavigationButtons back={() => setPhase("birth-time")} next={() => setPhase("question")} nextDisabled={!placeReady} />
-        </div>
-      </ReadingShell>
-    );
-  }
-
-  if (phase === "question") {
-    const selectedFocus = FOCUS_OPTIONS.find((option) => option.value === form.focusArea);
-    const questionReady = Boolean(form.focusArea && form.question.trim().length > 0 && form.question.length <= MAX_QUESTION_LENGTH);
-    return (
-      <ReadingShell
-        eyebrow="YOUR QUESTION"
-        title="지금 가장 살펴보고 싶은 한 가지는 무엇인가요?"
-        description="관심 분야를 고른 뒤, 현재 선택에 도움이 될 질문을 하나 적어주세요."
-        step={5}
-        totalSteps={TOTAL_STEPS}
-      >
-        <div className="wizard-card">
-          <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
-          <fieldset
-            className="field"
-            aria-describedby={fieldErrors.focusArea ? "focus-error" : undefined}
-            aria-invalid={Boolean(fieldErrors.focusArea)}
-          >
-            <legend>관심 분야</legend>
-            <div className="category-grid">
-              {FOCUS_OPTIONS.map((option) => (
-                <label className={`category saju-category${form.focusArea === option.value ? " active" : ""}`} key={option.value}>
-                  <input
-                    checked={form.focusArea === option.value}
-                    name="focus-area"
-                    onChange={() => updateForm({ focusArea: option.value })}
-                    type="radio"
-                  />
-                  <strong>{option.label}</strong>
-                  <span>{option.example}</span>
-                </label>
-              ))}
-            </div>
-            <FieldError id="focus-error" message={fieldErrors.focusArea} />
-          </fieldset>
-          <label className="field" htmlFor="saju-question">
-            <span>질문 한 가지</span>
-            <textarea
-              id="saju-question"
-              aria-describedby={fieldErrors.question
-                ? "saju-question-guidance question-error"
-                : "saju-question-guidance"}
-              aria-invalid={Boolean(fieldErrors.question)}
-              maxLength={MAX_QUESTION_LENGTH}
-              onChange={(event) => updateForm({ question: event.target.value })}
-              placeholder={selectedFocus?.example ?? "지금 가장 궁금한 한 가지를 적어주세요."}
-              value={form.question}
-            />
-            <p className="field-guidance" id="saju-question-guidance">
-              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문은 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
-            </p>
-            <small>{form.question.length} / {MAX_QUESTION_LENGTH}자</small>
-            <FieldError id="question-error" message={fieldErrors.question} />
-          </label>
-          <NavigationButtons back={() => setPhase("birth-place")} next={reviewQuestion} nextDisabled={!questionReady} nextLabel="입력 검토" />
         </div>
       </ReadingShell>
     );
@@ -575,7 +536,13 @@ export function SajuExperience() {
 
   if (phase === "loading") {
     return (
-      <ReadingShell eyebrow="AI SAJU" title="사주의 흐름을 읽고 있어요" step={6} totalSteps={TOTAL_STEPS}>
+      <ReadingShell
+        eyebrow="AI SAJU"
+        title="사주의 흐름을 읽고 있어요"
+        step={4}
+        totalSteps={TOTAL_STEPS}
+        showHomeLink={false}
+      >
         <div className="wizard-card loading-card" aria-live="polite">
           <p>{LOADING_MESSAGES[loadingIndex]}</p>
           <ol className="saju-loading-steps">
@@ -590,11 +557,27 @@ export function SajuExperience() {
   const focus = FOCUS_OPTIONS.find((item) => item.value === form.focusArea);
   return (
     <ReadingShell
-      eyebrow="REVIEW"
+      eyebrow="AI SAJU"
       title="입력한 내용을 확인해 주세요"
       description="출생정보와 계산 기준은 내 기록에 저장되지만 질문 원문은 저장되지 않아요."
-      step={6}
+      step={3}
       totalSteps={TOTAL_STEPS}
+      showHomeLink={false}
+      actions={(
+        <>
+          <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+          <div className="wizard-nav">
+            <button className="secondary-button" disabled={submitting} onClick={() => setPhase("birth")} type="button">이전</button>
+            <button
+              aria-label="사주 리딩 생성"
+              className="primary-button"
+              disabled={submitting || creditAccess.status !== "allowed"}
+              onClick={() => void submitReading()}
+              type="button"
+            >사주 리딩 생성 · {creditCost ?? "…"} 크레딧</button>
+          </div>
+        </>
+      )}
     >
       <div className="wizard-card confirmation-card">
         <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
@@ -606,17 +589,6 @@ export function SajuExperience() {
           <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
           <div><dt>질문</dt><dd>{form.question.trim()}</dd></div>
         </dl>
-        <div className="result-actions">
-          <button className="secondary-button" disabled={submitting} onClick={() => setPhase("question")} type="button">이전</button>
-          <button
-            aria-label="사주 리딩 생성"
-            className="primary-button"
-            disabled={submitting || creditAccess.status !== "allowed"}
-            onClick={() => void submitReading()}
-            type="button"
-          >사주 리딩 생성 · {creditCost ?? "…"} 크레딧</button>
-        </div>
-        <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
       </div>
     </ReadingShell>
   );
@@ -702,7 +674,7 @@ function NavigationButtons({
   nextLabel?: string;
 }) {
   return (
-    <div className="result-actions">
+    <div className="wizard-nav">
       <button className="secondary-button" onClick={back} type="button">이전</button>
       <button className="primary-button" disabled={nextDisabled} onClick={next} type="button">{nextLabel}</button>
     </div>
