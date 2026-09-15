@@ -341,8 +341,11 @@ export function SajuExperience() {
     updateForm({ provinceCode });
   }
 
-  function editStep(step: "question" | "birth") {
-    editingFromReviewRef.current = true;
+  // A generation failure belongs to review; carrying it back would read as an input mistake.
+  function leaveReview(step: "question" | "birth", editing: boolean) {
+    editingFromReviewRef.current = editing;
+    setGeneralError(null);
+    setCreditUntouched(false);
     setPhase(step);
   }
 
@@ -376,6 +379,9 @@ export function SajuExperience() {
     setFieldErrors({});
     setGeneralError(null);
     setCreditUntouched(false);
+    // Reset before the first loading frame so a retry never flashes the last attempt's progress.
+    setLoadingIndex(0);
+    setSlowGeneration(false);
     setPhase("loading");
 
     try {
@@ -707,7 +713,7 @@ export function SajuExperience() {
         <>
           <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
           <div className="wizard-nav">
-            <button className="secondary-button" disabled={submitting} onClick={() => setPhase("birth")} type="button">이전</button>
+            <button className="secondary-button" disabled={submitting} onClick={() => leaveReview("birth", false)} type="button">이전</button>
             <button
               aria-label="사주 리딩 생성"
               className="primary-button"
@@ -728,11 +734,11 @@ export function SajuExperience() {
           title={generalError ? "리딩을 만들지 못했어요." : undefined}
           note={creditUntouched ? "크레딧은 차감되지 않았어요." : undefined}
         />
-        <ReviewGroup id="review-question" title="질문" onEdit={() => editStep("question")} disabled={submitting}>
+        <ReviewGroup id="review-question" title="질문" onEdit={() => leaveReview("question", true)} disabled={submitting}>
           <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
           <div><dt>질문</dt><dd>{form.question.trim()}</dd></div>
         </ReviewGroup>
-        <ReviewGroup id="review-birth" title="출생 정보" onEdit={() => editStep("birth")} disabled={submitting}>
+        <ReviewGroup id="review-birth" title="출생 정보" onEdit={() => leaveReview("birth", true)} disabled={submitting}>
           <div><dt>생년월일</dt><dd>{formatBirthDate(form.birthDate)} · 양력</dd></div>
           <div><dt>출생 시각</dt><dd>{timeSummary(form)}</dd></div>
           {form.birthTimePrecision !== "unknown" ? <div><dt>출생지</dt><dd>{province?.provinceName}</dd></div> : null}

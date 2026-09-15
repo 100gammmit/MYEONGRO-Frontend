@@ -613,6 +613,25 @@ describe("SajuExperience", () => {
     expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
   });
 
+  it("leaves a generation failure on review when the user goes back to fix input", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(jsonResponse({ code: "BACKEND_UNAVAILABLE", message: "잠시 후 다시 시도해 주세요." }, { status: 502 }));
+    await startWithAcceptedConsent();
+    await reachReview();
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("리딩을 만들지 못했어요.");
+
+    fireEvent.click(screen.getByRole("button", { name: "출생 정보 고치기" }));
+    expect(await screen.findByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "이전" }));
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
+    expect(screen.queryByText("잠시 후 다시 시도해 주세요.")).not.toBeInTheDocument();
+  });
+
   it("shows one message beside the brand mark and a patience line after 15 seconds", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
     const deferred = createDeferred<Response>();
