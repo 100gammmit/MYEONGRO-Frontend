@@ -71,6 +71,8 @@ describe("SajuReadingResult", () => {
 
     expect(screen.getByText("리딩은 건강에 관한 결정을 대신할 수 없어요. 진단이나 치료는 의료 전문가와 상의해 주세요."))
       .toBeInTheDocument();
+    expect(screen.getByText("AI SAJU · 건강운")).toBeInTheDocument();
+    expect(screen.queryByText("AI SAJU · 일·진로")).not.toBeInTheDocument();
     expect(document.querySelector("blockquote")).not.toBeInTheDocument();
   });
 

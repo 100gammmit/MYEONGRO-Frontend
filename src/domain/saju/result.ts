@@ -157,7 +157,6 @@ const resultSchema = z.object({
     evidenceKeys: evidenceKeysSchema,
   }).strict(),
   questionReading: z.object({
-    focusArea: focusAreaSchema,
     heading: textSchema,
     body: textSchema,
     evidenceKeys: evidenceKeysSchema,
@@ -222,13 +221,6 @@ const completedSajuRecordSchema = z.union([
       code: z.ZodIssueCode.custom,
       path: ["result", "annualReading", "year"],
       message: "사주 기준 연도가 일치하지 않습니다.",
-    });
-  }
-  if (reading.result.questionReading.focusArea !== reading.input.focusArea) {
-    context.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["result", "questionReading", "focusArea"],
-      message: "사주 관심 분야가 일치하지 않습니다.",
     });
   }
   if (snapshot.dayMaster === null || snapshot.annualFortune === null) {

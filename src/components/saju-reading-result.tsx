@@ -17,6 +17,13 @@ const FOCUS_LABELS = {
   life_money: "재정·생활",
 } as const;
 
+const READING_MODE_LABELS = {
+  health_fortune: "건강운",
+  money_fortune: "금전운",
+  relationship_fortune: "관계운",
+  career_life_fortune: "직업·생활운",
+} as const;
+
 const PILLAR_LABELS = {
   year: "연주",
   month: "월주",
@@ -67,13 +74,16 @@ export function SajuReadingResult({
   const currentLuck = snapshot.luckCycle?.periods.find(
     (period) => period.startYear <= snapshot.targetYear && snapshot.targetYear <= period.endYear,
   );
+  const resultFocusLabel = view.result.readingMode === "standard"
+    ? FOCUS_LABELS[view.input.focusArea]
+    : READING_MODE_LABELS[view.result.readingMode];
 
   return (
     <article className="saju-result page-width">
       <Link className="back-link" href={backHref}>← {backLabel}</Link>
       <ReadingModeNotice mode={view.result.readingMode} />
       <header className="saju-result-hero">
-        <p className="eyebrow">AI SAJU · {FOCUS_LABELS[view.input.focusArea]}</p>
+        <p className="eyebrow">AI SAJU · {resultFocusLabel}</p>
         <h1>{view.result.title}</h1>
         <p>{view.result.summary}</p>
       </header>

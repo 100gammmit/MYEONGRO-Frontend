@@ -60,7 +60,7 @@ export function sajuReadingRecord(overrides: Record<string, unknown> = {}) {
         { id: "work", heading: "일하고 선택하는 방식", body: "선택을 살펴봅니다.", evidenceKeys: ["tenGods"] },
       ],
       annualReading: { year: 2026, heading: "2026년의 흐름", body: "연간 흐름입니다.", evidenceKeys: ["annualFlow"] },
-      questionReading: { focusArea: "career", heading: "지금의 질문에 비춰보면", body: "작게 준비하세요.", evidenceKeys: ["dayMaster"] },
+      questionReading: { heading: "지금의 질문에 비춰보면", body: "작게 준비하세요.", evidenceKeys: ["dayMaster"] },
       guidance: ["채용 정보를 확인하세요.", "작은 준비부터 시작하세요."],
       disclaimer: "오락과 자기성찰을 위한 참고입니다.",
     },
