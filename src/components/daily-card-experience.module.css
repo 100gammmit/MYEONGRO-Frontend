@@ -10,6 +10,12 @@
   min-width: 0;
 }
 
+/* The phone-only .tarot-back min-height is sized for the tarot deck; here it stretched each card
+   past its fifth of the row, so the last card ran off the screen. Let the column width decide. */
+.cards .card {
+  min-height: 0;
+}
+
 .selected {
   opacity: 1;
   border-color: var(--text-primary);
