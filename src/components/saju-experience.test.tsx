@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -96,7 +96,9 @@ function createDeferred<T>() {
 }
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.restoreAllMocks();
+  window.history.replaceState(null, "", "/");
   navigation.push.mockReset();
   clearRememberedSajuBirthProfile();
   credits.state.status = "ready";
@@ -463,7 +465,11 @@ describe("SajuExperience", () => {
     expect((await screen.findAllByText("출생정보를 확인하고 있어요.")).length).toBeGreaterThan(0);
     deferred.resolve(jsonResponse({ code: "BACKEND_UNAVAILABLE", message: "잠시 후 다시 시도해 주세요." }, { status: 502 }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("잠시 후 다시 시도해 주세요.");
+    const failure = await screen.findByRole("alert");
+    expect(failure).toHaveTextContent("리딩을 만들지 못했어요.");
+    expect(failure).toHaveTextContent("잠시 후 다시 시도해 주세요.");
+    // A proxy failure may hide a finished reading, so it makes no promise about credits.
+    expect(failure).not.toHaveTextContent("차감");
     fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
@@ -489,7 +495,11 @@ describe("SajuExperience", () => {
     await reachReview();
 
     fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("리딩 생성에 실패했어요.");
+    const failure = await screen.findByRole("alert");
+    expect(failure).toHaveTextContent("리딩을 만들지 못했어요.");
+    expect(failure).toHaveTextContent("리딩 생성에 실패했어요.");
+    expect(failure).toHaveTextContent("크레딧은 차감되지 않았어요.");
+    expect(failure).not.toHaveTextContent("입력 내용을 확인해 주세요.");
     fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
@@ -577,6 +587,89 @@ describe("SajuExperience", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("크레딧이 부족");
     expect(credits.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("groups review by question then birth and returns to review after 고치기", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
+    await startWithAcceptedConsent();
+    await reachReview("exact");
+
+    expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent))
+      .toEqual(["질문", "출생 정보"]);
+    expect(screen.getByText("1992년 8월 17일 · 양력")).toBeInTheDocument();
+    expect(screen.getByText("세종특별자치시")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "출생 정보 고치기" }));
+    expect(await screen.findByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
+    expect(screen.getByLabelText("양력 생년월일")).toHaveValue("1992-08-17");
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "질문 고치기" }));
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
+  });
+
+  it("shows one message beside the brand mark and a patience line after 15 seconds", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
+    const deferred = createDeferred<Response>();
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockImplementationOnce(() => deferred.promise);
+    await startWithAcceptedConsent();
+    await reachReview();
+
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    expect(screen.getByText("출생정보를 확인하고 있어요.")).toBeInTheDocument();
+    expect(screen.queryByText("명식의 공통 구조를 계산하고 있어요.")).not.toBeInTheDocument();
+    expect(screen.queryByText(/조금 더 걸리고 있어요/)).not.toBeInTheDocument();
+
+    act(() => { vi.advanceTimersByTime(15_000); });
+    expect(screen.getByText("질문에 맞는 리딩을 구성하고 있어요.")).toBeInTheDocument();
+    expect(screen.queryByText("출생정보를 확인하고 있어요.")).not.toBeInTheDocument();
+    expect(screen.getByText("조금 더 걸리고 있어요. 잠시만 기다려 주세요.")).toBeInTheDocument();
+    expect(document.querySelectorAll(".mark-stroke.on")).toHaveLength(4);
+    expect(document.querySelector(".mark-glyph.breathing")).not.toBeNull();
+
+    vi.useRealTimers();
+    deferred.resolve(jsonResponse(createdReading()));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
+  });
+
+  it("gives each step a history entry and steps back on the browser back button", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
+    const pushState = vi.spyOn(window.history, "pushState");
+    await startWithAcceptedConsent();
+    expect(window.location.search).toBe("?step=question");
+    expect(pushState).not.toHaveBeenCalled();
+
+    await reachBirth();
+    expect(window.location.search).toBe("?step=birth");
+    expect(pushState).toHaveBeenCalledTimes(1);
+
+    fireEvent(window, new PopStateEvent("popstate", { state: { sajuStep: "question" } }));
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /질문 한 가지/ })).toHaveValue("올해 이직을 준비해도 괜찮을까요?");
+    expect(pushState).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores a forward jump to review while the birth step is incomplete", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
+    await startWithAcceptedConsent();
+    await reachBirth();
+
+    fireEvent(window, new PopStateEvent("popstate", { state: { sajuStep: "review" } }));
+
+    expect(screen.getByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
   });
 
   it("redirects to login when consent status is unauthenticated", async () => {

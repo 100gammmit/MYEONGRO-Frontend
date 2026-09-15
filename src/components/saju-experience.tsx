@@ -32,12 +32,14 @@ import {
   SajuBirthPlacesClientError,
 } from "@/infrastructure/backend/saju-birth-places-client";
 
+import { BrandMark } from "./brand-mark";
 import { ConsentGate } from "./consent-gate";
 import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 
 type Phase = "consent" | "question" | "birth" | "review" | "loading";
+type WizardStep = "question" | "birth" | "review";
 type CatalogStatus = "idle" | "loading" | "ready" | "error";
 type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request";
 
@@ -54,6 +56,7 @@ interface SajuFormState {
 // Consent is a one-time threshold, not a step: question 1, birth 2, review 3, loading 4.
 const TOTAL_STEPS = 4;
 const MAX_QUESTION_LENGTH = 300;
+const SLOW_GENERATION_MS = 15_000;
 const initialForm: SajuFormState = {
   birthDate: "",
   birthTimePrecision: "",
@@ -83,6 +86,7 @@ const FOCUS_OPTIONS: ReadonlyArray<{ value: SajuFocusArea; label: string; exampl
   { value: "life_money", label: "재정·생활", example: "생활의 균형을 위해 무엇부터 정리할까요?" },
 ];
 
+// One message per stroke of the brand mark.
 const LOADING_MESSAGES = [
   "출생정보를 확인하고 있어요.",
   "명식의 공통 구조를 계산하고 있어요.",
@@ -124,6 +128,34 @@ function isTimeKnown(precision: SajuFormState["birthTimePrecision"]): boolean {
   return precision === "exact" || precision === "approximate";
 }
 
+function findMissingBirthFields(form: SajuFormState): Partial<Record<FieldKey, string>> {
+  const missing: Partial<Record<FieldKey, string>> = {};
+  if (!form.birthDate) missing.birthDate = "양력 생년월일을 입력해 주세요.";
+  if (!form.birthTimePrecision) {
+    missing.birthTimePrecision = "출생 시각의 정확도를 골라 주세요.";
+  } else if (isTimeKnown(form.birthTimePrecision)) {
+    if (!form.birthTime) missing.birthTime = "태어난 시각을 입력해 주세요.";
+    if (!form.provinceCode) missing.provinceCode = "출생 시·도를 선택해 주세요.";
+  }
+  return missing;
+}
+
+function isQuestionReady(form: SajuFormState): boolean {
+  return Boolean(form.focusArea && form.question.trim().length > 0 && form.question.length <= MAX_QUESTION_LENGTH);
+}
+
+// The browser's forward button can land on a later step; only allow it when the steps before it still pass their checks.
+function canEnterStep(step: WizardStep, form: SajuFormState): boolean {
+  if (step === "question") return true;
+  const questionPasses = isQuestionReady(form) && !containsDirectIdentifier(form.question);
+  if (step === "birth") return questionPasses;
+  return questionPasses && Object.keys(findMissingBirthFields(form)).length === 0;
+}
+
+function isWizardStep(value: unknown): value is WizardStep {
+  return value === "question" || value === "birth" || value === "review";
+}
+
 function ensureRequestId(requestIdRef: MutableRefObject<string | null>): string {
   if (!requestIdRef.current) requestIdRef.current = globalThis.crypto.randomUUID();
   return requestIdRef.current;
@@ -139,14 +171,20 @@ export function SajuExperience() {
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loadingIndex, setLoadingIndex] = useState(0);
+  const [slowGeneration, setSlowGeneration] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [creditUntouched, setCreditUntouched] = useState(false);
   const [revealAnnouncement, setRevealAnnouncement] = useState("");
   const requestIdRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
   const followUpDraftRef = useRef(false);
+  const editingFromReviewRef = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const focusFieldRef = useRef<string | null>(null);
+  const formRef = useRef(form);
+  const historyPhaseRef = useRef<Phase>("consent");
+  const poppedRef = useRef(false);
   const creditData = credits.state.status === "ready" ? credits.state.data : null;
   const creditCost = creditData?.costs.saju ?? null;
   const creditAccess = getReadingCreditAccess(
@@ -158,9 +196,7 @@ export function SajuExperience() {
   const creditBlocked = creditAccess.status === "insufficient"
     || creditAccess.status === "generation-in-progress"
     || creditAccess.status === "unavailable";
-  const questionReady = Boolean(
-    form.focusArea && form.question.trim().length > 0 && form.question.length <= MAX_QUESTION_LENGTH,
-  );
+  const questionReady = isQuestionReady(form);
 
   const redirectToLogin = useCallback(() => {
     router.push("/login?next=%2Fsaju");
@@ -182,6 +218,10 @@ export function SajuExperience() {
       setCatalogError(error instanceof Error ? error.message : "출생지 목록을 불러오지 못했어요.");
     }
   }, [redirectToLogin]);
+
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
 
   useEffect(() => {
     const remembered = takeRememberedSajuBirthProfile();
@@ -220,13 +260,54 @@ export function SajuExperience() {
     window.scrollTo({ top: 0 });
   }, [phase]);
 
+  // Each step gets a history entry so the phone's back button steps back instead of leaving the wizard.
+  // A refresh starts over by design: the question is never stored.
+  useEffect(() => {
+    const previous = historyPhaseRef.current;
+    historyPhaseRef.current = phase;
+    if (phase === "review") editingFromReviewRef.current = false;
+    if (!isWizardStep(phase) || previous === phase) return;
+    if (poppedRef.current) {
+      poppedRef.current = false;
+      return;
+    }
+    // Next's patched history methods add their router markers, so its popstate handler keeps this page instead of reloading.
+    const state = { sajuStep: phase };
+    const url = `${window.location.pathname}?step=${phase}`;
+    // The first step and returns from generation reuse the current entry; generation itself adds none.
+    if (previous === "consent" || previous === "loading") {
+      window.history.replaceState(state, "", url);
+    } else {
+      window.history.pushState(state, "", url);
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    function handlePopState(event: PopStateEvent) {
+      const step = (event.state as { sajuStep?: unknown } | null)?.sajuStep;
+      if (!isWizardStep(step) || inFlightRef.current) return;
+      if (step === historyPhaseRef.current || !canEnterStep(step, formRef.current)) return;
+      poppedRef.current = true;
+      setFieldErrors({});
+      setGeneralError(null);
+      setPhase(step);
+    }
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
   useEffect(() => {
     if (phase !== "loading") return;
     setLoadingIndex(0);
+    setSlowGeneration(false);
     const timer = globalThis.setInterval(() => {
       setLoadingIndex((current) => Math.min(current + 1, LOADING_MESSAGES.length - 1));
     }, 1200);
-    return () => globalThis.clearInterval(timer);
+    const slowTimer = globalThis.setTimeout(() => setSlowGeneration(true), SLOW_GENERATION_MS);
+    return () => {
+      globalThis.clearInterval(timer);
+      globalThis.clearTimeout(slowTimer);
+    };
   }, [phase]);
 
   useEffect(() => {
@@ -245,6 +326,7 @@ export function SajuExperience() {
     requestIdRef.current = null;
     setFieldErrors({});
     setGeneralError(null);
+    setCreditUntouched(false);
     setForm((current) => ({ ...current, ...patch }));
   }
 
@@ -259,6 +341,11 @@ export function SajuExperience() {
     updateForm({ provinceCode });
   }
 
+  function editStep(step: "question" | "birth") {
+    editingFromReviewRef.current = true;
+    setPhase(step);
+  }
+
   function submitQuestion() {
     if (!questionReady || creditAccess.status !== "allowed") return;
     if (containsDirectIdentifier(form.question)) {
@@ -266,19 +353,12 @@ export function SajuExperience() {
       setGeneralError(null);
       return;
     }
-    // A follow-up reading already carries the birth profile, so it goes straight to review.
-    setPhase(followUpDraftRef.current ? "review" : "birth");
+    // A follow-up reading already carries the birth profile, and an edit from review returns there filled in.
+    setPhase(followUpDraftRef.current || editingFromReviewRef.current ? "review" : "birth");
   }
 
   function submitBirth() {
-    const missing: Partial<Record<FieldKey, string>> = {};
-    if (!form.birthDate) missing.birthDate = "양력 생년월일을 입력해 주세요.";
-    if (!form.birthTimePrecision) {
-      missing.birthTimePrecision = "출생 시각의 정확도를 골라 주세요.";
-    } else if (isTimeKnown(form.birthTimePrecision)) {
-      if (!form.birthTime) missing.birthTime = "태어난 시각을 입력해 주세요.";
-      if (!form.provinceCode) missing.provinceCode = "출생 시·도를 선택해 주세요.";
-    }
+    const missing = findMissingBirthFields(form);
     const first = (Object.keys(missing) as FieldKey[])[0];
     if (first) {
       focusFieldRef.current = FIELD_INPUT_ID[first] ?? null;
@@ -295,6 +375,7 @@ export function SajuExperience() {
     setSubmitting(true);
     setFieldErrors({});
     setGeneralError(null);
+    setCreditUntouched(false);
     setPhase("loading");
 
     try {
@@ -347,6 +428,9 @@ export function SajuExperience() {
       setPhase(errorPhase);
       return;
     }
+    // Credits are charged only when a reading completes, so a confirmed generation failure charged nothing.
+    // Network and proxy failures stay silent on credits: the backend may still have finished.
+    setCreditUntouched(error.code === "OPENAI_READING_GENERATION_FAILED");
     setGeneralError(
       error.code === "READING_GENERATION_IN_PROGRESS"
         ? "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요."
@@ -593,11 +677,17 @@ export function SajuExperience() {
         totalSteps={TOTAL_STEPS}
         showHomeLink={false}
       >
-        <div className="wizard-card loading-card" aria-live="polite">
-          <p>{LOADING_MESSAGES[loadingIndex]}</p>
-          <ol className="saju-loading-steps">
-            {LOADING_MESSAGES.map((message, index) => <li className={index <= loadingIndex ? "active" : ""} key={message}>{message}</li>)}
-          </ol>
+        <div className="wizard-card saju-loading">
+          {/* After the fourth stroke the centre card breathes until the response arrives. */}
+          <BrandMark
+            breathing={loadingIndex === LOADING_MESSAGES.length - 1}
+            lit={loadingIndex + 1}
+            size={104}
+          />
+          <div aria-live="polite">
+            <p>{LOADING_MESSAGES[loadingIndex]}</p>
+            {slowGeneration ? <p className="muted">조금 더 걸리고 있어요. 잠시만 기다려 주세요.</p> : null}
+          </div>
         </div>
       </ReadingShell>
     );
@@ -630,15 +720,24 @@ export function SajuExperience() {
       )}
     >
       <div className="wizard-card confirmation-card">
-        <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
-        <dl className="saju-review-list">
-          <div><dt>생년월일</dt><dd>{form.birthDate} · 양력</dd></div>
+        {/* Only field problems are the user's to fix; anything reaching review is a failure to generate. */}
+        <ErrorSummary
+          summaryRef={errorSummaryRef}
+          errors={fieldErrors}
+          generalError={generalError}
+          title={generalError ? "리딩을 만들지 못했어요." : undefined}
+          note={creditUntouched ? "크레딧은 차감되지 않았어요." : undefined}
+        />
+        <ReviewGroup id="review-question" title="질문" onEdit={() => editStep("question")} disabled={submitting}>
+          <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
+          <div><dt>질문</dt><dd>{form.question.trim()}</dd></div>
+        </ReviewGroup>
+        <ReviewGroup id="review-birth" title="출생 정보" onEdit={() => editStep("birth")} disabled={submitting}>
+          <div><dt>생년월일</dt><dd>{formatBirthDate(form.birthDate)} · 양력</dd></div>
           <div><dt>출생 시각</dt><dd>{timeSummary(form)}</dd></div>
           {form.birthTimePrecision !== "unknown" ? <div><dt>출생지</dt><dd>{province?.provinceName}</dd></div> : null}
           <div><dt>대운</dt><dd>{luckSummary(form.luckDirectionBasis)}</dd></div>
-          <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
-          <div><dt>질문</dt><dd>{form.question.trim()}</dd></div>
-        </dl>
+        </ReviewGroup>
       </div>
     </ReadingShell>
   );
@@ -678,6 +777,11 @@ async function readApiError(response: Response): Promise<SajuApiError> {
   }
 }
 
+function formatBirthDate(value: string): string {
+  const [year, month, day] = value.split("-").map(Number);
+  return year && month && day ? `${year}년 ${month}월 ${day}일` : value;
+}
+
 function timeSummary(form: SajuFormState): string {
   if (form.birthTimePrecision === "unknown") return "시간 미상 · 시주 제외";
   if (form.birthTimePrecision === "approximate") return `${form.birthTime} 전후 60분`;
@@ -694,20 +798,55 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   return message ? <p className="form-error" id={id}>{message}</p> : null;
 }
 
+function ReviewGroup({
+  id,
+  title,
+  onEdit,
+  disabled,
+  children,
+}: {
+  id: string;
+  title: string;
+  onEdit: () => void;
+  disabled: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="saju-review-group" aria-labelledby={id}>
+      <div className="saju-review-head">
+        <h2 id={id}>{title}</h2>
+        <button
+          aria-label={`${title} 고치기`}
+          className="saju-review-edit"
+          disabled={disabled}
+          onClick={onEdit}
+          type="button"
+        >고치기</button>
+      </div>
+      <dl className="saju-review-list">{children}</dl>
+    </section>
+  );
+}
+
 const ErrorSummary = ({
   errors,
   generalError,
   summaryRef,
+  title = "입력 내용을 확인해 주세요.",
+  note,
 }: {
   errors: Partial<Record<FieldKey, string>>;
   generalError: string | null;
   summaryRef: React.RefObject<HTMLDivElement | null>;
+  title?: string;
+  note?: string;
 }) => {
   const messages = [...new Set([...Object.values(errors), ...(generalError ? [generalError] : [])])];
   return messages.length > 0 ? (
     <div className="saju-error-summary" ref={summaryRef} role="alert" tabIndex={-1}>
-      <strong>입력 내용을 확인해 주세요.</strong>
+      <strong>{title}</strong>
       {messages.map((message) => <p key={message}>{message}</p>)}
+      {note ? <p>{note}</p> : null}
     </div>
   ) : null;
 };
