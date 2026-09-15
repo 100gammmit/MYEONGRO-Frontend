@@ -23,8 +23,6 @@
   --surface-danger-subtle: rgba(240, 112, 138, 0.06);
   --surface-modal-backdrop: rgba(6, 6, 9, 0.82);
   --surface-sticky: rgba(13, 14, 19, 0.94);
-  --surface-secondary-soft: rgba(110, 138, 196, 0.1);
-  --surface-secondary-hover: rgba(110, 138, 196, 0.16);
 
   --text-primary: #e6ebf7;
   --text-secondary: #c3cce6;
@@ -33,7 +31,6 @@
   --text-inverse: #141a28;
   --text-accent: #a79ef6;
   --text-accent-strong: #c7bffa;
-  --text-editorial: #e8b54a;
   --text-danger: #f0708a;
 
   /* Borders are neutral; accent color stays on selected elements (--accent-primary). */
@@ -56,7 +53,6 @@
   /* Secondary topic color (currently: saju, vs. tarot's --accent-primary).
      Bright enough to double as text/border, not just a decorative dot. */
   --accent-secondary: #6e8ac4;
-  --accent-secondary-hover: #82a2d4;
 
   /* Seal red (인주): only for completion/ownership marks. Never for errors -- that is --text-danger. */
   --accent-seal: #c9503c;
@@ -66,9 +62,6 @@
   --focus-ring: 0 0 0 4px rgba(124, 111, 240, 0.16);
   --focus-field-ring: 0 0 0 3px rgba(124, 111, 240, 0.12);
 
-  --gradient-separator: linear-gradient(90deg, transparent, rgba(124, 111, 240, 0.5), transparent);
-  --gradient-landing-card: linear-gradient(160deg, rgba(29, 30, 36, 0.92), rgba(15, 16, 20, 0.97));
-  --gradient-saju-card: linear-gradient(160deg, rgba(25, 26, 31, 0.92), rgba(13, 14, 18, 0.97));
   --gradient-panel: linear-gradient(160deg, rgba(24, 25, 30, 0.92), rgba(15, 16, 20, 0.92));
   --gradient-tarot-back: linear-gradient(155deg, #1b2340, #101526);
   --gradient-confirmed-card: repeating-linear-gradient(45deg, rgba(124, 111, 240, 0.07) 0 3px, transparent 3px 6px), #171e2e;
@@ -81,8 +74,6 @@
   --glow-accent: 0 0 24px rgba(124, 111, 240, 0.16);
   --glow-cta: 0 10px 30px rgba(232, 181, 74, 0.22);
   --glow-dot: 0 0 8px rgba(124, 111, 240, 0.7);
-  --effect-card-inset-border: rgba(230, 235, 247, 0.06);
-  --effect-card-aura: radial-gradient(ellipse, rgba(124, 111, 240, 0.16), transparent 68%);
   --effect-tarot-inner-border: rgba(124, 111, 240, 0.35);
 
   /* Layout ladder: page, wide grid, reading column, input column, action width. */
@@ -204,117 +195,67 @@ h1, h2, h3, blockquote {
 .secondary-button { background: var(--surface-tint-2); color: var(--text-primary); border: 1px solid var(--border-strong); }
 .secondary-button:hover { background: var(--surface-tint-3); border-color: var(--accent-strong); }
 
-.landing-page .landing-hero {
-  min-height: 500px;
-  display: grid;
-  place-items: center;
-  padding-block: 64px 54px;
-  position: relative;
-  text-align: center;
+.landing-top { position: relative; }
+/* The sky also runs behind the header, so it starts the header's height above the page. */
+.landing-sky { position: absolute; top: -68px; left: 0; right: 0; z-index: 0; pointer-events: none; -webkit-mask-image: linear-gradient(180deg, #000 56%, transparent 100%); mask-image: linear-gradient(180deg, #000 56%, transparent 100%); }
+.landing-sky svg { display: block; width: 100%; height: auto; }
+.landing-sky-narrow { display: none; }
+@keyframes sky-twinkle { 0%, 100% { opacity: var(--o); } 50% { opacity: calc(var(--o) * .2); } }
+@media (prefers-reduced-motion: no-preference) {
+  .landing-sky .tw { animation: sky-twinkle var(--d) ease-in-out infinite; animation-delay: var(--dl); }
 }
-.landing-page .landing-hero::after {
-  content: "";
-  width: min(520px, 78%);
-  height: 1px;
-  position: absolute;
-  bottom: 0;
-  background: var(--gradient-separator);
-}
-.landing-page .hero-copy { width: min(var(--w-read), 100%); padding: 0; position: relative; z-index: 1; }
-.landing-page .eyebrow { margin-bottom: 22px; font-family: var(--landing-sans); font-size: 11px; font-weight: 600; color: var(--text-editorial); }
-.landing-page .landing-hero h1 { margin: 0; font-size: 64px; line-height: 1.16; letter-spacing: -.045em; text-wrap: balance; }
+.landing-page .landing-hero { position: relative; z-index: 1; padding-block: 136px 132px; text-align: center; }
+.landing-page .hero-copy { max-width: var(--w-read); margin-inline: auto; }
+.landing-page .eyebrow { margin: 0 0 20px; color: var(--accent-cta); font-family: var(--landing-sans); font-size: 11px; font-weight: 700; letter-spacing: .24em; }
+.landing-page .landing-hero h1 { margin: 0; font-size: 64px; line-height: 1.14; letter-spacing: -.045em; text-wrap: balance; }
 .landing-page .hero-title-break { display: none; }
-.landing-page .hero-description { max-width: var(--w-read); margin: 26px auto 28px; color: var(--text-secondary); font-size: 16px; line-height: 1.8; text-wrap: pretty; }
-.landing-page .hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
-.landing-page .hero-actions a { min-width: 148px; min-height: 48px; justify-content: center; border-radius: var(--radius-pill); font-family: var(--landing-sans); font-size: 14px; font-weight: 600; }
-
-/* Tarot/saju CTAs read by topic, not by gold-CTA hierarchy: tarot takes
-   the periwinkle brand color, saju takes the secondary topic color. Scoped
-   to the landing page only -- .primary-button/.secondary-button stay gold
-   everywhere else (consent, wizard nav, results actions). */
-.landing-page .cta-tarot,
-.landing-page .tarot-card .primary-button {
-  background: var(--accent-strong);
-  color: var(--text-inverse);
-}
-.landing-page .cta-tarot:hover,
-.landing-page .tarot-card .primary-button:hover {
-  background: var(--accent-strong-hover);
-}
-.landing-page .cta-saju,
-.landing-page .saju-card .secondary-button {
-  background: var(--surface-secondary-soft);
-  border-color: var(--accent-secondary);
-  color: var(--accent-secondary);
-}
-.landing-page .cta-saju:hover,
-.landing-page .saju-card .secondary-button:hover {
-  background: var(--surface-secondary-hover);
-  border-color: var(--accent-secondary-hover);
-  color: var(--accent-secondary-hover);
-}
-
-.landing-page .hero-question {
-  display: inline-flex; align-items: center; gap: 9px; margin-top: 22px; padding: 12px 20px;
-  border-radius: var(--radius-pill); background: var(--surface-tint-2); border: 1px solid var(--border-default);
-  max-width: 100%;
-}
-.landing-page .hero-question-mark { font-family: var(--landing-serif); font-size: 20px; line-height: 1; color: var(--text-accent); flex: 0 0 auto; }
-.landing-page .hero-question-text { font-size: 14px; color: var(--text-primary); }
-
-.landing-page .reading-picks { padding: 46px 0 20px; }
-.landing-page .picks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; max-width: var(--w-wide); margin: 0 auto; }
-.landing-page .pick-row { display: flex; gap: 14px; align-items: flex-start; }
-.landing-page .pick-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; flex: 0 0 auto; }
-.landing-page .pick-dot-tarot { background: var(--accent-primary); box-shadow: var(--glow-dot); }
-.landing-page .pick-dot-saju { background: var(--accent-secondary); }
-.landing-page .pick-row strong { display: block; font-size: 16px; margin-bottom: 5px; }
-.landing-page .pick-row span { color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
-
-.landing-page .reading-choice { padding: 42px 0 62px; }
-.landing-page .section-heading { margin-bottom: 32px; text-align: center; }
-.landing-page .section-heading h2 { margin: 0; font-size: 50px; line-height: 1.25; letter-spacing: -.04em; }
-.landing-page .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.landing-page .reading-card {
-  min-height: 348px;
-  display: flex;
-  flex-direction: column;
-  padding: 38px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  background: var(--gradient-landing-card);
-  box-shadow: var(--elevation-1);
-  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
-}
-.landing-page .reading-card::before { content: ""; position: absolute; inset: 10px; border: 1px solid var(--effect-card-inset-border); border-radius: var(--radius-xs); pointer-events: none; }
-.landing-page .reading-card::after { content: ""; width: 240px; height: 150px; position: absolute; top: -96px; right: -66px; background: var(--effect-card-aura); pointer-events: none; }
-.landing-page .reading-card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: var(--elevation-2); }
-.landing-page .saju-card { background: var(--gradient-saju-card); }
-.landing-page .card-kicker { margin: 0; color: var(--text-editorial); font-family: var(--landing-sans); font-size: 11px; font-weight: 600; letter-spacing: .16em; }
-.landing-page .reading-card h3 { margin: 32px 0 12px; font-size: 40px; line-height: 1.28; letter-spacing: -.035em; }
-.landing-page .reading-card > p:not(.card-kicker) { max-width: var(--w-input); margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.75; }
-.landing-page .reading-card ul { list-style: none; padding: 0; margin: 20px 0 26px; color: var(--text-secondary); font-size: 13px; line-height: 1.85; }
-.landing-page .reading-card li::before { content: ""; width: 3px; height: 3px; display: inline-block; margin: 0 10px 3px 1px; border-radius: 50%; background: var(--accent-primary); box-shadow: var(--glow-dot); }
-.landing-page .reading-card .primary-button,
-.landing-page .reading-card .secondary-button { width: fit-content; margin-top: auto; position: relative; z-index: 1; font-family: var(--landing-sans); font-size: 13px; font-weight: 600; }
-.landing-page .reading-peek { padding: 0 0 20px; }
-.landing-page .reading-peek-card {
-  max-width: var(--w-read); margin: 0 auto; padding: 40px; border-radius: var(--radius-lg); text-align: center;
-  background: var(--gradient-panel); border: 1px solid var(--border-default); box-shadow: var(--elevation-2);
-}
-.landing-page .reading-peek-label { margin: 0 0 16px; color: var(--text-accent); font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .2em; text-transform: uppercase; }
-.landing-page .reading-peek-card blockquote { margin: 0 0 16px; font-size: 25px; line-height: 1.75; font-weight: 300; color: var(--text-accent-strong); }
-.landing-page .reading-peek-from { margin: 0; color: var(--text-muted); font-size: 12px; }
-
-.landing-page .how-it-works { padding: 42px 0 124px; }
-.landing-page .feature-row { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-default); }
-.landing-page .feature { padding: 34px; border-right: 1px solid var(--border-default); }
-.landing-page .feature:last-child { border-right: 0; }
-.landing-page .feature > span { color: var(--text-editorial); font: 600 11px/1 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .1em; }
-.landing-page .feature h3 { margin: 26px 0 10px; font-size: 25px; line-height: 1.4; }
+.landing-page .hero-question { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; margin: 26px 0 0; padding: 11px 20px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); background: var(--surface-record); color: var(--text-secondary); font-size: 14px; }
+.landing-page .hero-question-mark { flex: 0 0 auto; color: var(--text-accent); font-family: var(--landing-serif); font-size: 20px; line-height: 1; }
+.landing-page .hero-description { max-width: var(--w-read); margin: 24px auto 0; color: var(--text-secondary); font-size: 16px; line-height: 1.8; text-wrap: pretty; }
+.landing-page .hero-actions { display: flex; justify-content: center; gap: 12px; margin-top: 44px; }
+.landing-page .hero-actions a, .landing-page .closing-cta { min-width: 176px; min-height: 52px; justify-content: center; font-family: var(--landing-sans); font-size: 16px; }
+/* Every action on the landing is gold: a fill where it is the one next step, an outline where it repeats one. */
+.landing-page .outline-cta { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 13px 20px; border: 1px solid var(--accent-cta); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-cta) 6%, transparent); color: var(--accent-cta); font-size: 14px; font-weight: 600; transition: background .2s ease; }
+.landing-page .outline-cta:hover { background: color-mix(in srgb, var(--accent-cta) 12%, transparent); }
+.daily-band { padding: 34px 0; border-block: 1px solid var(--border-default); background: color-mix(in srgb, var(--accent-cta) 3.5%, transparent); }
+.daily-band-row { display: flex; align-items: center; gap: 28px; max-width: var(--w-wide); }
+.daily-band-card { flex: none; display: grid; place-items: center; width: 104px; aspect-ratio: .62; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--gradient-tarot-back); color: var(--text-accent-strong); box-shadow: var(--elevation-2); }
+.daily-band h2 { margin: 0 0 8px; font-family: var(--landing-sans); font-size: 20px; font-weight: 500; }
+.daily-band p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
+.daily-band .outline-cta { flex: none; margin-left: auto; padding-inline: 22px; }
+.landing-page .reading-peek { padding-top: 84px; }
+.landing-page .reading-peek-card { position: relative; max-width: var(--w-read); margin: 0 auto; padding: 44px 46px 40px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--gradient-panel); text-align: center; }
+/* The example is signed with a seal like a finished piece; a stamp's corner, not a surface radius. */
+.landing-page .reading-peek-seal { position: absolute; top: -11px; left: 50%; width: 22px; height: 22px; border-radius: 3px; background: var(--accent-seal); transform: translateX(-50%); }
+.landing-page .reading-peek-label { margin: 6px 0 18px; color: var(--text-muted); font-size: 11px; letter-spacing: .2em; }
+.landing-page .reading-peek-card blockquote { margin: 0; color: var(--text-primary); font-family: var(--landing-serif); font-size: 25px; font-weight: 300; line-height: 1.62; }
+.landing-page .reading-peek-from { margin: 20px 0 0; color: var(--text-muted); font-size: 12px; }
+.landing-page .reading-choice, .landing-page .how-it-works { padding-top: 84px; }
+.landing-page .landing-column { max-width: var(--w-wide); margin-inline: auto; }
+.landing-page .section-heading { margin-bottom: 36px; text-align: center; }
+.landing-page .section-heading .eyebrow { margin-bottom: 14px; }
+.landing-page .section-heading h2 { margin: 0; font-size: 40px; line-height: 1.25; letter-spacing: -.04em; }
+.landing-page .section-heading p:not(.eyebrow) { margin: 14px 0 0; color: var(--text-muted); font-size: 16px; }
+.landing-page .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.landing-page .reading-card { position: relative; display: flex; flex-direction: column; min-height: 300px; padding: 34px; overflow: hidden; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--gradient-panel); }
+/* Periwinkle and blue survive only as each path's top rule. */
+.landing-page .reading-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent-primary), transparent 78%); }
+.landing-page .saju-card::before { background: linear-gradient(90deg, var(--accent-secondary), transparent 78%); }
+.landing-page .card-kicker { margin: 0; color: var(--accent-cta); font-family: var(--landing-sans); font-size: 11px; font-weight: 700; letter-spacing: .16em; }
+.landing-page .reading-card h3 { margin: 22px 0 10px; font-size: 25px; line-height: 1.3; letter-spacing: -.03em; }
+.landing-page .reading-card > p:not(.card-kicker) { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.75; }
+.landing-page .reading-card ul { margin: 18px 0 26px; padding: 0; list-style: none; }
+.landing-page .reading-card li { position: relative; padding-left: 16px; color: var(--text-muted); font-size: 13px; line-height: 2; }
+.landing-page .reading-card li::before { content: ""; position: absolute; top: 11px; left: 0; width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted); }
+.landing-page .reading-card .outline-cta { align-self: flex-start; margin-top: auto; }
+.landing-page .feature-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.landing-page .feature { padding-top: 18px; border-top: 1px solid var(--border-default); }
+.landing-page .feature > span { color: var(--accent-cta); font-size: 12px; font-weight: 700; letter-spacing: .14em; font-variant-numeric: tabular-nums; }
+.landing-page .feature h3 { margin: 12px 0 8px; font-size: 20px; font-weight: 400; }
 .landing-page .feature p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
+.landing-page .landing-closing { margin-top: 84px; padding: 58px 0 64px; border-top: 1px solid var(--border-default); text-align: center; }
+.landing-page .landing-closing h2 { margin: 0; font-size: 32px; letter-spacing: -.035em; }
+.landing-page .closing-cta { margin-top: 26px; }
 .landing-page a:focus-visible { border-radius: var(--radius-xs); box-shadow: var(--focus-ring); }
 .site-footer { width: min(var(--w-page), calc(100% - 64px)); margin: auto; border-top: 1px solid var(--border-hairline); padding: 30px 0 44px; color: var(--text-subtle); font-size: 11px; display: flex; justify-content: space-between; gap: 20px; }
 .site-footer div { display: flex; align-items: center; gap: 22px; }
@@ -657,10 +598,6 @@ h1, h2, h3, blockquote {
 .legal { max-width: var(--w-read); }
 .legal h2 { margin-top: 40px; color: var(--text-accent-strong); }
 
-@media (max-width: 900px) {
-  .landing-page .reading-card { padding: 32px; }
-}
-
 @media (max-width: 760px) {
   .page-width { width: min(100% - 28px, 620px); }
   .site-header { width: calc(100% - 28px); height: 56px; }
@@ -676,26 +613,37 @@ h1, h2, h3, blockquote {
   .account-menu-panel.open a { padding: 0 14px; border-radius: var(--radius-xs); }
   .account-menu-panel.open .nav-cta { width: 100%; margin-top: 4px; }
   .nav-cta { padding: 9px 12px; }
-  .landing-page .landing-hero { min-height: 390px; padding-block: 58px 46px; }
-  .landing-page .landing-hero h1 { font-size: 40px; line-height: 1.18; }
-  .landing-page .hero-title-break { display: block; }
-  .landing-page .hero-description { margin-block: 22px 25px; font-size: 14px; line-height: 1.75; }
-  .landing-page .hero-actions { gap: 10px; }
-  .landing-page .hero-actions a { min-width: 144px; min-height: 46px; padding-inline: 18px; }
-  .landing-page .hero-question { margin-top: 18px; padding: 10px 16px; }
-  .landing-page .hero-question-text { font-size: 13px; }
-  .landing-page .picks-grid { grid-template-columns: 1fr; gap: 20px; }
-  .landing-page .reading-peek-card { padding: 28px 22px; border-radius: var(--radius-lg); }
-  .landing-page .choice-grid, .landing-page .feature-row, .result-cards { grid-template-columns: 1fr; }
-  .landing-page .reading-choice { padding: 34px 0 50px; }
-  .landing-page .section-heading { margin-bottom: 28px; }
-  .landing-page .section-heading h2 { font-size: 32px; }
-  .landing-page .reading-card { min-height: 310px; padding: 28px 24px; }
-  .landing-page .reading-card h3 { margin-top: 26px; font-size: 32px; }
-  .landing-page .how-it-works { padding: 34px 0 90px; }
-  .landing-page .feature { padding: 28px 10px; border-right: 0; border-bottom: 1px solid var(--border-default); }
-  .landing-page .feature:last-child { border-bottom: 0; }
+  .result-cards { grid-template-columns: 1fr; }
   .site-footer { width: calc(100% - 28px); flex-direction: column; align-items: flex-start; padding-bottom: 30px; }
+  .landing-sky { top: -56px; }
+  .landing-sky-wide { display: none; }
+  .landing-sky-narrow { display: block; }
+  .landing-page .landing-hero { padding-block: 84px 92px; }
+  .landing-page .eyebrow { margin-bottom: 16px; }
+  .landing-page .landing-hero h1 { font-size: 32px; }
+  .landing-page .hero-title-break { display: block; }
+  .landing-page .hero-question { margin-top: 20px; font-size: 13px; }
+  .landing-page .hero-description { margin-top: 18px; font-size: 14px; }
+  .landing-page .hero-actions { flex-direction: column; align-items: stretch; margin-top: 36px; padding-inline: 24px; }
+  .daily-band { padding: 26px 0; }
+  .daily-band-row { flex-direction: column; align-items: stretch; gap: 16px; text-align: center; }
+  .daily-band-card { width: 76px; margin: 0 auto; }
+  .daily-band h2 { font-size: 16px; }
+  .daily-band p { font-size: 13px; }
+  .daily-band .outline-cta { justify-content: center; margin: 0; }
+  .landing-page .reading-peek, .landing-page .reading-choice, .landing-page .how-it-works { padding-top: 52px; }
+  .landing-page .reading-peek-card { padding: 34px 24px 30px; }
+  .landing-page .reading-peek-card blockquote { font-size: 20px; }
+  .landing-page .section-heading { margin-bottom: 24px; }
+  .landing-page .section-heading h2 { font-size: 25px; }
+  .landing-page .section-heading p:not(.eyebrow) { margin-top: 10px; font-size: 14px; }
+  .landing-page .choice-grid { grid-template-columns: 1fr; gap: 14px; }
+  .landing-page .feature-row { grid-template-columns: 1fr; gap: 24px; }
+  .landing-page .reading-card { min-height: 0; padding: 26px; }
+  .landing-page .reading-card h3 { margin-top: 16px; font-size: 20px; }
+  .landing-page .landing-closing { margin-top: 52px; padding: 40px 0 44px; }
+  .landing-page .landing-closing h2 { font-size: 25px; }
+  .landing-page .closing-cta { width: 100%; }
   .reading-shell { padding-top: 28px; }
   body:has(.reading-shell .reading-actions) { padding-bottom: calc(120px + env(safe-area-inset-bottom)); }
   .reading-actions { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; max-width: none; margin: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); background: var(--surface-sticky); border-top: 1px solid var(--border-hairline); backdrop-filter: blur(12px); }
@@ -742,7 +690,6 @@ h1, h2, h3, blockquote {
   .empty-state, .auth-card { padding: 34px 22px; }
   .record-card { flex-direction: column; padding: 22px; }
   .record-meta { min-width: 0; flex-direction: row; align-items: center; }
-  .landing-page .reading-peek-card blockquote { font-size: 20px; }
   .wizard-heading h1 { font-size: 32px; }
   .form-shell .wizard-heading { margin-top: 32px; }
   .form-shell .wizard-heading h1 { font-size: 25px; }
