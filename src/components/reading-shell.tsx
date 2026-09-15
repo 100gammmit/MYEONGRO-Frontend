@@ -11,6 +11,7 @@ export function ReadingShell({
   description,
   actions,
   showHomeLink = true,
+  form = false,
   children,
   ...progress
 }: {
@@ -19,6 +20,8 @@ export function ReadingShell({
   description?: string;
   actions?: ReactNode;
   showHomeLink?: boolean;
+  /** Input wizards sit in one reading column with the title aligned to the card's edge. */
+  form?: boolean;
   children: ReactNode;
 } & Progress) {
   const { step, totalSteps, stepLabel } = progress;
@@ -26,7 +29,7 @@ export function ReadingShell({
   const width = stepLabel !== undefined || !step || !totalSteps ? 0 : (step / totalSteps) * 100;
 
   return (
-    <section className={actions ? "reading-shell page-width has-actions" : "reading-shell page-width"}>
+    <section className={form ? "reading-shell page-width form-shell" : "reading-shell page-width"}>
       {showHomeLink ? (
         <Link href="/" className="back-link">
           ← 홈으로

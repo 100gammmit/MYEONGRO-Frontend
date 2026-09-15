@@ -309,6 +309,12 @@ h1, h2, h3, blockquote {
 .site-footer a { display: inline-flex; align-items: center; min-height: 44px; }
 
 .reading-shell { padding: 46px 0 110px; max-width: var(--w-wide); }
+.reading-shell.form-shell { max-width: var(--w-read); }
+/* Input steps line the title up with the card's left edge; only the loading step stays centred. */
+.form-shell .wizard-heading { text-align: left; margin: 44px 0 28px; }
+.form-shell .wizard-heading h1 { font-size: 32px; margin-bottom: 12px; }
+.form-shell .wizard-heading p { margin: 0; font-size: 14px; }
+.form-shell:has(.saju-loading) .wizard-heading { text-align: center; }
 .reading-actions { max-width: var(--w-read); margin: 28px auto 0; display: flex; flex-direction: column; gap: 10px; }
 .back-link { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; color: var(--text-muted); font-size: 13px; }
 .back-link:hover { color: var(--text-primary); }
@@ -379,7 +385,7 @@ h1, h2, h3, blockquote {
 .credit-notice { max-width: var(--w-read); margin: 14px auto; color: var(--text-secondary); text-align: center; font-size: 13px; line-height: 1.6; }
 .credit-notice p { margin: 0 0 10px; }
 .credit-notice .secondary-button { margin: auto; padding: 10px 15px; }
-.saju-option-list { display: grid; gap: 10px; }
+.saju-option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .saju-option { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 12px; padding: 16px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); cursor: pointer; transition: border-color .2s ease, background .2s ease; }
 .saju-option:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-tint-3); }
 .saju-option input, .saju-choice input, .saju-category input { width: auto; margin-top: 3px; accent-color: var(--accent-strong); }
@@ -391,7 +397,7 @@ h1, h2, h3, blockquote {
 .saju-choice-row.chips .saju-choice input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
 .saju-choice-row.chips .saju-choice:has(input:focus-visible) { outline: 2px solid var(--focus-outline); outline-offset: 3px; }
 /* Time and province open right under the precision choice; the gold rule marks them as depending on it. */
-.birth-reveal { margin-top: -6px; padding-left: 14px; border-left: 2px solid color-mix(in srgb, var(--accent-cta) 35%, transparent); animation: birth-reveal .18s ease-out; }
+.birth-reveal { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; align-items: start; margin-top: -6px; padding-left: 14px; border-left: 2px solid color-mix(in srgb, var(--accent-cta) 35%, transparent); animation: birth-reveal .18s ease-out; }
 @keyframes birth-reveal { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 .field-inline-error { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
 .field-inline-error .form-error { margin: 0; }
@@ -714,6 +720,10 @@ h1, h2, h3, blockquote {
   .record-meta { min-width: 0; flex-direction: row; align-items: center; }
   .landing-page .reading-peek-card blockquote { font-size: 20px; }
   .wizard-heading h1 { font-size: 32px; }
+  .form-shell .wizard-heading { margin-top: 32px; }
+  .form-shell .wizard-heading h1 { font-size: 25px; }
+  .form-shell .wizard-heading p { font-size: 13px; }
+  .saju-option-list, .birth-reveal { grid-template-columns: 1fr; }
   .draw-complete-grid .revealed-card strong { font-size: 20px; }
   .result-hero blockquote { font-size: 32px; }
   .simple-page > h1 { font-size: 40px; }

@@ -452,6 +452,7 @@ export function SajuExperience() {
     return (
       <ReadingShell
         eyebrow="AI SAJU"
+        form
         title="사주 리딩을 시작하기 전에"
         description="출생 정보는 리딩 생성과 기록 복원을 위해 저장되며, 내 기록에서 언제든 삭제할 수 있어요."
         stepLabel="시작하기 전에"
@@ -470,6 +471,7 @@ export function SajuExperience() {
     return (
       <ReadingShell
         eyebrow="AI SAJU"
+        form
         title="지금 가장 살펴보고 싶은 한 가지는 무엇인가요?"
         description="관심 분야를 고른 뒤, 현재 선택에 도움이 될 질문을 하나 적어주세요."
         step={1}
@@ -547,6 +549,7 @@ export function SajuExperience() {
     return (
       <ReadingShell
         eyebrow="AI SAJU"
+        form
         title="출생 정보를 알려주세요"
         description="출생 정보는 리딩 생성과 기록 복원을 위해 저장되며, 내 기록에서 언제든 삭제할 수 있어요."
         step={2}
@@ -679,6 +682,7 @@ export function SajuExperience() {
     return (
       <ReadingShell
         eyebrow="AI SAJU"
+        form
         title="사주의 흐름을 읽고 있어요"
         step={4}
         totalSteps={TOTAL_STEPS}
@@ -705,6 +709,7 @@ export function SajuExperience() {
   return (
     <ReadingShell
       eyebrow="AI SAJU"
+      form
       title="입력한 내용을 확인해 주세요"
       description="출생정보와 계산 기준은 내 기록에 저장되지만 질문 원문은 저장되지 않아요."
       step={3}
@@ -721,7 +726,7 @@ export function SajuExperience() {
               disabled={submitting || creditAccess.status !== "allowed"}
               onClick={() => void submitReading()}
               type="button"
-            >사주 리딩 생성 · {creditCost ?? "…"} 크레딧</button>
+            >사주 리딩 생성 · {creditCost ?? "…"}크레딧</button>
           </div>
         </>
       )}

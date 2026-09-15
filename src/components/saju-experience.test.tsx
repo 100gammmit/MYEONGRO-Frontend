@@ -667,11 +667,12 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse(birthPlaces()));
     const pushState = vi.spyOn(window.history, "pushState");
     await startWithAcceptedConsent();
-    expect(window.location.search).toBe("?step=question");
+    // History entries are written in an effect after the step renders, so wait for them under load.
+    await waitFor(() => expect(window.location.search).toBe("?step=question"));
     expect(pushState).not.toHaveBeenCalled();
 
     await reachBirth();
-    expect(window.location.search).toBe("?step=birth");
+    await waitFor(() => expect(window.location.search).toBe("?step=birth"));
     expect(pushState).toHaveBeenCalledTimes(1);
 
     fireEvent(window, new PopStateEvent("popstate", { state: { sajuStep: "question" } }));
