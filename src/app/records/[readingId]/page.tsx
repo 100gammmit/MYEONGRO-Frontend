@@ -8,6 +8,7 @@ import { SajuReadingResult } from "@/components/saju-reading-result";
 import { TarotReadingResult } from "@/components/tarot-reading-result";
 import { parseSajuReadingView } from "@/domain/saju/result";
 import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
+import { formatReadingDate } from "@/domain/reading/reading-date";
 import {
   TAROT_SPREADS,
   isAiTarotSpreadType,
@@ -77,8 +78,7 @@ export default async function ReadingDetailPage({
         record={{
           backHref: "/records",
           backLabel: "내 기록",
-          dateLabel: new Intl.DateTimeFormat("ko-KR", { dateStyle: "medium" })
-            .format(new Date(reading.createdAt)),
+          dateLabel: formatReadingDate(reading.createdAt),
           footer: <ReadingRecordActions readingId={reading.id} />,
         }}
       />
