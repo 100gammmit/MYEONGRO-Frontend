@@ -72,6 +72,7 @@ describe("ReadingDetailPage", () => {
         ],
       },
       result: {
+        questionRedirected: false,
         title: "관계의 흐름",
         summary: "천천히 확인할 시기입니다.",
         sections: [
@@ -115,6 +116,7 @@ describe("ReadingDetailPage", () => {
         ],
       },
       result: {
+        questionRedirected: false,
         title: "관계의 흐름",
         summary: "천천히 확인할 시기입니다.",
         sections: [

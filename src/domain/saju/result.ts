@@ -147,6 +147,7 @@ const sectionSchema = z.object({
 
 const resultSchema = z.object({
   readingMode: readingModeSchema.default("standard"),
+  questionRedirected: z.boolean(),
   title: textSchema,
   summary: textSchema,
   natalSections: z.array(sectionSchema).length(4),
@@ -163,7 +164,15 @@ const resultSchema = z.object({
   }).strict(),
   guidance: z.array(textSchema).min(1).max(2),
   disclaimer: textSchema,
-}).strict();
+}).strict().superRefine((result, context) => {
+  if (result.questionRedirected && result.readingMode === "standard") {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["questionRedirected"],
+      message: "전환된 질문에는 운세 리딩 모드가 필요합니다.",
+    });
+  }
+});
 
 const completedRecordCommon = {
   id: textSchema,

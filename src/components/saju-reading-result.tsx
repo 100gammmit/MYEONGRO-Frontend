@@ -6,23 +6,14 @@ import type {
   SajuEvidenceKey,
   SajuReadingView,
 } from "@/domain/saju/result";
+import {
+  fortuneReadingModeLabel,
+  sajuFocusAreaLabel,
+  sajuReadingModeNotice,
+} from "@/domain/reading/reading-mode";
 
 import { ReadingModeNotice } from "./reading-mode-notice";
 import { SajuFollowUpAction } from "./saju-follow-up-action";
-
-const FOCUS_LABELS = {
-  self: "나의 성향",
-  career: "일·진로",
-  relationship: "관계",
-  life_money: "재정·생활",
-} as const;
-
-const READING_MODE_LABELS = {
-  health_fortune: "건강운",
-  money_fortune: "금전운",
-  relationship_fortune: "관계운",
-  career_life_fortune: "직업·생활운",
-} as const;
 
 const PILLAR_LABELS = {
   year: "연주",
@@ -75,13 +66,18 @@ export function SajuReadingResult({
     (period) => period.startYear <= snapshot.targetYear && snapshot.targetYear <= period.endYear,
   );
   const resultFocusLabel = view.result.readingMode === "standard"
-    ? FOCUS_LABELS[view.input.focusArea]
-    : READING_MODE_LABELS[view.result.readingMode];
+    ? sajuFocusAreaLabel(view.input.focusArea)
+    : fortuneReadingModeLabel(view.result.readingMode);
+  const modeNotice = sajuReadingModeNotice(
+    view.input.focusArea,
+    view.result.readingMode,
+    view.result.questionRedirected,
+  );
 
   return (
     <article className="saju-result page-width">
       <Link className="back-link" href={backHref}>← {backLabel}</Link>
-      <ReadingModeNotice mode={view.result.readingMode} />
+      <ReadingModeNotice mode={view.result.readingMode} body={modeNotice} />
       <header className="saju-result-hero">
         <p className="eyebrow">AI SAJU · {resultFocusLabel}</p>
         <h1>{view.result.title}</h1>

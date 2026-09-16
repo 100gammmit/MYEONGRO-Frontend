@@ -91,7 +91,10 @@ export function TarotReadingResult({
       {...progress}
     >
       {/* The changed focus is explained before the first card, whose position labels already reflect it. */}
-      <ReadingModeNotice mode={result.readingMode} />
+      <ReadingModeNotice
+        mode={result.readingMode}
+        visible={result.questionRedirected}
+      />
       <div className="result-reveal-list">
         {revealedPositions.map((position, index) => {
           const card = CARD_INDEX.get(cardIds[index]);

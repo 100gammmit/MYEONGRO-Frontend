@@ -57,6 +57,7 @@ function completedReading() {
       ],
     },
     result: {
+      questionRedirected: false,
       title: "오늘의 리딩",
       summary: "오늘의 흐름을 확인했어요.",
       sections: [

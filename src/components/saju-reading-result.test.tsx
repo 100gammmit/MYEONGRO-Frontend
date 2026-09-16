@@ -64,12 +64,12 @@ describe("SajuReadingResult", () => {
     expect(takeRememberedSajuBirthProfile()).toBeNull();
   });
 
-  it("explains a redirected health fortune without rendering the original question", () => {
+  it("explains when the question is read through a different fortune area than the selected focus", () => {
     const view = sajuReadingView();
     view.result.readingMode = "health_fortune";
     render(<SajuReadingResult view={view} />);
 
-    expect(screen.getByText("건강·돈·관계·일에 관한 질문은 결정 대신 운의 흐름을 읽어요. 명로는 중대한 결정을 대신할 수 없어요."))
+    expect(screen.getByText("일·진로를 관심 분야로 선택했지만, 질문 내용에 맞춰 건강운으로 바꿔 읽었어요."))
       .toBeInTheDocument();
     expect(screen.getByText("AI SAJU · 건강운")).toBeInTheDocument();
     expect(screen.queryByText("AI SAJU · 일·진로")).not.toBeInTheDocument();
@@ -85,6 +85,27 @@ describe("SajuReadingResult", () => {
     expect(notice).toHaveTextContent("건강운을 중심으로 읽었어요");
     const title = screen.getByRole("heading", { level: 1 });
     expect(notice.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("explains a redirected decision even when the resulting mode matches the selected focus", () => {
+    const view = sajuReadingView();
+    view.result.readingMode = "career_life_fortune";
+    view.result.questionRedirected = true;
+    render(<SajuReadingResult view={view} />);
+
+    expect(screen.getByText("건강·돈·관계·일에 관한 질문은 결정 대신 운의 흐름을 읽어요. 명로는 중대한 결정을 대신할 수 없어요."))
+      .toBeInTheDocument();
+  });
+
+  it("does not show a redirect notice for an explicit fortune request matching the selected focus", () => {
+    const view = sajuReadingView();
+    view.input.focusArea = "life_money";
+    view.result.readingMode = "money_fortune";
+    view.result.questionRedirected = false;
+    render(<SajuReadingResult view={view} />);
+
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+    expect(screen.getByText("AI SAJU · 금전운")).toBeInTheDocument();
   });
 
   it("shows no redirect notice for a standard saju reading", () => {

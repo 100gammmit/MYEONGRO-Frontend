@@ -54,6 +54,7 @@ function completedSajuRecord() {
       },
     },
     result: {
+      questionRedirected: false,
       title: "변화를 준비하며 기준을 세우는 해",
       summary: "가능성을 현실 정보와 함께 살펴보세요.",
       natalSections: [
@@ -87,6 +88,13 @@ describe("parseSajuReadingView", () => {
     Object.assign(legacyDuplicate.result.questionReading, { focusArea: "career" });
 
     expect(parseSajuReadingView(legacyDuplicate)).toBeNull();
+  });
+
+  it("rejects a redirected question in standard mode", () => {
+    const invalid = completedSajuRecord();
+    invalid.result.questionRedirected = true;
+
+    expect(parseSajuReadingView(invalid)).toBeNull();
   });
 
   it("decodes a current v3 unknown-time record without a birth place", () => {

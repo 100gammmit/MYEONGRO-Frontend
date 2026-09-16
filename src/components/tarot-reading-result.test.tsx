@@ -12,6 +12,7 @@ describe("TarotReadingResult", () => {
         cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
         result={{
           readingMode: "standard",
+          questionRedirected: false,
           title: "오늘의 리딩",
           summary: "오늘의 흐름을 확인했어요.",
           sections: definition.positions.map((position) => ({
@@ -44,6 +45,7 @@ describe("TarotReadingResult", () => {
         cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
         result={{
           readingMode: "standard",
+          questionRedirected: false,
           title: "오늘의 리딩",
           summary: "오늘의 흐름을 확인했어요.",
           sections: definition.positions.map((position) => ({
@@ -80,6 +82,7 @@ describe("TarotReadingResult", () => {
         }}
         result={{
           readingMode: "standard",
+          questionRedirected: false,
           title: "오늘의 리딩",
           summary: "오늘의 흐름을 확인했어요.",
           sections: definition.positions.map((position) => ({
@@ -111,6 +114,7 @@ describe("TarotReadingResult", () => {
         cardIds={MAJOR_ARCANA.slice(0, 5).map((card) => card.id)}
         result={{
           readingMode: "money_fortune",
+          questionRedirected: true,
           title: "금전운의 방향",
           summary: "지금은 지키는 쪽이 좋아요.",
           sections: definition.positions.map((position) => ({
@@ -139,6 +143,7 @@ describe("TarotReadingResult", () => {
         cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
         result={{
           readingMode: "standard",
+          questionRedirected: false,
           title: "오늘의 리딩",
           summary: "오늘의 흐름을 확인했어요.",
           sections: definition.positions.map((position) => ({
@@ -163,6 +168,7 @@ describe("TarotReadingResult", () => {
         cardIds={MAJOR_ARCANA.slice(0, 5).map((card) => card.id)}
         result={{
           readingMode: "money_fortune",
+          questionRedirected: true,
           title: "금전운의 방향",
           summary: "지금은 지키는 쪽이 좋아요.",
           sections: definition.positions.map((position) => ({
@@ -196,6 +202,7 @@ describe("TarotReadingResult", () => {
         cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
         result={{
           readingMode,
+          questionRedirected: false,
           title: "운세의 방향",
           summary: "지금 흐름을 분명하게 읽었어요.",
           sections: definition.positions.map((position) => ({

@@ -11,6 +11,7 @@ import {
 
 export type TarotReadingResultData = {
   readingMode: ReadingMode;
+  questionRedirected: boolean;
   title: string;
   summary: string;
   sections: Array<{
@@ -70,7 +71,9 @@ export function parseTarotResultView(reading: StoredTarotReading): TarotResultVi
     || typeof result.title !== "string"
     || typeof result.summary !== "string"
     || typeof result.disclaimer !== "string"
+    || typeof result.questionRedirected !== "boolean"
     || readingMode === null
+    || (result.questionRedirected && readingMode === "standard")
   ) {
     return null;
   }
@@ -109,6 +112,7 @@ export function parseTarotResultView(reading: StoredTarotReading): TarotResultVi
     cardIds,
     result: {
       readingMode,
+      questionRedirected: result.questionRedirected,
       title: result.title,
       summary: result.summary,
       sections,

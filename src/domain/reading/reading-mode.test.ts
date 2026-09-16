@@ -4,6 +4,7 @@ import {
   parseReadingMode,
   readingModeHeadline,
   readingModeNotice,
+  sajuReadingModeNotice,
   tarotPositionLabel,
 } from "./reading-mode";
 
@@ -37,5 +38,16 @@ describe("reading mode", () => {
       expect(readingModeHeadline(mode)).not.toContain("바꿔");
     }
     expect(readingModeNotice("standard")).toBeNull();
+  });
+
+  it("distinguishes a redirected decision from an explicit fortune request in saju", () => {
+    expect(sajuReadingModeNotice("career", "career_life_fortune", true))
+      .toContain("중대한 결정을 대신할 수 없어요");
+    expect(sajuReadingModeNotice("life_money", "money_fortune", false)).toBeNull();
+    expect(sajuReadingModeNotice("career", "health_fortune", false))
+      .toBe("일·진로를 관심 분야로 선택했지만, 질문 내용에 맞춰 건강운으로 바꿔 읽었어요.");
+    expect(sajuReadingModeNotice("career", "health_fortune", true))
+      .toBe("일·진로를 관심 분야로 선택했지만, 질문의 구체적인 결정은 대신하지 않고 건강운으로 바꿔 읽었어요.");
+    expect(sajuReadingModeNotice("career", "standard", false)).toBeNull();
   });
 });
