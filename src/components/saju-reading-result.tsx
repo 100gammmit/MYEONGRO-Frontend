@@ -77,7 +77,7 @@ export function SajuReadingResult({
   return (
     <article className="saju-result page-width">
       <Link className="back-link" href={backHref}>← {backLabel}</Link>
-      <ReadingModeNotice mode={view.result.readingMode} body={modeNotice} />
+      <ReadingModeNotice notice={modeNotice} />
       <header className="saju-result-hero">
         <p className="eyebrow">AI SAJU · {resultFocusLabel}</p>
         <h1>{view.result.title}</h1>

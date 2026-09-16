@@ -69,7 +69,7 @@ describe("SajuReadingResult", () => {
     view.result.readingMode = "health_fortune";
     render(<SajuReadingResult view={view} />);
 
-    expect(screen.getByText("일·진로를 관심 분야로 선택했지만, 질문 내용에 맞춰 건강운으로 바꿔 읽었어요."))
+    expect(screen.getByText("일·진로를 관심 분야로 선택했지만, 질문 내용에 맞춰 건강운으로 읽었어요."))
       .toBeInTheDocument();
     expect(screen.getByText("AI SAJU · 건강운")).toBeInTheDocument();
     expect(screen.queryByText("AI SAJU · 일·진로")).not.toBeInTheDocument();
@@ -93,8 +93,9 @@ describe("SajuReadingResult", () => {
     view.result.questionRedirected = true;
     render(<SajuReadingResult view={view} />);
 
-    expect(screen.getByText("건강·돈·관계·일에 관한 질문은 결정 대신 운의 흐름을 읽어요. 명로는 중대한 결정을 대신할 수 없어요."))
-      .toBeInTheDocument();
+    const notice = screen.getByRole("note");
+    expect(notice).toHaveTextContent("질문 대신 직업·생활운을 읽었어요");
+    expect(notice).toHaveTextContent("중대한 결정이 걸린 질문은 명로가 대신 답할 수 없어요.");
   });
 
   it("does not show a redirect notice for an explicit fortune request matching the selected focus", () => {

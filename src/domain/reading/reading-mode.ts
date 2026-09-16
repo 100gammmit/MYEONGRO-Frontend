@@ -12,8 +12,10 @@ export type ReadingMode = z.infer<typeof readingModeSchema>;
 
 export type SajuFocusArea = "self" | "career" | "relationship" | "life_money";
 
-const FORTUNE_NOTICE =
-  "건강·돈·관계·일에 관한 질문은 결정 대신 운의 흐름을 읽어요. 명로는 중대한 결정을 대신할 수 없어요.";
+export type ReadingModeNoticeCopy = { headline: string; body: string };
+
+const REDIRECT_BODY =
+  "중대한 결정이 걸린 질문은 명로가 대신 답할 수 없어요. 결정은 직접 내려 주시고, 리딩은 흐름만 참고해 주세요.";
 
 const REDIRECTED_CHOICE_LABELS: Record<string, string> = {
   emotion: "현재의 운",
@@ -35,14 +37,6 @@ export function parseReadingMode(value: unknown): ReadingMode | null {
   return parsed.success ? parsed.data : null;
 }
 
-const HEADLINE: Record<ReadingMode, string | null> = {
-  standard: null,
-  health_fortune: "건강운을 중심으로 읽었어요",
-  money_fortune: "금전운을 중심으로 읽었어요",
-  relationship_fortune: "관계운을 중심으로 읽었어요",
-  career_life_fortune: "직업·생활운을 중심으로 읽었어요",
-};
-
 const SAJU_FOCUS_LABELS: Record<SajuFocusArea, string> = {
   self: "나의 성향",
   career: "일·진로",
@@ -63,14 +57,6 @@ const READING_MODE_LABELS: Record<Exclude<ReadingMode, "standard">, string> = {
   career_life_fortune: "직업·생활운",
 };
 
-export function readingModeNotice(mode: ReadingMode): string | null {
-  return mode === "standard" ? null : FORTUNE_NOTICE;
-}
-
-export function readingModeHeadline(mode: ReadingMode): string | null {
-  return HEADLINE[mode];
-}
-
 export function sajuFocusAreaLabel(focusArea: SajuFocusArea): string {
   return SAJU_FOCUS_LABELS[focusArea];
 }
@@ -79,22 +65,41 @@ export function fortuneReadingModeLabel(mode: Exclude<ReadingMode, "standard">):
   return READING_MODE_LABELS[mode];
 }
 
+// Only a decision question the server turned into a fortune gets this notice; asking for the fortune itself gets none.
+export function redirectedReadingNotice(
+  mode: ReadingMode,
+  questionRedirected: boolean,
+): ReadingModeNoticeCopy | null {
+  if (mode === "standard" || !questionRedirected) return null;
+  return {
+    headline: `질문 대신 ${fortuneReadingModeLabel(mode)}을 읽었어요`,
+    body: REDIRECT_BODY,
+  };
+}
+
+// The redirect notice wins; otherwise saju explains only a fortune that differs from the chosen focus area.
 export function sajuReadingModeNotice(
   focusArea: SajuFocusArea,
   mode: ReadingMode,
   questionRedirected: boolean,
-): string | null {
+): ReadingModeNoticeCopy | null {
   if (mode === "standard") return null;
-  const focusMismatch = SAJU_MODE_BY_FOCUS[focusArea] !== mode;
-  if (!questionRedirected && !focusMismatch) return null;
+  const redirected = redirectedReadingNotice(mode, questionRedirected);
+  if (redirected) return redirected;
+  if (SAJU_MODE_BY_FOCUS[focusArea] === mode) return null;
 
-  if (focusMismatch) {
-    const prefix = `${sajuFocusAreaLabel(focusArea)}를 관심 분야로 선택했지만, `;
-    return questionRedirected
-      ? `${prefix}질문의 구체적인 결정은 대신하지 않고 ${fortuneReadingModeLabel(mode)}으로 바꿔 읽었어요.`
-      : `${prefix}질문 내용에 맞춰 ${fortuneReadingModeLabel(mode)}으로 바꿔 읽었어요.`;
-  }
-  return FORTUNE_NOTICE;
+  const fortune = fortuneReadingModeLabel(mode);
+  return {
+    headline: `${fortune}을 중심으로 읽었어요`,
+    body: `${withObjectParticle(sajuFocusAreaLabel(focusArea))} 관심 분야로 선택했지만, 질문 내용에 맞춰 ${fortune}으로 읽었어요.`,
+  };
+}
+
+// 을 after a final consonant (나의 성향을, 재정·생활을), 를 otherwise (일·진로를, 관계를).
+function withObjectParticle(word: string): string {
+  const syllable = word.charCodeAt(word.length - 1) - 0xac00;
+  const hasFinalConsonant = syllable >= 0 && syllable < 11172 && syllable % 28 !== 0;
+  return `${word}${hasFinalConsonant ? "을" : "를"}`;
 }
 
 export function tarotPositionLabel(

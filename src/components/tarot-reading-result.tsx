@@ -8,7 +8,7 @@ import {
   TAROT_SPREADS,
   type AiTarotSpreadType,
 } from "@/domain/tarot";
-import { tarotPositionLabel } from "@/domain/reading/reading-mode";
+import { redirectedReadingNotice, tarotPositionLabel } from "@/domain/reading/reading-mode";
 import type { TarotReadingResultData } from "@/domain/tarot/result-view";
 import { ReadingModeNotice } from "./reading-mode-notice";
 import { ReadingShell } from "./reading-shell";
@@ -91,10 +91,7 @@ export function TarotReadingResult({
       {...progress}
     >
       {/* The changed focus is explained before the first card, whose position labels already reflect it. */}
-      <ReadingModeNotice
-        mode={result.readingMode}
-        visible={result.questionRedirected}
-      />
+      <ReadingModeNotice notice={redirectedReadingNotice(result.readingMode, result.questionRedirected)} />
       <div className="result-reveal-list">
         {revealedPositions.map((position, index) => {
           const card = CARD_INDEX.get(cardIds[index]);

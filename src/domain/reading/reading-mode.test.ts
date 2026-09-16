@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   parseReadingMode,
-  readingModeHeadline,
-  readingModeNotice,
+  redirectedReadingNotice,
   sajuReadingModeNotice,
   tarotPositionLabel,
 } from "./reading-mode";
+
+const REDIRECT_BODY = "중대한 결정이 걸린 질문은 명로가 대신 답할 수 없어요. 결정은 직접 내려 주시고, 리딩은 흐름만 참고해 주세요.";
 
 describe("reading mode", () => {
   it("keeps old records compatible and rejects unknown modes", () => {
@@ -15,8 +16,7 @@ describe("reading mode", () => {
     expect(parseReadingMode("unknown")).toBeNull();
   });
 
-  it("provides server-owned redirect copy and neutral choice labels", () => {
-    expect(readingModeNotice("health_fortune")).toContain("운의 흐름을 읽어요");
+  it("provides neutral choice labels for fortune readings", () => {
     expect(tarotPositionLabel("money_fortune", "option_a", "선택 A"))
       .toBe("운을 돕는 요소");
     expect(tarotPositionLabel("health_fortune", "emotion", "지금의 감정"))
@@ -26,28 +26,40 @@ describe("reading mode", () => {
     expect(tarotPositionLabel("standard", "option_a", "선택 A")).toBe("선택 A");
   });
 
-  it("names the fortune a redirected reading focused on, and nothing for a standard one", () => {
-    expect(readingModeHeadline("money_fortune")).toBe("금전운을 중심으로 읽었어요");
-    expect(readingModeHeadline("career_life_fortune")).toBe("직업·생활운을 중심으로 읽었어요");
-    expect(readingModeHeadline("standard")).toBeNull();
-  });
-
-  it("tells every fortune reading that a reading cannot make the decision", () => {
+  it("explains a redirected decision question for every fortune, and nothing for an explicit request", () => {
+    expect(redirectedReadingNotice("money_fortune", true)).toEqual({
+      headline: "질문 대신 금전운을 읽었어요",
+      body: REDIRECT_BODY,
+    });
     for (const mode of ["health_fortune", "money_fortune", "relationship_fortune", "career_life_fortune"] as const) {
-      expect(readingModeNotice(mode)).toContain("명로는 중대한 결정을 대신할 수 없어요.");
-      expect(readingModeHeadline(mode)).not.toContain("바꿔");
+      expect(redirectedReadingNotice(mode, true)?.body).toBe(REDIRECT_BODY);
+      expect(redirectedReadingNotice(mode, false)).toBeNull();
     }
-    expect(readingModeNotice("standard")).toBeNull();
+    expect(redirectedReadingNotice("standard", false)).toBeNull();
   });
 
-  it("distinguishes a redirected decision from an explicit fortune request in saju", () => {
-    expect(sajuReadingModeNotice("career", "career_life_fortune", true))
-      .toContain("중대한 결정을 대신할 수 없어요");
+  it("puts the redirect notice first in saju and otherwise explains only a focus mismatch", () => {
+    expect(sajuReadingModeNotice("career", "career_life_fortune", true)?.headline)
+      .toBe("질문 대신 직업·생활운을 읽었어요");
+    expect(sajuReadingModeNotice("career", "health_fortune", true)).toEqual({
+      headline: "질문 대신 건강운을 읽었어요",
+      body: REDIRECT_BODY,
+    });
+    expect(sajuReadingModeNotice("career", "health_fortune", false)).toEqual({
+      headline: "건강운을 중심으로 읽었어요",
+      body: "일·진로를 관심 분야로 선택했지만, 질문 내용에 맞춰 건강운으로 읽었어요.",
+    });
     expect(sajuReadingModeNotice("life_money", "money_fortune", false)).toBeNull();
-    expect(sajuReadingModeNotice("career", "health_fortune", false))
-      .toBe("일·진로를 관심 분야로 선택했지만, 질문 내용에 맞춰 건강운으로 바꿔 읽었어요.");
-    expect(sajuReadingModeNotice("career", "health_fortune", true))
-      .toBe("일·진로를 관심 분야로 선택했지만, 질문의 구체적인 결정은 대신하지 않고 건강운으로 바꿔 읽었어요.");
     expect(sajuReadingModeNotice("career", "standard", false)).toBeNull();
+  });
+
+  it.each([
+    ["self", "나의 성향을"],
+    ["career", "일·진로를"],
+    ["relationship", "관계를"],
+    ["life_money", "재정·생활을"],
+  ] as const)("uses the right object particle after the %s focus label", (focusArea, phrase) => {
+    expect(sajuReadingModeNotice(focusArea, "health_fortune", false)?.body)
+      .toContain(`${phrase} 관심 분야로 선택했지만`);
   });
 });

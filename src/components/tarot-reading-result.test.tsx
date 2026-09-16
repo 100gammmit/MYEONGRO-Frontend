@@ -130,8 +130,8 @@ describe("TarotReadingResult", () => {
     );
 
     const notice = screen.getByRole("note");
-    expect(notice).toHaveTextContent("금전운을 중심으로 읽었어요");
-    expect(notice).toHaveTextContent("명로는 중대한 결정을 대신할 수 없어요.");
+    expect(notice).toHaveTextContent("질문 대신 금전운을 읽었어요");
+    expect(notice).toHaveTextContent("중대한 결정이 걸린 질문은 명로가 대신 답할 수 없어요.");
     const reveal = screen.getByRole("button", { name: "첫 카드 공개" });
     expect(notice.compareDocumentPosition(reveal) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
@@ -153,6 +153,31 @@ describe("TarotReadingResult", () => {
           })),
           guidance: ["작은 행동을 시작하세요."],
           disclaimer: "자기 성찰을 위한 참고 정보입니다.",
+        }}
+        spreadType="mind_three_card"
+      />,
+    );
+
+    expect(screen.queryByRole("note")).not.toBeInTheDocument();
+  });
+
+  it("shows no notice when the fortune itself was asked for", () => {
+    const definition = TAROT_SPREADS.mind_three_card;
+    render(
+      <TarotReadingResult
+        cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
+        result={{
+          readingMode: "money_fortune",
+          questionRedirected: false,
+          title: "금전운의 방향",
+          summary: "들어오는 쪽이 조금 더 커요.",
+          sections: definition.positions.map((position) => ({
+            position: position.id,
+            heading: "흐름",
+            body: "카드 해석",
+          })),
+          guidance: ["오늘 쓸 돈을 먼저 정해 보는 건 어때요?"],
+          disclaimer: "오락과 자기 성찰을 위한 참고입니다.",
         }}
         spreadType="mind_three_card"
       />,
@@ -187,7 +212,7 @@ describe("TarotReadingResult", () => {
       fireEvent.click(screen.getByRole("button", { name: index === 0 ? "첫 카드 공개" : "다음 카드 공개" }));
     }
 
-    expect(screen.getByText(/명로는 중대한 결정을 대신할 수 없어요\./)).toBeInTheDocument();
+    expect(screen.getByText(/명로가 대신 답할 수 없어요\./)).toBeInTheDocument();
     expect(screen.getByText("운을 돕는 요소")).toBeInTheDocument();
     expect(screen.queryByText("선택 A")).not.toBeInTheDocument();
   });
