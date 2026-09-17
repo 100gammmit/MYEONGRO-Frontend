@@ -35,7 +35,7 @@ export function sajuReadingRecord(overrides: Record<string, unknown> = {}) {
         pillars: { year: pillar, month: pillar, day: pillar, time: null },
         dayMaster: "임",
         fiveElements: { wood: 1, fire: 0, earth: 3, metal: 2, water: 2 },
-        relations: [{ type: "충", members: ["축", "미"] }],
+        relations: [{ type: "branch_clash", members: ["축", "미"] }],
         luckCycle: null,
         annualFortune: { year: 2026, ganZhi: "병오", stemTenGod: "상관" },
         limitations: ["BIRTH_TIME_UNKNOWN", "LUCK_DIRECTION_UNSPECIFIED"],

@@ -127,7 +127,37 @@ describe("SajuReadingResult", () => {
     const facts = container.querySelector(".saju-calculation-facts") as HTMLElement;
     expect(within(facts).queryByText("일간")).not.toBeInTheDocument();
     expect(within(facts).getByText("병오")).toBeInTheDocument();
+    expect(within(facts).getByText("목 1 · 화 0 · 토 3 · 금 2 · 수 2 (확정된 기둥 기준)")).toBeInTheDocument();
+    expect(screen.getAllByText("일간 미확정 · 출생 시각 후보에 따라 달라져요").length).toBeGreaterThan(0);
     expect(container).not.toHaveTextContent("null");
     expect(screen.getAllByText("일주 경계 가능성").length).toBeGreaterThan(0);
+  });
+
+  it("names relation codes in Korean and states when none were fixed", () => {
+    const view = sajuReadingView();
+    view.input.calculationSnapshot.relations = [
+      { type: "stem_combination", members: ["무", "계"] },
+      { type: "branch_clash", members: ["축", "미"] },
+    ];
+    const { container, unmount } = render(<SajuReadingResult view={view} />);
+
+    expect(screen.getByText("합·충 관계 천간의 합(무·계), 지지의 충(축·미)")).toBeInTheDocument();
+    expect(container).not.toHaveTextContent("branch_clash");
+    unmount();
+
+    const none = sajuReadingView();
+    none.input.calculationSnapshot.relations = [];
+    render(<SajuReadingResult view={none} />);
+    expect(screen.getByText("확정된 합·충 관계 없음")).toBeInTheDocument();
+  });
+
+  it("shows the element balance without a basis note when all four pillars are fixed", () => {
+    const view = sajuReadingView();
+    const snapshot = view.input.calculationSnapshot;
+    snapshot.pillars.time = snapshot.pillars.year;
+    const { container } = render(<SajuReadingResult view={view} />);
+
+    const facts = container.querySelector(".saju-calculation-facts") as HTMLElement;
+    expect(within(facts).getByText("목 1 · 화 0 · 토 3 · 금 2 · 수 2")).toBeInTheDocument();
   });
 });

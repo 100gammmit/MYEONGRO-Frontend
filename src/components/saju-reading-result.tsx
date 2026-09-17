@@ -30,6 +30,19 @@ const ELEMENT_LABELS: Record<string, string> = {
   water: "수",
 };
 
+const ELEMENT_ORDER = ["wood", "fire", "earth", "metal", "water"] as const;
+
+// The snapshot keeps relation kinds as codes; these are the names the interpretation prompt uses too.
+const RELATION_LABELS: Record<string, string> = {
+  stem_combination: "천간의 합",
+  stem_clash: "천간의 충",
+  branch_combination: "지지의 합",
+  branch_clash: "지지의 충",
+  branch_harm: "지지의 해",
+  branch_break: "지지의 파",
+  branch_punishment: "지지의 형",
+};
+
 const LIMITATION_COPY: Record<string, { title: string; body: string }> = {
   BIRTH_TIME_UNKNOWN: {
     title: "출생 시각 미상",
@@ -205,12 +218,16 @@ function evidenceText(key: SajuEvidenceKey, snapshot: SajuCalculationSnapshot): 
   const confirmed = Object.values(snapshot.pillars).filter((pillar) => pillar !== null);
   switch (key) {
     case "pillars": return `확정된 기둥 ${confirmed.map((pillar) => pillar?.ganZhi).join(" · ")}`;
-    case "dayMaster": return snapshot.dayMaster ? `일간 ${snapshot.dayMaster}` : "후보에서 공통된 일간";
+    case "dayMaster": return snapshot.dayMaster
+      ? `일간 ${snapshot.dayMaster}`
+      : "일간 미확정 · 출생 시각 후보에 따라 달라져요";
     case "elementBalance": return `오행 분포 ${elementBalanceText(snapshot)}`;
     case "tenGods": return "확정된 기둥에 연결된 십성 관계";
     case "interactions": return snapshot.relations.length > 0
-      ? `지지 관계 ${snapshot.relations.map((relation) => `${relation.type}(${relation.members.join("·")})`).join(", ")}`
-      : "후보에서 공통된 지지 관계";
+      ? `합·충 관계 ${snapshot.relations.map((relation) => (
+        `${RELATION_LABELS[relation.type] ?? relation.type}(${relation.members.join("·")})`
+      )).join(", ")}`
+      : "확정된 합·충 관계 없음";
     case "currentLuckCycle": return "현재 연도에 해당하는 대운 흐름";
     case "annualFlow": return `${snapshot.targetYear}년 세운 ${annualFortuneText(snapshot)}`;
     case "limitations": return "계산에서 확정하지 않은 항목과 적용 한계";
@@ -218,10 +235,14 @@ function evidenceText(key: SajuEvidenceKey, snapshot: SajuCalculationSnapshot): 
   }
 }
 
+// Elements are counted from the fixed pillars only, so a missing pillar makes the balance partial.
 function elementBalanceText(snapshot: SajuCalculationSnapshot): string {
-  return Object.entries(snapshot.fiveElements)
-    .map(([element, count]) => `${ELEMENT_LABELS[element] ?? element} ${count}`)
+  const counts = ELEMENT_ORDER
+    .filter((element) => element in snapshot.fiveElements)
+    .map((element) => `${ELEMENT_LABELS[element]} ${snapshot.fiveElements[element]}`)
     .join(" · ");
+  const fixedPillars = Object.values(snapshot.pillars).filter((pillar) => pillar !== null).length;
+  return fixedPillars < 4 ? `${counts} (확정된 기둥 기준)` : counts;
 }
 
 function annualFortuneText(snapshot: SajuCalculationSnapshot): string {
