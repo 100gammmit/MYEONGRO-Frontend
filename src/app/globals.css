@@ -282,7 +282,8 @@ h1, h2, h3, blockquote {
 .method-principles p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.8; }
 .method-comparison-scroll { overflow-x: auto; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-record); scrollbar-color: var(--border-strong) transparent; }
 .method-comparison-scroll:focus-visible { outline-offset: 5px; box-shadow: var(--focus-ring); }
-.method-comparison { width: 100%; min-width: 780px; border-collapse: collapse; table-layout: fixed; }
+/* Separate borders: Chrome does not paint sticky cells over their neighbours in a collapsed table. */
+.method-comparison { width: 100%; min-width: 780px; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
 .method-comparison th, .method-comparison td { padding: 20px 18px; border-bottom: 1px solid var(--border-hairline); vertical-align: top; text-align: left; font-size: 13px; line-height: 1.75; }
 .method-comparison tr:last-child th, .method-comparison tr:last-child td { border-bottom: 0; }
 .method-comparison thead th { color: var(--text-secondary); background: var(--surface-tint-1); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
@@ -771,8 +772,8 @@ h1, h2, h3, blockquote {
   .method-comparison-hint { display: block; }
   /* Row labels stay in view while the other columns scroll past, so every cell keeps its row. */
   .method-comparison thead th:first-child, .method-comparison tbody th { position: sticky; left: 0; z-index: 1; width: 96px; border-right: 1px solid var(--border-hairline); }
-  .method-comparison tbody th { background: var(--surface-sticky); }
-  .method-comparison thead th:first-child { background: linear-gradient(var(--surface-tint-1), var(--surface-tint-1)), var(--surface-sticky); }
+  .method-comparison tbody th { background: linear-gradient(var(--surface-sticky), var(--surface-sticky)), var(--surface-segment); }
+  .method-comparison thead th:first-child { background: linear-gradient(var(--surface-tint-1), var(--surface-tint-1)), linear-gradient(var(--surface-sticky), var(--surface-sticky)), var(--surface-segment); }
   .method-path-grid { gap: 14px; }
   .method-closing { padding-block: 52px; }
   .method-closing h2 { font-size: 25px; }
