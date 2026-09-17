@@ -16,6 +16,8 @@ describe("ReadingMethodPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/질문과 선택지 원문은.*명로 데이터베이스에는 저장하지 않습니다/))
       .toBeInTheDocument();
+    expect(screen.getByText(/특정 운세로 바꿔 읽은 이유를 안내하거나.*다룰 수 없는 질문은 별도로 안내합니다/))
+      .toBeInTheDocument();
   });
 
   it("compares service types in an accessible table", () => {
