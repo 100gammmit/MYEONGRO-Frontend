@@ -3,15 +3,15 @@ import { render, screen, within } from "@testing-library/react";
 import ReadingMethodPage, { metadata } from "./page";
 
 describe("ReadingMethodPage", () => {
-  it("explains the structured reading principles without claiming superiority", () => {
+  it("explains how readings are structured without claiming superiority", () => {
     render(<ReadingMethodPage />);
 
     expect(screen.getByRole("heading", {
       level: 1,
       name: "그냥 AI에게 물어보는 것과 무엇이 다를까요?",
     })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "계산은 정해진 규칙으로" }))
-      .toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "계산과 해석, 선택의 역할을 나눠요" }))
+      .not.toBeInTheDocument();
     expect(screen.getByText(/어느 쪽이 낫다는 비교가 아니라.*구조의 차이를 정리했어요/))
       .toBeInTheDocument();
     expect(screen.getByText(/특정 운세로 바꿔 읽은 이유를 안내하고.*다룰 수 없는 질문은 따로 알려드려요/))
@@ -28,22 +28,20 @@ describe("ReadingMethodPage", () => {
   it("puts Myeongro next to the row labels in an accessible comparison table", () => {
     render(<ReadingMethodPage />);
 
-    const comparison = screen.getByRole("region", {
-      name: "명로, AI 챗봇 대화, 미리 작성된 운세 비교",
-    });
+    const comparison = screen.getByRole("region", { name: "명로와 AI 챗봇 대화 비교" });
     expect(comparison).toHaveAttribute("tabindex", "0");
     expect(within(comparison).getAllByRole("columnheader").map((header) => header.textContent))
-      .toEqual(["구분", "명로", "AI 챗봇 대화", "미리 작성된 운세"]);
+      .toEqual(["구분", "명로", "AI 챗봇 대화"]);
     expect(within(comparison).getByRole("rowheader", { name: "사주" }))
       .toBeInTheDocument();
-    expect(screen.queryByText(/LLM/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/LLM|미리 작성된/)).not.toBeInTheDocument();
   });
 
   it("keeps step numbers out of the spoken list text", () => {
     const { container } = render(<ReadingMethodPage />);
 
     const numbers = container.querySelectorAll("li > span");
-    expect(numbers).toHaveLength(9);
+    expect(numbers).toHaveLength(6);
     numbers.forEach((number) => expect(number).toHaveAttribute("aria-hidden", "true"));
   });
 

@@ -275,15 +275,10 @@ h1, h2, h3, blockquote {
 .reading-method-heading .eyebrow { margin-bottom: 14px; }
 .reading-method-heading h2 { margin: 0; font-size: 32px; line-height: 1.4; letter-spacing: -.035em; }
 .reading-method-heading > p:last-child:not(.eyebrow) { margin: 14px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
-.method-principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 0; padding: 0; list-style: none; }
-.method-principles li { padding: 26px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--gradient-panel); }
-.method-principles span { color: var(--accent-cta); font-size: 11px; font-weight: 700; letter-spacing: .16em; }
-.method-principles h3 { margin: 22px 0 12px; font-size: 20px; line-height: 1.45; text-wrap: balance; }
-.method-principles p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.8; }
 .method-comparison-scroll { overflow-x: auto; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-record); scrollbar-color: var(--border-strong) transparent; }
 .method-comparison-scroll:focus-visible { outline-offset: 5px; box-shadow: var(--focus-ring); }
 /* Separate borders: Chrome does not paint sticky cells over their neighbours in a collapsed table. */
-.method-comparison { width: 100%; min-width: 780px; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
+.method-comparison { width: 100%; min-width: 600px; border-collapse: separate; border-spacing: 0; table-layout: fixed; }
 .method-comparison th, .method-comparison td { padding: 20px 18px; border-bottom: 1px solid var(--border-hairline); vertical-align: top; text-align: left; font-size: 13px; line-height: 1.75; }
 .method-comparison tr:last-child th, .method-comparison tr:last-child td { border-bottom: 0; }
 .method-comparison thead th { color: var(--text-secondary); background: var(--surface-tint-1); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
@@ -765,9 +760,8 @@ h1, h2, h3, blockquote {
   .reading-method-section { padding-block: 52px; }
   .reading-method-heading { margin-bottom: 26px; }
   .reading-method-heading h2 { font-size: 25px; }
-  .method-principles, .method-path-grid { grid-template-columns: 1fr; }
-  .method-principles { gap: 14px; }
-  .method-principles li, .method-path-card { padding: 24px; }
+  .method-path-grid { grid-template-columns: 1fr; }
+  .method-path-card { padding: 24px; }
   .method-comparison-scroll { margin-right: -14px; border-radius: var(--radius-md) 0 0 var(--radius-md); border-right: 0; }
   .method-comparison-hint { display: block; }
   /* Row labels stay in view while the other columns scroll past, so every cell keeps its row. */
