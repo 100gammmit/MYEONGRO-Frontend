@@ -84,7 +84,7 @@ describe("HomePage", () => {
   it("links to the public explanation of how readings are made", () => {
     render(<HomePage />);
 
-    expect(screen.getByText(/타로는 카드의 자리를 정하고.*사주는 명식을 먼저 계산한 뒤 해석합니다/))
+    expect(screen.getByText(/타로는 카드의 자리를 정하고.*사주는 명식을 먼저 계산한 뒤 해석해요/))
       .toBeInTheDocument();
     expect(screen.getByRole("link", { name: /명로의 리딩 방식 보기/ }))
       .toHaveAttribute("href", "/about/reading");

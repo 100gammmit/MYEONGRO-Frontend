@@ -142,8 +142,8 @@ export default function HomePage() {
           <p className="eyebrow">WHY MYEONGRO</p>
           <h2 id="reading-method-entry-title">그냥 AI에게 물어보는 것과 무엇이 다를까요?</h2>
           <p>
-            명로는 질문을 바로 AI에 맡기지 않습니다. 타로는 카드의 자리를 정하고,
-            사주는 명식을 먼저 계산한 뒤 해석합니다.
+            명로는 질문을 바로 AI에 맡기지 않아요. 타로는 카드의 자리를 정하고,
+            사주는 명식을 먼저 계산한 뒤 해석해요.
           </p>
         </div>
         <Link href="/about/reading" className="outline-cta">
