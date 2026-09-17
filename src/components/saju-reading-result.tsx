@@ -225,9 +225,10 @@ function elementBalanceText(snapshot: SajuCalculationSnapshot): string {
 }
 
 function annualFortuneText(snapshot: SajuCalculationSnapshot): string {
-  return snapshot.annualFortune
-    ? `${snapshot.annualFortune.ganZhi} · ${snapshot.annualFortune.stemTenGod}`
-    : "후보에서 공통된 연간 흐름";
+  const annual = snapshot.annualFortune;
+  if (!annual) return "후보에서 공통된 연간 흐름";
+  // Without a fixed day master the ten god of the year differs across birth-time candidates.
+  return annual.stemTenGod ? `${annual.ganZhi} · ${annual.stemTenGod}` : annual.ganZhi;
 }
 
 function uncertaintyText(snapshot: SajuCalculationSnapshot): string {

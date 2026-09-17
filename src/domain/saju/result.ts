@@ -119,7 +119,7 @@ const calculationSnapshotSchema = z.object({
   annualFortune: z.object({
     year: z.number().int(),
     ganZhi: textSchema,
-    stemTenGod: textSchema,
+    stemTenGod: textSchema.nullable(),
   }).strict().nullable(),
   limitations: z.array(textSchema),
   uncertainty: z.object({
@@ -230,13 +230,6 @@ const completedSajuRecordSchema = z.union([
       code: z.ZodIssueCode.custom,
       path: ["result", "annualReading", "year"],
       message: "사주 기준 연도가 일치하지 않습니다.",
-    });
-  }
-  if (snapshot.dayMaster === null || snapshot.annualFortune === null) {
-    context.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["input", "calculationSnapshot"],
-      message: "A completed Saju reading requires a day master and annual fortune.",
     });
   }
   if (snapshot.annualFortune !== null

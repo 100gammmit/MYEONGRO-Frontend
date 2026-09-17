@@ -183,11 +183,33 @@ describe("parseSajuReadingView", () => {
     expect(parseSajuReadingView(value)).toBeNull();
   });
 
-  it("rejects impossible completed snapshots and inconsistent birth inputs", () => {
-    const incomplete = completedSajuRecord();
-    incomplete.input.calculationSnapshot.dayMaster = null;
-    expect(parseSajuReadingView(incomplete)).toBeNull();
+  it("decodes an unknown-time record whose day pillar and ten gods differ across candidates", () => {
+    const current = completedSajuRecord();
+    current.schemaVersion = 4;
+    delete (current.input as Partial<typeof current.input>).question;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).provinceCode;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).cityCode;
+    delete (current.input.birthProfile as Partial<typeof current.input.birthProfile>).birthTime;
+    const snapshot = current.input.calculationSnapshot;
+    snapshot.calculationVersion = "saju-ko-v3";
+    snapshot.cityCatalogVersion = "kr-admin-v1-province";
+    const uncertainPillar = { ...snapshot.pillars.year, stemTenGod: null, branchTenGods: [] };
+    Object.assign(snapshot, {
+      pillars: { year: uncertainPillar, month: uncertainPillar, day: null, time: null },
+      dayMaster: null,
+      annualFortune: { year: 2026, ganZhi: "병오", stemTenGod: null },
+      limitations: ["DAY_PILLAR_UNCERTAIN", "BIRTH_TIME_UNKNOWN", "TIME_PILLAR_UNCERTAIN"],
+    });
+    current.result.natalSections[0].evidenceKeys = ["pillars"];
+    current.result.questionReading.evidenceKeys = ["uncertainty"];
 
+    const parsed = parseSajuReadingView(current);
+
+    expect(parsed?.input.calculationSnapshot.dayMaster).toBeNull();
+    expect(parsed?.input.calculationSnapshot.annualFortune?.stemTenGod).toBeNull();
+  });
+
+  it("rejects inconsistent birth inputs", () => {
     const unknownWithTime = completedSajuRecord();
     unknownWithTime.input.birthProfile.birthTime = "12:30";
     expect(parseSajuReadingView(unknownWithTime)).toBeNull();

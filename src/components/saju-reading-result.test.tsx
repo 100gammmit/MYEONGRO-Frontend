@@ -114,4 +114,20 @@ describe("SajuReadingResult", () => {
 
     expect(screen.queryByRole("note")).not.toBeInTheDocument();
   });
+
+  it("renders an unknown-time reading whose day master could not be fixed", () => {
+    const view = sajuReadingView();
+    const snapshot = view.input.calculationSnapshot;
+    snapshot.pillars.day = null;
+    snapshot.dayMaster = null;
+    snapshot.annualFortune = { year: 2026, ganZhi: "병오", stemTenGod: null };
+    snapshot.limitations = ["DAY_PILLAR_UNCERTAIN", "BIRTH_TIME_UNKNOWN"];
+    const { container } = render(<SajuReadingResult view={view} />);
+
+    const facts = container.querySelector(".saju-calculation-facts") as HTMLElement;
+    expect(within(facts).queryByText("일간")).not.toBeInTheDocument();
+    expect(within(facts).getByText("병오")).toBeInTheDocument();
+    expect(container).not.toHaveTextContent("null");
+    expect(screen.getAllByText("일주 경계 가능성").length).toBeGreaterThan(0);
+  });
 });
