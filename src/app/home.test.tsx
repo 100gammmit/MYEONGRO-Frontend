@@ -44,6 +44,7 @@ describe("HomePage", () => {
         "리딩 예시",
         "지금 무엇을 살펴보고 싶나요?",
         "세 단계로 만나는 나의 리딩",
+        "그냥 AI에게 물어보는 것과 무엇이 다를까요?",
         "오늘은 어떤 마음인가요?",
       ]);
   });
@@ -78,5 +79,14 @@ describe("HomePage", () => {
     const closing = screen.getByRole("region", { name: "오늘은 어떤 마음인가요?" });
     expect(within(closing).getByRole("link", { name: "무료로 오늘의 운세 보기" }))
       .toHaveAttribute("href", "/tarot/daily");
+  });
+
+  it("links to the public explanation of how readings are made", () => {
+    render(<HomePage />);
+
+    expect(screen.getByText(/타로는 카드의 자리를 정하고.*사주는 명식을 먼저 계산한 뒤 해석합니다/))
+      .toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /명로의 리딩 방식 보기/ }))
+      .toHaveAttribute("href", "/about/reading");
   });
 });

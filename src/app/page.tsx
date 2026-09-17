@@ -137,6 +137,20 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="reading-method-entry page-width" aria-labelledby="reading-method-entry-title">
+        <div>
+          <p className="eyebrow">WHY MYEONGRO</p>
+          <h2 id="reading-method-entry-title">그냥 AI에게 물어보는 것과 무엇이 다를까요?</h2>
+          <p>
+            명로는 질문을 바로 AI에 맡기지 않습니다. 타로는 카드의 자리를 정하고,
+            사주는 명식을 먼저 계산한 뒤 해석합니다.
+          </p>
+        </div>
+        <Link href="/about/reading" className="outline-cta">
+          명로의 리딩 방식 보기 <span aria-hidden="true">→</span>
+        </Link>
+      </section>
+
       <section className="landing-closing" aria-labelledby="landing-closing-title">
         <div className="page-width">
           <h2 id="landing-closing-title">오늘은 어떤 마음인가요?</h2>

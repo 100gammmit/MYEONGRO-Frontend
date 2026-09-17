@@ -34,6 +34,7 @@ export default async function RootLayout({
               명로의 해석은 자기 성찰을 위한 콘텐츠이며 중요한 결정을 대신하지 않습니다.
             </p>
             <div>
+              <Link href="/about/reading">명로의 리딩 방식</Link>
               <Link href="/privacy">개인정보 처리방침</Link>
               <span>© 2026 MYEONGRO</span>
             </div>
