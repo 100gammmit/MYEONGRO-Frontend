@@ -621,11 +621,11 @@ h1, h2, h3, blockquote {
 .saju-section-heading h2 { margin: 6px 0 0; font-size: 32px; font-weight: 300; }
 .saju-pillar-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px; }
 .saju-pillar-grid article { padding: 22px 12px; border: 1px solid var(--border-default); border-radius: var(--radius-md); text-align: center; background: var(--surface-tint-1); }
-.saju-pillar-grid span, .saju-calculation-facts span { display: block; color: var(--text-muted); font-size: 11px; letter-spacing: .08em; }
+.saju-pillar-grid span, .saju-calculation-facts dt { display: block; color: var(--text-muted); font-size: 11px; letter-spacing: .08em; }
 .saju-pillar-grid strong { display: block; margin-top: 10px; color: var(--text-accent-strong); font: 25px "Noto Serif KR Variable", Georgia, serif; }
-.saju-calculation-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.saju-calculation-facts article { padding: 20px; border-radius: 0 var(--radius-md) var(--radius-md) 0; border-left: 2px solid var(--accent-primary); background: var(--surface-tint-1); }
-.saju-calculation-facts strong { display: block; margin-top: 8px; line-height: 1.6; }
+.saju-calculation-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.saju-calculation-facts > div { padding: 20px; border-radius: 0 var(--radius-md) var(--radius-md) 0; border-left: 2px solid var(--accent-primary); background: var(--surface-tint-1); }
+.saju-calculation-facts dd { margin: 8px 0 0; line-height: 1.6; overflow-wrap: anywhere; }
 .saju-calculation-meta { margin-top: 22px; color: var(--text-secondary); }
 .saju-calculation-meta summary, .saju-evidence summary { cursor: pointer; color: var(--text-accent-strong); }
 .saju-calculation-meta dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin-bottom: 0; }
