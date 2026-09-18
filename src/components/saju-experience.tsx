@@ -32,7 +32,7 @@ import {
   SajuBirthPlacesClientError,
 } from "@/infrastructure/backend/saju-birth-places-client";
 
-import { BrandMark } from "./brand-mark";
+import { ReadingLoading } from "./reading-loading";
 import { ConsentGate } from "./consent-gate";
 import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
@@ -56,7 +56,6 @@ interface SajuFormState {
 // Consent is a one-time threshold, not a step: question 1, birth 2, review 3, loading 4.
 const TOTAL_STEPS = 4;
 const MAX_QUESTION_LENGTH = 300;
-const SLOW_GENERATION_MS = 15_000;
 const initialForm: SajuFormState = {
   birthDate: "",
   birthTimePrecision: "",
@@ -170,8 +169,6 @@ export function SajuExperience() {
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatus>("idle");
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [loadingIndex, setLoadingIndex] = useState(0);
-  const [slowGeneration, setSlowGeneration] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [creditUntouched, setCreditUntouched] = useState(false);
@@ -298,20 +295,6 @@ export function SajuExperience() {
   }, []);
 
   useEffect(() => {
-    if (phase !== "loading") return;
-    setLoadingIndex(0);
-    setSlowGeneration(false);
-    const timer = globalThis.setInterval(() => {
-      setLoadingIndex((current) => Math.min(current + 1, LOADING_MESSAGES.length - 1));
-    }, 1200);
-    const slowTimer = globalThis.setTimeout(() => setSlowGeneration(true), SLOW_GENERATION_MS);
-    return () => {
-      globalThis.clearInterval(timer);
-      globalThis.clearTimeout(slowTimer);
-    };
-  }, [phase]);
-
-  useEffect(() => {
     if (Object.keys(fieldErrors).length === 0 && !generalError) return;
     const fieldId = focusFieldRef.current;
     focusFieldRef.current = null;
@@ -380,9 +363,6 @@ export function SajuExperience() {
     setFieldErrors({});
     setGeneralError(null);
     setCreditUntouched(false);
-    // Reset before the first loading frame so a retry never flashes the last attempt's progress.
-    setLoadingIndex(0);
-    setSlowGeneration(false);
     setPhase("loading");
 
     try {
@@ -688,18 +668,7 @@ export function SajuExperience() {
         totalSteps={TOTAL_STEPS}
         showHomeLink={false}
       >
-        <div className="wizard-card saju-loading">
-          {/* After the fourth stroke the centre card breathes until the response arrives. */}
-          <BrandMark
-            breathing={loadingIndex === LOADING_MESSAGES.length - 1}
-            lit={loadingIndex + 1}
-            size={104}
-          />
-          <div aria-live="polite">
-            <p>{LOADING_MESSAGES[loadingIndex]}</p>
-            {slowGeneration ? <p className="muted">조금 더 걸리고 있어요. 잠시만 기다려 주세요.</p> : null}
-          </div>
-        </div>
+        <ReadingLoading messages={LOADING_MESSAGES} />
       </ReadingShell>
     );
   }

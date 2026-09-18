@@ -633,7 +633,7 @@ describe("SajuExperience", () => {
     expect(screen.queryByText("잠시 후 다시 시도해 주세요.")).not.toBeInTheDocument();
   });
 
-  it("shows one message beside the brand mark and a patience line after 15 seconds", async () => {
+  it("steps through its messages beside the brand mark and adds a patience line after 20 seconds", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
     const deferred = createDeferred<Response>();
     vi.spyOn(globalThis, "fetch")
@@ -649,12 +649,15 @@ describe("SajuExperience", () => {
     expect(screen.queryByText("명식의 공통 구조를 계산하고 있어요.")).not.toBeInTheDocument();
     expect(screen.queryByText(/조금 더 걸리고 있어요/)).not.toBeInTheDocument();
 
-    act(() => { vi.advanceTimersByTime(15_000); });
+    act(() => { vi.advanceTimersByTime(12_000); });
     expect(screen.getByText("질문에 맞는 리딩을 구성하고 있어요.")).toBeInTheDocument();
     expect(screen.queryByText("출생정보를 확인하고 있어요.")).not.toBeInTheDocument();
-    expect(screen.getByText("조금 더 걸리고 있어요. 잠시만 기다려 주세요.")).toBeInTheDocument();
     expect(document.querySelectorAll(".mark-stroke.on")).toHaveLength(4);
     expect(document.querySelector(".mark-glyph.breathing")).not.toBeNull();
+    expect(screen.queryByText(/조금 더 걸리고 있어요/)).not.toBeInTheDocument();
+
+    act(() => { vi.advanceTimersByTime(8_000); });
+    expect(screen.getByText("조금 더 걸리고 있어요. 잠시만 기다려 주세요.")).toBeInTheDocument();
 
     vi.useRealTimers();
     deferred.resolve(jsonResponse(createdReading()));

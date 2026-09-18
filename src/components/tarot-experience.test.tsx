@@ -305,6 +305,20 @@ describe("TarotExperience", () => {
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
   });
 
+  it("waits on the same brand-mark loading screen as saju", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementationOnce(() => new Promise<Response>(() => {}));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([2, 3, 4]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+
+    expect(await screen.findByRole("heading", { name: "선택한 카드의 흐름을 읽고 있어요" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("선택한 카드를 확인하고 있어요.")).toBeInTheDocument();
+    expect(document.querySelector(".reading-loading .mark-glyph")).not.toBeNull();
+    expect(screen.queryByRole("link", { name: /홈으로/ })).not.toBeInTheDocument();
+  });
+
   it("does not show or trigger reading generation before the last card", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     await chooseSpreadAndStart("mind_three_card");

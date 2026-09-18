@@ -23,12 +23,21 @@ import { ConsentGate } from "./consent-gate";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
 import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
+import { ReadingLoading, type ReadingLoadingMessages } from "./reading-loading";
 import { ReadingShell } from "./reading-shell";
 import styles from "./tarot-experience.module.css";
 
 const MAX_QUESTION_LENGTH = 300;
 const MAX_CHOICE_LENGTH = 100;
 const SLOT_COUNT = 5;
+
+// One message per stroke of the brand mark, as on the saju wait.
+const LOADING_MESSAGES: ReadingLoadingMessages = [
+  "선택한 카드를 확인하고 있어요.",
+  "카드마다 자리의 의미를 살피고 있어요.",
+  "카드 사이의 흐름을 잇고 있어요.",
+  "질문에 맞는 리딩을 구성하고 있어요.",
+];
 
 type Phase = "spread" | "input" | "draw" | "consent" | "loading" | "error";
 
@@ -442,10 +451,15 @@ export function TarotExperience() {
 
   if (phase === "loading") {
     return (
-      <ReadingShell eyebrow={definition.name} title="선택한 카드의 흐름을 읽고 있어요" step={4} totalSteps={4}>
-        <div className="wizard-card loading-card" aria-live="polite">
-          <p>선택한 카드와 질문을 연결하고 있어요. 잠시만 기다려 주세요.</p>
-        </div>
+      <ReadingShell
+        eyebrow={definition.name}
+        form
+        title="선택한 카드의 흐름을 읽고 있어요"
+        step={4}
+        totalSteps={4}
+        showHomeLink={false}
+      >
+        <ReadingLoading messages={LOADING_MESSAGES} />
       </ReadingShell>
     );
   }

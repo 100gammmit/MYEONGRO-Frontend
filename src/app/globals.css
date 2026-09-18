@@ -320,7 +320,7 @@ h1, h2, h3, blockquote {
 .form-shell .wizard-heading { text-align: left; margin: 44px 0 28px; }
 .form-shell .wizard-heading h1 { font-size: 32px; margin-bottom: 12px; }
 .form-shell .wizard-heading p { margin: 0; font-size: 14px; }
-.form-shell:has(.saju-loading) .wizard-heading { text-align: center; }
+.form-shell:has(.reading-loading) .wizard-heading { text-align: center; }
 .reading-actions { max-width: var(--w-read); margin: 28px auto 0; display: flex; flex-direction: column; gap: 10px; }
 .back-link { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; color: var(--text-muted); font-size: 13px; }
 .back-link:hover { color: var(--text-primary); }
@@ -419,9 +419,9 @@ h1, h2, h3, blockquote {
 .saju-review-edit:hover { color: var(--accent-strong-hover); }
 .saju-review-edit:focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 2px; border-radius: var(--radius-xs); }
 .saju-review-edit:disabled { opacity: .5; cursor: not-allowed; }
-.saju-loading { display: grid; justify-items: center; gap: 22px; padding-block: 40px; text-align: center; }
-.saju-loading p { margin: 0; }
-.saju-loading p + p { margin-top: 8px; }
+.reading-loading { display: grid; justify-items: center; gap: 22px; padding-block: 40px; text-align: center; }
+.reading-loading p { margin: 0; }
+.reading-loading p + p { margin-top: 8px; }
 /* Brand mark: four pillar strokes light one per loading message; the centre card breathes after the last. */
 .mark-glyph { display: block; }
 .mark-frame { fill: none; stroke: var(--border-default); stroke-width: 2; }
@@ -468,19 +468,6 @@ h1, h2, h3, blockquote {
 .tarot-back:disabled { opacity: .44; cursor: default; }
 .narrow-button { max-width: var(--w-act); margin: 26px auto; display: flex; }
 .confirmation-card { max-width: var(--w-read); }
-.loading-card { text-align: center; position: relative; }
-.loading-card::before {
-  content: ""; display: block; width: 14px; height: 14px; margin: 0 auto 22px; border-radius: 50%;
-  background: var(--accent-primary); box-shadow: 0 0 0 0 rgba(124, 111, 240, .5);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .loading-card::before { animation: loading-pulse 1.8s ease-out infinite; }
-}
-@keyframes loading-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(124, 111, 240, .5); }
-  70% { box-shadow: 0 0 0 14px rgba(124, 111, 240, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(124, 111, 240, 0); }
-}
 .wizard-card[role="alert"] { border-color: var(--border-danger); box-shadow: 0 28px 90px rgba(240, 112, 138, .08); }
 .wizard-card[role="alert"] h1 { color: var(--text-danger); font-size: 20px; }
 .wizard-card[role="alert"] > p:first-of-type { color: var(--text-danger); margin: 0 0 20px; line-height: 1.7; }
