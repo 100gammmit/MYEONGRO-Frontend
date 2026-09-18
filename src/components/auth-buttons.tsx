@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 import { normalizeNextPath } from "@/infrastructure/auth/next-path";
 
 const LOGIN_PROVIDERS = [
@@ -16,15 +14,17 @@ export function AuthButtons({ next }: { next?: string }) {
 
   return (
     <>
+      {/* The login route redirects to the backend's OAuth start, so it needs a full page load:
+          a client-side Link would fetch it as RSC and hit a cross-origin redirect. */}
       {LOGIN_PROVIDERS.map((provider) => (
-        <Link
+        <a
           className={`social-button ${provider.id}`}
           href={`/auth/login/${provider.id}?${loginUrl}`}
           key={provider.id}
         >
           <provider.Logo />
           <span>{provider.label}</span>
-        </Link>
+        </a>
       ))}
     </>
   );
