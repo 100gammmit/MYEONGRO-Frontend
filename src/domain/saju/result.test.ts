@@ -77,6 +77,15 @@ describe("parseSajuReadingView", () => {
 		const minimal = sajuReadingRecord();
 		expect(parseSajuReadingView(minimal)).not.toBeNull();
 
+		const uncertainPillars = structuredClone(minimal);
+		Object.assign(uncertainPillars.input.calculationSnapshot.pillars, {
+			month: null,
+			day: null,
+		});
+		const parsedUncertain = parseSajuReadingView(uncertainPillars);
+		expect(parsedUncertain?.input.calculationSnapshot.pillars.month).toBeNull();
+		expect(parsedUncertain?.input.calculationSnapshot.pillars.day).toBeNull();
+
 		const forbiddenBirthProfile = structuredClone(minimal);
 		Object.assign(forbiddenBirthProfile.input, {
 			birthProfile: { birthDate: "1992-08-17" },

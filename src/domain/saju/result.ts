@@ -144,9 +144,9 @@ const minimalCalculationSnapshotSchema = z.object({
   cityCatalogVersion: textSchema,
   targetYear: z.number().int(),
   pillars: z.object({
-    year: minimalPillarSchema,
-    month: minimalPillarSchema,
-    day: minimalPillarSchema,
+    year: minimalPillarSchema.nullable(),
+    month: minimalPillarSchema.nullable(),
+    day: minimalPillarSchema.nullable(),
     time: minimalPillarSchema.nullable(),
   }).strict(),
   dayMaster: textSchema.optional(),

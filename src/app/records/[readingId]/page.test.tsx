@@ -1,5 +1,5 @@
 ﻿import type { ReactElement } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { sajuReadingRecord } from "@/test-fixtures/saju-reading";
@@ -206,6 +206,25 @@ describe("ReadingDetailPage", () => {
     expect(screen.getByRole("heading", { name: "변화를 준비하며 기준을 세우는 해" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "사주 리딩 목차" })).toBeInTheDocument();
     expect(screen.getByText("현재 대운")).toBeInTheDocument();
+  });
+
+  it("renders a v5 record with uncertain month and day pillars", async () => {
+    const record = sajuReadingRecord();
+    Object.assign(record.input.calculationSnapshot.pillars, {
+      month: null,
+      day: null,
+    });
+    mocks.get.mockResolvedValue(record);
+
+    const { container } = await renderPage();
+
+    expect(screen.getByRole("heading", { name: "변화를 준비하며 기준을 세우는 해" }))
+      .toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    const pillarGrid = container.querySelector(".saju-pillar-grid") as HTMLElement;
+    expect(within(pillarGrid).getByText("연주")).toBeInTheDocument();
+    expect(within(pillarGrid).queryByText("월주")).not.toBeInTheDocument();
+    expect(within(pillarGrid).queryByText("일주")).not.toBeInTheDocument();
   });
 
   it("does not guess-render a malformed saju v5 payload", async () => {

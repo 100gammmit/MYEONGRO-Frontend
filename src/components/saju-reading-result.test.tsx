@@ -44,6 +44,8 @@ describe("SajuReadingResult", () => {
   it("renders sparse v5 calculation data without inventing missing values", () => {
     const view = sajuReadingView();
     const snapshot = view.input.calculationSnapshot;
+    snapshot.pillars.month = null;
+    snapshot.pillars.day = null;
     snapshot.pillars.time = null;
     delete snapshot.dayMaster;
     delete snapshot.annualFortune;
@@ -52,9 +54,23 @@ describe("SajuReadingResult", () => {
     const { container } = render(<SajuReadingResult view={view} />);
 
     const facts = container.querySelector(".saju-calculation-facts") as HTMLElement;
+    const pillarGrid = container.querySelector(".saju-pillar-grid") as HTMLElement;
     expect(within(facts).queryByText("일간")).not.toBeInTheDocument();
     expect(within(facts).getByText("후보에서 공통된 연간 흐름")).toBeInTheDocument();
+    expect(within(pillarGrid).getByText("연주")).toBeInTheDocument();
+    expect(within(pillarGrid).queryByText("월주")).not.toBeInTheDocument();
+    expect(within(pillarGrid).queryByText("일주")).not.toBeInTheDocument();
     expect(container).not.toHaveTextContent("null");
+  });
+
+  it("keeps the safety notice when a v5 question is redirected", () => {
+    const view = sajuReadingView();
+    view.result.readingMode = "career_life_fortune";
+    view.result.questionRedirected = true;
+
+    render(<SajuReadingResult view={view} />);
+
+    expect(screen.getByText("질문 대신 직업·생활운을 읽었어요")).toBeInTheDocument();
   });
 
   it("names relation codes in Korean", () => {

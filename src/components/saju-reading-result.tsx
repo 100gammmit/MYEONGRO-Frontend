@@ -8,6 +8,7 @@ import type {
 } from "@/domain/saju/result";
 import {
   fortuneReadingModeLabel,
+  redirectedReadingNotice,
   sajuFocusAreaLabel,
   sajuReadingModeNotice,
 } from "@/domain/reading/reading-mode";
@@ -83,11 +84,13 @@ export function SajuReadingResult({
   const resultFocusLabel = view.result.readingMode === "standard"
     ? isVersionFive ? "사주 리딩" : sajuFocusAreaLabel(view.input.focusArea)
     : fortuneReadingModeLabel(view.result.readingMode);
-  const modeNotice = isVersionFive ? null : sajuReadingModeNotice(
-      view.input.focusArea,
-      view.result.readingMode,
-      view.result.questionRedirected,
-    );
+  const modeNotice = isVersionFive
+    ? redirectedReadingNotice(view.result.readingMode, view.result.questionRedirected)
+    : sajuReadingModeNotice(
+        view.input.focusArea,
+        view.result.readingMode,
+        view.result.questionRedirected,
+      );
 
   return (
     <article className="saju-result page-width">
