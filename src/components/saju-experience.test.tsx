@@ -1,11 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import {
-  clearRememberedSajuBirthProfile,
-  rememberSajuBirthProfile,
-} from "@/domain/saju/draft-session";
-
 import { SajuExperience } from "./saju-experience";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
@@ -83,7 +78,7 @@ function createdReading() {
     reading: {
       id: "reading-1",
       kind: "saju",
-      schemaVersion: 4,
+      schemaVersion: 5,
       status: "completed",
     },
   };
@@ -100,7 +95,6 @@ afterEach(() => {
   vi.restoreAllMocks();
   window.history.replaceState(null, "", "/");
   navigation.push.mockReset();
-  clearRememberedSajuBirthProfile();
   credits.state.status = "ready";
   credits.state.data.balance = { free: 10, paid: 0, total: 10 };
   credits.state.data.generationInProgress = false;
@@ -717,40 +711,6 @@ describe("SajuExperience", () => {
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/login?next=%2Fsaju"));
     expect(screen.queryByRole("textbox", { name: /질문 한 가지/ })).not.toBeInTheDocument();
-  });
-
-  it("consumes remembered birth information and goes from the question straight to review", async () => {
-    rememberSajuBirthProfile({
-      calendarType: "solar",
-      birthDate: "1992-08-17",
-      birthTimePrecision: "unknown",
-      provinceCode: "36",
-      cityCode: "36110",
-      luckDirectionBasis: "unspecified",
-    });
-    vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
-      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
-
-    render(<SajuExperience />);
-
-    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
-    expect(screen.getByRole("textbox", { name: /질문 한 가지/ }))
-      .toHaveAccessibleDescription(/개인정보는 제외.*OpenAI API로 전송.*일부 식별정보 형식만 확인/);
-    expect(screen.getByRole("textbox", { name: /질문 한 가지/ }))
-      .toHaveAccessibleDescription(/리딩 기록에는 저장되지 않습니다/);
-    expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /일·진로/ })).not.toBeChecked();
-
-    fillQuestion();
-    fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
-    expect(screen.getByText("시간 미상 · 시주 제외")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "이전" }));
-    expect(await screen.findByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: /시간을 몰라요/ })).toBeChecked();
-    expect(screen.queryByLabelText("출생 시·도")).not.toBeInTheDocument();
   });
 
   it("blocks a verifiable identifier on the question step before any birth input or API call", async () => {

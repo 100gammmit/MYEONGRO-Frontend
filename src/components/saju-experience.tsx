@@ -17,7 +17,6 @@ import type {
   SajuFocusArea,
   SajuReadingCreateRequest,
 } from "@/domain/saju/contracts";
-import { takeRememberedSajuBirthProfile } from "@/domain/saju/draft-session";
 import {
   parseSajuReadingCreatedResponse,
   parseSajuReadingCreateRequest,
@@ -175,7 +174,6 @@ export function SajuExperience() {
   const [revealAnnouncement, setRevealAnnouncement] = useState("");
   const requestIdRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
-  const followUpDraftRef = useRef(false);
   const editingFromReviewRef = useRef(false);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const focusFieldRef = useRef<string | null>(null);
@@ -220,28 +218,11 @@ export function SajuExperience() {
     formRef.current = form;
   }, [form]);
 
-  useEffect(() => {
-    const remembered = takeRememberedSajuBirthProfile();
-    if (!remembered) return;
-    followUpDraftRef.current = true;
-    setForm((current) => ({
-      ...current,
-      birthDate: remembered.birthDate,
-      birthTimePrecision: remembered.birthTimePrecision,
-      birthTime: "birthTime" in remembered ? remembered.birthTime ?? "" : "",
-      provinceCode: remembered.birthTimePrecision === "unknown"
-        ? ""
-        : remembered.provinceCode ?? "",
-      luckDirectionBasis: remembered.luckDirectionBasis,
-    }));
-  }, []);
-
   const handleConsentComplete = useCallback(() => {
     setPhase("question");
   }, []);
 
   // Load the province list as soon as the birth step opens, so choosing a known time never waits on it.
-  // A remembered profile with a known time also needs it on review to show the province name.
   useEffect(() => {
     if (catalogStatus !== "idle") return;
     if (phase === "birth" || (phase !== "consent" && isTimeKnown(form.birthTimePrecision))) {
@@ -341,7 +322,7 @@ export function SajuExperience() {
       return;
     }
     // A follow-up reading already carries the birth profile, and an edit from review returns there filled in.
-    setPhase(followUpDraftRef.current || editingFromReviewRef.current ? "review" : "birth");
+    setPhase(editingFromReviewRef.current ? "review" : "birth");
   }
 
   function submitBirth() {

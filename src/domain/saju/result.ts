@@ -132,6 +132,55 @@ const calculationSnapshotSchema = z.object({
   }).strict(),
 }).strict();
 
+const minimalPillarSchema = z.object({
+  ganZhi: textSchema,
+  stemTenGod: textSchema.optional(),
+}).strict();
+
+const minimalCalculationSnapshotSchema = z.object({
+  calculationVersion: textSchema,
+  engine: textSchema,
+  engineVersion: textSchema,
+  cityCatalogVersion: textSchema,
+  targetYear: z.number().int(),
+  pillars: z.object({
+    year: minimalPillarSchema,
+    month: minimalPillarSchema,
+    day: minimalPillarSchema,
+    time: minimalPillarSchema.nullable(),
+  }).strict(),
+  dayMaster: textSchema.optional(),
+  fiveElements: z.object({
+    wood: z.number().int().nonnegative().optional(),
+    fire: z.number().int().nonnegative().optional(),
+    earth: z.number().int().nonnegative().optional(),
+    metal: z.number().int().nonnegative().optional(),
+    water: z.number().int().nonnegative().optional(),
+  }).strict(),
+  relations: z.array(z.object({
+    type: textSchema,
+    members: z.array(textSchema),
+  }).strict()),
+  currentLuckCycle: z.object({
+    startYear: z.number().int(),
+    endYear: z.number().int(),
+    ganZhi: textSchema,
+  }).strict().optional(),
+  annualFortune: z.object({
+    year: z.number().int(),
+    ganZhi: textSchema,
+    stemTenGod: textSchema.optional(),
+  }).strict().optional(),
+  limitations: z.array(textSchema).refine(
+    (values) => !values.includes("BIRTH_TIME_UNKNOWN")
+      && !values.includes("APPROXIMATE_BIRTH_TIME"),
+    "Raw birth-time precision must not be persisted.",
+  ),
+  uncertainty: z.object({
+    varyingFields: z.array(textSchema),
+  }).strict(),
+}).strict();
+
 const evidenceKeysSchema = z.array(evidenceKeySchema).min(1).superRefine((keys, context) => {
   if (new Set(keys).size !== keys.length) {
     context.addIssue({ code: z.ZodIssueCode.custom, message: "근거 키가 중복되었습니다." });
@@ -214,6 +263,14 @@ const completedSajuRecordSchema = z.union([
       birthProfile: currentBirthProfileSchema,
     }).strict(),
   }).passthrough(),
+  z.object({
+    ...completedRecordCommon,
+    schemaVersion: z.literal(5),
+    input: z.object({
+      targetYear: z.number().int(),
+      calculationSnapshot: minimalCalculationSnapshotSchema,
+    }).strict(),
+  }).passthrough(),
 ]).superRefine((reading, context) => {
   const snapshot = reading.input.calculationSnapshot;
   const expectedSections = ["core", "strengths", "relationship", "work"];
@@ -232,7 +289,7 @@ const completedSajuRecordSchema = z.union([
       message: "사주 기준 연도가 일치하지 않습니다.",
     });
   }
-  if (snapshot.annualFortune !== null
+  if (snapshot.annualFortune != null
     && snapshot.annualFortune.year !== reading.input.targetYear) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
@@ -245,7 +302,10 @@ const completedSajuRecordSchema = z.union([
     ...reading.result.annualReading.evidenceKeys,
     ...reading.result.questionReading.evidenceKeys,
   ];
-  if (snapshot.luckCycle === null && evidenceKeys.includes("currentLuckCycle")) {
+  const hasCurrentLuck = "currentLuckCycle" in snapshot
+    ? snapshot.currentLuckCycle !== undefined
+    : "luckCycle" in snapshot && snapshot.luckCycle !== null;
+  if (!hasCurrentLuck && evidenceKeys.includes("currentLuckCycle")) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
       path: ["result"],
@@ -255,7 +315,7 @@ const completedSajuRecordSchema = z.union([
 });
 
 export type SajuReadingView = z.infer<typeof completedSajuRecordSchema>;
-export type SajuCalculationSnapshot = z.infer<typeof calculationSnapshotSchema>;
+export type SajuCalculationSnapshot = SajuReadingView["input"]["calculationSnapshot"];
 export type SajuEvidenceKey = z.infer<typeof evidenceKeySchema>;
 export type SajuBirthProfile = z.infer<typeof legacyBirthProfileSchema>
   | z.infer<typeof currentBirthProfileSchema>;

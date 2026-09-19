@@ -3,27 +3,16 @@ import { parseSajuReadingView, type SajuReadingView } from "@/domain/saju/result
 export function sajuReadingRecord(overrides: Record<string, unknown> = {}) {
   const pillar = {
     ganZhi: "임신",
-    stem: "임",
-    branch: "신",
-    fiveElements: "수금",
     stemTenGod: "정인",
-    branchTenGods: ["정관"],
   };
   return {
     id: "reading-1",
     kind: "saju",
     spreadType: null,
-    schemaVersion: 4,
+    schemaVersion: 5,
     status: "completed",
     title: "변화를 준비하며 기준을 세우는 해",
     input: {
-      focusArea: "career",
-      birthProfile: {
-        calendarType: "solar",
-        birthDate: "1992-08-17",
-        birthTimePrecision: "unknown",
-        luckDirectionBasis: "unspecified",
-      },
       targetYear: 2026,
       calculationSnapshot: {
         calculationVersion: "saju-ko-v1",
@@ -31,21 +20,15 @@ export function sajuReadingRecord(overrides: Record<string, unknown> = {}) {
         engineVersion: "1.7.7",
         cityCatalogVersion: "kr-admin-v1",
         targetYear: 2026,
-        timeCorrection: null,
         pillars: { year: pillar, month: pillar, day: pillar, time: null },
         dayMaster: "임",
         fiveElements: { wood: 1, fire: 0, earth: 3, metal: 2, water: 2 },
         relations: [{ type: "branch_clash", members: ["축", "미"] }],
-        luckCycle: null,
+        currentLuckCycle: { startYear: 2023, endYear: 2032, ganZhi: "병오" },
         annualFortune: { year: 2026, ganZhi: "병오", stemTenGod: "상관" },
-        limitations: ["BIRTH_TIME_UNKNOWN", "LUCK_DIRECTION_UNSPECIFIED"],
+        limitations: ["TIME_PILLAR_UNCERTAIN", "LUCK_DIRECTION_UNSPECIFIED"],
         uncertainty: {
-          precision: "unknown",
-          candidateCount: 1440,
-          rangeStart: "1992-08-17T00:00",
-          rangeEnd: "1992-08-17T23:59",
           varyingFields: ["pillars.time", "luckCycle"],
-          candidateZoneOffsets: ["+09:00"],
         },
       },
     },

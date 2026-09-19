@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseSajuReadingView } from "./result";
+import { sajuReadingRecord } from "@/test-fixtures/saju-reading";
 
 function completedSajuRecord() {
   const pillar = {
@@ -72,6 +73,29 @@ function completedSajuRecord() {
 }
 
 describe("parseSajuReadingView", () => {
+	it("accepts the minimal v5 record and rejects forbidden persisted fields", () => {
+		const minimal = sajuReadingRecord();
+		expect(parseSajuReadingView(minimal)).not.toBeNull();
+
+		const forbiddenBirthProfile = structuredClone(minimal);
+		Object.assign(forbiddenBirthProfile.input, {
+			birthProfile: { birthDate: "1992-08-17" },
+		});
+		expect(parseSajuReadingView(forbiddenBirthProfile)).toBeNull();
+
+		const forbiddenFullLuck = structuredClone(minimal);
+		Object.assign(forbiddenFullLuck.input.calculationSnapshot, {
+			luckCycle: { periods: [] },
+		});
+		expect(parseSajuReadingView(forbiddenFullLuck)).toBeNull();
+
+		const forbiddenPrecision = structuredClone(minimal);
+		Object.assign(forbiddenPrecision.input.calculationSnapshot.uncertainty, {
+			candidateCount: 1440,
+		});
+		expect(parseSajuReadingView(forbiddenPrecision)).toBeNull();
+	});
+
   it("decodes a completed saju v2 record while preserving an absent time pillar", () => {
     const parsed = parseSajuReadingView(completedSajuRecord());
 

@@ -50,14 +50,14 @@ describe("SajuResultPage", () => {
     mocks.get.mockResolvedValue(sajuReadingRecord());
   });
 
-  it("restores a completed saju v4 result by reading ID", async () => {
+  it("restores a completed saju v5 result by reading ID", async () => {
     await renderPage();
 
     expect(mocks.get).toHaveBeenCalledWith("reading-1");
     expect(mocks.result).toHaveBeenCalledWith(
       expect.objectContaining({
         backHref: "/saju",
-        view: expect.objectContaining({ id: "reading-1", schemaVersion: 4 }),
+        view: expect.objectContaining({ id: "reading-1", schemaVersion: 5 }),
       }),
       undefined,
     );
@@ -113,7 +113,7 @@ describe("SajuResultPage", () => {
   });
 
   it("does not guess-render unsupported or malformed saju records", async () => {
-    mocks.get.mockResolvedValue(sajuReadingRecord({ schemaVersion: 5 }));
+    mocks.get.mockResolvedValue(sajuReadingRecord({ schemaVersion: 6 }));
 
     await expect(renderPage()).rejects.toThrow("NOT_FOUND");
     expect(mocks.result).not.toHaveBeenCalled();

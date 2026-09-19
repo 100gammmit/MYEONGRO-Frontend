@@ -13,7 +13,6 @@ import {
 } from "@/domain/reading/reading-mode";
 
 import { ReadingModeNotice } from "./reading-mode-notice";
-import { SajuFollowUpAction } from "./saju-follow-up-action";
 
 const PILLAR_LABELS = {
   year: "연주",
@@ -74,18 +73,21 @@ export function SajuReadingResult({
   footer?: ReactNode;
 }) {
   const snapshot = view.input.calculationSnapshot;
+  const isVersionFive = view.schemaVersion === 5;
   const confirmedPillars = Object.entries(snapshot.pillars).filter((entry) => entry[1] !== null);
-  const currentLuck = snapshot.luckCycle?.periods.find(
-    (period) => period.startYear <= snapshot.targetYear && snapshot.targetYear <= period.endYear,
-  );
+  const currentLuck = "currentLuckCycle" in snapshot
+    ? snapshot.currentLuckCycle
+    : "luckCycle" in snapshot ? snapshot.luckCycle?.periods.find(
+      (period) => period.startYear <= snapshot.targetYear && snapshot.targetYear <= period.endYear,
+    ) : undefined;
   const resultFocusLabel = view.result.readingMode === "standard"
-    ? sajuFocusAreaLabel(view.input.focusArea)
+    ? isVersionFive ? "사주 리딩" : sajuFocusAreaLabel(view.input.focusArea)
     : fortuneReadingModeLabel(view.result.readingMode);
-  const modeNotice = sajuReadingModeNotice(
-    view.input.focusArea,
-    view.result.readingMode,
-    view.result.questionRedirected,
-  );
+  const modeNotice = isVersionFive ? null : sajuReadingModeNotice(
+      view.input.focusArea,
+      view.result.readingMode,
+      view.result.questionRedirected,
+    );
 
   return (
     <article className="saju-result page-width">
@@ -143,7 +145,9 @@ export function SajuReadingResult({
           <dl>
             <div><dt>계산 규칙</dt><dd>{snapshot.calculationVersion}</dd></div>
             <div><dt>계산 엔진</dt><dd>{snapshot.engine} {snapshot.engineVersion}</dd></div>
-            <div><dt>출생 시각 정확도</dt><dd>{uncertaintyText(snapshot)}</dd></div>
+            {!isVersionFive && "precision" in snapshot.uncertainty ? (
+              <div><dt>출생 시각 정확도</dt><dd>{legacyUncertaintyText(snapshot.uncertainty)}</dd></div>
+            ) : null}
           </dl>
         </details>
       </section>
@@ -191,7 +195,7 @@ export function SajuReadingResult({
 
       <p className="reading-disclaimer">{view.result.disclaimer}</p>
       <div className="result-actions saju-result-actions">
-        <SajuFollowUpAction birthProfile={view.input.birthProfile} />
+        <Link className="primary-button" href="/saju">새 사주 리딩</Link>
         <Link className="secondary-button" href="/records">내 기록 보기</Link>
       </div>
       {footer}
@@ -231,7 +235,7 @@ function evidenceText(key: SajuEvidenceKey, snapshot: SajuCalculationSnapshot): 
     case "currentLuckCycle": return "현재 연도에 해당하는 대운 흐름";
     case "annualFlow": return `${snapshot.targetYear}년 세운 ${annualFortuneText(snapshot)}`;
     case "limitations": return "계산에서 확정하지 않은 항목과 적용 한계";
-    case "uncertainty": return `출생 시각 후보 ${snapshot.uncertainty.candidateCount.toLocaleString("ko-KR")}개 비교`;
+    case "uncertainty": return "계산에서 값이 달라진 항목은 확정하지 않음";
   }
 }
 
@@ -252,11 +256,11 @@ function annualFortuneText(snapshot: SajuCalculationSnapshot): string {
   return annual.stemTenGod ? `${annual.ganZhi} · ${annual.stemTenGod}` : annual.ganZhi;
 }
 
-function uncertaintyText(snapshot: SajuCalculationSnapshot): string {
-  const precision = snapshot.uncertainty.precision === "exact"
+function legacyUncertaintyText(uncertainty: { precision: string; candidateCount: number }): string {
+  const precision = uncertainty.precision === "exact"
     ? "정확한 시각"
-    : snapshot.uncertainty.precision === "approximate"
+    : uncertainty.precision === "approximate"
       ? "대략적인 시각"
       : "시간 미상";
-  return `${precision} · 후보 ${snapshot.uncertainty.candidateCount.toLocaleString("ko-KR")}개`;
+  return `${precision} · 후보 ${uncertainty.candidateCount.toLocaleString("ko-KR")}개`;
 }

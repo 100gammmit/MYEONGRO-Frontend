@@ -11,9 +11,11 @@ describe("PrivacyPage", () => {
     expect(screen.getByText(/계정 설정에서 계정 삭제를 요청하면.*운영 데이터베이스에서 즉시 영구 삭제되며 복구할 수 없습니다/))
       .toBeInTheDocument();
     expect(screen.getByText(/문서 버전 draft-2026-09-10/)).toBeInTheDocument();
-    expect(screen.getByText(/질문과 선택지 원문은 AI 리딩 생성 중에만 사용/))
-      .toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
+    expect(screen.getByText(/원본 출생정보는 명식 계산 후 폐기하며 명로 데이터베이스에 저장하지 않습니다/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/질문·선택지·관심 분야는 AI 리딩 생성 중에만 사용하고 명로 데이터베이스에는 저장하지 않습니다/))
+      .toBeInTheDocument();
     expect(screen.getByText(/만 19세 이상 확인 여부와 정책 버전·확인 시각/))
       .toBeInTheDocument();
     expect(screen.getByText(/연령 확인을 위해 생년월일이나 신분증 정보는 수집하지 않습니다/))

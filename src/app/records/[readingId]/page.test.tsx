@@ -198,17 +198,17 @@ describe("ReadingDetailPage", () => {
     expect(screen.queryByText("추측하면 안 되는 본문")).not.toBeInTheDocument();
   });
 
-  it("selects the saju v4 renderer and restores its calculation context", async () => {
+  it("selects the saju v5 renderer and restores its calculation context", async () => {
     mocks.get.mockResolvedValue(sajuReadingRecord());
 
     await renderPage();
 
     expect(screen.getByRole("heading", { name: "변화를 준비하며 기준을 세우는 해" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "사주 리딩 목차" })).toBeInTheDocument();
-    expect(screen.getByText("출생 시각 미상")).toBeInTheDocument();
+    expect(screen.getByText("현재 대운")).toBeInTheDocument();
   });
 
-  it("does not guess-render a malformed saju v4 payload", async () => {
+  it("does not guess-render a malformed saju v5 payload", async () => {
     const malformed = sajuReadingRecord();
     malformed.result.natalSections = malformed.result.natalSections.slice(0, 3);
     mocks.get.mockResolvedValue(malformed);
