@@ -415,7 +415,7 @@ export function SajuExperience() {
         eyebrow="AI SAJU"
         form
         title="사주 리딩을 시작하기 전에"
-        description="출생 정보는 리딩 생성과 기록 복원을 위해 저장되며, 내 기록에서 언제든 삭제할 수 있어요."
+        description="원본 출생정보는 사주 계산 중에만 사용하고 계산이 끝나면 폐기해요. 내 기록에는 화면 복원에 필요한 최소 계산정보와 리딩 결과만 저장돼요."
         stepLabel="시작하기 전에"
       >
         <ConsentGate
@@ -512,7 +512,7 @@ export function SajuExperience() {
         eyebrow="AI SAJU"
         form
         title="출생 정보를 알려주세요"
-        description="출생 정보는 리딩 생성과 기록 복원을 위해 저장되며, 내 기록에서 언제든 삭제할 수 있어요."
+        description="원본 출생정보는 사주 계산 중에만 사용하고 계산이 끝나면 폐기해요. 내 기록에는 화면 복원에 필요한 최소 계산정보와 리딩 결과만 저장돼요."
         step={2}
         totalSteps={TOTAL_STEPS}
         showHomeLink={false}
@@ -661,7 +661,7 @@ export function SajuExperience() {
       eyebrow="AI SAJU"
       form
       title="입력한 내용을 확인해 주세요"
-      description="출생정보와 계산 기준은 내 기록에 저장되지만 질문 원문은 저장되지 않아요."
+      description="원본 출생정보와 질문 원문은 저장하지 않아요. 내 기록에는 화면 복원에 필요한 최소 계산정보와 리딩 결과만 저장돼요."
       step={3}
       totalSteps={TOTAL_STEPS}
       showHomeLink={false}

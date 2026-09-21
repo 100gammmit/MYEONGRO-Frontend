@@ -164,7 +164,10 @@ describe("SajuExperience", () => {
 
     render(<SajuExperience />);
     expect(screen.queryByRole("textbox", { name: /질문 한 가지/ })).not.toBeInTheDocument();
-    expect(screen.getByText(/내 기록에서 언제든 삭제/)).toBeInTheDocument();
+    expect(screen.getByText(/원본 출생정보는 사주 계산 중에만 사용하고 계산이 끝나면 폐기/))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/출생 정보는 리딩 생성과 기록 복원을 위해 저장/))
+      .not.toBeInTheDocument();
     expect(screen.getByText("시작하기 전에")).toBeInTheDocument();
     expect(screen.queryByText(/\d+ \/ 4/)).not.toBeInTheDocument();
 
@@ -201,6 +204,8 @@ describe("SajuExperience", () => {
 
     await reachBirth();
     expect(screen.getByText("2 / 4")).toBeInTheDocument();
+    expect(screen.getByText(/원본 출생정보는 사주 계산 중에만 사용하고 계산이 끝나면 폐기/))
+      .toBeInTheDocument();
     expect(screen.getByLabelText("양력 생년월일")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /정확히 알아요/ })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "선택하지 않음" })).toBeChecked();
@@ -209,6 +214,10 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
     expect(screen.getByText("3 / 4")).toBeInTheDocument();
+    expect(screen.getByText(/원본 출생정보와 질문 원문은 저장하지 않아요/))
+      .toBeInTheDocument();
+    expect(screen.queryByText(/출생정보와 계산 기준은 내 기록에 저장/))
+      .not.toBeInTheDocument();
   });
 
   it("locks the question step when the saju cost exceeds the current balance", async () => {
