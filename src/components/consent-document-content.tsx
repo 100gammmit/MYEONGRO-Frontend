@@ -3,7 +3,6 @@ import {
   OPENAI_SUBPROCESSOR_COUNTRY_SNAPSHOT,
   OPENAI_SUBPROCESSOR_LIST_URL,
   PRIVACY_DOCUMENT_VERSION,
-  SAJU_INPUT_DOCUMENT_VERSION,
   TERMS_DOCUMENT_VERSION,
   type ConsentDocumentType as RequiredConsentDocumentType,
 } from "@/domain/consent/documents";
@@ -49,34 +48,30 @@ export function ConsentDocumentContent({
     );
   }
 
-  if (documentType === "saju-input") {
-    return (
-      <div className="consent-document-content">
-        <DocumentMeta version={SAJU_INPUT_DOCUMENT_VERSION} />
-        <p>{LEGAL_METADATA.operatorName}은 사주 리딩 제공을 위해 아래 출생정보를 처리합니다.</p>
-        <Heading>처리하는 정보</Heading>
-        <ul>
-          <li>양력 생년월일</li>
-          <li>출생시각 또는 출생시각 정확도</li>
-          <li>출생 시·도</li>
-          <li>대운 계산 기준 선택값</li>
-        </ul>
-        <Heading>처리 목적과 방법</Heading>
-        <p>원본 출생정보는 명로 서버에서 명식과 흐름을 계산하는 동안에만 사용하고 계산이 끝나면 폐기합니다. 원본 출생정보는 명로 데이터베이스에 저장하거나 OpenAI API에 전송하지 않습니다. 질문과 관심 분야는 AI 리딩 생성 중에만 사용하고 명로 데이터베이스에는 저장하지 않습니다. OpenAI에는 질문·관심 분야와 서버에서 계산한 최소 명식 정보만 전송합니다.</p>
-        <Heading>보유·이용 기간</Heading>
-        <p>기록 화면 복원에 필요한 최소 계산정보와 AI 리딩 결과는 개별 사주 기록을 삭제하거나 계정을 삭제할 때까지 보유합니다. 처리 중단이나 삭제를 원하면 내 기록에서 개별 기록을 삭제하거나 {LEGAL_METADATA.privacyEmail}로 요청할 수 있습니다.</p>
-        <Heading>동의 거부 안내</Heading>
-        <p>동의하지 않을 수 있으며, 이 경우 사주 리딩 생성 기능은 이용할 수 없습니다. AI 타로와 무료 오늘의 운세 이용에는 영향을 주지 않습니다.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="consent-document-content">
       <DocumentMeta version={PRIVACY_DOCUMENT_VERSION} />
       <p>서비스 &quot;명로&quot;를 운영하는 {LEGAL_METADATA.operatorName}은 서비스 제공을 위해 필요한 범위에서 개인정보를 처리합니다.</p>
       <Heading>처리 목적과 항목</Heading>
-      <p>소셜 로그인 계정 식별, 연령 이용자격 확인, AI 리딩 생성, 리딩 기록 저장·조회·삭제, 서비스 보안과 장애 대응을 위해 OAuth 프로필 정보, 만 19세 이상 확인 여부와 정책 버전·확인 시각, 이용자가 작성한 질문·선택지·관심 분야, 사주 계산에 필요한 원본 출생정보와 서비스 이용 기록을 처리합니다. 원본 출생정보는 명식 계산 후 폐기하며 명로 데이터베이스에 저장하지 않습니다. 질문·선택지·관심 분야는 AI 리딩 생성 중에만 사용하고 명로 데이터베이스에는 저장하지 않습니다. 연령 확인을 위해 생년월일이나 신분증 정보는 수집하지 않습니다.</p>
+      <p>소셜 로그인 계정 식별, 연령 이용자격 확인, AI 리딩 생성, 리딩 기록 저장·조회·삭제, 서비스 보안과 장애 대응을 위해 OAuth 프로필 정보, 만 19세 이상 확인 여부와 정책 버전·확인 시각, 이용자가 작성한 질문·선택지·관심 분야와 서비스 이용 기록을 처리합니다. 질문·선택지·관심 분야는 AI 리딩 생성 중에만 사용하고 명로 데이터베이스에는 저장하지 않습니다. 연령 확인을 위해 생년월일이나 신분증 정보는 수집하지 않습니다.</p>
+      <Heading>사주 출생정보의 일시적 처리</Heading>
+      <p>사주 리딩을 요청한 경우 아래 정보는 별도 동의 항목이 아니라 이용자가 요청한 서비스를 제공하기 위해 필요한 범위에서 처리합니다.</p>
+      <dl>
+        <div><dt>처리 항목</dt><dd>양력 생년월일, 출생시각 또는 출생시각 정확도, 출생 시·도, 대운 계산 기준</dd></div>
+        <div><dt>처리 목적</dt><dd>명식·흐름 계산과 AI에 전달할 최소 계산정보 생성</dd></div>
+        <div>
+          <dt>처리 근거</dt>
+          <dd>
+            <a href="https://law.go.kr/LSW/lsLawLinkInfo.do?ancYnChk=0&chrClsCd=010202&lsJoLnkSeq=1006184341" rel="noreferrer" target="_blank">
+              개인정보 보호법 제15조 제1항 제4호
+            </a>
+            에 따른 계약 이행 및 이용자 요청 처리
+          </dd>
+        </div>
+        <div><dt>처리 기간</dt><dd>사주 계산 요청 처리 완료 시까지</dd></div>
+      </dl>
+      <p>원본 출생정보는 별도 데이터베이스에 저장하지 않고 OpenAI API에도 전송하지 않습니다. 사주 계산과 최소 계산정보 생성에 사용한 뒤 별도로 보유하지 않으며, 요청 처리 종료 시 메모리에서 해제됩니다.</p>
+      <p>계산된 최소 사주정보, AI 리딩 결과, 요청 중복 방지를 위한 원문 미포함 식별값은 리딩 기록과 함께 저장됩니다. 저장된 정보는 이용자가 개별 리딩을 삭제하거나 계정을 삭제할 때 즉시 영구 삭제됩니다.</p>
       <Heading>국외 처리위탁</Heading>
       <p>AI 리딩 생성에는 OpenAI OpCo, LLC의 Global API를 사용합니다. 아래 국외이전 세부 내용은 로그인하지 않아도 언제든 확인할 수 있습니다.</p>
       <AiOverseasTransferDetails headingLevel={headingLevel} />

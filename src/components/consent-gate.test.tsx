@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
-  SAJU_INPUT_DOCUMENT_VERSION,
   TERMS_DOCUMENT_VERSION,
 } from "@/domain/consent/documents";
 import { ConsentGate } from "./consent-gate";
@@ -48,18 +47,19 @@ describe("ConsentGate", () => {
     expect(screen.getByText(/마지막 단계에서 모든 동의를 한 번에 저장합니다/)).toBeInTheDocument();
   });
 
-  it("shows the saju-only birth information agreement in the saju scope", async () => {
+  it("uses the shared terms and overseas transfer documents for the saju scope", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
-      status: {
-        ...tarotStatus,
-        requiredDocumentTypes: ["terms", "ai-overseas-transfer", "saju-input"],
-      },
+      status: tarotStatus,
     }));
 
     render(<ConsentGate scope="saju" onComplete={vi.fn()} />);
 
-    expect(await screen.findByText("[필수] 사주 출생정보 처리 동의"))
+    expect(await screen.findByText("[필수] 서비스 이용약관 동의"))
       .toBeInTheDocument();
+    expect(screen.getByText("[필수] AI 리딩 정보 국외이전 동의"))
+      .toBeInTheDocument();
+    expect(screen.queryByText("[필수] 사주 출생정보 처리 동의"))
+      .not.toBeInTheDocument();
   });
 
   it("routes a 401 response back through the login gate", async () => {
@@ -79,7 +79,7 @@ describe("ConsentGate", () => {
     await waitFor(() => expect(onUnauthenticated).toHaveBeenCalledOnce());
   });
 
-  it("skips the gate when every current document is already accepted", async () => {
+  it("skips the saju gate when terms and overseas transfer are already accepted", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
       status: {
         ...tarotStatus,
@@ -89,10 +89,12 @@ describe("ConsentGate", () => {
     }));
     const onComplete = vi.fn();
 
-    render(<ConsentGate scope="tarot" onComplete={onComplete} />);
+    render(<ConsentGate scope="saju" onComplete={onComplete} />);
 
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
     expect(screen.queryByRole("button", { name: "동의 완료하고 계속" }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByText("[필수] 사주 출생정보 처리 동의"))
       .not.toBeInTheDocument();
   });
 
@@ -133,19 +135,15 @@ describe("ConsentGate", () => {
     expect(continueButton).toBeDisabled();
   });
 
-  it("submits current tarot consent with the newly reviewed saju document", async () => {
+  it("submits only terms and overseas transfer consent for saju", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(Response.json({
-        status: {
-          acceptedDocumentTypes: ["terms", "ai-overseas-transfer"],
-          requiredDocumentTypes: ["terms", "ai-overseas-transfer", "saju-input"],
-          hasAcceptedRequired: false,
-        },
+        status: tarotStatus,
       }))
       .mockResolvedValueOnce(Response.json({
         status: {
-          acceptedDocumentTypes: ["terms", "ai-overseas-transfer", "saju-input"],
-          requiredDocumentTypes: ["terms", "ai-overseas-transfer", "saju-input"],
+          acceptedDocumentTypes: ["terms", "ai-overseas-transfer"],
+          requiredDocumentTypes: ["terms", "ai-overseas-transfer"],
           hasAcceptedRequired: true,
         },
       }));
@@ -154,10 +152,17 @@ describe("ConsentGate", () => {
     render(<ConsentGate scope="saju" onComplete={onComplete} />);
 
     fireEvent.click(await screen.findByRole("button", {
-      name: "사주 출생정보 처리 동의 내용 확인",
+      name: "서비스 이용약관 동의 내용 확인",
     }));
     fireEvent.click(screen.getByRole("button", {
-      name: "사주 출생정보 처리 동의 확인하고 동의",
+      name: "서비스 이용약관 동의 확인하고 동의",
+    }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", {
+      name: "AI 리딩 정보 국외이전 동의 내용 확인",
+    }));
+    fireEvent.click(screen.getByRole("button", {
+      name: "AI 리딩 정보 국외이전 동의 확인하고 동의",
     }));
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "동의 완료하고 계속" }));
@@ -171,7 +176,6 @@ describe("ConsentGate", () => {
           documentVersions: {
             terms: TERMS_DOCUMENT_VERSION,
             "ai-overseas-transfer": AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
-            "saju-input": SAJU_INPUT_DOCUMENT_VERSION,
           },
         }),
       }),

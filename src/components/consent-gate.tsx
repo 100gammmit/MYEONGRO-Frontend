@@ -17,7 +17,7 @@ type ConsentStatus = {
 
 const SCOPE_DOCUMENTS: Readonly<Record<ConsentScope, readonly ConsentDocumentType[]>> = {
   tarot: ["terms", "ai-overseas-transfer"],
-  saju: ["terms", "ai-overseas-transfer", "saju-input"],
+  saju: ["terms", "ai-overseas-transfer"],
 };
 
 const agreementDetails: Readonly<Record<ConsentDocumentType, {
@@ -31,10 +31,6 @@ const agreementDetails: Readonly<Record<ConsentDocumentType, {
   "ai-overseas-transfer": {
     label: "AI 리딩 정보 국외이전 동의",
     detail: "OpenAI로 전송되는 정보, 처리 가능 국가와 보유기간을 확인합니다.",
-  },
-  "saju-input": {
-    label: "사주 출생정보 처리 동의",
-    detail: "명식 계산과 기록 저장에 필요한 출생정보의 처리 범위를 확인합니다.",
   },
 };
 

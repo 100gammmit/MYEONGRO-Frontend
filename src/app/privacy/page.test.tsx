@@ -12,7 +12,20 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/문서 버전 draft-2026-09-10/)).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
-    expect(screen.getByText(/원본 출생정보는 명식 계산 후 폐기하며 명로 데이터베이스에 저장하지 않습니다/))
+    expect(screen.getByRole("heading", { name: "사주 출생정보의 일시적 처리" }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/양력 생년월일, 출생시각 또는 출생시각 정확도, 출생 시·도, 대운 계산 기준/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/명식·흐름 계산과 AI에 전달할 최소 계산정보 생성/))
+      .toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "개인정보 보호법 제15조 제1항 제4호" }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/사주 계산 요청 처리 완료 시까지/)).toBeInTheDocument();
+    expect(screen.getByText(/원본 출생정보는 별도 데이터베이스에 저장하지 않고 OpenAI API에도 전송하지 않습니다/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/요청 처리 종료 시 메모리에서 해제됩니다/)).toBeInTheDocument();
+    expect(screen.getByText(/요청 중복 방지를 위한 원문 미포함 식별값/)).toBeInTheDocument();
+    expect(screen.getByText(/개별 리딩을 삭제하거나 계정을 삭제할 때 즉시 영구 삭제/))
       .toBeInTheDocument();
     expect(screen.getByText(/질문·선택지·관심 분야는 AI 리딩 생성 중에만 사용하고 명로 데이터베이스에는 저장하지 않습니다/))
       .toBeInTheDocument();

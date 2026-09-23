@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SajuExperience } from "./saju-experience";
@@ -33,7 +33,7 @@ vi.mock("./reading-credit-provider", () => ({
   useReadingCredits: () => credits,
 }));
 
-const REQUIRED_CONSENTS = ["terms", "ai-overseas-transfer", "saju-input"] as const;
+const REQUIRED_CONSENTS = ["terms", "ai-overseas-transfer"] as const;
 const REQUEST_ID = "11111111-1111-4111-8111-111111111111";
 const SECOND_REQUEST_ID = "22222222-2222-4222-8222-222222222222";
 const QUESTION_HEADING = "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?";
@@ -164,7 +164,7 @@ describe("SajuExperience", () => {
 
     render(<SajuExperience />);
     expect(screen.queryByRole("textbox", { name: /질문 한 가지/ })).not.toBeInTheDocument();
-    expect(screen.getByText(/원본 출생정보는 사주 계산 중에만 사용하고 계산이 끝나면 폐기/))
+    expect(screen.getByText(/원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용/))
       .toBeInTheDocument();
     expect(screen.queryByText(/출생 정보는 리딩 생성과 기록 복원을 위해 저장/))
       .not.toBeInTheDocument();
@@ -174,7 +174,6 @@ describe("SajuExperience", () => {
     for (const agreement of [
       "서비스 이용약관 동의",
       "AI 리딩 정보 국외이전 동의",
-      "사주 출생정보 처리 동의",
     ]) {
       fireEvent.click(await screen.findByRole("button", { name: `${agreement} 내용 확인` }));
       fireEvent.click(screen.getByRole("button", { name: `${agreement} 확인하고 동의` }));
@@ -204,9 +203,18 @@ describe("SajuExperience", () => {
 
     await reachBirth();
     expect(screen.getByText("2 / 4")).toBeInTheDocument();
-    expect(screen.getByText(/원본 출생정보는 사주 계산 중에만 사용하고 계산이 끝나면 폐기/))
+    expect(screen.getByText(/원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용/))
       .toBeInTheDocument();
-    expect(screen.getByLabelText("양력 생년월일")).toBeInTheDocument();
+    const privacyNotice = screen.getByRole("complementary", {
+      name: "사주 출생정보 처리 안내",
+    });
+    const birthDateInput = screen.getByLabelText("양력 생년월일");
+    expect(privacyNotice).toHaveTextContent("원본 출생정보는 데이터베이스에 저장하거나 OpenAI에 전송하지 않으며");
+    expect(within(privacyNotice).getByRole("link", { name: "개인정보 처리방침" }))
+      .toHaveAttribute("href", "/privacy");
+    expect(privacyNotice.compareDocumentPosition(birthDateInput) & Node.DOCUMENT_POSITION_FOLLOWING)
+      .toBeTruthy();
+    expect(birthDateInput).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: /정확히 알아요/ })).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "선택하지 않음" })).toBeChecked();
 

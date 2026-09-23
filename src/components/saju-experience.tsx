@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -415,7 +416,7 @@ export function SajuExperience() {
         eyebrow="AI SAJU"
         form
         title="사주 리딩을 시작하기 전에"
-        description="원본 출생정보는 사주 계산 중에만 사용하고 계산이 끝나면 폐기해요. 내 기록에는 화면 복원에 필요한 최소 계산정보와 리딩 결과만 저장돼요."
+        description="원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용하고 요청 처리가 끝나면 별도로 보유하지 않아요. 내 기록에는 최소 계산정보와 리딩 결과만 저장돼요."
         stepLabel="시작하기 전에"
       >
         <ConsentGate
@@ -512,7 +513,7 @@ export function SajuExperience() {
         eyebrow="AI SAJU"
         form
         title="출생 정보를 알려주세요"
-        description="원본 출생정보는 사주 계산 중에만 사용하고 계산이 끝나면 폐기해요. 내 기록에는 화면 복원에 필요한 최소 계산정보와 리딩 결과만 저장돼요."
+        description="원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용하고 요청 처리가 끝나면 별도로 보유하지 않아요."
         step={2}
         totalSteps={TOTAL_STEPS}
         showHomeLink={false}
@@ -521,6 +522,9 @@ export function SajuExperience() {
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
           <p className="sr-only" aria-live="polite">{revealAnnouncement}</p>
+          <aside aria-label="사주 출생정보 처리 안내" className="notice">
+            생년월일, 출생시각·정확도, 출생 시·도와 대운 계산 기준은 사주 계산 중에만 사용합니다. 원본 출생정보는 데이터베이스에 저장하거나 OpenAI에 전송하지 않으며, 요청 처리가 끝나면 별도로 보유하지 않습니다. 계산된 최소 정보와 리딩 결과는 내 기록에 저장되며 언제든 삭제할 수 있습니다. 자세한 내용은 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다.
+          </aside>
           <div className="field">
             <label htmlFor="saju-birth-date">양력 생년월일</label>
             <input

@@ -1,19 +1,16 @@
 export const TERMS_DOCUMENT_VERSION = "2026-09-09";
 export const PRIVACY_DOCUMENT_VERSION = "draft-2026-09-10";
 export const AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION = "draft-2026-09-07";
-export const SAJU_INPUT_DOCUMENT_VERSION = "draft-2026-09-07";
 
 export type ConsentScope = "tarot" | "saju";
 
 export type ConsentDocumentType =
   | "terms"
-  | "ai-overseas-transfer"
-  | "saju-input";
+  | "ai-overseas-transfer";
 
 export const CONSENT_DOCUMENT_VERSIONS: Readonly<Record<ConsentDocumentType, string>> = {
   terms: TERMS_DOCUMENT_VERSION,
   "ai-overseas-transfer": AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
-  "saju-input": SAJU_INPUT_DOCUMENT_VERSION,
 };
 
 export const OPENAI_SUBPROCESSOR_COUNTRY_SNAPSHOT = [
