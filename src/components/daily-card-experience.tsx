@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   DAILY_CARD_CONTENT_VERSION,
+  cleanupStaleDailyCardStorage,
   getDailyCardStorageKey,
   getDailyCardContent,
   getKoreanDate,
@@ -37,6 +38,11 @@ export function DailyCardExperience({
   const storageKey = storageScope === null ? null : getDailyCardStorageKey(storageScope);
 
   const restore = useCallback(() => {
+    try {
+      cleanupStaleDailyCardStorage(localStorage);
+    } catch {
+      // Storage can be unavailable in privacy-focused browsers.
+    }
     if (storageKey === null) {
       setState((current) => current.status === "result"
         && current.stored.dateKst === getKoreanDate()
@@ -47,7 +53,6 @@ export function DailyCardExperience({
     let stored: StoredDailyCard | null = null;
     try {
       stored = parseStoredDailyCard(localStorage.getItem(storageKey));
-      if (!stored) localStorage.removeItem(storageKey);
     } catch {
       // Storage can be unavailable in privacy-focused browsers; the current view still works.
     }

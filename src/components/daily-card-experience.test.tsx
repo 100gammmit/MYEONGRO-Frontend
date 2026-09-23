@@ -90,6 +90,33 @@ describe("DailyCardExperience", () => {
     expect(localStorage.getItem(guestStorageKey)).not.toBeNull();
   });
 
+  it("cleans stale cards for every account without removing another account's current card", async () => {
+    const currentOtherAccountKey = getDailyCardStorageKey(`user:${"a".repeat(64)}`);
+    const staleOtherAccountKey = getDailyCardStorageKey(`user:${"b".repeat(64)}`);
+    localStorage.setItem(currentOtherAccountKey, JSON.stringify({
+      schemaVersion: 1,
+      contentVersion: DAILY_CARD_CONTENT_VERSION,
+      dateKst: getKoreanDate(),
+      drawId,
+      cardId: "major-19-sun",
+      variantIndex: 0,
+    }));
+    localStorage.setItem(staleOtherAccountKey, JSON.stringify({
+      schemaVersion: 1,
+      contentVersion: DAILY_CARD_CONTENT_VERSION,
+      dateKst: "2000-01-01",
+      drawId,
+      cardId: "major-17-star",
+      variantIndex: 3,
+    }));
+
+    render(<DailyCardExperience storageScope="guest" />);
+
+    await screen.findByRole("button", { name: "숨은 카드 1" });
+    expect(localStorage.getItem(currentOtherAccountKey)).not.toBeNull();
+    expect(localStorage.getItem(staleOtherAccountKey)).toBeNull();
+  });
+
   it("does not persist or restore a result when the viewer identity is unavailable", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
       selection: {

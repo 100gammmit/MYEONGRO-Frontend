@@ -52,26 +52,95 @@ export function ConsentDocumentContent({
     <div className="consent-document-content">
       <DocumentMeta version={PRIVACY_DOCUMENT_VERSION} />
       <p>서비스 &quot;명로&quot;를 운영하는 {LEGAL_METADATA.operatorName}은 서비스 제공을 위해 필요한 범위에서 개인정보를 처리합니다.</p>
-      <Heading>처리 목적과 항목</Heading>
-      <p>소셜 로그인 계정 식별, 연령 이용자격 확인, AI 리딩 생성, 리딩 기록 저장·조회·삭제, 서비스 보안과 장애 대응을 위해 OAuth 프로필 정보, 만 19세 이상 확인 여부와 정책 버전·확인 시각, 이용자가 작성한 질문·선택지·관심 분야와 서비스 이용 기록을 처리합니다. 질문·선택지·관심 분야는 AI 리딩 생성 중에만 사용하고 명로 데이터베이스에는 저장하지 않습니다. 연령 확인을 위해 생년월일이나 신분증 정보는 수집하지 않습니다.</p>
-      <Heading>사주 출생정보의 일시적 처리</Heading>
-      <p>사주 리딩을 요청한 경우 아래 정보는 별도 동의 항목이 아니라 이용자가 요청한 서비스를 제공하기 위해 필요한 범위에서 처리합니다.</p>
-      <dl>
-        <div><dt>처리 항목</dt><dd>양력 생년월일, 출생시각 또는 출생시각 정확도, 출생 시·도, 대운 계산 기준</dd></div>
-        <div><dt>처리 목적</dt><dd>명식·흐름 계산과 AI에 전달할 최소 계산정보 생성</dd></div>
-        <div>
-          <dt>처리 근거</dt>
-          <dd>
-            <a href="https://law.go.kr/LSW/lsLawLinkInfo.do?ancYnChk=0&chrClsCd=010202&lsJoLnkSeq=1006184341" rel="noreferrer" target="_blank">
-              개인정보 보호법 제15조 제1항 제4호
-            </a>
-            에 따른 계약 이행 및 이용자 요청 처리
-          </dd>
-        </div>
-        <div><dt>처리 기간</dt><dd>사주 계산 요청 처리 완료 시까지</dd></div>
-      </dl>
-      <p>원본 출생정보는 명로 데이터베이스에 저장하지 않고 OpenAI API에도 전송하지 않습니다. 사주 계산과 최소 계산정보 생성 과정에서만 일시적으로 처리하며 별도로 보유하지 않습니다.</p>
-      <p>계산된 최소 사주정보, AI 리딩 결과, 요청 중복 방지를 위한 원문 미포함 식별값은 리딩 기록과 함께 저장됩니다. 저장된 정보는 이용자가 개별 리딩을 삭제하거나 계정을 삭제할 때 즉시 영구 삭제됩니다.</p>
+      <Heading>개인정보 처리 항목과 보유기간</Heading>
+      <div className="consent-table-wrapper">
+        <table className="consent-processing-table">
+          <caption className="sr-only">명로 개인정보 처리 항목과 보유기간</caption>
+          <thead>
+            <tr>
+              <th scope="col">처리 목적</th>
+              <th scope="col">처리 항목</th>
+              <th scope="col">처리 근거</th>
+              <th scope="col">보유기간·삭제 기준</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">소셜 로그인과 계정 식별</th>
+              <td>명로 사용자 식별자, OAuth 제공자와 제공자 사용자 식별자, 제공자가 전달한 이메일·표시 이름, 계정 생성·변경 시각</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>계정 삭제 시 명로 운영 데이터베이스에서 즉시 영구 삭제</td>
+            </tr>
+            <tr>
+              <th scope="row">리딩 크레딧과 서비스 상태 관리</th>
+              <td>무료·유료 크레딧 잔액, 무료 크레딧 기준일, 리딩 생성 상태와 사용 크레딧</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>계정 삭제 시 즉시 영구 삭제</td>
+            </tr>
+            <tr>
+              <th scope="row">만 19세 이상 이용자격 확인</th>
+              <td>만 19세 이상 확인 여부, 정책 버전, 확인 시각·방법, 가입 시도 세대 식별자</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>계정 삭제 시 즉시 영구 삭제. 생년월일과 신분증 정보는 수집하지 않음</td>
+            </tr>
+            <tr>
+              <th scope="row">약관과 AI 국외이전 동의 이력 관리</th>
+              <td>문서 종류·버전, 동의 또는 철회 동작, 발생 시각·방법</td>
+              <td>이용자 동의 이행과 철회 상태 관리</td>
+              <td>계정 삭제 시 즉시 영구 삭제</td>
+            </tr>
+            <tr>
+              <th scope="row">타로 리딩 생성·저장·조회</th>
+              <td>리딩·요청 식별자, 리딩 종류·스프레드·버전, 카드 식별자·위치·방향, 원문 미포함 입력 식별값, 제목·결과·상태·오류 코드·크레딧 비용, 모델·프롬프트 등 생성 정보</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>개별 리딩 삭제 또는 계정 삭제 시 즉시 영구 삭제</td>
+            </tr>
+            <tr>
+              <th scope="row">사주 리딩 생성·저장·조회</th>
+              <td>대상 연도, 확정 기둥·일간·오행·십성·합충·대운·세운·불확실성 등 최소 계산정보, HMAC 방식 원문 미포함 입력 식별값, 리딩 결과·상태·생성 정보</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>개별 리딩 삭제 또는 계정 삭제 시 즉시 영구 삭제</td>
+            </tr>
+            <tr>
+              <th scope="row">AI 리딩 요청 처리</th>
+              <td>이용자가 작성한 질문·선택지·관심 분야</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>요청 처리 완료 시 명로 서버에서 폐기. 명로 데이터베이스와 운영 로그에는 저장하지 않음. OpenAI의 보유기간은 아래 국외 처리위탁 항목을 따름</td>
+            </tr>
+            <tr>
+              <th scope="row">사주 계산</th>
+              <td>양력 생년월일, 출생시각 또는 출생시각 정확도, 출생 시·도, 대운 계산 기준</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>사주 계산 요청 처리 완료 시 폐기. 명로 데이터베이스에 저장하지 않고 OpenAI에도 전송하지 않음</td>
+            </tr>
+            <tr>
+              <th scope="row">로그인과 가입 대기 세션</th>
+              <td>로그인 세션의 최소 계정 식별정보와 권한, 가입 대기 중 OAuth 제공자·제공자 사용자 식별자·표시 이름·이메일·access token·가입 시도 식별자</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>30분 미사용 시 만료. 로그아웃·가입 완료·취소·계정 삭제 또는 비영속 Redis 재시작 시 삭제</td>
+            </tr>
+            <tr>
+              <th scope="row">무료 오늘의 운세 이어보기</th>
+              <td>한국 날짜, SHA-256 계정 범위값 또는 비회원 구분, 뽑기 식별자, 카드·콘텐츠 식별자와 버전</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>명로 서버에는 저장하지 않고 현재 브라우저에만 저장. 날짜가 지난 뒤 다음 페이지 방문 시 삭제하며, 계정 삭제 성공 시 현재 브라우저의 해당 계정 값 삭제</td>
+            </tr>
+            <tr>
+              <th scope="row">서비스 보안과 오류·장애 대응</th>
+              <td>오류가 발생한 경우의 리딩 식별자, 모델·리딩 종류·종료 사유·응답 크기·토큰 사용량 등 진단정보</td>
+              <td>개인정보 보호법 제15조 제1항 제6호에 따른 서비스의 안정적 운영과 정당한 이익</td>
+              <td>최대 30일 후 자동 삭제</td>
+            </tr>
+            <tr>
+              <th scope="row">OpenAI를 통한 AI 리딩 생성</th>
+              <td>질문·선택지·관심 분야, 카드 선택정보, 최소 사주 계산정보, 서버 비밀키 기반 가명 안전 식별자</td>
+              <td><OverseasTransferConsentBasis /></td>
+              <td>오남용 감시 로그 최대 30일, 적용되는 프롬프트 캐시 최대 24시간. 법적 의무 또는 심각한 위해 방지를 위한 예외가 적용될 수 있음</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>원본 출생정보는 사주 계산과 AI에 전달할 최소 계산정보 생성 과정에서만 일시적으로 처리합니다. 질문·선택지·관심 분야와 원본 출생정보는 명로 데이터베이스와 운영 로그에 남기지 않습니다.</p>
       <Heading>국외 처리위탁</Heading>
       <p>AI 리딩 생성에는 OpenAI OpCo, LLC의 Global API를 사용합니다. 아래 국외이전 세부 내용은 로그인하지 않아도 언제든 확인할 수 있습니다.</p>
       <AiOverseasTransferDetails headingLevel={headingLevel} />
@@ -80,6 +149,28 @@ export function ConsentDocumentContent({
       <Heading>안전성 확보 조치</Heading>
       <p>질문·선택지 원문은 명로 데이터베이스와 운영 로그에 남기지 않고, 인증 비밀 값은 서버 환경에서 관리합니다. 질문 입력 전 일부 직접 식별정보 형식을 자동 검사하지만 모든 개인정보나 민감한 내용을 탐지한다고 보장하지 않습니다.</p>
     </div>
+  );
+}
+
+function ContractPerformanceBasis() {
+  return (
+    <>
+      <a href="https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029335389" rel="noreferrer" target="_blank">
+        개인정보 보호법 제15조 제1항 제4호
+      </a>
+      에 따른 계약 이행 및 이용자 요청 처리
+    </>
+  );
+}
+
+function OverseasTransferConsentBasis() {
+  return (
+    <>
+      <a href="https://law.go.kr/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029331979" rel="noreferrer" target="_blank">
+        개인정보 보호법 제28조의8 제1항 제1호
+      </a>
+      에 따른 국외이전 별도 동의
+    </>
   );
 }
 

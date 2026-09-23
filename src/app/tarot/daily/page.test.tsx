@@ -49,8 +49,9 @@ describe("DailyTarotPage", () => {
 
     await renderPage();
 
-    expect(screen.getByText("user:11111111-1111-4111-8111-111111111111"))
-      .toBeInTheDocument();
+    const scope = screen.getByText(/^user:/).textContent ?? "";
+    expect(scope).toMatch(/^user:[0-9a-f]{64}$/);
+    expect(scope).not.toContain("11111111-1111-4111-8111-111111111111");
   });
 
   it("does not fall back to guest storage when session verification is unavailable", async () => {

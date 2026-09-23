@@ -2,10 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  getDailyCardStorageKey,
+  type DailyCardStorageScope,
+} from "@/domain/daily-card-free";
 
 const FAILURE_MESSAGE = "계정을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요.";
 
-export function AccountDeleteButton() {
+export function AccountDeleteButton({
+  dailyCardStorageScope,
+}: {
+  dailyCardStorageScope: DailyCardStorageScope;
+}) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +38,12 @@ export function AccountDeleteButton() {
       if (!response.ok) {
         setError(FAILURE_MESSAGE);
         return;
+      }
+
+      try {
+        localStorage.removeItem(getDailyCardStorageKey(dailyCardStorageScope));
+      } catch {
+        // Account deletion succeeded; unavailable browser storage must not block navigation.
       }
 
       router.push("/");

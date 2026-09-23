@@ -6,7 +6,7 @@ import {
   getDailyCardContent,
 } from "./content";
 
-const DAILY_CARD_STORAGE_KEY_PREFIX = "myeongro:daily-card:v2";
+const DAILY_CARD_STORAGE_KEY_PREFIX = "myeongro:daily-card:v3";
 
 export type DailyCardStorageScope =
   | "guest"
@@ -54,4 +54,19 @@ export function parseStoredDailyCard(
 
 export function serializeStoredDailyCard(value: StoredDailyCard): string {
   return JSON.stringify(storedDailyCardSchema.parse(value));
+}
+
+export function cleanupStaleDailyCardStorage(
+  storage: Storage,
+  dateKst = getKoreanDate(),
+): void {
+  const prefix = `${DAILY_CARD_STORAGE_KEY_PREFIX}:`;
+  const keys = Array.from({ length: storage.length }, (_, index) => storage.key(index))
+    .filter((key): key is string => key !== null && key.startsWith(prefix));
+
+  for (const key of keys) {
+    if (parseStoredDailyCard(storage.getItem(key), dateKst) === null) {
+      storage.removeItem(key);
+    }
+  }
 }

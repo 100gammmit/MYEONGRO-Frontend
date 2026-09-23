@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import PrivacyPage from "./page";
 
 describe("PrivacyPage", () => {
@@ -12,27 +12,25 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/문서 버전 draft-2026-09-10/)).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "사주 출생정보의 일시적 처리" }))
+    expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
-    expect(screen.getByText(/양력 생년월일, 출생시각 또는 출생시각 정확도, 출생 시·도, 대운 계산 기준/))
+    const table = screen.getByRole("table", { name: "명로 개인정보 처리 항목과 보유기간" });
+    expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent))
+      .toEqual(["처리 목적", "처리 항목", "처리 근거", "보유기간·삭제 기준"]);
+    expect(within(table).getAllByRole("rowheader")).toHaveLength(12);
+    expect(within(table).getByRole("row", { name: /사주 계산.*양력 생년월일.*처리 완료 시 폐기/ }))
       .toBeInTheDocument();
-    expect(screen.getByText(/명식·흐름 계산과 AI에 전달할 최소 계산정보 생성/))
+    expect(within(table).getByRole("row", { name: /AI 리딩 요청 처리.*명로 데이터베이스와 운영 로그에는 저장하지 않음/ }))
       .toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "개인정보 보호법 제15조 제1항 제4호" }))
+    expect(within(table).getByRole("row", { name: /무료 오늘의 운세 이어보기.*SHA-256 계정 범위값.*현재 브라우저/ }))
       .toBeInTheDocument();
-    expect(screen.getByText(/사주 계산 요청 처리 완료 시까지/)).toBeInTheDocument();
-    expect(screen.getByText(/원본 출생정보는 명로 데이터베이스에 저장하지 않고 OpenAI API에도 전송하지 않습니다/))
+    expect(within(table).getByRole("row", { name: /서비스 보안과 오류·장애 대응.*리딩 식별자.*최대 30일/ }))
       .toBeInTheDocument();
-    expect(screen.getByText(/사주 계산과 최소 계산정보 생성 과정에서만 일시적으로 처리하며 별도로 보유하지 않습니다/))
+    expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성.*국외이전 별도 동의.*최대 24시간/ }))
       .toBeInTheDocument();
-    expect(screen.getByText(/요청 중복 방지를 위한 원문 미포함 식별값/)).toBeInTheDocument();
-    expect(screen.getByText(/개별 리딩을 삭제하거나 계정을 삭제할 때 즉시 영구 삭제/))
-      .toBeInTheDocument();
-    expect(screen.getByText(/질문·선택지·관심 분야는 AI 리딩 생성 중에만 사용하고 명로 데이터베이스에는 저장하지 않습니다/))
-      .toBeInTheDocument();
-    expect(screen.getByText(/만 19세 이상 확인 여부와 정책 버전·확인 시각/))
-      .toBeInTheDocument();
-    expect(screen.getByText(/연령 확인을 위해 생년월일이나 신분증 정보는 수집하지 않습니다/))
+    expect(screen.getAllByRole("link", { name: "개인정보 보호법 제15조 제1항 제4호" }))
+      .toHaveLength(9);
+    expect(screen.getByRole("link", { name: "개인정보 보호법 제28조의8 제1항 제1호" }))
       .toBeInTheDocument();
   });
 });

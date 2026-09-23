@@ -11,18 +11,24 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { AccountDeleteButton } from "./account-delete-button";
+import { getDailyCardStorageKey } from "@/domain/daily-card-free";
+
+const accountScope = `user:${"a".repeat(64)}` as const;
+const accountStorageKey = getDailyCardStorageKey(accountScope);
 
 describe("AccountDeleteButton", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubGlobal("fetch", vi.fn());
     vi.stubGlobal("confirm", vi.fn());
+    localStorage.clear();
+    localStorage.setItem(accountStorageKey, "stored-card");
   });
 
   it("does not delete the account when confirmation is cancelled", () => {
     vi.mocked(window.confirm).mockReturnValue(false);
 
-    render(<AccountDeleteButton />);
+    render(<AccountDeleteButton dailyCardStorageScope={accountScope} />);
 
     fireEvent.click(screen.getByRole("button", { name: "계정 삭제" }));
 
@@ -30,13 +36,14 @@ describe("AccountDeleteButton", () => {
       "계정을 영구 삭제할까요? 프로필, 로그인 연결, 리딩과 동의 이력이 명로 운영 데이터베이스에서 즉시 삭제되며 복구할 수 없습니다.",
     );
     expect(window.fetch).not.toHaveBeenCalled();
+    expect(localStorage.getItem(accountStorageKey)).toBe("stored-card");
   });
 
   it("deletes the account and returns home after confirmation", async () => {
     vi.mocked(window.confirm).mockReturnValue(true);
     vi.mocked(window.fetch).mockResolvedValue(new Response(null, { status: 204 }));
 
-    render(<AccountDeleteButton />);
+    render(<AccountDeleteButton dailyCardStorageScope={accountScope} />);
 
     expect(screen.getByText(
       "계정을 삭제하면 프로필, 로그인 연결, 리딩과 동의 이력이 명로 운영 데이터베이스에서 즉시 영구 삭제되며 복구할 수 없습니다.",
@@ -52,6 +59,7 @@ describe("AccountDeleteButton", () => {
     });
     expect(router.push).toHaveBeenCalledWith("/");
     expect(router.refresh).toHaveBeenCalledWith();
+    expect(localStorage.getItem(accountStorageKey)).toBeNull();
   });
 
   it("shows an error when account deletion fails", async () => {
@@ -60,7 +68,7 @@ describe("AccountDeleteButton", () => {
       Response.json({ code: "WITHDRAWAL_FAILED" }, { status: 502 }),
     );
 
-    render(<AccountDeleteButton />);
+    render(<AccountDeleteButton dailyCardStorageScope={accountScope} />);
 
     fireEvent.click(screen.getByRole("button", { name: "계정 삭제" }));
 
@@ -68,5 +76,6 @@ describe("AccountDeleteButton", () => {
       await screen.findByText("계정을 삭제하지 못했어요. 잠시 후 다시 시도해 주세요."),
     ).toBeInTheDocument();
     expect(router.push).not.toHaveBeenCalled();
+    expect(localStorage.getItem(accountStorageKey)).toBe("stored-card");
   });
 });

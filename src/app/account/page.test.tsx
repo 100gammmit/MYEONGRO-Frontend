@@ -14,7 +14,9 @@ vi.mock("@/infrastructure/backend/session-auth", () => ({
   getSpringSessionState: mocks.getSessionState,
 }));
 vi.mock("./account-delete-button", () => ({
-  AccountDeleteButton: () => <button type="button">계정 삭제</button>,
+  AccountDeleteButton: ({ dailyCardStorageScope }: { dailyCardStorageScope: string }) => (
+    <button data-scope={dailyCardStorageScope} type="button">계정 삭제</button>
+  ),
 }));
 vi.mock("./consent-settings", () => ({
   ConsentSettings: () => <section>AI 리딩 정보 국외이전 관리</section>,
@@ -44,7 +46,9 @@ describe("AccountPage", () => {
     expect(mocks.getSessionState).toHaveBeenCalledWith("JSESSIONID=session");
     expect(screen.getByRole("heading", { name: "계정 설정" })).toBeInTheDocument();
     expect(screen.getByText("AI 리딩 정보 국외이전 관리")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "계정 삭제" })).toBeInTheDocument();
+    const deleteButton = screen.getByRole("button", { name: "계정 삭제" });
+    expect(deleteButton).toHaveAttribute("data-scope", expect.stringMatching(/^user:[0-9a-f]{64}$/));
+    expect(deleteButton.getAttribute("data-scope")).not.toContain("user-1");
   });
 
   it("asks guests to log in before account management", async () => {

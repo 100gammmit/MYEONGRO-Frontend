@@ -4,6 +4,7 @@ import { AccountDeleteButton } from "./account-delete-button";
 import { ConsentSettings } from "./consent-settings";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
+import { deriveDailyCardUserScope } from "@/domain/daily-card-free/account-scope.server";
 
 export default async function AccountPage() {
   const cookieHeader = await getBackendCookieHeader();
@@ -30,7 +31,9 @@ export default async function AccountPage() {
       <h1>계정 설정</h1>
       <p>현재 로그인한 계정의 저장 기록과 연결 상태를 관리합니다.</p>
       <ConsentSettings />
-      <AccountDeleteButton />
+      <AccountDeleteButton
+        dailyCardStorageScope={deriveDailyCardUserScope(session.user.id)}
+      />
     </article>
   );
 }

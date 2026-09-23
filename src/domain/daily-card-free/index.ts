@@ -6,6 +6,7 @@ export {
 export type { DailyCardContent } from "./content";
 export { parseDailyCardSelectionResponse } from "./selection";
 export {
+  cleanupStaleDailyCardStorage,
   getDailyCardStorageKey,
   getKoreanDate,
   parseStoredDailyCard,

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DAILY_CARD_CONTENT_VERSION,
+  cleanupStaleDailyCardStorage,
   getDailyCardStorageKey,
   getDailyCardContent,
   parseStoredDailyCard,
@@ -23,6 +24,10 @@ describe("daily card static contract", () => {
       .not.toBe(getDailyCardStorageKey("user:11111111-1111-4111-8111-111111111111"));
     expect(getDailyCardStorageKey("user:11111111-1111-4111-8111-111111111111"))
       .not.toBe(getDailyCardStorageKey("user:22222222-2222-4222-8222-222222222222"));
+  });
+
+  it("uses the v3 storage namespace", () => {
+    expect(getDailyCardStorageKey("guest")).toBe("myeongro:daily-card:v3:guest");
   });
 
   it("provides every canonical card variant", () => {
@@ -52,5 +57,33 @@ describe("daily card static contract", () => {
     expect(parseStoredDailyCard("{broken", "2026-08-25")).toBeNull();
     expect(parseStoredDailyCard(JSON.stringify({ ...stored, extra: true }), "2026-08-25"))
       .toBeNull();
+  });
+
+  it("removes every stale or invalid v3 card while preserving valid and unrelated keys", () => {
+    localStorage.clear();
+    const validGuestKey = getDailyCardStorageKey("guest");
+    const validOtherAccountKey = getDailyCardStorageKey(`user:${"a".repeat(64)}`);
+    const staleAccountKey = getDailyCardStorageKey(`user:${"b".repeat(64)}`);
+    const invalidAccountKey = getDailyCardStorageKey(`user:${"c".repeat(64)}`);
+    localStorage.setItem(validGuestKey, serializeStoredDailyCard(stored));
+    localStorage.setItem(validOtherAccountKey, serializeStoredDailyCard({
+      ...stored,
+      cardId: "major-19-sun",
+      variantIndex: 0,
+    }));
+    localStorage.setItem(staleAccountKey, serializeStoredDailyCard({
+      ...stored,
+      dateKst: "2026-08-24",
+    }));
+    localStorage.setItem(invalidAccountKey, "{broken");
+    localStorage.setItem("other:application:key", "keep");
+
+    cleanupStaleDailyCardStorage(localStorage, "2026-08-25");
+
+    expect(localStorage.getItem(validGuestKey)).not.toBeNull();
+    expect(localStorage.getItem(validOtherAccountKey)).not.toBeNull();
+    expect(localStorage.getItem(staleAccountKey)).toBeNull();
+    expect(localStorage.getItem(invalidAccountKey)).toBeNull();
+    expect(localStorage.getItem("other:application:key")).toBe("keep");
   });
 });
