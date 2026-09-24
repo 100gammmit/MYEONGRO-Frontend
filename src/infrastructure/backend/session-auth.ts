@@ -2,7 +2,6 @@ import { toBackendUrl } from "./url";
 
 export interface SpringSessionUser {
   id: string;
-  displayName?: string | null;
 }
 
 export type SpringSessionState =
@@ -14,7 +13,6 @@ interface MeResponse {
   authenticated?: boolean;
   user?: {
     id?: unknown;
-    displayName?: unknown;
   };
 }
 
@@ -53,12 +51,7 @@ export async function getSpringSessionState(
 
   return {
     status: "authenticated",
-    user: {
-      id: body.user.id,
-      displayName: typeof body.user.displayName === "string"
-        ? body.user.displayName
-        : null,
-    },
+    user: { id: body.user.id },
   };
 }
 

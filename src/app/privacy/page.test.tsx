@@ -18,6 +18,14 @@ describe("PrivacyPage", () => {
     expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent))
       .toEqual(["처리 목적", "처리 항목", "처리 근거", "보유기간·삭제 기준"]);
     expect(within(table).getAllByRole("rowheader")).toHaveLength(12);
+    const socialLoginRow = within(table).getByRole("row", { name: /소셜 로그인과 계정 식별/ });
+    expect(socialLoginRow).toHaveTextContent("OAuth 제공자와 제공자 사용자 식별자");
+    expect(socialLoginRow).not.toHaveTextContent("이메일");
+    expect(socialLoginRow).not.toHaveTextContent("표시 이름");
+    const sessionRow = within(table).getByRole("row", { name: /로그인과 가입 대기 세션/ });
+    expect(sessionRow).toHaveTextContent("명로 사용자 식별자와 권한");
+    expect(sessionRow).not.toHaveTextContent("이메일");
+    expect(sessionRow).not.toHaveTextContent("표시 이름");
     expect(within(table).getByRole("row", { name: /사주 계산.*양력 생년월일.*처리 완료 시 폐기/ }))
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /AI 리딩 요청 처리.*명로 데이터베이스와 운영 로그에는 저장하지 않음/ }))

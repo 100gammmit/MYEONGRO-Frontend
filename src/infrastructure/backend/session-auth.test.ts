@@ -9,7 +9,7 @@ describe("getSpringSessionUser", () => {
   it("requests the Spring auth session endpoint with forwarded cookies", async () => {
     const fetch = vi.fn().mockResolvedValue(Response.json({
       authenticated: true,
-      user: { id: "user-1", displayName: "Myeongro" },
+      user: { id: "user-1" },
     }));
     vi.stubGlobal("fetch", fetch);
 
@@ -19,7 +19,7 @@ describe("getSpringSessionUser", () => {
       headers: { cookie: "JSESSIONID=session" },
       cache: "no-store",
     });
-    expect(user).toEqual({ id: "user-1", displayName: "Myeongro" });
+    expect(user).toEqual({ id: "user-1" });
   });
 
   it("treats an unavailable backend as unauthenticated on public frontend routes", async () => {

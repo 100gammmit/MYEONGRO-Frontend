@@ -67,7 +67,7 @@ export function ConsentDocumentContent({
           <tbody>
             <tr>
               <th scope="row">소셜 로그인과 계정 식별</th>
-              <td>명로 사용자 식별자, OAuth 제공자와 제공자 사용자 식별자, 제공자가 전달한 이메일·표시 이름, 계정 생성·변경 시각</td>
+              <td>명로 사용자 식별자, OAuth 제공자와 제공자 사용자 식별자, 계정 생성·변경 시각</td>
               <td><ContractPerformanceBasis /></td>
               <td>계정 삭제 시 명로 운영 데이터베이스에서 즉시 영구 삭제</td>
             </tr>
@@ -115,7 +115,7 @@ export function ConsentDocumentContent({
             </tr>
             <tr>
               <th scope="row">로그인과 가입 대기 세션</th>
-              <td>로그인 세션의 최소 계정 식별정보와 권한, 가입 대기 중 OAuth 제공자·제공자 사용자 식별자·표시 이름·이메일·access token·가입 시도 식별자</td>
+              <td>로그인 세션의 명로 사용자 식별자와 권한, 가입 대기 중 OAuth 제공자·제공자 사용자 식별자·access token·가입 시도 식별자</td>
               <td><ContractPerformanceBasis /></td>
               <td>30분 미사용 시 만료. 로그아웃·가입 완료·취소·계정 삭제 또는 비영속 Redis 재시작 시 삭제</td>
             </tr>
@@ -196,7 +196,7 @@ function AiOverseasTransferDetails({
         <li>타로 카드 선택 정보와 리딩 유형</li>
         <li>사주 원본 출생정보로 명로 서버에서 계산한 확정 기둥·일간·오행·십성·합충·현재 대운·세운·불확실성 등의 최소 명식 정보와 관심 분야</li>
       </ul>
-      <p>원본 생년월일, 출생시각과 출생 시·도, 로그인 이메일, OAuth 식별자와 명로 사용자 ID는 OpenAI API에 전송하지 않습니다.</p>
+      <p>원본 생년월일, 출생시각과 출생 시·도, OAuth 식별자와 명로 사용자 ID는 OpenAI API에 전송하지 않습니다.</p>
       <Heading>이전 국가</Heading>
       <p>
         미국을 포함하여 OpenAI가 공개한 하위처리자 목록의 Customer Content 처리 가능
