@@ -366,6 +366,7 @@ h1, h2, h3, blockquote {
 .consent-document-content a { color: var(--text-accent-strong); }
 .consent-table-wrapper { margin: 10px 0 18px; overflow-x: auto; }
 .consent-processing-table { width: 100%; min-width: 820px; border-collapse: collapse; color: var(--text-secondary); font-size: 13px; line-height: 1.6; }
+.consent-processing-table caption { margin-bottom: 8px; color: var(--text-primary); font-weight: 600; text-align: left; }
 .consent-processing-table th, .consent-processing-table td { padding: 10px 12px; border: 1px solid var(--border-default); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
 .consent-processing-table thead th { background: var(--surface-tint-1); color: var(--text-primary); font-weight: 600; }
 .consent-processing-table tbody th { width: 17%; color: var(--text-primary); font-weight: 600; }

@@ -10,7 +10,7 @@ describe("PrivacyPage", () => {
     expect(screen.queryByText(/후속 마일스톤/)).not.toBeInTheDocument();
     expect(screen.getByText(/계정 설정에서 계정 삭제를 요청하면.*운영 데이터베이스에서 즉시 영구 삭제되며 복구할 수 없습니다/))
       .toBeInTheDocument();
-    expect(screen.getByText(/문서 버전 draft-2026-09-10/)).toBeInTheDocument();
+    expect(screen.getByText(/문서 버전 draft-2026-09-25/)).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
@@ -35,6 +35,31 @@ describe("PrivacyPage", () => {
     expect(within(table).getByRole("row", { name: /서비스 보안과 오류·장애 대응.*리딩 식별자.*최대 30일/ }))
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성.*국외이전 별도 동의.*최대 24시간/ }))
+      .toBeInTheDocument();
+    expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성/ }))
+      .not.toHaveTextContent("가명 안전 식별자");
+    const processorTable = screen.getByRole("table", {
+      name: "OpenAI API 외부 처리자와 처리 가능 국가",
+    });
+    expect(within(processorTable).getByRole("row", {
+      name: /직접 이전받는 자.*OpenAI OpCo, LLC.*미국/,
+    })).toBeInTheDocument();
+    expect(within(processorTable).getByRole("row", {
+      name: /API 클라우드 인프라.*Microsoft Corporation.*대한민국/,
+    })).toBeInTheDocument();
+    expect(within(processorTable).getByRole("row", {
+      name: /조건부 콘텐츠 검토·고객지원.*TaskUs, LLC.*필리핀/,
+    })).toBeInTheDocument();
+    expect(within(processorTable).getByRole("row", {
+      name: /동적 네트워크 처리.*Cloudflare, Ltd..*가장 가까운 데이터센터 소재국/,
+    })).toBeInTheDocument();
+    expect(screen.getByText(/정적 처리 국가 수는 국내 위치를 포함해 26개/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/Global API는 미국에서만 처리되는 서비스가 아니며/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/store=false는 이러한 오남용 감시 로그와 프롬프트 캐시를 제거하지 않습니다/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/OpenAI 원문 갱신일 2026-07-09 · 명로 최종 확인일 2026-09-25/))
       .toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "개인정보 보호법 제15조 제1항 제4호" }))
       .toHaveLength(9);

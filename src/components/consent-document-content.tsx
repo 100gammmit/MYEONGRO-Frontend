@@ -1,7 +1,9 @@
 import {
   AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
-  OPENAI_SUBPROCESSOR_COUNTRY_SNAPSHOT,
-  OPENAI_SUBPROCESSOR_LIST_URL,
+  OPENAI_DOMESTIC_PROCESSING_COUNTRIES,
+  OPENAI_OVERSEAS_PROCESSING_COUNTRIES,
+  OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
+  OPENAI_TRANSFER_SNAPSHOT,
   PRIVACY_DOCUMENT_VERSION,
   TERMS_DOCUMENT_VERSION,
   type ConsentDocumentType as RequiredConsentDocumentType,
@@ -133,7 +135,7 @@ export function ConsentDocumentContent({
             </tr>
             <tr>
               <th scope="row">OpenAI를 통한 AI 리딩 생성</th>
-              <td>질문·선택지·관심 분야, 카드 선택정보, 최소 사주 계산정보, 서버 비밀키 기반 가명 안전 식별자</td>
+              <td>질문·선택지·관심 분야, 카드 선택정보, 최소 사주 계산정보</td>
               <td><OverseasTransferConsentBasis /></td>
               <td>오남용 감시 로그 최대 30일, 적용되는 프롬프트 캐시 최대 24시간. 법적 의무 또는 심각한 위해 방지를 위한 예외가 적용될 수 있음</td>
             </tr>
@@ -188,6 +190,7 @@ function AiOverseasTransferDetails({
   headingLevel: "h2" | "h3";
 }) {
   const Heading = headingLevel;
+  const { directRecipient, dynamicProcessor, processorGroups } = OPENAI_TRANSFER_SNAPSHOT;
   return (
     <>
       <Heading>이전되는 개인정보 항목</Heading>
@@ -196,21 +199,71 @@ function AiOverseasTransferDetails({
         <li>타로 카드 선택 정보와 리딩 유형</li>
         <li>사주 원본 출생정보로 명로 서버에서 계산한 확정 기둥·일간·오행·십성·합충·현재 대운·세운·불확실성 등의 최소 명식 정보와 관심 분야</li>
       </ul>
-      <p>원본 생년월일, 출생시각과 출생 시·도, OAuth 식별자와 명로 사용자 ID는 OpenAI API에 전송하지 않습니다.</p>
+      <p>원본 생년월일, 출생시각과 출생 시·도, 로그인 이메일, OAuth 식별자, 명로 사용자 ID와 사용자 연계 safety_identifier는 OpenAI API에 전송하지 않습니다.</p>
       <Heading>이전 국가</Heading>
       <p>
-        미국을 포함하여 OpenAI가 공개한 하위처리자 목록의 Customer Content 처리 가능
-        국가로 이전될 수 있습니다. 2026년 7월 9일 공개 목록을 기준으로 보수적으로
-        정리한 국가는 다음과 같습니다.
-      </p>
-      <p className="consent-country-list">
-        {OPENAI_SUBPROCESSOR_COUNTRY_SNAPSHOT.join(", ")}
+        직접 이전받는 자의 소재국이자 주된 고지 국가는 미국입니다. 다만 Global API는
+        미국에서만 처리되는 서비스가 아니며, 아래 OpenAI 계열사와 하위처리자의 공개
+        처리 가능 국가에서 처리될 수 있습니다.
       </p>
       <p>
-        네트워크 보안·전송을 담당하는 Cloudflare는 이용자와 가까운 데이터센터에서
-        정보를 처리할 수 있어 국가가 위 목록에 한정되지 않을 수 있습니다. 최신 처리자와
-        소재지는 {" "}
-        <a href={OPENAI_SUBPROCESSOR_LIST_URL} rel="noreferrer" target="_blank">
+        국외 처리 가능 국가: {OPENAI_OVERSEAS_PROCESSING_COUNTRIES.join(", ")}
+      </p>
+      <p>
+        국내 처리 가능 위치: {OPENAI_DOMESTIC_PROCESSING_COUNTRIES.join(", ")}
+      </p>
+      <div className="consent-table-wrapper">
+        <table className="consent-processing-table consent-processor-table">
+          <caption>OpenAI API 외부 처리자와 처리 가능 국가</caption>
+          <thead>
+            <tr>
+              <th scope="col">역할</th>
+              <th scope="col">처리자</th>
+              <th scope="col">처리 가능 국가</th>
+              <th scope="col">목적·적용 조건</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">직접 이전받는 자</th>
+              <td>{directRecipient.name}</td>
+              <td>{directRecipient.country}</td>
+              <td>{directRecipient.purpose}</td>
+            </tr>
+            {processorGroups.flatMap((group) =>
+              group.processors.map((processor, processorIndex) => (
+                <tr key={`${group.id}-${processor.name}`}>
+                  {processorIndex === 0 ? (
+                    <th scope="rowgroup" rowSpan={group.processors.length}>{group.label}</th>
+                  ) : null}
+                  <td>{processor.name}</td>
+                  <td>{processor.countries.join(", ")}</td>
+                  <td>
+                    {processor.purpose}
+                    {"condition" in processor ? ` · ${processor.condition}` : ""}
+                  </td>
+                </tr>
+              )),
+            )}
+            <tr>
+              <th scope="row">동적 네트워크 처리</th>
+              <td>{dynamicProcessor.name}</td>
+              <td>{dynamicProcessor.location}</td>
+              <td>{dynamicProcessor.purpose}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        위 표의 정적 처리 국가 수는 국내 위치를 포함해 {OPENAI_PUBLISHED_PROCESSING_COUNTRIES.length}개입니다.
+        모든 처리자가 모든 요청을 처리하는 것은 아닙니다. 고객지원 업체는 지원 요청에서
+        내용을 공유한 경우, 콘텐츠 검토 업체는 관련 콘텐츠가 안전 검토 대상으로 분류된
+        경우 등에 한해 적용될 수 있습니다. {dynamicProcessor.name}는 이용자와 가장 가까운
+        데이터센터를 사용할 수 있어 Global 경로의 전체 국가를 폐쇄 목록으로 확정할 수 없습니다.
+      </p>
+      <p>
+        OpenAI 원문 갱신일 {OPENAI_TRANSFER_SNAPSHOT.sourceUpdatedAt} · 명로 최종 확인일 {OPENAI_TRANSFER_SNAPSHOT.verifiedAt}. 최신 처리자와 소재지는 {" "}
+        <a href={OPENAI_TRANSFER_SNAPSHOT.sourceUrl} rel="noreferrer" target="_blank">
           OpenAI 하위처리자 목록
         </a>
         에서 확인할 수 있습니다.
@@ -219,14 +272,14 @@ function AiOverseasTransferDetails({
       <p>이용자가 AI 리딩 생성을 요청할 때 암호화된 통신망을 통해 API 방식으로 이전됩니다.</p>
       <Heading>이전받는 자와 연락처</Heading>
       <dl>
-        <div><dt>법인명</dt><dd>OpenAI OpCo, LLC</dd></div>
-        <div><dt>주소</dt><dd>1455 3rd Street, San Francisco, California 94158, United States</dd></div>
-        <div><dt>개인정보 문의</dt><dd>privacy@openai.com</dd></div>
+        <div><dt>법인명</dt><dd>{directRecipient.name}</dd></div>
+        <div><dt>주소</dt><dd>{directRecipient.address}</dd></div>
+        <div><dt>개인정보 문의</dt><dd>{directRecipient.contact}</dd></div>
       </dl>
       <Heading>이전 목적</Heading>
       <p>입력 내용과 계산 정보를 바탕으로 AI 타로·사주 리딩 콘텐츠를 생성하기 위해 처리합니다.</p>
       <Heading>보유·이용 기간</Heading>
-      <p>Chat Completions API는 일반적인 서비스 상태를 별도로 저장하지 않지만, 오남용 감시 로그에 입력과 출력이 포함되어 최대 30일 보관될 수 있습니다. 적용되는 경우 프롬프트 캐시는 최대 24시간 보관될 수 있으며, 법적 의무 또는 심각한 위해 방지를 위한 예외가 적용될 수 있습니다. OpenAI는 API 입력을 명시적 선택 없이 모델 학습에 사용하지 않습니다.</p>
+      <p>명로는 Chat Completions API 요청에 store=false를 설정해 OpenAI 응답 저장 기능을 비활성화합니다. 다만 오남용 감시 로그에 입력과 출력이 포함되어 최대 30일 보관될 수 있고, 적용되는 프롬프트 캐시는 최대 24시간 보관될 수 있습니다. store=false는 이러한 오남용 감시 로그와 프롬프트 캐시를 제거하지 않습니다. 법적 의무 또는 심각한 위해 방지를 위한 예외가 적용될 수 있으며, OpenAI는 API 입력을 명시적 선택 없이 모델 학습에 사용하지 않습니다.</p>
       <Heading>동의 거부와 철회</Heading>
       <p>동의를 거부하거나 계정 설정에서 철회할 수 있습니다. 이 경우 신규 AI 타로·사주 리딩은 생성할 수 없지만, 무료 오늘의 운세와 기존 기록의 열람·삭제는 계속 이용할 수 있습니다.</p>
     </>
