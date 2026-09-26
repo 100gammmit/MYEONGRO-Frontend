@@ -59,6 +59,9 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/store=false는 이러한 오남용 감시 로그와 프롬프트 캐시를 제거하지 않습니다/))
       .toBeInTheDocument();
+    expect(screen.getAllByText(/서비스 또는 제3자를 위해로부터 보호하기 위해 합리적으로 필요한 경우 더 오래 보관/))
+      .toHaveLength(2);
+    expect(screen.queryByText(/심각한 위해/)).not.toBeInTheDocument();
     expect(screen.getByText(/OpenAI 원문 갱신일 2026-07-09 · 명로 최종 확인일 2026-09-25/))
       .toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "개인정보 보호법 제15조 제1항 제4호" }))
