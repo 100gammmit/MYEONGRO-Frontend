@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { FooterLink } from "@/components/footer-link";
 import { ReadingCreditProvider } from "@/components/reading-credit-provider";
+import { ServiceUpdateBanner } from "@/components/service-update-banner";
 import { SiteHeader } from "@/components/site-header";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
@@ -28,6 +29,7 @@ export default async function RootLayout({
         <div className="ambient ambient-two" />
         <ReadingCreditProvider authenticated={authenticated}>
           <SiteHeader authenticated={authenticated} />
+          <ServiceUpdateBanner />
           <main>{children}</main>
           <footer className="site-footer">
             <p>
@@ -35,6 +37,8 @@ export default async function RootLayout({
             </p>
             <div>
               <FooterLink href="/about/reading">명로의 리딩 방식</FooterLink>
+              <FooterLink href="/updates">업데이트 소식</FooterLink>
+              <FooterLink href="/terms">서비스 이용약관</FooterLink>
               <FooterLink href="/privacy">개인정보 처리방침</FooterLink>
               <span>© 2026 MYEONGRO</span>
             </div>
