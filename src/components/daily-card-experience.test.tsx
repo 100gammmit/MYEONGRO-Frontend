@@ -39,6 +39,8 @@ describe("DailyCardExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "이 카드로 확인" }));
 
     expect(await screen.findByText("오늘의 카드 · 별")).toBeInTheDocument();
+    expect(screen.queryByText("이 결과는 생성형 AI를 활용해 생성되었습니다."))
+      .not.toBeInTheDocument();
     expect(screen.queryByRole("complementary", { name: "광고" })).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({

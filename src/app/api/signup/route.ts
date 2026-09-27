@@ -7,7 +7,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return proxyBackendRequest({
     request,
-    path: "/api/signup/adult-eligibility",
+    path: "/api/signup",
   });
 }
 

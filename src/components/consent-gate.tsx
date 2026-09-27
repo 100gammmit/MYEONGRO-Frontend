@@ -56,6 +56,12 @@ export function ConsentGate({
     () => status?.requiredDocumentTypes ?? SCOPE_DOCUMENTS[scope],
     [scope, status],
   );
+  const pendingAgreements = useMemo<readonly ConsentDocumentType[]>(
+    () => requiredAgreements.filter(
+      (documentType) => !status?.acceptedDocumentTypes.includes(documentType),
+    ),
+    [requiredAgreements, status],
+  );
   const complete = requiredAgreements.every((id) => accepted[id]);
   const closeDocument = useCallback(() => setActiveAgreement(null), []);
 
@@ -113,7 +119,7 @@ export function ConsentGate({
         body: JSON.stringify({
           scope,
           documentVersions: Object.fromEntries(
-            requiredAgreements.map((documentType) => [
+            pendingAgreements.map((documentType) => [
               documentType,
               CONSENT_DOCUMENT_VERSIONS[documentType],
             ]),
@@ -163,7 +169,7 @@ export function ConsentGate({
           이 리딩에 필요한 항목만 안내합니다. 각 문서를 확인한 뒤 마지막 단계에서 모든 동의를 한 번에 저장합니다.
         </p>
         <div className="agreement-list">
-          {requiredAgreements.map((agreementId) => (
+          {pendingAgreements.map((agreementId) => (
             <div key={agreementId} className="agreement">
               <div className="agreement-copy">
                 <span aria-hidden="true" className="agreement-mark">

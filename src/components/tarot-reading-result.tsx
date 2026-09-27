@@ -10,6 +10,7 @@ import {
 } from "@/domain/tarot";
 import { redirectedReadingNotice, tarotPositionLabel } from "@/domain/reading/reading-mode";
 import type { TarotReadingResultData } from "@/domain/tarot/result-view";
+import { AiGeneratedNotice } from "./ai-generated-notice";
 import { ReadingModeNotice } from "./reading-mode-notice";
 import { ReadingShell } from "./reading-shell";
 import { TarotCardFace } from "./tarot-card-face";
@@ -90,6 +91,7 @@ export function TarotReadingResult({
       showTrack={!record}
       {...progress}
     >
+      <AiGeneratedNotice />
       {/* The changed focus is explained before the first card, whose position labels already reflect it. */}
       <ReadingModeNotice notice={redirectedReadingNotice(result.readingMode, result.questionRedirected)} />
       <div className="result-reveal-list">

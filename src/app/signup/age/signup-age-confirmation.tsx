@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
+import { ConsentDocumentModal } from "@/components/consent-document-modal";
+import { TERMS_DOCUMENT_VERSION } from "@/domain/consent/documents";
 import { normalizeNextPath } from "@/infrastructure/auth/next-path";
 
 type ViewState = "loading" | "ready" | "submitting" | "expired" | "error";
@@ -28,7 +30,11 @@ export function SignupAgeConfirmation() {
   const [viewState, setViewState] = useState<ViewState>("loading");
   const [provider, setProvider] = useState<string | null>(null);
   const [isAdultConfirmed, setIsAdultConfirmed] = useState(false);
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false);
+  const [isTermsDocumentOpen, setIsTermsDocumentOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const termsReviewButtonRef = useRef<HTMLButtonElement | null>(null);
+  const closeTermsDocument = useCallback(() => setIsTermsDocumentOpen(false), []);
 
   const navigateToCompletedSignup = useCallback((next: unknown) => {
     router.replace(normalizeNextPath(typeof next === "string" ? next : undefined));
@@ -76,13 +82,19 @@ export function SignupAgeConfirmation() {
   }, [navigateToCompletedSignup]);
 
   async function confirmAdultEligibility() {
-    if (!isAdultConfirmed || viewState !== "ready") return;
+    if (!isAdultConfirmed || !isTermsAccepted || viewState !== "ready") return;
     setViewState("submitting");
     setErrorMessage(null);
     try {
       const response = await fetch("/api/signup", {
         method: "POST",
         credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          adultEligibilityConfirmed: true,
+          termsAccepted: true,
+          termsVersion: TERMS_DOCUMENT_VERSION,
+        }),
       });
       if (!response.ok) {
         if (await recoverCompletedSignup()) return;
@@ -201,9 +213,46 @@ export function SignupAgeConfirmation() {
           <small>만 19세 미만이라면 가입을 취소해 주세요.</small>
         </span>
       </label>
+      <div className="agreement-list signup-terms-agreement">
+        <div className="agreement">
+          <div className="agreement-copy">
+            <span aria-hidden="true" className="agreement-mark">
+              {isTermsAccepted ? "✓" : null}
+            </span>
+            <span className="agreement-text">
+              <strong>[필수] 서비스 이용약관 동의</strong>
+              <small>약관 전문과 문서 버전을 확인한 뒤 동의해 주세요.</small>
+            </span>
+          </div>
+          <div className="agreement-action">
+            <span
+              aria-label="서비스 이용약관 동의 상태"
+              className={isTermsAccepted ? "agreement-status accepted" : "agreement-status"}
+              role="status"
+            >
+              {isTermsAccepted ? "동의 완료" : "내용 확인 필요"}
+            </span>
+            <button
+              aria-label="서비스 이용약관 동의 내용 확인"
+              className="agreement-review-button"
+              disabled={viewState === "submitting"}
+              onClick={(event) => {
+                termsReviewButtonRef.current = event.currentTarget;
+                setIsTermsDocumentOpen(true);
+              }}
+              type="button"
+            >
+              {isTermsAccepted ? "다시 보기" : "내용 확인"}
+            </button>
+          </div>
+        </div>
+      </div>
+      <p className="signup-ai-consent-notice">
+        AI 타로·사주 리딩을 처음 생성할 때 OpenAI 국외이전 동의를 별도로 요청합니다.
+      </p>
       <button
         className="primary-button adult-eligibility-button"
-        disabled={viewState === "submitting" || !isAdultConfirmed}
+        disabled={viewState === "submitting" || !isAdultConfirmed || !isTermsAccepted}
         onClick={() => void confirmAdultEligibility()}
         type="button"
       >
@@ -217,6 +266,15 @@ export function SignupAgeConfirmation() {
       >
         가입 취소
       </button>
+      {isTermsDocumentOpen ? (
+        <ConsentDocumentModal
+          documentType="terms"
+          onAgree={async () => setIsTermsAccepted(true)}
+          onClose={closeTermsDocument}
+          returnFocusTo={termsReviewButtonRef.current}
+          title="서비스 이용약관 동의"
+        />
+      ) : null}
     </div>
   );
 }

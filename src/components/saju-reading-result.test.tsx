@@ -4,12 +4,14 @@ import { describe, expect, it } from "vitest";
 import { sajuReadingView } from "@/test-fixtures/saju-reading";
 
 import { SajuReadingResult } from "./saju-reading-result";
+import { AI_GENERATED_NOTICE } from "./ai-generated-notice";
 
 describe("SajuReadingResult", () => {
   it("renders a v5 record without raw birth details or precision metadata", () => {
     const { container } = render(<SajuReadingResult view={sajuReadingView()} />);
 
     expect(screen.getByText("AI SAJU · 사주 리딩")).toBeInTheDocument();
+    expect(screen.getByLabelText("생성형 AI 사용 안내")).toHaveTextContent(AI_GENERATED_NOTICE);
     expect(screen.getByText("병오 · 2023-2032")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "새 사주 리딩" })).toHaveAttribute("href", "/saju");
     expect(screen.queryByText("같은 출생정보로 새 질문")).not.toBeInTheDocument();

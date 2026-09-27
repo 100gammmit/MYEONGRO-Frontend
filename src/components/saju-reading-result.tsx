@@ -14,6 +14,7 @@ import {
 } from "@/domain/reading/reading-mode";
 
 import { ReadingModeNotice } from "./reading-mode-notice";
+import { AiGeneratedNotice } from "./ai-generated-notice";
 
 const PILLAR_LABELS = {
   year: "연주",
@@ -95,6 +96,7 @@ export function SajuReadingResult({
   return (
     <article className="saju-result page-width">
       <Link className="back-link" href={backHref}>← {backLabel}</Link>
+      <AiGeneratedNotice />
       <ReadingModeNotice notice={modeNotice} />
       <header className="saju-result-hero">
         <p className="eyebrow">AI SAJU · {resultFocusLabel}</p>

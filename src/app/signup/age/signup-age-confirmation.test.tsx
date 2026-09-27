@@ -11,6 +11,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { SignupAgeConfirmation } from "./signup-age-confirmation";
+import { TERMS_DOCUMENT_VERSION } from "@/domain/consent/documents";
 
 describe("SignupAgeConfirmation", () => {
   const fetchMock = vi.fn();
@@ -22,7 +23,7 @@ describe("SignupAgeConfirmation", () => {
     vi.stubGlobal("fetch", fetchMock);
   });
 
-  it("creates the member only after an adult confirms signup eligibility", async () => {
+  it("creates the member only after age and terms confirmations", async () => {
     fetchMock
       .mockResolvedValueOnce(Response.json({ pending: true, provider: "google" }))
       .mockResolvedValueOnce(Response.json({ next: "/records?tab=latest" }));
@@ -36,6 +37,15 @@ describe("SignupAgeConfirmation", () => {
     fireEvent.click(submitButton);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     fireEvent.click(screen.getByRole("checkbox", { name: /만 19세 이상임을 확인합니다/ }));
+    expect(submitButton).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "서비스 이용약관 동의 내용 확인" }));
+    expect(screen.getByRole("dialog", { name: "서비스 이용약관 동의" })).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`문서 버전 ${TERMS_DOCUMENT_VERSION}`)))
+      .toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", {
+      name: "서비스 이용약관 동의 확인하고 동의",
+    }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(submitButton).toBeEnabled();
     fireEvent.click(submitButton);
 
@@ -43,6 +53,12 @@ describe("SignupAgeConfirmation", () => {
       expect(fetchMock).toHaveBeenLastCalledWith("/api/signup", {
         method: "POST",
         credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          adultEligibilityConfirmed: true,
+          termsAccepted: true,
+          termsVersion: TERMS_DOCUMENT_VERSION,
+        }),
       });
       expect(navigation.replace).toHaveBeenCalledWith("/records?tab=latest");
     });
@@ -110,9 +126,7 @@ describe("SignupAgeConfirmation", () => {
 
     render(<SignupAgeConfirmation />);
 
-    fireEvent.click(await screen.findByRole("checkbox", {
-      name: /만 19세 이상임을 확인합니다/,
-    }));
+    await acceptRequiredSignupConfirmations();
     fireEvent.click(screen.getByRole("button", { name: "확인하고 가입하기" }));
 
     expect(await screen.findByText("가입 대기 시간이 만료되었어요.")).toBeInTheDocument();
@@ -130,9 +144,7 @@ describe("SignupAgeConfirmation", () => {
 
     render(<SignupAgeConfirmation />);
 
-    fireEvent.click(await screen.findByRole("checkbox", {
-      name: /만 19세 이상임을 확인합니다/,
-    }));
+    await acceptRequiredSignupConfirmations();
     fireEvent.click(screen.getByRole("button", { name: "확인하고 가입하기" }));
 
     await waitFor(() => {
@@ -140,4 +152,26 @@ describe("SignupAgeConfirmation", () => {
       expect(fetchMock).toHaveBeenCalledTimes(3);
     });
   });
+
+  it("explains that overseas transfer consent is deferred until AI use", async () => {
+    fetchMock.mockResolvedValueOnce(Response.json({ pending: true, provider: "google" }));
+
+    render(<SignupAgeConfirmation />);
+
+    expect(await screen.findByText(/AI 타로·사주 리딩을 처음 생성할 때/))
+      .toHaveTextContent("OpenAI 국외이전 동의를 별도로 요청합니다");
+    expect(screen.queryByRole("button", { name: /국외이전 동의 내용 확인/ }))
+      .not.toBeInTheDocument();
+  });
 });
+
+async function acceptRequiredSignupConfirmations() {
+  fireEvent.click(await screen.findByRole("checkbox", {
+    name: /만 19세 이상임을 확인합니다/,
+  }));
+  fireEvent.click(screen.getByRole("button", { name: "서비스 이용약관 동의 내용 확인" }));
+  fireEvent.click(screen.getByRole("button", {
+    name: "서비스 이용약관 동의 확인하고 동의",
+  }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+}

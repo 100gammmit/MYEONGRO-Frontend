@@ -18,7 +18,7 @@ describe("/api/signup route proxy", () => {
 
   it.each([
     ["GET", GET, "/api/signup"],
-    ["POST", POST, "/api/signup/adult-eligibility"],
+    ["POST", POST, "/api/signup"],
     ["DELETE", DELETE, "/api/signup"],
   ] as const)("proxies %s to the signup backend endpoint", async (method, handler, path) => {
     const request = new Request("https://front.test/api/signup", { method });

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { DeclinedReadingView } from "@/domain/reading/declined-result";
+import { AiGeneratedNotice } from "./ai-generated-notice";
 
 export function ReadingDeclinedResult({
   view,
@@ -17,6 +18,7 @@ export function ReadingDeclinedResult({
   return (
     <article className="simple-page page-width record-detail">
       <Link className="back-link" href={backHref}>← {backLabel}</Link>
+      <AiGeneratedNotice />
       <header className="record-detail-header">
         <p className="eyebrow">{view.kind === "tarot" ? "AI TAROT" : "AI SAJU"}</p>
         <h1>{view.result.title}</h1>

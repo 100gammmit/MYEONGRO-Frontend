@@ -98,6 +98,52 @@ describe("ConsentGate", () => {
       .not.toBeInTheDocument();
   });
 
+  it("asks a newly signed-up member only for the missing overseas transfer consent", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json({
+        status: {
+          ...tarotStatus,
+          acceptedDocumentTypes: ["terms"],
+        },
+      }))
+      .mockResolvedValueOnce(Response.json({
+        status: {
+          ...tarotStatus,
+          acceptedDocumentTypes: ["terms", "ai-overseas-transfer"],
+          hasAcceptedRequired: true,
+        },
+      }));
+    const onComplete = vi.fn();
+
+    render(<ConsentGate scope="tarot" onComplete={onComplete} />);
+
+    expect(await screen.findByText("[필수] AI 리딩 정보 국외이전 동의"))
+      .toBeInTheDocument();
+    expect(screen.queryByText("[필수] 서비스 이용약관 동의"))
+      .not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", {
+      name: "AI 리딩 정보 국외이전 동의 내용 확인",
+    }));
+    fireEvent.click(screen.getByRole("button", {
+      name: "AI 리딩 정보 국외이전 동의 확인하고 동의",
+    }));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "동의 완료하고 계속" }));
+
+    await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "/api/consents",
+      expect.objectContaining({
+        body: JSON.stringify({
+          scope: "tarot",
+          documentVersions: {
+            "ai-overseas-transfer": AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
+          },
+        }),
+      }),
+    );
+  });
+
   it("does not agree on close and marks a reviewed document locally", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(Response.json({ status: tarotStatus }));

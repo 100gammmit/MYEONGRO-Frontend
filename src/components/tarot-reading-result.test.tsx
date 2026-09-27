@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MAJOR_ARCANA, TAROT_SPREADS } from "@/domain/tarot";
 
 import { TarotReadingResult } from "./tarot-reading-result";
+import { AI_GENERATED_NOTICE } from "./ai-generated-notice";
 
 describe("TarotReadingResult", () => {
   it("reveals the persisted result and links a new reading to the tarot entry route", () => {
@@ -32,6 +33,7 @@ describe("TarotReadingResult", () => {
     fireEvent.click(screen.getByRole("button", { name: "다음 카드 공개" }));
 
     expect(screen.getByText("오늘의 리딩")).toBeInTheDocument();
+    expect(screen.getByLabelText("생성형 AI 사용 안내")).toHaveTextContent(AI_GENERATED_NOTICE);
     expect(screen.getByRole("link", { name: "새로운 리딩 시작" }))
       .toHaveAttribute("href", "/tarot");
     expect(screen.getByRole("link", { name: "내 기록 보기" }))

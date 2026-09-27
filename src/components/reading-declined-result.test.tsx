@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { ReadingDeclinedResult } from "./reading-declined-result";
+import { AI_GENERATED_NOTICE } from "./ai-generated-notice";
 
 describe("ReadingDeclinedResult", () => {
   it("shows fixed guidance and a new-question action without retry UI", () => {
@@ -25,6 +26,8 @@ describe("ReadingDeclinedResult", () => {
         }}
       />,
     );
+
+    expect(screen.getByLabelText("생성형 AI 사용 안내")).toHaveTextContent(AI_GENERATED_NOTICE);
 
     expect(screen.getByRole("heading", {
       name: "큰 재정 결정을 리딩으로 정해 드리기는 어려워요",
