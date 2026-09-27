@@ -139,6 +139,12 @@ export function koreaDateFromInstant(instant = new Date()): string {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+export function millisecondsUntilNextKoreaDate(instant = new Date()): number {
+  const nextDate = addKoreaCalendarDays(koreaDateFromInstant(instant), 1);
+  const nextMidnight = new Date(`${nextDate}T00:00:00+09:00`).getTime();
+  return Math.max(nextMidnight - instant.getTime(), 1);
+}
+
 export function getPublishedServiceUpdates(
   updates: readonly ServiceUpdate[],
   today = koreaDateFromInstant(),

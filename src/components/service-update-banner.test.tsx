@@ -1,8 +1,13 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
+import { afterEach, vi } from "vitest";
 
 import { defineServiceUpdates } from "@/domain/service-updates/model";
 
 import { ServiceUpdateBanner } from "./service-update-banner";
+import { ServiceUpdateBannerLive } from "./service-update-banner-live";
+
+const navigation = vi.hoisted(() => ({ refresh: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => navigation }));
 
 const updates = defineServiceUpdates([
   {
@@ -49,6 +54,11 @@ const updates = defineServiceUpdates([
 ]);
 
 describe("ServiceUpdateBanner", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+    navigation.refresh.mockReset();
+  });
+
   it("shows only active important notices in priority order", () => {
     render(<ServiceUpdateBanner updates={updates} today="2026-10-02" />);
 
@@ -71,5 +81,52 @@ describe("ServiceUpdateBanner", () => {
     );
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("keeps unpublished entries out of the client-rendered banner", () => {
+    render(<ServiceUpdateBanner updates={updates} today="2026-09-30" />);
+
+    expect(screen.queryByText("이용약관 변경")).not.toBeInTheDocument();
+  });
+
+  it("refreshes at Korea midnight and shows a newly published notice without remounting", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-01T14:59:59.900Z"));
+    const newlyPublished = updates.filter((update) => update.id === "2026-10-02-emergency");
+    const { rerender } = render(
+      <ServiceUpdateBannerLive initialToday="2026-10-01" publishedUpdates={[]} />,
+    );
+    expect(screen.queryByText("일부 생성 일시 중단")).not.toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(200));
+    expect(navigation.refresh).toHaveBeenCalledTimes(1);
+    rerender(
+      <ServiceUpdateBannerLive initialToday="2026-10-02" publishedUpdates={newlyPublished} />,
+    );
+
+    expect(screen.getByText("일부 생성 일시 중단")).toBeInTheDocument();
+  });
+
+  it("removes an expired notice after Korea midnight without remounting", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-08T14:59:59.900Z"));
+    const adverse = updates.filter((update) => update.id === "2026-09-01-adverse");
+    render(
+      <ServiceUpdateBannerLive initialToday="2026-10-08" publishedUpdates={adverse} />,
+    );
+    expect(screen.getByText("무료 크레딧 변경")).toBeInTheDocument();
+
+    act(() => vi.advanceTimersByTime(200));
+
+    expect(screen.queryByText("무료 크레딧 변경")).not.toBeInTheDocument();
+    expect(navigation.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it("refreshes published entries when a visible tab returns", () => {
+    render(<ServiceUpdateBannerLive initialToday="2026-10-01" publishedUpdates={[]} />);
+
+    act(() => document.dispatchEvent(new Event("visibilitychange")));
+
+    expect(navigation.refresh).toHaveBeenCalledTimes(1);
   });
 });

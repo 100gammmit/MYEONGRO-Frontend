@@ -4,6 +4,7 @@ import {
   getActiveImportantServiceUpdates,
   getPublishedServiceUpdates,
   koreaDateFromInstant,
+  millisecondsUntilNextKoreaDate,
   type ServiceUpdate,
 } from "./model";
 
@@ -143,5 +144,7 @@ describe("service update registry", () => {
   it("derives the calendar date in Asia/Seoul", () => {
     expect(koreaDateFromInstant(new Date("2026-12-31T15:00:00.000Z")))
       .toBe("2027-01-01");
+    expect(millisecondsUntilNextKoreaDate(new Date("2026-12-31T14:59:59.500Z")))
+      .toBe(500);
   });
 });
