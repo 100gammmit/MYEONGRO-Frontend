@@ -132,6 +132,34 @@ describe("SignupAgeConfirmation", () => {
     expect(await screen.findByText("가입 대기 시간이 만료되었어요.")).toBeInTheDocument();
   });
 
+  it("discards the local acceptance and requires a full reload after a terms version change", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json({ pending: true, provider: "google" }))
+      .mockResolvedValueOnce(Response.json(
+        {
+          code: "CONSENT_VERSION_MISMATCH",
+          message: "동의 문서가 변경되었습니다. 최신 내용을 다시 확인해 주세요.",
+        },
+        { status: 409 },
+      ));
+
+    render(<SignupAgeConfirmation />);
+
+    await acceptRequiredSignupConfirmations();
+    fireEvent.click(screen.getByRole("button", { name: "확인하고 가입하기" }));
+
+    expect(await screen.findByText("서비스 이용약관이 업데이트되었어요."))
+      .toBeInTheDocument();
+    expect(screen.getByText(/최신 약관을 다시 불러온 뒤 전문을 확인/))
+      .toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "최신 약관 다시 불러오기" }))
+      .toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "확인하고 가입하기" }))
+      .not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("recovers a completed signup when the first completion response is lost", async () => {
     fetchMock
       .mockResolvedValueOnce(Response.json({ pending: true, provider: "google" }))

@@ -8,7 +8,13 @@ import { ConsentDocumentModal } from "@/components/consent-document-modal";
 import { TERMS_DOCUMENT_VERSION } from "@/domain/consent/documents";
 import { normalizeNextPath } from "@/infrastructure/auth/next-path";
 
-type ViewState = "loading" | "ready" | "submitting" | "expired" | "error";
+type ViewState =
+  | "loading"
+  | "ready"
+  | "submitting"
+  | "expired"
+  | "terms-outdated"
+  | "error";
 
 interface SignupStatusResponse {
   pending?: boolean;
@@ -22,6 +28,7 @@ interface SignupCompletionResponse {
 }
 
 interface SignupErrorResponse {
+  code?: unknown;
   message?: unknown;
 }
 
@@ -97,6 +104,16 @@ export function SignupAgeConfirmation() {
         }),
       });
       if (!response.ok) {
+        if (response.status === 409) {
+          const error = await safeErrorResponse(response);
+          if (error.code === "CONSENT_VERSION_MISMATCH") {
+            setIsTermsAccepted(false);
+            setIsTermsDocumentOpen(false);
+            setErrorMessage(null);
+            setViewState("terms-outdated");
+            return;
+          }
+        }
         if (await recoverCompletedSignup()) return;
         if (response.status === 401 || response.status === 410) {
           setViewState("expired");
@@ -144,7 +161,7 @@ export function SignupAgeConfirmation() {
         return;
       }
       if (!response.ok) {
-        const body = await safeErrorBody(response);
+        const body = (await safeErrorResponse(response)).message;
         setErrorMessage(
           body ?? "외부 계정 연결 해제를 확인하지 못했습니다. 계정 설정에서 직접 연결을 해제해 주세요.",
         );
@@ -173,6 +190,29 @@ export function SignupAgeConfirmation() {
         <Link className="primary-button adult-eligibility-button" href="/login">
           로그인 화면으로 돌아가기
         </Link>
+      </div>
+    );
+  }
+
+  if (viewState === "terms-outdated") {
+    return (
+      <div className="adult-eligibility-result" role="alert">
+        <strong>서비스 이용약관이 업데이트되었어요.</strong>
+        <p>최신 약관을 다시 불러온 뒤 전문을 확인하고 동의해 주세요.</p>
+        <button
+          className="primary-button adult-eligibility-button"
+          onClick={() => window.location.reload()}
+          type="button"
+        >
+          최신 약관 다시 불러오기
+        </button>
+        <button
+          className="secondary-button adult-eligibility-button"
+          onClick={() => void cancelSignup()}
+          type="button"
+        >
+          가입 취소
+        </button>
       </div>
     );
   }
@@ -279,12 +319,17 @@ export function SignupAgeConfirmation() {
   );
 }
 
-async function safeErrorBody(response: Response): Promise<string | null> {
+async function safeErrorResponse(
+  response: Response,
+): Promise<{ code: string | null; message: string | null }> {
   try {
     const body = await response.json() as SignupErrorResponse;
-    return typeof body.message === "string" ? body.message : null;
+    return {
+      code: typeof body.code === "string" ? body.code : null,
+      message: typeof body.message === "string" ? body.message : null,
+    };
   } catch {
-    return null;
+    return { code: null, message: null };
   }
 }
 
