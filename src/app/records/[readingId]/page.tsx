@@ -116,10 +116,14 @@ export default async function ReadingDetailPage({
         </div>
       )}
 
-      <ReadingRecordActions
-        readingCompleted={reading.status === "completed"}
-        readingId={reading.id}
-      />
+      {/* Deleting mid-generation would only make the pending completion conflict, and a stuck
+          generation is failed by the stale cleanup, which brings the button back. */}
+      {reading.status === "generating" ? null : (
+        <ReadingRecordActions
+          readingCompleted={reading.status === "completed"}
+          readingId={reading.id}
+        />
+      )}
     </article>
   );
 }

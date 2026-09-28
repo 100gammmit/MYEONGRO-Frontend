@@ -4,11 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 // Deleting a record is a hard delete on the backend, so it is confirmed once before the request.
-// A failed or still generating reading stored no result and never debited credits, so it says less.
+// A failed reading stored no result and never debited credits, so it says less.
 const DELETE_CONFIRMATION = {
   completed:
     "이 리딩 기록을 삭제할까요? 저장된 리딩 결과가 즉시 삭제되며 복구할 수 없고, 사용한 크레딧도 돌아오지 않습니다.",
-  incomplete: "이 리딩 기록을 삭제할까요? 삭제한 기록은 복구할 수 없습니다.",
+  failed: "이 리딩 기록을 삭제할까요? 삭제한 기록은 복구할 수 없습니다.",
 } as const;
 
 export function ReadingRecordActions({
@@ -26,7 +26,7 @@ export function ReadingRecordActions({
     if (pending) return;
     const confirmation = readingCompleted
       ? DELETE_CONFIRMATION.completed
-      : DELETE_CONFIRMATION.incomplete;
+      : DELETE_CONFIRMATION.failed;
     if (!window.confirm(confirmation)) return;
 
     setPending(true);

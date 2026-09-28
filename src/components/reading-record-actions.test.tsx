@@ -32,7 +32,7 @@ describe("ReadingRecordActions", () => {
     expect(screen.getByRole("button", { name: "기록 삭제" })).toBeEnabled();
   });
 
-  it("does not claim lost credits for a reading that never completed", () => {
+  it("does not claim lost credits for a failed reading", () => {
     vi.mocked(window.confirm).mockReturnValue(false);
     render(<ReadingRecordActions readingCompleted={false} readingId="reading-1" />);
 

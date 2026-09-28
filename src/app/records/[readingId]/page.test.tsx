@@ -258,6 +258,24 @@ describe("ReadingDetailPage", () => {
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "새 질문 입력하기" })).toHaveAttribute("href", "/saju");
     expect(screen.queryByText("올해의 흐름이 궁금해요.")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "기록 삭제" })).toBeInTheDocument();
+  });
+
+  it("hides deletion while a reading is still generating", async () => {
+    mocks.get.mockResolvedValue({
+      id: "reading-1",
+      kind: "saju",
+      status: "generating",
+      title: "Generating...",
+      input: { focusArea: "career", targetYear: 2026 },
+      createdAt: "2026-06-12T00:00:00.000Z",
+      updatedAt: "2026-06-12T00:00:01.000Z",
+    });
+
+    await renderPage();
+
+    expect(screen.getByRole("heading", { name: "리딩을 생성하고 있어요" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "기록 삭제" })).not.toBeInTheDocument();
   });
 
   it.each(["completed", "failed"] as const)(
