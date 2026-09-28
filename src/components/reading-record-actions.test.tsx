@@ -20,7 +20,7 @@ describe("ReadingRecordActions", () => {
   it("keeps the record when the confirmation is cancelled", () => {
     vi.mocked(window.confirm).mockReturnValue(false);
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 204 }));
-    render(<ReadingRecordActions readingId="reading-1" />);
+    render(<ReadingRecordActions readingCompleted readingId="reading-1" />);
 
     fireEvent.click(screen.getByRole("button", { name: "기록 삭제" }));
 
@@ -32,9 +32,20 @@ describe("ReadingRecordActions", () => {
     expect(screen.getByRole("button", { name: "기록 삭제" })).toBeEnabled();
   });
 
+  it("does not claim lost credits for a reading that never completed", () => {
+    vi.mocked(window.confirm).mockReturnValue(false);
+    render(<ReadingRecordActions readingCompleted={false} readingId="reading-1" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "기록 삭제" }));
+
+    const [message] = vi.mocked(window.confirm).mock.calls[0];
+    expect(message).toContain("복구할 수 없습니다");
+    expect(message).not.toContain("크레딧");
+  });
+
   it("deletes a reading and returns to records", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 204 }));
-    render(<ReadingRecordActions readingId="reading-1" />);
+    render(<ReadingRecordActions readingCompleted readingId="reading-1" />);
 
     fireEvent.click(screen.getByRole("button", { name: "기록 삭제" }));
 
@@ -47,7 +58,7 @@ describe("ReadingRecordActions", () => {
 
   it("shows a recoverable error when deletion fails", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(null, { status: 500 }));
-    render(<ReadingRecordActions readingId="reading-1" />);
+    render(<ReadingRecordActions readingCompleted readingId="reading-1" />);
 
     fireEvent.click(screen.getByRole("button", { name: "기록 삭제" }));
 

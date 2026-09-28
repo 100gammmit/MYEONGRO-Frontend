@@ -53,7 +53,7 @@ export default async function ReadingDetailPage({
       <ReadingDeclinedResult
         backHref="/records"
         backLabel="내 기록"
-        footer={<ReadingRecordActions readingId={reading.id} />}
+        footer={<ReadingRecordActions readingCompleted readingId={reading.id} />}
         view={declinedView}
       />
     );
@@ -64,7 +64,7 @@ export default async function ReadingDetailPage({
       <SajuReadingResult
         backHref="/records"
         backLabel="내 기록"
-        footer={<ReadingRecordActions readingId={reading.id} />}
+        footer={<ReadingRecordActions readingCompleted readingId={reading.id} />}
         view={sajuView}
       />
     );
@@ -79,7 +79,7 @@ export default async function ReadingDetailPage({
           backHref: "/records",
           backLabel: "내 기록",
           dateLabel: formatReadingDate(reading.createdAt),
-          footer: <ReadingRecordActions readingId={reading.id} />,
+          footer: <ReadingRecordActions readingCompleted readingId={reading.id} />,
         }}
       />
     );
@@ -117,6 +117,7 @@ export default async function ReadingDetailPage({
       )}
 
       <ReadingRecordActions
+        readingCompleted={reading.status === "completed"}
         readingId={reading.id}
       />
     </article>
