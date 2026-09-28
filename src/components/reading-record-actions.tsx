@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Deleting a record is a hard delete on the backend, so it is confirmed once before the request.
+const DELETE_CONFIRMATION =
+  "이 리딩 기록을 삭제할까요? 저장된 리딩 결과가 즉시 삭제되며 복구할 수 없고, 사용한 크레딧도 돌아오지 않습니다.";
+
 export function ReadingRecordActions({ readingId }: { readingId: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
@@ -10,6 +14,8 @@ export function ReadingRecordActions({ readingId }: { readingId: string }) {
 
   async function deleteReading() {
     if (pending) return;
+    if (!window.confirm(DELETE_CONFIRMATION)) return;
+
     setPending(true);
     setError(null);
 
