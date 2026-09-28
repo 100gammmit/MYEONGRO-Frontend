@@ -7,9 +7,7 @@ describe("UpdatesPage", () => {
   it("shows an honest empty state before any public update exists", () => {
     render(<ServiceUpdatesPageContent updates={[]} today="2026-09-28" />);
 
-    expect(screen.getByRole("heading", { name: "업데이트 소식" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "아직 등록된 소식이 없습니다." }))
-      .toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "업데이트 내역" })).toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "명로 업데이트 목록" }))
       .not.toBeInTheDocument();
   });

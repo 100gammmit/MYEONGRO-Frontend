@@ -23,14 +23,10 @@ export function ServiceUpdatesPageContent({
   return (
     <article className="simple-page updates-page page-width">
       <p className="eyebrow">UPDATES</p>
-      <h1>업데이트 소식</h1>
-      <p className="updates-intro">
-        새 기능과 이용에 영향을 주는 정책·크레딧·서비스 변경을 알려드립니다.
-      </p>
+      <h1>업데이트 내역</h1>
       {publishedUpdates.length === 0 ? (
         <div className="updates-empty">
           <h2>아직 등록된 소식이 없습니다.</h2>
-          <p>사용자가 체감하는 변경이 생기면 이곳에 투명하게 기록하겠습니다.</p>
         </div>
       ) : (
         <ol aria-label="명로 업데이트 목록" className="updates-list">
