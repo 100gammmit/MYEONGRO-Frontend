@@ -22,8 +22,10 @@ export default async function RootLayout({
     await getSpringSessionUser(await getBackendCookieHeader()),
   );
 
+  // globals.css scrolls in-page links smoothly; the attribute tells Next.js that is intended, so it
+  // keeps jumping straight to the top on route changes (and stays that way after Next.js 16).
   return (
-    <html lang="ko" data-theme="dark">
+    <html lang="ko" data-theme="dark" data-scroll-behavior="smooth">
       <body>
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
