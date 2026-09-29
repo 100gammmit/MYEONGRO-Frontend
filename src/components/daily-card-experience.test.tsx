@@ -39,6 +39,8 @@ describe("DailyCardExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "이 카드로 확인" }));
 
     expect(await screen.findByText("오늘의 카드 · 별")).toBeInTheDocument();
+    expect(document.querySelector(".card-face img"))
+      .toHaveAttribute("src", "/images/tarot/major-arcana/major-17-star-480.webp");
     expect(screen.queryByText("이 결과는 생성형 AI를 활용해 생성되었습니다."))
       .not.toBeInTheDocument();
     expect(screen.queryByRole("complementary", { name: "광고" })).not.toBeInTheDocument();

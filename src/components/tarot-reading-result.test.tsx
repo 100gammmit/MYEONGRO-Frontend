@@ -40,7 +40,7 @@ describe("TarotReadingResult", () => {
       .toHaveAttribute("href", "/records");
   });
 
-  it("turns each revealed card from its back to the typeset front", async () => {
+  it("turns each revealed card from its back to the illustrated front, then names it", async () => {
     const definition = TAROT_SPREADS.mind_three_card;
     const { container } = render(
       <TarotReadingResult
@@ -66,9 +66,44 @@ describe("TarotReadingResult", () => {
 
     const card = screen.getByLabelText(`${definition.positions[0].label}: ${MAJOR_ARCANA[0].name}`);
     expect(card.querySelector(".card-flip-back")).toHaveAttribute("aria-hidden", "true");
-    expect(card.querySelector(".face-number")).toHaveTextContent("0");
-    expect(card.querySelector(".face-name")).toHaveTextContent(MAJOR_ARCANA[0].name);
+    expect(card.querySelector(".card-flip-front img"))
+      .toHaveAttribute("src", "/images/tarot/major-arcana/major-00-fool-480.webp");
+    const caption = card.querySelector(".tarot-card-caption");
+    expect(caption).toHaveTextContent(`0 · ${MAJOR_ARCANA[0].name}`);
+    expect(caption).not.toHaveClass("shown");
     await waitFor(() => expect(container.querySelector(".card-flip-inner")).toHaveClass("flipped"));
+    expect(caption).toHaveClass("shown");
+  });
+
+  it("requests every drawn front before the first card is revealed", () => {
+    const definition = TAROT_SPREADS.mind_three_card;
+    const cards = MAJOR_ARCANA.slice(10, 13);
+    render(
+      <TarotReadingResult
+        cardIds={cards.map((card) => card.id)}
+        result={{
+          readingMode: "standard",
+          questionRedirected: false,
+          title: "오늘의 리딩",
+          summary: "오늘의 흐름을 확인했어요.",
+          sections: definition.positions.map((position) => ({
+            position: position.id,
+            heading: "마음의 흐름",
+            body: "천천히 살펴보세요.",
+          })),
+          guidance: ["작은 행동을 시작하세요."],
+          disclaimer: "자기 성찰을 위한 참고 정보입니다.",
+        }}
+        spreadType="mind_three_card"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "첫 카드 공개" })).toBeInTheDocument();
+    for (const card of cards) {
+      expect(document.head.querySelector(
+        `link[rel="preload"][as="image"][href="/images/tarot/major-arcana/${card.id}-480.webp"]`,
+      )).not.toBeNull();
+    }
   });
 
   it("opens a saved record with every card turned and the record's own frame", () => {
@@ -101,6 +136,7 @@ describe("TarotReadingResult", () => {
 
     expect(screen.queryByRole("button", { name: "첫 카드 공개" })).not.toBeInTheDocument();
     expect(container.querySelectorAll(".card-flip-inner.flipped")).toHaveLength(3);
+    expect(container.querySelectorAll(".tarot-card-caption.shown")).toHaveLength(3);
     expect(screen.getByRole("link", { name: "← 내 기록" })).toHaveAttribute("href", "/records");
     expect(screen.getByText("2026. 9. 15.")).toBeInTheDocument();
     expect(container.querySelector(".progress-track")).toBeNull();

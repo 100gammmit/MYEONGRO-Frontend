@@ -21,6 +21,11 @@
   gap: 1rem;
 }
 
+.cardImage {
+  width: 150px;
+  margin: 0 auto;
+}
+
 .cardName {
   color: var(--text-muted);
   font-size: 14px;

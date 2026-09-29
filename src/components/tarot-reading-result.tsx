@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
+import { preload } from "react-dom";
 
 import {
   MAJOR_ARCANA,
@@ -13,7 +14,7 @@ import type { TarotReadingResultData } from "@/domain/tarot/result-view";
 import { AiGeneratedNotice } from "./ai-generated-notice";
 import { ReadingModeNotice } from "./reading-mode-notice";
 import { ReadingShell } from "./reading-shell";
-import { TarotCardFace } from "./tarot-card-face";
+import { TarotCardCaption, TarotCardFace, tarotCardImageSrc } from "./tarot-card-face";
 
 // How a saved reading is framed when it is reopened from 내 기록.
 export type TarotRecordFrame = {
@@ -27,8 +28,8 @@ const CARD_INDEX = new Map<string, (typeof MAJOR_ARCANA)[number]>(
   MAJOR_ARCANA.map((card) => [card.id, card]),
 );
 
-// A revealed card lands on its back and turns over to the typeset front, as drawn on the canvas.
-// A reopened record skips the turn and starts face up.
+// A revealed card lands on its back and turns over to its illustrated front, then the caption
+// names it. A reopened record skips the turn and starts face up.
 function RevealedCard({
   cardId,
   label,
@@ -56,10 +57,11 @@ function RevealedCard({
         <div className={flipped ? "card-flip-inner flipped" : "card-flip-inner"}>
           <div aria-hidden="true" className="card-flip-back tarot-back-art" />
           <div className="card-flip-front">
-            <TarotCardFace cardId={cardId} name={name} />
+            <TarotCardFace cardId={cardId} />
           </div>
         </div>
       </div>
+      <TarotCardCaption cardId={cardId} className={flipped ? "shown" : undefined} name={name} />
     </div>
   );
 }
@@ -81,6 +83,12 @@ export function TarotReadingResult({
   const revealedPositions = definition.positions.slice(0, revealedCount);
   const allRevealed = revealedCount === definition.cardCount;
   const progress = record ? { stepLabel: record.dateLabel } : { step: 4, totalSteps: 4 };
+
+  // Fetch every drawn front up front, so a card revealed later never turns over to an empty face.
+  for (const cardId of cardIds) {
+    const src = tarotCardImageSrc(cardId);
+    if (src) preload(src, { as: "image" });
+  }
 
   return (
     <ReadingShell

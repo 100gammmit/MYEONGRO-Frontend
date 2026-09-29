@@ -1,8 +1,11 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+
 import { render } from "@testing-library/react";
 
 import { MAJOR_ARCANA } from "@/domain/tarot";
 
-import { TarotCardFace } from "./tarot-card-face";
+import { TarotCardCaption, TarotCardFace, tarotCardImageSrc } from "./tarot-card-face";
 import { stoneForSlot, TAROT_STONES, TarotStone } from "./tarot-stone";
 
 describe("TarotStone", () => {
@@ -21,29 +24,51 @@ describe("TarotStone", () => {
 });
 
 describe("TarotCardFace", () => {
-  it("prints the arcana number in Roman numerals above the name", () => {
-    const moon = MAJOR_ARCANA.find((card) => card.id === "major-18-moon");
-    const { container } = render(<TarotCardFace cardId="major-18-moon" name={moon?.name ?? "달"} />);
+  it("fills the card with the pre-cut front and leaves naming to the caption", () => {
+    const { container } = render(<TarotCardFace cardId="major-18-moon" />);
 
-    expect(container.querySelector(".face-number")).toHaveTextContent("XVIII");
-    expect(container.querySelector(".face-name")).toHaveTextContent(moon?.name ?? "달");
+    const image = container.querySelector(".card-face img");
+    expect(image).toHaveAttribute("src", "/images/tarot/major-arcana/major-18-moon-480.webp");
+    expect(image).toHaveAttribute("alt", "");
   });
 
-  it("sizes the name by its length, from one syllable to the wheel of fortune", () => {
-    const short = render(<TarotCardFace cardId="major-18-moon" name="달" />);
-    expect(short.container.querySelector(".card-face")).toHaveClass("short");
+  it("keeps the empty face for an id it cannot read", () => {
+    const { container } = render(<TarotCardFace cardId="major-99-unknown" />);
 
-    const long = render(<TarotCardFace cardId="major-10-wheel-of-fortune" name="운명의 수레바퀴" />);
-    expect(long.container.querySelector(".card-face")).toHaveClass("long");
+    expect(container.querySelector(".card-face")).toBeInTheDocument();
+    expect(container.querySelector(".card-face img")).toBeNull();
+    expect(tarotCardImageSrc("major-99-unknown")).toBeNull();
+  });
 
-    const middle = render(<TarotCardFace cardId="major-01-magician" name="마법사" />);
-    expect(middle.container.querySelector(".card-face")).not.toHaveClass("short");
-    expect(middle.container.querySelector(".card-face")).not.toHaveClass("long");
+  it("ships a front image for every major arcana card", () => {
+    for (const card of MAJOR_ARCANA) {
+      const src = tarotCardImageSrc(card.id);
+      expect(src, card.id).not.toBeNull();
+      expect(existsSync(join(process.cwd(), "public", src ?? "")), `${src} is missing`).toBe(true);
+    }
+  });
+});
+
+describe("TarotCardCaption", () => {
+  it("prints the arcana number before the name and hides the numeral from screen readers", () => {
+    const moon = MAJOR_ARCANA.find((card) => card.id === "major-18-moon");
+    const { container } = render(<TarotCardCaption cardId="major-18-moon" name={moon?.name ?? "달"} />);
+
+    const caption = container.querySelector(".tarot-card-caption");
+    expect(caption).toHaveTextContent(`XVIII · ${moon?.name ?? "달"}`);
+    expect(caption?.querySelector(".tarot-card-number")).toHaveAttribute("aria-hidden", "true");
+  });
+
+  it("names the fool with its zero", () => {
+    const { container } = render(<TarotCardCaption cardId="major-00-fool" name="바보" />);
+
+    expect(container.querySelector(".tarot-card-caption")).toHaveTextContent("0 · 바보");
   });
 
   it("leaves the number out for an id it cannot read", () => {
-    const { container } = render(<TarotCardFace cardId="" name="카드" />);
+    const { container } = render(<TarotCardCaption cardId="" name="카드" />);
 
-    expect(container.querySelector(".face-number")).toBeNull();
+    expect(container.querySelector(".tarot-card-number")).toBeNull();
+    expect(container.querySelector(".tarot-card-caption")).toHaveTextContent("카드");
   });
 });

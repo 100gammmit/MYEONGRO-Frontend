@@ -550,24 +550,14 @@ h1, h2, h3, blockquote {
 .stone-pearl .ov { background: radial-gradient(circle at 26% 70%, rgba(255, 110, 185, .3), transparent 42%), radial-gradient(circle at 76% 30%, rgba(104, 234, 200, .26), transparent 40%); }
 .stone-pearl .hl { background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .96) 0 5%, rgba(255, 255, 255, .32) 14%, transparent 32%); }
 
-/* ── Typeset front (canvas sheet 15): number and name only, framed like the back ─────────────── */
-.card-face { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; aspect-ratio: .621; overflow: hidden; container-type: inline-size; border-radius: var(--radius-sm); background: var(--gradient-revealed-card); }
-.card-face i { position: absolute; }
-.card-face .face-frame { inset: 5.5%; border: 1.5px solid color-mix(in srgb, var(--accent-cta) 58%, transparent); border-radius: max(1.5px, .9%); }
-.card-face .face-frame.inner { inset: 9%; border: 1px solid color-mix(in srgb, var(--accent-cta) 18%, transparent); border-radius: max(1px, .6%); }
-.card-face .face-corner { width: 13%; aspect-ratio: 1; border: 0 solid color-mix(in srgb, var(--accent-cta) 45%, transparent); }
-.card-face .face-corner.tl { top: 9%; left: 9%; border-top-width: 1px; border-left-width: 1px; }
-.card-face .face-corner.tr { top: 9%; right: 9%; border-top-width: 1px; border-right-width: 1px; }
-.card-face .face-corner.bl { bottom: 9%; left: 9%; border-bottom-width: 1px; border-left-width: 1px; }
-.card-face .face-corner.br { right: 9%; bottom: 9%; border-right-width: 1px; border-bottom-width: 1px; }
-.card-face .face-number { margin-top: 14%; color: var(--accent-cta); font-size: 5.6cqw; font-variant-numeric: tabular-nums; letter-spacing: .3em; text-indent: .3em; }
-.card-face .face-rule { position: static; flex: none; width: 26%; height: 1px; margin-top: 4.5%; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-cta) 70%, transparent), transparent); }
-/* The bottom padding lines the name up with the back's well (46.17%), so the focus stays put through the flip. */
-.card-face .face-name { flex: 1; display: grid; align-items: center; padding: 3% 12% 19%; color: var(--text-primary); font-family: "Noto Serif KR Variable", Georgia, serif; font-size: 17cqw; font-weight: 300; line-height: 1.22; letter-spacing: -.04em; text-align: center; }
-.card-face.short .face-name { font-size: 24cqw; }
-.card-face.long .face-name { font-size: 13cqw; }
-/* The seal sits in the flow: absolute placement would split its % between width and height. */
-.card-face .face-seal { position: static; flex: none; width: 6.5%; aspect-ratio: 1; margin-bottom: 17%; border-radius: 1px; background: var(--accent-seal); opacity: .9; }
+/* ── Card front: the illustration fills the card; number and name go in a caption beneath ─────── */
+.card-face { position: relative; width: 100%; aspect-ratio: .621; overflow: hidden; border-radius: var(--radius-sm); background: var(--gradient-revealed-card); }
+.card-face img { object-fit: cover; }
+.tarot-card-caption { margin: 12px 0 0; color: var(--text-primary); font-family: "Noto Serif KR Variable", Georgia, serif; font-size: 16px; line-height: 1.4; text-align: center; }
+.tarot-card-number { color: var(--accent-cta); font-family: "Pretendard Variable", Pretendard, sans-serif; font-size: 11px; font-variant-numeric: tabular-nums; letter-spacing: .14em; }
+/* The caption waits until the front has turned past edge-on, so the name never arrives before the card. */
+.revealed-card .tarot-card-caption { opacity: 0; transition: opacity .3s ease .45s; }
+.revealed-card .tarot-card-caption.shown { opacity: 1; }
 
 /* ── Flip: back to front in 700ms; the stone leaves with the back ─────────────────────────────── */
 .card-flip { perspective: 1100px; }
@@ -577,7 +567,7 @@ h1, h2, h3, blockquote {
 .card-flip-front { transform: rotateY(180deg); }
 /* A 3D turn is a classic vestibular trigger, so reduced motion shows the front at once. */
 @media (prefers-reduced-motion: reduce) {
-  .card-flip-inner { transition: none; }
+  .card-flip-inner, .revealed-card .tarot-card-caption { transition: none; }
 }
 .result-hero { text-align: center; padding: 52px 30px; border-block: 1px solid var(--border-default); }
 .result-hero blockquote { max-width: var(--w-read); margin: 0 auto 18px; font-size: 40px; line-height: 1.5; color: var(--text-accent-strong); }

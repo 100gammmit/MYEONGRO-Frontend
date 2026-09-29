@@ -17,6 +17,7 @@ import {
 } from "@/domain/daily-card-free";
 import { ReadingShell } from "./reading-shell";
 import styles from "./daily-card-experience.module.css";
+import { TarotCardFace } from "./tarot-card-face";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
 
 const SLOT_COUNT = 5;
@@ -157,6 +158,10 @@ export function DailyCardExperience({
     return (
       <ReadingShell eyebrow="FREE DAILY TAROT" title={content.title} step={2} totalSteps={2}>
         <article className={`wizard-card ${styles.result}`}>
+          {/* The line beneath names the card, so the front itself is shown without a caption. */}
+          <div className={styles.cardImage}>
+            <TarotCardFace cardId={state.stored.cardId} />
+          </div>
           <p className={styles.cardName}>오늘의 카드 · {content.cardName}</p>
           <h2 ref={resultHeadingRef} tabIndex={-1}>{content.today.heading}</h2>
           <p>{content.today.body}</p>
