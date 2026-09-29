@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type ReactNode } from "react";
-import { preload } from "react-dom";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import {
   MAJOR_ARCANA,
@@ -85,10 +84,18 @@ export function TarotReadingResult({
   const progress = record ? { stepLabel: record.dateLabel } : { step: 4, totalSteps: 4 };
 
   // Fetch every drawn front up front, so a card revealed later never turns over to an empty face.
-  for (const cardId of cardIds) {
-    const src = tarotCardImageSrc(cardId);
-    if (src) preload(src, { as: "image" });
-  }
+  // A <link rel="preload"> would warn in the console while a card waits for its click; an Image
+  // does not, and the document hands its loaded picture to the <img> that later asks for it.
+  const warmedFronts = useRef<HTMLImageElement[]>([]);
+  useEffect(() => {
+    warmedFronts.current = cardIds.flatMap((cardId) => {
+      const src = tarotCardImageSrc(cardId);
+      if (!src) return [];
+      const image = new Image();
+      image.src = src;
+      return [image];
+    });
+  }, [cardIds]);
 
   return (
     <ReadingShell

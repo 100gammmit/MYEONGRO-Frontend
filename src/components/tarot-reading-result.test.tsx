@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { vi } from "vitest";
 
 import { MAJOR_ARCANA, TAROT_SPREADS } from "@/domain/tarot";
 
@@ -78,6 +79,11 @@ describe("TarotReadingResult", () => {
   it("requests every drawn front before the first card is revealed", () => {
     const definition = TAROT_SPREADS.mind_three_card;
     const cards = MAJOR_ARCANA.slice(10, 13);
+    const requested: string[] = [];
+    const srcSetter = vi.spyOn(HTMLImageElement.prototype, "src", "set")
+      .mockImplementation(function (value: string) {
+        requested.push(value);
+      });
     render(
       <TarotReadingResult
         cardIds={cards.map((card) => card.id)}
@@ -99,11 +105,11 @@ describe("TarotReadingResult", () => {
     );
 
     expect(screen.getByRole("button", { name: "첫 카드 공개" })).toBeInTheDocument();
-    for (const card of cards) {
-      expect(document.head.querySelector(
-        `link[rel="preload"][as="image"][href="/images/tarot/major-arcana/${card.id}-480.webp"]`,
-      )).not.toBeNull();
-    }
+    expect(document.querySelectorAll(".card-face img")).toHaveLength(0);
+    expect(requested).toEqual(
+      cards.map((card) => `/images/tarot/major-arcana/${card.id}-480.webp`),
+    );
+    srcSetter.mockRestore();
   });
 
   it("opens a saved record with every card turned and the record's own frame", () => {
