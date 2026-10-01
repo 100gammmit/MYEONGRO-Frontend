@@ -1,6 +1,6 @@
-export const TERMS_DOCUMENT_VERSION = "draft-2026-09-27";
-export const PRIVACY_DOCUMENT_VERSION = "draft-2026-09-25";
-export const AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION = "draft-2026-09-25";
+export const TERMS_DOCUMENT_VERSION = "2026-09-27";
+export const PRIVACY_DOCUMENT_VERSION = "2026-09-25";
+export const AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION = "2026-09-25";
 
 export type ConsentScope = "tarot" | "saju";
 
