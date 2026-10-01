@@ -20,7 +20,7 @@ export function AccountDeleteButton({
 
   async function deleteAccount() {
     const confirmed = window.confirm(
-      "계정을 영구 삭제할까요? 프로필, 로그인 연결, 리딩과 동의 이력이 명로 운영 데이터베이스에서 즉시 삭제되며 복구할 수 없습니다.",
+      "계정을 삭제할까요? 프로필, 로그인 연결, 리딩과 동의 이력이 명로 운영 데이터베이스에서 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.",
     );
     if (!confirmed) {
       return;
@@ -58,7 +58,7 @@ export function AccountDeleteButton({
   return (
     <div className="danger-zone">
       <h2>계정 삭제</h2>
-      <p>계정을 삭제하면 프로필, 로그인 연결, 리딩과 동의 이력이 명로 운영 데이터베이스에서 즉시 영구 삭제되며 복구할 수 없습니다.</p>
+      <p>계정을 삭제하면 프로필, 로그인 연결, 리딩과 동의 이력이 명로 운영 데이터베이스에서 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.</p>
       <button type="button" onClick={deleteAccount} disabled={submitting}>
         {submitting ? "삭제 중" : "계정 삭제"}
       </button>

@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 // A failed reading stored no result and never debited credits, so it says less.
 const DELETE_CONFIRMATION = {
   completed:
-    "이 리딩 기록을 삭제할까요? 저장된 리딩 결과가 즉시 삭제되며 복구할 수 없고, 사용한 크레딧도 돌아오지 않습니다.",
-  failed: "이 리딩 기록을 삭제할까요? 삭제한 기록은 복구할 수 없습니다.",
+    "이 리딩 기록을 삭제할까요? 저장된 리딩 결과가 운영 데이터베이스에서 즉시 삭제되며 서비스에서 개별 복구할 수 없고, 사용한 크레딧도 돌아오지 않습니다.",
+  failed: "이 리딩 기록을 삭제할까요? 삭제한 기록은 서비스에서 개별 복구할 수 없습니다.",
 } as const;
 
 export function ReadingRecordActions({

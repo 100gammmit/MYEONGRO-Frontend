@@ -25,7 +25,7 @@ describe("ReadingRecordActions", () => {
     fireEvent.click(screen.getByRole("button", { name: "기록 삭제" }));
 
     expect(window.confirm).toHaveBeenCalledWith(
-      expect.stringContaining("복구할 수 없고"),
+      expect.stringContaining("서비스에서 개별 복구할 수 없고"),
     );
     expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(push).not.toHaveBeenCalled();
@@ -39,7 +39,7 @@ describe("ReadingRecordActions", () => {
     fireEvent.click(screen.getByRole("button", { name: "기록 삭제" }));
 
     const [message] = vi.mocked(window.confirm).mock.calls[0];
-    expect(message).toContain("복구할 수 없습니다");
+    expect(message).toContain("서비스에서 개별 복구할 수 없습니다");
     expect(message).not.toContain("크레딧");
   });
 
