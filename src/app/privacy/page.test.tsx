@@ -12,7 +12,7 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
       .toBeInTheDocument();
-    expect(screen.getByText(/문서 버전 2026-09-25/)).toBeInTheDocument();
+    expect(screen.getByText(/문서 버전 2026-10-02/)).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
@@ -34,8 +34,13 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /무료 오늘의 운세 이어보기.*SHA-256 계정 범위값.*현재 브라우저/ }))
       .toBeInTheDocument();
-    expect(within(table).getByRole("row", { name: /서비스 보안과 오류·장애 대응.*리딩 식별자.*최대 30일/ }))
-      .toBeInTheDocument();
+    const operationalLogRow = within(table).getByRole("row", {
+      name: /서비스 보안과 오류·장애 대응.*리딩 식별자.*최대 30일/,
+    });
+    expect(operationalLogRow).toHaveTextContent("30일 경과 시 CloudWatch에서 만료·삭제 대상으로 표시");
+    expect(operationalLogRow).toHaveTextContent("물리적 삭제는 통상 추가 72시간 이내");
+    expect(operationalLogRow).toHaveTextContent("드물게 더 오래 걸릴 수 있음");
+    expect(operationalLogRow).not.toHaveTextContent("최대 30일 후 자동 삭제");
     expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성.*국외이전 별도 동의.*최대 24시간/ }))
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성/ }))
