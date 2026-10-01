@@ -10,7 +10,7 @@ describe("PrivacyPage", () => {
     expect(screen.queryByText(/후속 마일스톤/)).not.toBeInTheDocument();
     expect(screen.getByText(/계정 설정에서 계정 삭제를 요청하면.*운영 데이터베이스에서 즉시 영구 삭제되며 복구할 수 없습니다/))
       .toBeInTheDocument();
-    expect(screen.getByText(/문서 버전 draft-2026-09-25/)).toBeInTheDocument();
+    expect(screen.getByText(/문서 버전 2026-09-25/)).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();

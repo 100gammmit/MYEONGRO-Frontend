@@ -7,7 +7,7 @@ describe("TermsPage", () => {
     render(<TermsPage />);
 
     expect(screen.getByRole("heading", { name: "서비스 이용약관" })).toBeInTheDocument();
-    expect(screen.getByText(/문서 버전 draft-2026-09-27/)).toBeInTheDocument();
+    expect(screen.getByText(/문서 버전 2026-09-27/)).toBeInTheDocument();
     expect(screen.getByText(/자기 성찰과 오락을 위한 참고 정보/)).toBeInTheDocument();
     expect(screen.getByText(/무료 크레딧은 한국시간을 기준으로 매일 초기화/))
       .toBeInTheDocument();
