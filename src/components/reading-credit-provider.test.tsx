@@ -73,18 +73,29 @@ describe("ReadingCreditProvider", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("loads the public price list once for a guest when a screen asks for it", async () => {
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json(pricing));
+  it("loads the public price list for a guest whenever a screen asks, keeping the last one shown", async () => {
+    let resolveSecond: (response: Response) => void = () => {};
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(pricing))
+      .mockReturnValueOnce(new Promise((resolve) => { resolveSecond = resolve; }));
     render(<ReadingCreditProvider authenticated={false}><PricingConsumer /></ReadingCreditProvider>);
 
     expect(await screen.findByText("saju cost: 4")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "ask pricing" }));
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith("/api/reading-credits/pricing", {
       credentials: "same-origin",
       cache: "no-store",
     });
+
+    fireEvent.click(screen.getByRole("button", { name: "ask pricing" }));
+    fireEvent.click(screen.getByRole("button", { name: "ask pricing" }));
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(screen.getByText("saju cost: 4")).toBeInTheDocument();
+
+    await act(async () => resolveSecond(Response.json({
+      ...pricing,
+      costs: { ...pricing.costs, saju: 5 },
+    })));
+    expect(await screen.findByText("saju cost: 5")).toBeInTheDocument();
   });
 
   it("does not load the price list for a signed-in user", async () => {

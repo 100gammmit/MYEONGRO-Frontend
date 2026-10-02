@@ -54,8 +54,10 @@ export function ReadingCreditProvider({
   const pricingInFlight = useRef(false);
   const refreshedResetAt = useRef<string | null>(null);
 
+  // Asked again each time a cost screen opens, so a long-lived tab follows a price change; the
+  // previous list stays on screen meanwhile and only a request already running is shared.
   const requestPricing = useCallback(() => {
-    if (authenticated || pricing || pricingInFlight.current) return;
+    if (authenticated || pricingInFlight.current) return;
     pricingInFlight.current = true;
     void (async () => {
       try {
@@ -66,12 +68,12 @@ export function ReadingCreditProvider({
         if (!response.ok) throw new Error("credit pricing failed");
         setPricing(parseReadingCreditPricing(await response.json()));
       } catch {
-        // Costs stay unknown ("…"); the next screen that asks tries again.
+        // Keep what is shown (unknown "…" on a first failure); the next screen that asks retries.
       } finally {
         pricingInFlight.current = false;
       }
     })();
-  }, [authenticated, pricing]);
+  }, [authenticated]);
 
   const refresh = useCallback((options: RefreshOptions = {}): Promise<void> => {
     if (!authenticated) {
