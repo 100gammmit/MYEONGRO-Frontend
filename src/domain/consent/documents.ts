@@ -27,6 +27,10 @@ export const AWS_PROCESSING_DISCLOSURE = {
     "서비스 이용 시 암호화된 네트워크를 통해 AWS 인프라로 전송·처리",
   retention:
     "요청 중계 정보는 요청 처리에 필요한 동안, 저장 정보는 위 처리 항목별 보유기간 동안 처리한 뒤 삭제",
+  refusalMethod:
+    "서비스 이용 전에는 접속을 중단하고, 이용 중에는 계정 설정에서 계정을 삭제하거나 개인정보 문의 이메일로 요청",
+  refusalEffect:
+    "AWS 인프라는 명로 서비스 제공에 필수이므로 국외 처리를 거부하면 명로의 웹 서비스 전체를 이용할 수 없음. 다만 개인정보 문의 이메일을 통한 권리행사와 계정 삭제 요청은 가능",
 } as const;
 
 export type ConsentScope = "tarot" | "saju";

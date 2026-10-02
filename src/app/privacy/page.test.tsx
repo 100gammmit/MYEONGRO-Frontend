@@ -64,6 +64,10 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/개인정보 보호법 제28조의8 제1항 제3호 가목/))
       .toBeInTheDocument();
+    expect(screen.getByText(/서비스 이용 전에는 접속을 중단하고.*계정을 삭제하거나 개인정보 문의 이메일로 요청/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/AWS 인프라는 명로 서비스 제공에 필수이므로.*웹 서비스 전체를 이용할 수 없음.*이메일을 통한 권리행사와 계정 삭제 요청은 가능/))
+      .toBeInTheDocument();
     expect(screen.getByRole("link", { name: "AWS의 현재 엣지 로케이션 목록" }))
       .toHaveAttribute("href", "https://aws.amazon.com/cloudfront/features/");
     const processorTable = screen.getByRole("table", {

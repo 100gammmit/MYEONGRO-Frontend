@@ -206,6 +206,8 @@ export function ConsentDocumentContent({
         <div><dt>시기·방법</dt><dd>{AWS_PROCESSING_DISCLOSURE.method}</dd></div>
         <div><dt>목적</dt><dd>{AWS_PROCESSING_DISCLOSURE.outsourcedTasks}</dd></div>
         <div><dt>보유·이용 기간</dt><dd>{AWS_PROCESSING_DISCLOSURE.retention}</dd></div>
+        <div><dt>거부 방법·절차</dt><dd>{AWS_PROCESSING_DISCLOSURE.refusalMethod}</dd></div>
+        <div><dt>거부 효과</dt><dd>{AWS_PROCESSING_DISCLOSURE.refusalEffect}</dd></div>
       </dl>
       <p>
         위 AWS 국외 처리는 서비스 계약의 이행을 위한 처리위탁·보관에 해당하며, 개인정보 보호법 제28조의8 제1항 제3호 가목에 따라 이 처리방침으로 공개합니다. CloudFront의 처리 국가는 이용자 접속 위치와 AWS 네트워크 운영에 따라 달라질 수 있으며, {" "}

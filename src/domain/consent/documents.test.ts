@@ -19,6 +19,8 @@ describe("AWS processing disclosure", () => {
     expect(AWS_PROCESSING_DISCLOSURE.dynamicProcessingLocation)
       .toContain("CloudFront 엣지 로케이션 소재국");
     expect(AWS_PROCESSING_DISCLOSURE.transferItems).toContain("원본 출생정보");
+    expect(AWS_PROCESSING_DISCLOSURE.refusalMethod).toContain("계정을 삭제");
+    expect(AWS_PROCESSING_DISCLOSURE.refusalEffect).toContain("웹 서비스 전체");
     expect(AWS_PROCESSING_DISCLOSURE.verifiedAt).toBe("2026-10-02");
   });
 });
