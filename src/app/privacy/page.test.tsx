@@ -37,10 +37,12 @@ describe("PrivacyPage", () => {
     const operationalLogRow = within(table).getByRole("row", {
       name: /서비스 보안과 오류·장애 대응.*리딩 식별자.*최대 30일/,
     });
-    expect(operationalLogRow).toHaveTextContent("30일 경과 시 CloudWatch에서 만료·삭제 대상으로 표시");
+    expect(operationalLogRow).toHaveTextContent("최대 30일 동안만 운영 조회·이용");
+    expect(operationalLogRow).toHaveTextContent("CloudWatch 보유 정책에 따라 만료·삭제 대상으로 표시");
     expect(operationalLogRow).toHaveTextContent("물리적 삭제는 통상 추가 72시간 이내");
     expect(operationalLogRow).toHaveTextContent("드물게 더 오래 걸릴 수 있음");
     expect(operationalLogRow).not.toHaveTextContent("최대 30일 후 자동 삭제");
+    expect(operationalLogRow).not.toHaveTextContent("조회 대상에서 제외");
     expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성.*국외이전 별도 동의.*최대 24시간/ }))
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성/ }))
