@@ -1,9 +1,14 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 
 describe("POST /auth/logout route", () => {
+  beforeEach(() => {
+    vi.stubEnv("BACKEND_API_URL", "https://spring.test/");
+  });
+
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("forwards logout to the Spring auth endpoint with the session cookie", async () => {
@@ -18,7 +23,7 @@ describe("POST /auth/logout route", () => {
 
     await POST(request);
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8080/api/auth/logout", {
+    expect(fetch).toHaveBeenCalledWith("https://spring.test/api/auth/logout", {
       method: "POST",
       headers: { cookie: "JSESSIONID=session" },
       cache: "no-store",

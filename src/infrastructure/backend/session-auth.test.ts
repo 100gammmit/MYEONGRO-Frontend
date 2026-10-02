@@ -1,9 +1,14 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getSpringSessionState, getSpringSessionUser } from "./session-auth";
 
 describe("getSpringSessionUser", () => {
+  beforeEach(() => {
+    vi.stubEnv("BACKEND_API_URL", "https://spring.test/");
+  });
+
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it("requests the Spring auth session endpoint with forwarded cookies", async () => {
@@ -15,7 +20,7 @@ describe("getSpringSessionUser", () => {
 
     const user = await getSpringSessionUser("JSESSIONID=session");
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8080/api/auth/me", {
+    expect(fetch).toHaveBeenCalledWith("https://spring.test/api/auth/me", {
       headers: { cookie: "JSESSIONID=session" },
       cache: "no-store",
     });
