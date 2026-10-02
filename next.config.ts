@@ -5,6 +5,7 @@ import {
 } from "next/constants";
 
 import { assertReleaseLegalConfiguration } from "./src/domain/consent/release-validation";
+import { SECURITY_HEADERS } from "./src/infrastructure/security-headers";
 
 const backendApiUrl = process.env.BACKEND_API_URL ?? "http://localhost:8080";
 
@@ -15,6 +16,9 @@ const nextConfig = (phase: string): NextConfig => {
 
   return {
     poweredByHeader: false,
+    async headers() {
+      return [{ source: "/:path*", headers: [...SECURITY_HEADERS] }];
+    },
     async rewrites() {
       return {
         beforeFiles: [
