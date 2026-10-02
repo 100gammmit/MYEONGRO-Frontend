@@ -1,11 +1,27 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  AWS_PROCESSING_DISCLOSURE,
   OPENAI_DOMESTIC_PROCESSING_COUNTRIES,
   OPENAI_OVERSEAS_PROCESSING_COUNTRIES,
   OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
   OPENAI_TRANSFER_SNAPSHOT,
 } from "./documents";
+
+describe("AWS processing disclosure", () => {
+  it("records the direct processor and separates the Seoul region from dynamic edge processing", () => {
+    expect(AWS_PROCESSING_DISCLOSURE.processor).toMatchObject({
+      name: "Amazon Web Services Korea LLC",
+      contact: "aws-korea-privacy@amazon.com",
+    });
+    expect(AWS_PROCESSING_DISCLOSURE.primaryProcessingLocation)
+      .toContain("서울 리전 ap-northeast-2");
+    expect(AWS_PROCESSING_DISCLOSURE.dynamicProcessingLocation)
+      .toContain("CloudFront 엣지 로케이션 소재국");
+    expect(AWS_PROCESSING_DISCLOSURE.transferItems).toContain("원본 출생정보");
+    expect(AWS_PROCESSING_DISCLOSURE.verifiedAt).toBe("2026-10-02");
+  });
+});
 
 describe("OpenAI transfer snapshot", () => {
   it("keeps the dated official country snapshot complete and separates Korea", () => {

@@ -8,7 +8,7 @@ describe("PrivacyPage", () => {
     expect(screen.queryByText(/회원 탈퇴 시 계정 데이터 삭제를 요청/))
       .not.toBeInTheDocument();
     expect(screen.queryByText(/후속 마일스톤/)).not.toBeInTheDocument();
-    expect(screen.getByText(/계정 설정에서 계정 삭제를 요청하면.*위 삭제·백업 기준에 따라 처리됩니다/))
+    expect(screen.getByText(/계정 설정에서 저장한 리딩의 삭제, 계정 삭제와 AI 국외이전 동의 철회를 직접 할 수 있습니다/))
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
       .toBeInTheDocument();
@@ -47,6 +47,25 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성/ }))
       .not.toHaveTextContent("가명 안전 식별자");
+    const directProcessorTable = screen.getByRole("table", {
+      name: "명로가 직접 이용하는 개인정보 처리 수탁자",
+    });
+    expect(within(directProcessorTable).getByRole("row", {
+      name: /Amazon Web Services Korea LLC.*Front 호스팅·콘텐츠 전송·API 요청 중계.*처리 항목별 보유기간/,
+    })).toBeInTheDocument();
+    expect(within(directProcessorTable).getByRole("row", {
+      name: /OpenAI OpCo, LLC.*AI 타로·사주 리딩 생성.*OpenAI 국외이전/,
+    })).toBeInTheDocument();
+    expect(within(directProcessorTable).queryByText("Cloudflare, Ltd."))
+      .not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "AWS 인프라의 국외 처리" }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/주된 Backend·세션·데이터베이스·운영 로그 처리 및 저장 위치는 대한민국 서울 리전/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/개인정보 보호법 제28조의8 제1항 제3호 가목/))
+      .toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "AWS의 현재 엣지 로케이션 목록" }))
+      .toHaveAttribute("href", "https://aws.amazon.com/cloudfront/features/");
     const processorTable = screen.getByRole("table", {
       name: "OpenAI API 외부 처리자와 처리 가능 국가",
     });
@@ -77,5 +96,24 @@ describe("PrivacyPage", () => {
       .toHaveLength(9);
     expect(screen.getByRole("link", { name: "개인정보 보호법 제28조의8 제1항 제1호" }))
       .toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "개인정보 파기 절차와 방법" }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/운영 데이터베이스의 관련 레코드를 복구 유예 없이 영구 삭제/))
+      .toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "로그인 세션 쿠키" }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/MYEONGRO_SESSION/)).toBeInTheDocument();
+    expect(screen.getByText(/HttpOnly, Secure와 SameSite=Lax/)).toBeInTheDocument();
+    expect(screen.getByText(/광고 또는 행태 추적 쿠키를 사용하지 않/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "개인정보 보호책임자와 문의처" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("백민하")).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "privacy@myeongro.com" }))
+      .toHaveLength(2);
+    expect(screen.queryByText(/개인정보 문의 전화번호/)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "개인정보분쟁조정위원회" }))
+      .toHaveAttribute("href", "https://www.kopico.go.kr");
+    expect(screen.getByRole("link", { name: "개인정보침해 신고센터" }))
+      .toHaveAttribute("href", "https://privacy.kisa.or.kr");
   });
 });

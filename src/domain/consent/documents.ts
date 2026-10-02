@@ -2,6 +2,33 @@ export const TERMS_DOCUMENT_VERSION = "2026-09-27";
 export const PRIVACY_DOCUMENT_VERSION = "2026-10-02";
 export const AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION = "2026-09-25";
 
+export const AWS_PROCESSING_DISCLOSURE = {
+  verifiedAt: "2026-10-02",
+  processor: {
+    name: "Amazon Web Services Korea LLC",
+    address: "대한민국 서울특별시 강남구 테헤란로 231, 센터필드 EAST 12층 (06142)",
+    contact: "aws-korea-privacy@amazon.com",
+  },
+  sourceUrls: {
+    contractingParty: "https://aws.amazon.com/legal/aws-contracting-party/",
+    privacy: "https://aws.amazon.com/privacy/",
+    subprocessors: "https://aws.amazon.com/compliance/sub-processors/",
+    edgeLocations: "https://aws.amazon.com/cloudfront/features/",
+  },
+  outsourcedTasks:
+    "Front 호스팅·콘텐츠 전송·API 요청 중계, Backend·세션·데이터베이스·자동 백업·운영 로그 인프라 제공",
+  primaryProcessingLocation:
+    "대한민국(Backend·Redis·RDS·CloudWatch는 서울 리전 ap-northeast-2)",
+  dynamicProcessingLocation:
+    "이용자와 가까운 AWS CloudFront 엣지 로케이션 소재국 및 AWS가 공개한 서비스 제공 계열사·하위처리자 소재국",
+  transferItems:
+    "세션 식별자, 계정·크레딧·동의·리딩 정보, 요청 중 일시 처리되는 질문·선택지·관심 분야와 원본 출생정보, 최소 사주 계산정보, 서비스 요청·응답 및 최소 운영 로그",
+  method:
+    "서비스 이용 시 암호화된 네트워크를 통해 AWS 인프라로 전송·처리",
+  retention:
+    "요청 중계 정보는 요청 처리에 필요한 동안, 저장 정보는 위 처리 항목별 보유기간 동안 처리한 뒤 삭제",
+} as const;
+
 export type ConsentScope = "tarot" | "saju";
 
 export type ConsentDocumentType =
