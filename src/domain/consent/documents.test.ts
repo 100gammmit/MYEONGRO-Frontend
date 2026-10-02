@@ -1,11 +1,53 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  AWS_PROCESSING_DISCLOSURE,
   OPENAI_DOMESTIC_PROCESSING_COUNTRIES,
   OPENAI_OVERSEAS_PROCESSING_COUNTRIES,
   OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
   OPENAI_TRANSFER_SNAPSHOT,
+  PRIVACY_INQUIRY_EMAIL_PROCESSING,
 } from "./documents";
+
+describe("privacy inquiry email processing", () => {
+  it("records Cloudflare routing and the personal Gmail destination separately", () => {
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.cloudflare).toMatchObject({
+      name: "Cloudflare, Inc.",
+      contact: "privacyquestions@cloudflare.com",
+    });
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.cloudflare.retention)
+      .toContain("최대 31일");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google).toMatchObject({
+      name: "Google LLC",
+      country: "미국 등 Google 데이터센터 소재국",
+    });
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.retention)
+      .toContain("일반적으로 약 2개월");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.retention)
+      .toContain("최대 6개월");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention)
+      .toContain("완료한 날부터 30일");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalEffect)
+      .toContain("이메일을 통한 문의·권리행사");
+  });
+});
+
+describe("AWS processing disclosure", () => {
+  it("records the direct processor and separates the Seoul region from dynamic edge processing", () => {
+    expect(AWS_PROCESSING_DISCLOSURE.processor).toMatchObject({
+      name: "Amazon Web Services Korea LLC",
+      contact: "aws-korea-privacy@amazon.com",
+    });
+    expect(AWS_PROCESSING_DISCLOSURE.primaryProcessingLocation)
+      .toContain("서울 리전 ap-northeast-2");
+    expect(AWS_PROCESSING_DISCLOSURE.dynamicProcessingLocation)
+      .toContain("CloudFront 엣지 로케이션 소재국");
+    expect(AWS_PROCESSING_DISCLOSURE.transferItems).toContain("원본 출생정보");
+    expect(AWS_PROCESSING_DISCLOSURE.refusalMethod).toContain("계정을 삭제");
+    expect(AWS_PROCESSING_DISCLOSURE.refusalEffect).toContain("웹 서비스 전체");
+    expect(AWS_PROCESSING_DISCLOSURE.verifiedAt).toBe("2026-10-02");
+  });
+});
 
 describe("OpenAI transfer snapshot", () => {
   it("keeps the dated official country snapshot complete and separates Korea", () => {
