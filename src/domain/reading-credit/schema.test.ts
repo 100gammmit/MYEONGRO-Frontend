@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { getReadingCreditAccess, parseReadingCreditStatus } from ".";
+import {
+  getDisplayedReadingCredits,
+  getReadingCreditAccess,
+  parseReadingCreditStatus,
+} from ".";
 
 const status = {
   dailyFreeGrant: 10,
@@ -52,5 +56,21 @@ describe("reading credit contract", () => {
       required: 3,
       remaining: 9,
     });
+  });
+
+  it("keeps the previous status visible while a refresh runs", () => {
+    expect(getDisplayedReadingCredits({ status: "loading", data: status }))
+      .toEqual({ data: status, loading: false });
+    expect(getDisplayedReadingCredits({ status: "ready", data: status }))
+      .toEqual({ data: status, loading: false });
+  });
+
+  it("reports loading only for the first load and drops data after an error", () => {
+    expect(getDisplayedReadingCredits({ status: "loading", data: null }))
+      .toEqual({ data: null, loading: true });
+    expect(getDisplayedReadingCredits({ status: "error", data: status }))
+      .toEqual({ data: null, loading: false });
+    expect(getDisplayedReadingCredits({ status: "idle", data: null }))
+      .toEqual({ data: null, loading: false });
   });
 });

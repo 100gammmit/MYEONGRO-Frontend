@@ -7,7 +7,7 @@ const navigation = vi.hoisted(() => ({
 }));
 const credits = vi.hoisted(() => ({
   state: {
-    status: "ready" as "ready" | "error",
+    status: "ready" as "ready" | "loading" | "error",
     data: {
       balance: { free: 7, paid: 2, total: 9 },
     },
@@ -66,6 +66,15 @@ describe("SiteHeader", () => {
     expect(screen.getByRole("button", { name: "로그아웃" })).toBeInTheDocument();
     expect(screen.getByText("크레딧")).toHaveTextContent("크레딧 9");
     expect(screen.getByTitle("오늘 무료 7 · 추가 2")).toBeInTheDocument();
+  });
+
+  it("keeps showing the balance while credits refresh", () => {
+    credits.state.status = "loading";
+
+    render(<SiteHeader authenticated />);
+
+    expect(screen.getByText("크레딧")).toHaveTextContent("크레딧 9");
+    expect(screen.queryByLabelText("크레딧 확인 중")).not.toBeInTheDocument();
   });
 
   it("offers a retry instead of showing stale credit data after an error", () => {

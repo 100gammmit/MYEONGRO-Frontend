@@ -239,6 +239,17 @@ describe("TarotExperience", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
   });
 
+  it("keeps costs and spread entry available while credits refresh", () => {
+    credits.state.status = "loading";
+    render(<TarotExperience />);
+    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
+
+    expect(screen.getByText(/카드 3장.*감정 정리.*2 크레딧/)).toBeInTheDocument();
+    expect(screen.queryByText(/… 크레딧/)).not.toBeInTheDocument();
+    expect(screen.getByText("2크레딧 사용 · 현재 10크레딧")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "이 유형으로 시작" })).toBeEnabled();
+  });
+
   it("blocks spread entry and offers retry when credit refresh fails after prior data", async () => {
     credits.state.status = "error";
     render(<TarotExperience />);

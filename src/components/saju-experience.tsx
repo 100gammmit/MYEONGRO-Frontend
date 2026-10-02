@@ -22,7 +22,7 @@ import {
   parseSajuReadingCreatedResponse,
   parseSajuReadingCreateRequest,
 } from "@/domain/saju/schema";
-import { getReadingCreditAccess } from "@/domain/reading-credit";
+import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
 import {
   containsDirectIdentifier,
   DIRECT_IDENTIFIER_INPUT_MESSAGE,
@@ -181,11 +181,12 @@ export function SajuExperience() {
   const formRef = useRef(form);
   const historyPhaseRef = useRef<Phase>("consent");
   const poppedRef = useRef(false);
-  const creditData = credits.state.status === "ready" ? credits.state.data : null;
+  const displayedCredits = getDisplayedReadingCredits(credits.state);
+  const creditData = displayedCredits.data;
   const creditCost = creditData?.costs.saju ?? null;
   const creditAccess = getReadingCreditAccess(
     creditData,
-    credits.state.status === "idle" || credits.state.status === "loading",
+    credits.state.status === "idle" || displayedCredits.loading,
     creditCost,
   );
   // Blocking states surface at the top of the question step; allowed and loading stay next to the button.

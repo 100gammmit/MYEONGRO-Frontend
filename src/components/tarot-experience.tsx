@@ -18,7 +18,7 @@ import {
   containsDirectIdentifier,
   DIRECT_IDENTIFIER_INPUT_MESSAGE,
 } from "@/domain/reading/direct-identifier";
-import { getReadingCreditAccess } from "@/domain/reading-credit";
+import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
 import { ConsentGate } from "./consent-gate";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
 import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
@@ -109,7 +109,8 @@ export function TarotExperience() {
 
   const definition = TAROT_SPREADS[spreadType];
   const inputIsValid = hasValidTarotInput(spreadType, question, choiceOptions);
-  const creditData = credits.state.status === "ready" ? credits.state.data : null;
+  const displayedCredits = getDisplayedReadingCredits(credits.state);
+  const creditData = displayedCredits.data;
   const isAiSpread = isAiTarotSpreadType(spreadType);
   const creditCost = isAiSpread ? creditData?.costs.tarot[spreadType] ?? null : 0;
   const creditAccess = isAiSpread
@@ -117,7 +118,7 @@ export function TarotExperience() {
       ? { status: "allowed", required: 0, remaining: 0 } as const
       : getReadingCreditAccess(
       creditData,
-      credits.state.status === "loading",
+      displayedCredits.loading,
       creditCost,
       )
     : { status: "allowed", required: 0, remaining: creditData?.balance.total ?? 0 } as const;

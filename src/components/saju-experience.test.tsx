@@ -254,6 +254,19 @@ describe("SajuExperience", () => {
     expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
   });
 
+  it("keeps the question step usable while credits refresh", async () => {
+    credits.state.status = "loading";
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+
+    render(<SajuExperience />);
+
+    expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("4크레딧 사용 · 현재 10크레딧")).toBeInTheDocument();
+    fillQuestion();
+    expect(screen.getByRole("button", { name: "다음" })).toBeEnabled();
+  });
+
   it("locks the question step and offers retry when credit refresh fails after prior data", async () => {
     credits.state.status = "error";
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));

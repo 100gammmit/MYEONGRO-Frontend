@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
+import { getDisplayedReadingCredits } from "@/domain/reading-credit";
 import { BrandMark } from "./brand-mark";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReturnAwareLoginLink } from "./return-aware-login-link";
@@ -133,10 +134,11 @@ function CreditIndicator({
       </button>
     );
   }
-  if (state.status === "ready") {
+  const { data } = getDisplayedReadingCredits(state);
+  if (data) {
     return (
-      <span className="credit-indicator" title={`오늘 무료 ${state.data.balance.free} · 추가 ${state.data.balance.paid}`}>
-        크레딧 <strong>{state.data.balance.total}</strong>
+      <span className="credit-indicator" title={`오늘 무료 ${data.balance.free} · 추가 ${data.balance.paid}`}>
+        크레딧 <strong>{data.balance.total}</strong>
       </span>
     );
   }
