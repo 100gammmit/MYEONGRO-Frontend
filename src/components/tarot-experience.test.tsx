@@ -128,6 +128,7 @@ describe("TarotExperience", () => {
     navigation.replace.mockReset();
     consent.autoComplete = true;
     consent.unauthenticated = false;
+    window.history.replaceState(null, "", "/tarot");
     credits.state.status = "ready";
     credits.state.data.balance = { free: 10, paid: 0, total: 10 };
     credits.state.data.generationInProgress = false;
@@ -240,12 +241,28 @@ describe("TarotExperience", () => {
     ));
   });
 
-  it("opens with the spread chosen before login already selected", () => {
+  it("opens with the spread chosen before login already selected and scrolled into view", () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
     render(<TarotExperience initialSpread="choice_five_card" />);
 
-    expect(screen.getByRole("button", { name: /선택 리딩/ })).toHaveAttribute("aria-pressed", "true");
+    const chosen = screen.getByRole("button", { name: /선택 리딩/ });
+    expect(chosen).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: /오늘의 운세/ })).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByText("3크레딧 사용 · 현재 10크레딧")).toBeInTheDocument();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView.mock.contexts[0]).toBe(chosen);
+  });
+
+  it("keeps the chosen spread in the address so other login links and reloads return to it", () => {
+    render(<TarotExperience />);
+
+    fireEvent.click(screen.getByRole("button", { name: /관계 리딩/ }));
+    expect(`${window.location.pathname}${window.location.search}`)
+      .toBe("/tarot?spread=relationship_three_card");
+
+    fireEvent.click(screen.getByRole("button", { name: /오늘의 운세/ }));
+    expect(`${window.location.pathname}${window.location.search}`).toBe("/tarot");
   });
 
   it("shows configured spread costs and blocks an unaffordable spread before input", async () => {

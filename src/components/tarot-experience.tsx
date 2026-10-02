@@ -91,6 +91,12 @@ const READING_ERROR_MESSAGES: Readonly<Record<number, string>> = {
   502: "리딩 생성에 실패했어요. 잠시 뒤 다시 시도해 주세요.",
 };
 
+// The spread is kept in the address and the login return path so a reload or a login round trip
+// brings it back; the question and cards are never stored.
+function tarotPathFor(spreadType: TarotSpreadType): string {
+  return isAiTarotSpreadType(spreadType) ? `/tarot?spread=${spreadType}` : "/tarot";
+}
+
 export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpreadType } = {}) {
   const router = useRouter();
   const credits = useReadingCredits();
@@ -104,6 +110,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
   const [error, setError] = useState<string | null>(null);
   const [inputErrorField, setInputErrorField] = useState<EditableInputField | null>(null);
   const inFlightRequestId = useRef<string | null>(null);
+  const initialSpreadButtonRef = useRef<HTMLButtonElement>(null);
   const questionInputRef = useRef<HTMLTextAreaElement>(null);
   const choiceAInputRef = useRef<HTMLInputElement>(null);
   const choiceBInputRef = useRef<HTMLInputElement>(null);
@@ -124,13 +131,20 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
       )
     : { status: "allowed", required: 0, remaining: creditData?.balance.total ?? 0 } as const;
 
-  // Only the spread survives the login round trip; the question and cards are never stored.
   const redirectToLogin = useCallback(() => {
-    const returnPath = isAiTarotSpreadType(spreadType) ? `/tarot?spread=${spreadType}` : "/tarot";
-    router.push(`/login?next=${encodeURIComponent(returnPath)}`);
+    router.push(`/login?next=${encodeURIComponent(tarotPathFor(spreadType))}`);
   }, [router, spreadType]);
 
+  // A spread brought back from login can sit below the fold on a phone, which reads as lost.
+  // Jump instead of inheriting the page's smooth scrolling: this is where the page opens.
+  useEffect(() => {
+    initialSpreadButtonRef.current?.scrollIntoView({ block: "center", behavior: "instant" });
+  }, []);
+
   function selectSpread(nextSpreadType: TarotSpreadType) {
+    // Next's patched history keeps its router state, and useSearchParams (the header login
+    // link) follows the new address without a server round trip.
+    window.history.replaceState(null, "", tarotPathFor(nextSpreadType));
     setSpreadType(nextSpreadType);
     setQuestion("");
     setChoiceOptions({ a: "", b: "" });
@@ -306,6 +320,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
                 aria-pressed={spread.id === spreadType}
                 className={spread.id === spreadType ? "spread-option active" : "spread-option"}
                 onClick={() => selectSpread(spread.id)}
+                ref={spread.id === initialSpread ? initialSpreadButtonRef : undefined}
                 type="button"
               >
                 <strong>{spread.name}</strong>
