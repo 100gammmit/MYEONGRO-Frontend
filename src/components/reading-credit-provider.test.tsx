@@ -92,6 +92,32 @@ describe("ReadingCreditProvider", () => {
     expect(await screen.findByText("1")).toBeInTheDocument();
   });
 
+  it("does not trust a refresh that was already running when asked to discard", async () => {
+    let resolveEarlier: (response: Response) => void = () => {};
+    let resolveLater: (response: Response) => void = () => {};
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(status))
+      .mockReturnValueOnce(new Promise((resolve) => { resolveEarlier = resolve; }))
+      .mockReturnValueOnce(new Promise((resolve) => { resolveLater = resolve; }));
+    render(<ReadingCreditProvider authenticated><Consumer /></ReadingCreditProvider>);
+    expect(await screen.findByText("9")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "refresh" }));
+    fireEvent.click(screen.getByRole("button", { name: "discard and refresh" }));
+    expect(screen.getByText("loading")).toBeInTheDocument();
+
+    await act(async () => resolveEarlier(Response.json(status)));
+    expect(screen.getByText("loading")).toBeInTheDocument();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+
+    await act(async () => resolveLater(Response.json({
+      ...status,
+      generationInProgress: true,
+      balance: { free: 0, paid: 1, total: 1 },
+    })));
+    expect(await screen.findByText("1")).toBeInTheDocument();
+  });
+
   it("refreshes credit status when the next reset time arrives", async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     vi.setSystemTime(new Date("2026-08-21T14:59:59Z"));

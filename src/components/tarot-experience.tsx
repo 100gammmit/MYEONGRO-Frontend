@@ -130,6 +130,8 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
       creditCost,
       )
     : { status: "allowed", required: 0, remaining: creditData?.balance.total ?? 0 } as const;
+  // A guest has no balance to report: the placeholder access above would read "0크레딧 사용 · 현재 0크레딧".
+  const showCreditNotice = isAiSpread && credits.state.status !== "idle";
 
   const redirectToLogin = useCallback(() => {
     router.push(`/login?next=${encodeURIComponent(tarotPathFor(spreadType))}`);
@@ -334,7 +336,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
             </li>
           ))}
         </ul>
-        {isAiSpread ? (
+        {showCreditNotice ? (
           <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
         ) : null}
         <button
@@ -496,7 +498,9 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
           >
             같은 질문으로 다시 시도
           </button>
-          <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+          {showCreditNotice ? (
+            <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+          ) : null}
         </div>
       </ReadingShell>
     );

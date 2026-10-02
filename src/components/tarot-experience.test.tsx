@@ -129,6 +129,8 @@ describe("TarotExperience", () => {
     consent.autoComplete = true;
     consent.unauthenticated = false;
     window.history.replaceState(null, "", "/tarot");
+    // jsdom has no scrollIntoView; a spread passed in from the address scrolls itself into view.
+    Element.prototype.scrollIntoView = vi.fn();
     credits.state.status = "ready";
     credits.state.data.balance = { free: 10, paid: 0, total: 10 };
     credits.state.data.generationInProgress = false;
@@ -228,6 +230,14 @@ describe("TarotExperience", () => {
     expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
   });
 
+  it("does not show a credit balance notice to a guest", () => {
+    credits.state.status = "idle";
+    render(<TarotExperience initialSpread="mind_three_card" />);
+
+    expect(screen.queryByText(/크레딧 사용/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "이 유형으로 시작" })).toBeEnabled();
+  });
+
   it("sends a guest to login with the chosen spread as the return path", async () => {
     consent.unauthenticated = true;
     credits.state.status = "idle";
@@ -242,8 +252,7 @@ describe("TarotExperience", () => {
   });
 
   it("opens with the spread chosen before login already selected and scrolled into view", () => {
-    const scrollIntoView = vi.fn();
-    Element.prototype.scrollIntoView = scrollIntoView;
+    const scrollIntoView = vi.mocked(Element.prototype.scrollIntoView);
     render(<TarotExperience initialSpread="choice_five_card" />);
 
     const chosen = screen.getByRole("button", { name: /선택 리딩/ });

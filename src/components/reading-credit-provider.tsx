@@ -51,7 +51,13 @@ export function ReadingCreditProvider({
       setState({ status: "idle", data: null });
       return Promise.resolve();
     }
-    if (options.discardCurrent) setState({ status: "loading", data: null });
+    if (options.discardCurrent) {
+      setState({ status: "loading", data: null });
+      // A refresh already running may have read the status before the rejection, so its answer
+      // cannot be trusted either: wait for it, then read again, still showing no status.
+      const earlier = refreshInFlight.current;
+      if (earlier) return earlier.then(() => refresh({ discardCurrent: true }));
+    }
     if (refreshInFlight.current) return refreshInFlight.current;
 
     const request = (async () => {
