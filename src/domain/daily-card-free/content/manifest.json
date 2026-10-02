@@ -1,11 +1,11 @@
 {
-  "contentVersion" : "daily-one-card-static-v1",
+  "contentVersion" : "daily-one-card-static-v2",
   "authoringMethod" : "codex-agent-authored",
-  "promptVersion" : "daily-static-agent-ko-v1+major-arcana-ko-v4",
-  "authoredAt" : "2026-08-26",
+  "promptVersion" : "daily-static-agent-ko-v3+major-arcana-ko-v4",
+  "authoredAt" : "2026-10-02",
   "entryCount" : 132,
   "reviewStatus" : "quality-filter-passed",
-  "reviewedAt" : "2026-08-26",
+  "reviewedAt" : "2026-10-02",
   "reviewedEntryCount" : 132,
-  "evaluationVersion" : 2
+  "evaluationVersion" : 3
 }

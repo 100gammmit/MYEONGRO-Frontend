@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 import { MAJOR_ARCANA } from "@/domain/tarot";
-import rawContent from "./content/daily-one-card-static-v1.json";
+import rawContent from "./content/daily-one-card-static-v2.json";
 
-export const DAILY_CARD_CONTENT_VERSION = "daily-one-card-static-v1";
+export const DAILY_CARD_CONTENT_VERSION = "daily-one-card-static-v2";
 export const DAILY_CARD_VARIANT_COUNT = 6;
 
 const contentSchema = z.object({
