@@ -589,6 +589,7 @@ h1, h2, h3, blockquote {
 .empty-state, .auth-card { max-width: var(--w-read); padding: 52px; text-align: center; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--gradient-panel); box-shadow: var(--elevation-2); }
 .empty-state > span { display: block; font-size: 40px; color: var(--text-accent); }
 .empty-state h2 { font-size: 32px; font-weight: 300; }
+.empty-state .result-actions { margin-top: 0; justify-content: center; }
 .empty-state p, .auth-page > p, .legal p { color: var(--text-muted); line-height: 1.8; margin-bottom: 28px; }
 .auth-card { display: grid; gap: 12px; }
 .adult-eligibility, .adult-eligibility-result { display: grid; gap: 12px; }
