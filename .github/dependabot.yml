@@ -2,6 +2,8 @@ version: 2
 updates:
   - package-ecosystem: npm
     directory: /
+    # Updates go through dev like every other change; main deploys straight to production.
+    target-branch: dev
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
