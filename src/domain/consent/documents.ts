@@ -33,6 +33,51 @@ export const AWS_PROCESSING_DISCLOSURE = {
     "AWS 인프라는 명로 서비스 제공에 필수이므로 국외 처리를 거부하면 명로의 웹 서비스 전체를 이용할 수 없음. 다만 개인정보 문의 이메일을 통한 권리행사와 계정 삭제 요청은 가능",
 } as const;
 
+export const PRIVACY_INQUIRY_EMAIL_PROCESSING = {
+  verifiedAt: "2026-10-02",
+  address: "privacy@myeongro.com",
+  items:
+    "발신자 이름·이메일 주소, 메일 제목·본문·첨부파일, 답변과 권리행사 처리 이력",
+  operatorRetention:
+    "문의 처리를 완료한 날부터 30일간 보관한 뒤 Gmail에서 영구 삭제",
+  method:
+    "이용자가 개인정보 문의 메일을 보내면 Cloudflare Email Routing을 거쳐 운영자의 개인 Gmail 메일함으로 암호화 전송·처리",
+  refusalMethod:
+    "메일 전송 전 발송을 중단하여 국외 처리를 거부하거나, 전송 후 privacy@myeongro.com으로 삭제 요청",
+  refusalEffect:
+    "메일 국외 처리를 거부하면 이메일을 통한 문의·권리행사는 처리할 수 없음. 서비스 화면에서 제공하는 리딩 삭제, 계정 삭제와 AI 국외이전 동의 철회 기능은 계속 이용 가능",
+  processors: {
+    cloudflare: {
+      name: "Cloudflare, Inc.",
+      country: "미국 등 Cloudflare 글로벌 네트워크·계열사·하위처리자 소재국",
+      address: "101 Townsend St, San Francisco, California 94107, United States",
+      contact: "privacyquestions@cloudflare.com",
+      purpose: "개인정보 문의 메일 수신·인증·전달 및 라우팅 상태 기록",
+      retention:
+        "메일 본문은 최종 메일함으로 전달하는 동안 처리하며, 발신자·수신자·제목·메시지 ID 등 라우팅 이벤트는 최대 31일",
+      sourceUrls: {
+        routing: "https://developers.cloudflare.com/email-service/get-started/route-emails/",
+        retention: "https://developers.cloudflare.com/email-service/observability/metrics-analytics/",
+        subprocessors: "https://www.cloudflare.com/gdpr/subprocessors/cloudflare-services/",
+      },
+    },
+    google: {
+      name: "Google LLC",
+      country: "미국 등 Google 데이터센터 소재국",
+      address: "1600 Amphitheatre Parkway, Mountain View, California 94043, United States",
+      contactUrl: "https://support.google.com/policies/answer/9581826",
+      purpose: "개인정보 문의 메일·첨부파일·답변 및 처리 이력의 저장·열람·답변",
+      retention:
+        "명로의 보관기간 종료 후 Gmail에서 영구 삭제하며, Google의 삭제 절차상 암호화된 백업에는 최대 6개월간 잔존할 수 있음",
+      sourceUrls: {
+        terms: "https://policies.google.com/terms",
+        privacy: "https://policies.google.com/privacy",
+        retention: "https://policies.google.com/technologies/retention",
+      },
+    },
+  },
+} as const;
+
 export type ConsentScope = "tarot" | "saju";
 
 export type ConsentDocumentType =

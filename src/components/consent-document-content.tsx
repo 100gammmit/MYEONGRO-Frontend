@@ -5,6 +5,7 @@ import {
   OPENAI_OVERSEAS_PROCESSING_COUNTRIES,
   OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
   OPENAI_TRANSFER_SNAPSHOT,
+  PRIVACY_INQUIRY_EMAIL_PROCESSING,
   PRIVACY_DOCUMENT_VERSION,
   TERMS_DOCUMENT_VERSION,
   type ConsentDocumentType as RequiredConsentDocumentType,
@@ -145,6 +146,12 @@ export function ConsentDocumentContent({
               <td>명로 서버에는 저장하지 않고 현재 브라우저에만 저장. 날짜가 지난 뒤 다음 페이지 방문 시 삭제하며, 계정 삭제 성공 시 현재 브라우저의 해당 계정 값 삭제</td>
             </tr>
             <tr>
+              <th scope="row">개인정보 문의와 권리행사 처리</th>
+              <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.items}</td>
+              <td><ContractPerformanceBasis /></td>
+              <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention}. 외부 사업자의 삭제 절차는 아래 개인정보 문의 이메일 국외 처리 항목을 따름</td>
+            </tr>
+            <tr>
               <th scope="row">서비스 보안과 오류·장애 대응</th>
               <td>오류가 발생한 경우의 리딩 식별자, 모델·리딩 종류·종료 사유·응답 크기·토큰 사용량 등 진단정보</td>
               <td>개인정보 보호법 제15조 제1항 제6호에 따른 서비스의 안정적 운영과 정당한 이익</td>
@@ -184,6 +191,16 @@ export function ConsentDocumentContent({
               <td>이용자가 요청한 AI 타로·사주 리딩 생성</td>
               <td>아래 OpenAI 국외이전 세부 내용의 보유·이용 기간에 따름</td>
             </tr>
+            <tr>
+              <th scope="row">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.cloudflare.name}</th>
+              <td>개인정보 문의 메일 수신·인증·전달 및 라우팅 상태 기록</td>
+              <td>메일 전달에 필요한 동안. 라우팅 이벤트는 최대 31일</td>
+            </tr>
+            <tr>
+              <th scope="row">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.name}</th>
+              <td>개인정보 문의 메일·첨부파일·답변 및 처리 이력의 저장·열람·답변</td>
+              <td>문의 처리 완료 후 30일. 영구 삭제 후 Google 암호화 백업에 최대 6개월 잔존 가능</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -216,6 +233,7 @@ export function ConsentDocumentContent({
         </a>
         에서 확인할 수 있습니다. AWS 정보 최종 확인일은 {AWS_PROCESSING_DISCLOSURE.verifiedAt}입니다.
       </p>
+      <PrivacyInquiryEmailOverseasDetails headingLevel={headingLevel} />
       <Heading>OpenAI AI 리딩 국외이전</Heading>
       <p>AI 리딩 생성에는 OpenAI OpCo, LLC의 Global API를 사용합니다. 아래 국외이전 세부 내용은 로그인하지 않아도 언제든 확인할 수 있습니다.</p>
       <AiOverseasTransferDetails headingLevel={headingLevel} />
@@ -223,7 +241,7 @@ export function ConsentDocumentContent({
       <p>보유기간이 끝나거나 처리 목적이 달성된 개인정보는 지체 없이 파기 대상으로 확정합니다. 이용자가 개별 리딩이나 계정을 삭제하면 운영 데이터베이스의 관련 레코드를 복구 유예 없이 영구 삭제하고, 계정 삭제 시 Redis 세션과 현재 브라우저의 해당 계정 오늘의 카드 값도 삭제합니다. 질문·선택지·관심 분야와 원본 출생정보는 요청 처리가 끝나면 별도로 보유하지 않습니다.</p>
       <p>전자적 기록은 해당 저장소의 삭제 기능으로 복구 대상에서 제거합니다. 재해복구용 자동 백업은 최대 7일, 운영 로그는 명로의 운영 조회·이용 기준 최대 30일이 지나면 각 인프라의 보유 정책에 따라 만료·삭제됩니다. 외부 처리자의 자체 보유분은 위 수탁·국외이전 항목에 적힌 기준을 따릅니다.</p>
       <Heading>이용자 권리와 이의제기</Heading>
-      <p>이용자는 계정 설정에서 저장한 리딩의 삭제, 계정 삭제와 AI 국외이전 동의 철회를 직접 할 수 있습니다. 개인정보의 열람·정정·삭제·처리정지, 동의 철회와 처리 결과에 대한 이의제기는 <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a>로 요청할 수 있습니다. 명로는 본인 여부를 확인한 뒤 관련 법령에 따라 처리하고, 요청을 전부 또는 일부 받아들이기 어려운 경우에는 그 사유와 이의제기 방법을 안내합니다.</p>
+      <p>이용자는 계정 설정에서 저장한 리딩의 삭제, 계정 삭제와 AI 국외이전 동의 철회를 직접 할 수 있습니다. 개인정보의 열람·정정·삭제·처리정지, 동의 철회와 처리 결과에 대한 이의제기는 <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a>로 요청할 수 있습니다. 이 주소로 보낸 메일은 Cloudflare Email Routing을 거쳐 Google의 Gmail에 저장되며, 세부 내용은 위 개인정보 문의 이메일 국외 처리 항목을 따릅니다. 명로는 본인 여부를 확인한 뒤 관련 법령에 따라 처리하고, 요청을 전부 또는 일부 받아들이기 어려운 경우에는 그 사유와 이의제기 방법을 안내합니다.</p>
       <p>
         개인정보 침해에 관한 별도 상담이나 분쟁조정이 필요한 경우 {" "}
         <a href="https://www.kopico.go.kr" rel="noreferrer" target="_blank">개인정보분쟁조정위원회</a>
@@ -272,6 +290,65 @@ function DocumentMeta({ version }: { version: string }) {
     <p className="consent-document-meta">
       문서 버전 {version} · 시행일 {LEGAL_METADATA.effectiveDate}
     </p>
+  );
+}
+
+function PrivacyInquiryEmailOverseasDetails({
+  headingLevel,
+}: {
+  headingLevel: "h2" | "h3";
+}) {
+  const Heading = headingLevel;
+  const { processors } = PRIVACY_INQUIRY_EMAIL_PROCESSING;
+
+  return (
+    <>
+      <Heading>개인정보 문의 이메일 국외 처리</Heading>
+      <p>
+        개인정보 문의와 권리행사 메일은 미국 소재 Cloudflare와 Google의 서비스를 통해
+        국외에서 처리될 수 있습니다. 이 처리는 이용자가 요청한 문의·권리행사 처리에
+        필요한 위탁·보관으로, 개인정보 보호법 제28조의8 제1항 제3호 가목에 따라 이
+        처리방침으로 공개합니다.
+      </p>
+      <dl>
+        <div><dt>처리 항목</dt><dd>{PRIVACY_INQUIRY_EMAIL_PROCESSING.items}</dd></div>
+        <div><dt>시기·방법</dt><dd>{PRIVACY_INQUIRY_EMAIL_PROCESSING.method}</dd></div>
+        <div><dt>명로 보유기간</dt><dd>{PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention}</dd></div>
+        <div><dt>거부 방법·절차</dt><dd>{PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalMethod}</dd></div>
+        <div><dt>거부 효과</dt><dd>{PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalEffect}</dd></div>
+      </dl>
+      <p><strong>Cloudflare Email Routing</strong></p>
+      <dl>
+        <div><dt>수탁자</dt><dd>{processors.cloudflare.name}</dd></div>
+        <div><dt>주소·연락처</dt><dd>{processors.cloudflare.address} · {processors.cloudflare.contact}</dd></div>
+        <div><dt>처리 국가</dt><dd>{processors.cloudflare.country}</dd></div>
+        <div><dt>처리 목적</dt><dd>{processors.cloudflare.purpose}</dd></div>
+        <div><dt>보유·이용 기간</dt><dd>{processors.cloudflare.retention}</dd></div>
+      </dl>
+      <p>
+        Cloudflare Email Routing의 처리 방식·보유기간과 참여 사업자는 {" "}
+        <a href={processors.cloudflare.sourceUrls.routing} rel="noreferrer" target="_blank">서비스 설명</a>, {" "}
+        <a href={processors.cloudflare.sourceUrls.retention} rel="noreferrer" target="_blank">로그 보유기간</a>, {" "}
+        <a href={processors.cloudflare.sourceUrls.subprocessors} rel="noreferrer" target="_blank">하위처리자 목록</a>
+        에서 확인할 수 있습니다.
+      </p>
+      <p><strong>개인 Gmail</strong></p>
+      <dl>
+        <div><dt>수탁자</dt><dd>{processors.google.name}</dd></div>
+        <div><dt>주소</dt><dd>{processors.google.address}</dd></div>
+        <div><dt>개인정보 문의</dt><dd><a href={processors.google.contactUrl} rel="noreferrer" target="_blank">Google 개인정보 보호 문의</a></dd></div>
+        <div><dt>처리 국가</dt><dd>{processors.google.country}</dd></div>
+        <div><dt>처리 목적</dt><dd>{processors.google.purpose}</dd></div>
+        <div><dt>보유·이용 기간</dt><dd>{processors.google.retention}</dd></div>
+      </dl>
+      <p>
+        Google의 서비스 제공 법인·글로벌 처리와 삭제 절차는 {" "}
+        <a href={processors.google.sourceUrls.terms} rel="noreferrer" target="_blank">Google 서비스 약관</a>, {" "}
+        <a href={processors.google.sourceUrls.privacy} rel="noreferrer" target="_blank">개인정보처리방침</a>, {" "}
+        <a href={processors.google.sourceUrls.retention} rel="noreferrer" target="_blank">데이터 보유기간 안내</a>
+        에서 확인할 수 있습니다. 최종 확인일은 {PRIVACY_INQUIRY_EMAIL_PROCESSING.verifiedAt}입니다.
+      </p>
+    </>
   );
 }
 

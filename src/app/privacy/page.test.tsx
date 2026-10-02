@@ -19,7 +19,7 @@ describe("PrivacyPage", () => {
     const table = screen.getByRole("table", { name: "명로 개인정보 처리 항목과 보유기간" });
     expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent))
       .toEqual(["처리 목적", "처리 항목", "처리 근거", "보유기간·삭제 기준"]);
-    expect(within(table).getAllByRole("rowheader")).toHaveLength(12);
+    expect(within(table).getAllByRole("rowheader")).toHaveLength(13);
     const socialLoginRow = within(table).getByRole("row", { name: /소셜 로그인과 계정 식별/ });
     expect(socialLoginRow).toHaveTextContent("OAuth 제공자와 제공자 사용자 식별자");
     expect(socialLoginRow).not.toHaveTextContent("이메일");
@@ -34,6 +34,9 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /무료 오늘의 운세 이어보기.*SHA-256 계정 범위값.*현재 브라우저/ }))
       .toBeInTheDocument();
+    expect(within(table).getByRole("row", {
+      name: /개인정보 문의와 권리행사 처리.*발신자 이름·이메일 주소.*문의 처리를 완료한 날부터 30일/,
+    })).toBeInTheDocument();
     const operationalLogRow = within(table).getByRole("row", {
       name: /서비스 보안과 오류·장애 대응.*리딩 식별자.*최대 30일/,
     });
@@ -56,20 +59,36 @@ describe("PrivacyPage", () => {
     expect(within(directProcessorTable).getByRole("row", {
       name: /OpenAI OpCo, LLC.*AI 타로·사주 리딩 생성.*OpenAI 국외이전/,
     })).toBeInTheDocument();
-    expect(within(directProcessorTable).queryByText("Cloudflare, Ltd."))
-      .not.toBeInTheDocument();
+    expect(within(directProcessorTable).getByRole("row", {
+      name: /Cloudflare, Inc..*개인정보 문의 메일 수신·인증·전달.*최대 31일/,
+    })).toBeInTheDocument();
+    expect(within(directProcessorTable).getByRole("row", {
+      name: /Google LLC.*개인정보 문의 메일·첨부파일·답변.*최대 6개월/,
+    })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AWS 인프라의 국외 처리" }))
       .toBeInTheDocument();
     expect(screen.getByText(/주된 Backend·세션·데이터베이스·운영 로그 처리 및 저장 위치는 대한민국 서울 리전/))
       .toBeInTheDocument();
-    expect(screen.getByText(/개인정보 보호법 제28조의8 제1항 제3호 가목/))
-      .toBeInTheDocument();
+    expect(screen.getAllByText(/개인정보 보호법 제28조의8 제1항 제3호 가목/))
+      .toHaveLength(2);
     expect(screen.getByText(/서비스 이용 전에는 접속을 중단하고.*계정을 삭제하거나 개인정보 문의 이메일로 요청/))
       .toBeInTheDocument();
     expect(screen.getByText(/AWS 인프라는 명로 서비스 제공에 필수이므로.*웹 서비스 전체를 이용할 수 없음.*이메일을 통한 권리행사와 계정 삭제 요청은 가능/))
       .toBeInTheDocument();
     expect(screen.getByRole("link", { name: "AWS의 현재 엣지 로케이션 목록" }))
       .toHaveAttribute("href", "https://aws.amazon.com/cloudfront/features/");
+    expect(screen.getByRole("heading", { name: "개인정보 문의 이메일 국외 처리" }))
+      .toBeInTheDocument();
+    expect(screen.getByText(/Cloudflare Email Routing을 거쳐 운영자의 개인 Gmail 메일함/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/발신자·수신자·제목·메시지 ID 등 라우팅 이벤트는 최대 31일/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/Google의 삭제 절차상 암호화된 백업에는 최대 6개월/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/메일 국외 처리를 거부하면 이메일을 통한 문의·권리행사는 처리할 수 없음/))
+      .toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Google 개인정보 보호 문의" }))
+      .toHaveAttribute("href", "https://support.google.com/policies/answer/9581826");
     const processorTable = screen.getByRole("table", {
       name: "OpenAI API 외부 처리자와 처리 가능 국가",
     });
@@ -97,7 +116,7 @@ describe("PrivacyPage", () => {
     expect(screen.getByText(/OpenAI 원문 갱신일 2026-07-09 · 명로 최종 확인일 2026-09-25/))
       .toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "개인정보 보호법 제15조 제1항 제4호" }))
-      .toHaveLength(9);
+      .toHaveLength(10);
     expect(screen.getByRole("link", { name: "개인정보 보호법 제28조의8 제1항 제1호" }))
       .toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 파기 절차와 방법" }))

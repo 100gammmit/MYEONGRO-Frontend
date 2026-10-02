@@ -6,7 +6,29 @@ import {
   OPENAI_OVERSEAS_PROCESSING_COUNTRIES,
   OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
   OPENAI_TRANSFER_SNAPSHOT,
+  PRIVACY_INQUIRY_EMAIL_PROCESSING,
 } from "./documents";
+
+describe("privacy inquiry email processing", () => {
+  it("records Cloudflare routing and the personal Gmail destination separately", () => {
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.cloudflare).toMatchObject({
+      name: "Cloudflare, Inc.",
+      contact: "privacyquestions@cloudflare.com",
+    });
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.cloudflare.retention)
+      .toContain("최대 31일");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google).toMatchObject({
+      name: "Google LLC",
+      country: "미국 등 Google 데이터센터 소재국",
+    });
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.retention)
+      .toContain("최대 6개월");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention)
+      .toContain("완료한 날부터 30일");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalEffect)
+      .toContain("이메일을 통한 문의·권리행사");
+  });
+});
 
 describe("AWS processing disclosure", () => {
   it("records the direct processor and separates the Seoul region from dynamic edge processing", () => {
