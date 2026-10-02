@@ -15,7 +15,7 @@ describe("POST /auth/logout", () => {
 
     expect(logout).toHaveBeenCalledWith(request);
     expect(response.status).toBe(303);
-    expect(response.headers.get("location")).toBe("https://fortune.test/");
+    expect(response.headers.get("location")).toBe("/");
     expect(response.headers.get("set-cookie")).toContain("JSESSIONID=");
   });
 

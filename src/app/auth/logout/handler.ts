@@ -15,10 +15,12 @@ export function createLogoutHandler(dependencies: LogoutDependencies) {
       );
     }
 
+    // Relative on purpose: behind Amplify, request.url carries the Next.js
+    // server's own address (localhost:3000), not the public host.
     const response = new Response(null, {
       status: 303,
       headers: {
-        location: new URL("/", request.url).toString(),
+        location: "/",
       },
     });
     const setCookie = backendResponse.headers.get("set-cookie");
