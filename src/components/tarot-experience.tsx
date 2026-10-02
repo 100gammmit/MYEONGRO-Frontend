@@ -9,6 +9,7 @@ import {
   TAROT_SPREADS,
   createTarotReadingRequest,
   isAiTarotSpreadType,
+  type AiTarotSpreadType,
   type TarotChoiceOptions,
   type TarotPositionId,
   type TarotSpreadType,
@@ -90,11 +91,11 @@ const READING_ERROR_MESSAGES: Readonly<Record<number, string>> = {
   502: "리딩 생성에 실패했어요. 잠시 뒤 다시 시도해 주세요.",
 };
 
-export function TarotExperience() {
+export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpreadType } = {}) {
   const router = useRouter();
   const credits = useReadingCredits();
   const [phase, setPhase] = useState<Phase>("spread");
-  const [spreadType, setSpreadType] = useState<TarotSpreadType>("daily_one_card");
+  const [spreadType, setSpreadType] = useState<TarotSpreadType>(initialSpread ?? "daily_one_card");
   const [question, setQuestion] = useState("");
   const [choiceOptions, setChoiceOptions] = useState<TarotChoiceOptions>({ a: "", b: "" });
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
@@ -123,9 +124,11 @@ export function TarotExperience() {
       )
     : { status: "allowed", required: 0, remaining: creditData?.balance.total ?? 0 } as const;
 
+  // Only the spread survives the login round trip; the question and cards are never stored.
   const redirectToLogin = useCallback(() => {
-    router.push("/login?next=%2Ftarot");
-  }, [router]);
+    const returnPath = isAiTarotSpreadType(spreadType) ? `/tarot?spread=${spreadType}` : "/tarot";
+    router.push(`/login?next=${encodeURIComponent(returnPath)}`);
+  }, [router, spreadType]);
 
   function selectSpread(nextSpreadType: TarotSpreadType) {
     setSpreadType(nextSpreadType);

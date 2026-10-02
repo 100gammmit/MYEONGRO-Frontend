@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MAJOR_ARCANA, TAROT_SPREADS, type TarotSpreadType } from "@/domain/tarot";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn(), replace: vi.fn() }));
-const consent = vi.hoisted(() => ({ autoComplete: true }));
+const consent = vi.hoisted(() => ({ autoComplete: true, unauthenticated: false }));
 const credits = vi.hoisted(() => ({
   state: {
     status: "ready",
@@ -32,10 +32,17 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("./consent-gate", () => ({
-  ConsentGate: ({ onComplete }: { onComplete: () => void }) => {
+  ConsentGate: ({
+    onComplete,
+    onUnauthenticated,
+  }: {
+    onComplete: () => void;
+    onUnauthenticated?: () => void;
+  }) => {
     useEffect(() => {
-      if (consent.autoComplete) onComplete();
-    }, [onComplete]);
+      if (consent.unauthenticated) onUnauthenticated?.();
+      else if (consent.autoComplete) onComplete();
+    }, [onComplete, onUnauthenticated]);
     return consent.autoComplete
       ? null
       : <button onClick={onComplete} type="button">동의 완료</button>;
@@ -120,6 +127,7 @@ describe("TarotExperience", () => {
     navigation.push.mockReset();
     navigation.replace.mockReset();
     consent.autoComplete = true;
+    consent.unauthenticated = false;
     credits.state.status = "ready";
     credits.state.data.balance = { free: 10, paid: 0, total: 10 };
     credits.state.data.generationInProgress = false;
@@ -217,6 +225,27 @@ describe("TarotExperience", () => {
     fireEvent.click(start);
 
     expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
+  });
+
+  it("sends a guest to login with the chosen spread as the return path", async () => {
+    consent.unauthenticated = true;
+    credits.state.status = "idle";
+    render(<TarotExperience />);
+
+    fireEvent.click(screen.getByRole("button", { name: /관계 리딩/ }));
+    fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith(
+      "/login?next=%2Ftarot%3Fspread%3Drelationship_three_card",
+    ));
+  });
+
+  it("opens with the spread chosen before login already selected", () => {
+    render(<TarotExperience initialSpread="choice_five_card" />);
+
+    expect(screen.getByRole("button", { name: /선택 리딩/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /오늘의 운세/ })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByText("3크레딧 사용 · 현재 10크레딧")).toBeInTheDocument();
   });
 
   it("shows configured spread costs and blocks an unaffordable spread before input", async () => {

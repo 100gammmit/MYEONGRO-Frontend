@@ -3,6 +3,7 @@ export {
   TAROT_SPREAD_LIST,
   TAROT_SPREADS,
   isAiTarotSpreadType,
+  parseAiTarotSpreadType,
 } from "./definitions";
 export { createTarotReadingRequest } from "./request";
 export type {

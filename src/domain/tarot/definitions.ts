@@ -146,3 +146,11 @@ export const TAROT_SPREADS: Readonly<Record<TarotSpreadType, TarotSpreadDefiniti
 };
 
 export const TAROT_SPREAD_LIST = Object.values(TAROT_SPREADS);
+
+// For untrusted input such as a URL query: only an own spread id counts, so inherited keys
+// like "toString" are rejected along with the free daily card.
+export function parseAiTarotSpreadType(value: unknown): AiTarotSpreadType | null {
+  if (typeof value !== "string" || !Object.hasOwn(TAROT_SPREADS, value)) return null;
+  const spreadType = value as TarotSpreadType;
+  return isAiTarotSpreadType(spreadType) ? spreadType : null;
+}
