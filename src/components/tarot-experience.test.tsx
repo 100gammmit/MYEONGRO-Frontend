@@ -25,6 +25,14 @@ const credits = vi.hoisted(() => ({
     },
   },
   refresh: vi.fn(),
+  pricing: null as null | {
+    dailyFreeGrant: number;
+    costs: {
+      tarot: { mind_three_card: number; relationship_three_card: number; choice_five_card: number };
+      saju: number;
+    };
+  },
+  requestPricing: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -135,6 +143,8 @@ describe("TarotExperience", () => {
     credits.state.data.balance = { free: 10, paid: 0, total: 10 };
     credits.state.data.generationInProgress = false;
     credits.refresh.mockReset();
+    credits.pricing = null;
+    credits.requestPricing.mockReset();
     sessionStorage.clear();
     localStorage.clear();
   });
@@ -228,6 +238,30 @@ describe("TarotExperience", () => {
     fireEvent.click(start);
 
     expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
+  });
+
+  it("asks for the public price list and shows its costs to a guest", () => {
+    credits.state.status = "idle";
+    credits.pricing = {
+      dailyFreeGrant: 10,
+      costs: {
+        tarot: { mind_three_card: 2, relationship_three_card: 2, choice_five_card: 3 },
+        saju: 4,
+      },
+    };
+    render(<TarotExperience />);
+
+    expect(credits.requestPricing).toHaveBeenCalled();
+    expect(screen.getByText(/카드 3장.*감정 정리.*2 크레딧/)).toBeInTheDocument();
+    expect(screen.getByText(/카드 5장.*선택 A와 B 비교.*3 크레딧/)).toBeInTheDocument();
+    expect(screen.queryByText(/… 크레딧/)).not.toBeInTheDocument();
+  });
+
+  it("keeps a guest's costs unknown until the price list arrives", () => {
+    credits.state.status = "idle";
+    render(<TarotExperience />);
+
+    expect(screen.getAllByText(/… 크레딧/)).toHaveLength(3);
   });
 
   it("does not show a credit balance notice to a guest", () => {

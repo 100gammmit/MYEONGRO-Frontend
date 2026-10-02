@@ -15,6 +15,12 @@ export interface ReadingCreditStatus {
   };
 }
 
+// The public price list (GET /api/reading-credits/pricing): what a guest can see before logging in.
+export interface ReadingCreditPricing {
+  dailyFreeGrant: number;
+  costs: ReadingCreditStatus["costs"];
+}
+
 export type ReadingCreditAccess =
   | { status: "loading" }
   | { status: "unavailable" }

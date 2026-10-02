@@ -132,6 +132,13 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
     : { status: "allowed", required: 0, remaining: creditData?.balance.total ?? 0 } as const;
   // A guest has no balance to report: the placeholder access above would read "0크레딧 사용 · 현재 0크레딧".
   const showCreditNotice = isAiSpread && credits.state.status !== "idle";
+  // Signed-in costs come with the balance; a guest sees the public price list instead.
+  const displayedCosts = creditData?.costs ?? credits.pricing?.costs ?? null;
+  const { requestPricing } = credits;
+
+  useEffect(() => {
+    requestPricing();
+  }, [requestPricing]);
 
   const redirectToLogin = useCallback(() => {
     router.push(`/login?next=${encodeURIComponent(tarotPathFor(spreadType))}`);
@@ -330,7 +337,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
                 <small>
                   {spread.metaLabel} · {spread.id === "daily_one_card"
                     ? "무료"
-                    : `${creditData?.costs.tarot[spread.id] ?? "…"} 크레딧`}
+                    : `${displayedCosts?.tarot[spread.id] ?? "…"} 크레딧`}
                 </small>
               </button>
             </li>

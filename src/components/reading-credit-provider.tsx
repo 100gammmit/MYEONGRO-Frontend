@@ -12,7 +12,9 @@ import {
 } from "react";
 
 import {
+  parseReadingCreditPricing,
   parseReadingCreditStatus,
+  type ReadingCreditPricing,
   type ReadingCreditStatus,
 } from "@/domain/reading-credit";
 
@@ -31,6 +33,10 @@ interface RefreshOptions {
 interface ReadingCreditContextValue {
   state: ReadingCreditState;
   refresh: (options?: RefreshOptions) => Promise<void>;
+  // Guests only (a signed-in status already carries the costs): the public price list, loaded on
+  // demand by the screens that show costs so other pages make no extra request.
+  pricing: ReadingCreditPricing | null;
+  requestPricing: () => void;
 }
 
 const ReadingCreditContext = createContext<ReadingCreditContextValue | null>(null);
@@ -43,8 +49,29 @@ export function ReadingCreditProvider({
   children: ReactNode;
 }) {
   const [state, setState] = useState<ReadingCreditState>({ status: "idle", data: null });
+  const [pricing, setPricing] = useState<ReadingCreditPricing | null>(null);
   const refreshInFlight = useRef<Promise<void> | null>(null);
+  const pricingInFlight = useRef(false);
   const refreshedResetAt = useRef<string | null>(null);
+
+  const requestPricing = useCallback(() => {
+    if (authenticated || pricing || pricingInFlight.current) return;
+    pricingInFlight.current = true;
+    void (async () => {
+      try {
+        const response = await fetch("/api/reading-credits/pricing", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("credit pricing failed");
+        setPricing(parseReadingCreditPricing(await response.json()));
+      } catch {
+        // Costs stay unknown ("…"); the next screen that asks tries again.
+      } finally {
+        pricingInFlight.current = false;
+      }
+    })();
+  }, [authenticated, pricing]);
 
   const refresh = useCallback((options: RefreshOptions = {}): Promise<void> => {
     if (!authenticated) {
@@ -119,7 +146,10 @@ export function ReadingCreditProvider({
     return () => globalThis.clearTimeout(timer);
   }, [authenticated, nextResetAt, refreshAfterInFlight]);
 
-  const value = useMemo(() => ({ state, refresh }), [refresh, state]);
+  const value = useMemo(
+    () => ({ state, refresh, pricing, requestPricing }),
+    [pricing, refresh, requestPricing, state],
+  );
   return (
     <ReadingCreditContext.Provider value={value}>
       {children}

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { ReadingCreditStatus } from "./contracts";
+import type { ReadingCreditPricing, ReadingCreditStatus } from "./contracts";
 
 const balanceSchema = z.object({
   free: z.number().int().nonnegative(),
@@ -12,21 +12,34 @@ const balanceSchema = z.object({
 
 const positiveCost = z.number().int().positive();
 
+const costsSchema = z.object({
+  tarot: z.object({
+    mind_three_card: positiveCost,
+    relationship_three_card: positiveCost,
+    choice_five_card: positiveCost,
+  }).strict(),
+  saju: positiveCost,
+}).strict();
+
+const dailyFreeGrantSchema = z.number().int().nonnegative();
+
 const readingCreditStatusSchema = z.object({
-  dailyFreeGrant: z.number().int().nonnegative(),
+  dailyFreeGrant: dailyFreeGrantSchema,
   balance: balanceSchema,
   nextResetAt: z.string().datetime({ offset: true }),
   generationInProgress: z.boolean(),
-  costs: z.object({
-    tarot: z.object({
-      mind_three_card: positiveCost,
-      relationship_three_card: positiveCost,
-      choice_five_card: positiveCost,
-    }).strict(),
-    saju: positiveCost,
-  }).strict(),
+  costs: costsSchema,
+}).strict();
+
+const readingCreditPricingSchema = z.object({
+  dailyFreeGrant: dailyFreeGrantSchema,
+  costs: costsSchema,
 }).strict();
 
 export function parseReadingCreditStatus(input: unknown): ReadingCreditStatus {
   return readingCreditStatusSchema.parse(input);
+}
+
+export function parseReadingCreditPricing(input: unknown): ReadingCreditPricing {
+  return readingCreditPricingSchema.parse(input);
 }

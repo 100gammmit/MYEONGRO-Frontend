@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   getDisplayedReadingCredits,
   getReadingCreditAccess,
+  parseReadingCreditPricing,
   parseReadingCreditStatus,
 } from ".";
 
@@ -33,6 +34,17 @@ describe("reading credit contract", () => {
     })).toThrow();
     expect(() => parseReadingCreditStatus({
       ...status,
+      costs: { tarot: { mind_three_card: 2 }, saju: 4 },
+    })).toThrow();
+  });
+
+  it("accepts the public price list and rejects anything beyond it", () => {
+    const pricing = { dailyFreeGrant: 10, costs: status.costs };
+
+    expect(parseReadingCreditPricing(pricing)).toEqual(pricing);
+    expect(() => parseReadingCreditPricing({ ...pricing, balance: status.balance })).toThrow();
+    expect(() => parseReadingCreditPricing({
+      dailyFreeGrant: 10,
       costs: { tarot: { mind_three_card: 2 }, saju: 4 },
     })).toThrow();
   });

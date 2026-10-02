@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useEffect } from "react";
 import { vi } from "vitest";
 
 import { ReadingCreditProvider, useReadingCredits } from "./reading-credit-provider";
@@ -31,6 +32,22 @@ function Consumer() {
   );
 }
 
+const pricing = { dailyFreeGrant: 10, costs: status.costs };
+
+function PricingConsumer() {
+  const credits = useReadingCredits();
+  const { requestPricing } = credits;
+  useEffect(() => {
+    requestPricing();
+  }, [requestPricing]);
+  return (
+    <>
+      <p>saju cost: {credits.pricing?.costs.saju ?? "unknown"}</p>
+      <button onClick={() => credits.requestPricing()} type="button">ask pricing</button>
+    </>
+  );
+}
+
 describe("ReadingCreditProvider", () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -54,6 +71,43 @@ describe("ReadingCreditProvider", () => {
 
     await waitFor(() => expect(screen.getByText("idle")).toBeInTheDocument());
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("loads the public price list once for a guest when a screen asks for it", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json(pricing));
+    render(<ReadingCreditProvider authenticated={false}><PricingConsumer /></ReadingCreditProvider>);
+
+    expect(await screen.findByText("saju cost: 4")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "ask pricing" }));
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledWith("/api/reading-credits/pricing", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+  });
+
+  it("does not load the price list for a signed-in user", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json(status));
+    render(<ReadingCreditProvider authenticated><PricingConsumer /></ReadingCreditProvider>);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(fetchMock).toHaveBeenCalledWith("/api/reading-credits", expect.anything());
+    expect(screen.getByText("saju cost: unknown")).toBeInTheDocument();
+  });
+
+  it("keeps costs unknown when the price list fails and tries again on the next request", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(Response.json(pricing));
+    render(<ReadingCreditProvider authenticated={false}><PricingConsumer /></ReadingCreditProvider>);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(screen.getByText("saju cost: unknown")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "ask pricing" }));
+    expect(await screen.findByText("saju cost: 4")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("invalidates a previous balance when a later refresh fails", async () => {
