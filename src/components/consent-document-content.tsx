@@ -199,7 +199,7 @@ export function ConsentDocumentContent({
             <tr>
               <th scope="row">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.name}</th>
               <td>개인정보 문의 메일·첨부파일·답변 및 처리 이력의 저장·열람·답변</td>
-              <td>문의 처리 완료 후 30일. 영구 삭제 후 Google 암호화 백업에 최대 6개월 잔존 가능</td>
+              <td>문의 처리 완료 후 30일에 Gmail 영구 삭제 동작 수행. Google 활성 시스템 삭제에는 일반적으로 약 2개월이 걸리며 더 길어질 수 있고, 암호화 백업에는 최대 6개월 잔존 가능</td>
             </tr>
           </tbody>
         </table>

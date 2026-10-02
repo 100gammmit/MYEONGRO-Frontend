@@ -22,6 +22,8 @@ describe("privacy inquiry email processing", () => {
       country: "미국 등 Google 데이터센터 소재국",
     });
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.retention)
+      .toContain("일반적으로 약 2개월");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.retention)
       .toContain("최대 6개월");
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention)
       .toContain("완료한 날부터 30일");

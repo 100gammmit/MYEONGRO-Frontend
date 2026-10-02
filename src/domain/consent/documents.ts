@@ -68,7 +68,7 @@ export const PRIVACY_INQUIRY_EMAIL_PROCESSING = {
       contactUrl: "https://support.google.com/policies/answer/9581826",
       purpose: "개인정보 문의 메일·첨부파일·답변 및 처리 이력의 저장·열람·답변",
       retention:
-        "명로의 보관기간 종료 후 Gmail에서 영구 삭제하며, Google의 삭제 절차상 암호화된 백업에는 최대 6개월간 잔존할 수 있음",
+        "명로의 보관기간 종료 후 Gmail에서 영구 삭제 동작을 수행. Google 활성 시스템의 삭제 완료에는 일반적으로 약 2개월이 걸리고 유지보수·장애·오류 등의 사유로 더 길어질 수 있으며, 암호화된 백업에는 최대 6개월간 잔존할 수 있음",
       sourceUrls: {
         terms: "https://policies.google.com/terms",
         privacy: "https://policies.google.com/privacy",

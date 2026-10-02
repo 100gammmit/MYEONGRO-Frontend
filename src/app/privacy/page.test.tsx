@@ -63,7 +63,7 @@ describe("PrivacyPage", () => {
       name: /Cloudflare, Inc..*개인정보 문의 메일 수신·인증·전달.*최대 31일/,
     })).toBeInTheDocument();
     expect(within(directProcessorTable).getByRole("row", {
-      name: /Google LLC.*개인정보 문의 메일·첨부파일·답변.*최대 6개월/,
+      name: /Google LLC.*개인정보 문의 메일·첨부파일·답변.*약 2개월.*최대 6개월/,
     })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AWS 인프라의 국외 처리" }))
       .toBeInTheDocument();
@@ -83,7 +83,7 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/발신자·수신자·제목·메시지 ID 등 라우팅 이벤트는 최대 31일/))
       .toBeInTheDocument();
-    expect(screen.getByText(/Google의 삭제 절차상 암호화된 백업에는 최대 6개월/))
+    expect(screen.getByText(/Google 활성 시스템의 삭제 완료에는 일반적으로 약 2개월.*암호화된 백업에는 최대 6개월/))
       .toBeInTheDocument();
     expect(screen.getByText(/메일 국외 처리를 거부하면 이메일을 통한 문의·권리행사는 처리할 수 없음/))
       .toBeInTheDocument();
