@@ -612,6 +612,7 @@ describe("SajuExperience", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("크레딧이 부족");
     expect(credits.refresh).toHaveBeenCalledTimes(1);
+    expect(credits.refresh).toHaveBeenCalledWith({ discardCurrent: true });
   });
 
   it("groups review by question then birth and returns to review after 고치기", async () => {

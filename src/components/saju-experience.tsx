@@ -366,7 +366,7 @@ export function SajuExperience() {
           apiError.code === "READING_GENERATION_IN_PROGRESS"
           || apiError.code === "INSUFFICIENT_READING_CREDITS"
         ) {
-          void credits.refresh();
+          void credits.refresh({ discardCurrent: true });
         }
         handleSubmissionError(apiError);
         return;

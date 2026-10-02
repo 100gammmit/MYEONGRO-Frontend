@@ -24,6 +24,9 @@ function Consumer() {
     <>
       <p>{credits.state.data?.balance.total ?? credits.state.status}</p>
       <button onClick={() => void credits.refresh()} type="button">refresh</button>
+      <button onClick={() => void credits.refresh({ discardCurrent: true })} type="button">
+        discard and refresh
+      </button>
     </>
   );
 }
@@ -64,6 +67,29 @@ describe("ReadingCreditProvider", () => {
 
     expect(await screen.findByText("error")).toBeInTheDocument();
     expect(screen.queryByText("9")).not.toBeInTheDocument();
+  });
+
+  it("keeps the previous balance during a plain refresh but drops it when asked to discard", async () => {
+    let resolveSecond: (response: Response) => void = () => {};
+    let resolveThird: (response: Response) => void = () => {};
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json(status))
+      .mockReturnValueOnce(new Promise((resolve) => { resolveSecond = resolve; }))
+      .mockReturnValueOnce(new Promise((resolve) => { resolveThird = resolve; }));
+    render(<ReadingCreditProvider authenticated><Consumer /></ReadingCreditProvider>);
+    expect(await screen.findByText("9")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "refresh" }));
+    expect(screen.getByText("9")).toBeInTheDocument();
+    await act(async () => resolveSecond(Response.json(status)));
+
+    fireEvent.click(screen.getByRole("button", { name: "discard and refresh" }));
+    expect(screen.getByText("loading")).toBeInTheDocument();
+    await act(async () => resolveThird(Response.json({
+      ...status,
+      balance: { free: 0, paid: 1, total: 1 },
+    })));
+    expect(await screen.findByText("1")).toBeInTheDocument();
   });
 
   it("refreshes credit status when the next reset time arrives", async () => {

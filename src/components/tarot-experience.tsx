@@ -232,7 +232,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
           apiError.code === "READING_GENERATION_IN_PROGRESS"
           || apiError.code === "INSUFFICIENT_READING_CREDITS"
         ) {
-          void credits.refresh();
+          void credits.refresh({ discardCurrent: true });
         }
         if (apiError.code === "OPENAI_READING_GENERATION_FAILED") {
           setRequestId(null);

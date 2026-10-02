@@ -416,6 +416,7 @@ describe("TarotExperience", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("크레딧이 부족");
     expect(credits.refresh).toHaveBeenCalledTimes(1);
+    expect(credits.refresh).toHaveBeenCalledWith({ discardCurrent: true });
   });
 
   it.each([
@@ -457,6 +458,7 @@ describe("TarotExperience", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
     expect(credits.refresh).toHaveBeenCalledTimes(1);
+    expect(credits.refresh).toHaveBeenCalledWith({ discardCurrent: true });
   });
 
   it("shows an actionable message instead of an internal result-contract error", async () => {

@@ -22,9 +22,15 @@ type ReadingCreditState =
   | { status: "ready"; data: ReadingCreditStatus }
   | { status: "error"; data: null };
 
+interface RefreshOptions {
+  // Set when the server just rejected a reading on credit grounds: the shown status is known to be
+  // wrong, so it must not keep the start buttons enabled while the new one loads.
+  discardCurrent?: boolean;
+}
+
 interface ReadingCreditContextValue {
   state: ReadingCreditState;
-  refresh: () => Promise<void>;
+  refresh: (options?: RefreshOptions) => Promise<void>;
 }
 
 const ReadingCreditContext = createContext<ReadingCreditContextValue | null>(null);
@@ -40,11 +46,12 @@ export function ReadingCreditProvider({
   const refreshInFlight = useRef<Promise<void> | null>(null);
   const refreshedResetAt = useRef<string | null>(null);
 
-  const refresh = useCallback((): Promise<void> => {
+  const refresh = useCallback((options: RefreshOptions = {}): Promise<void> => {
     if (!authenticated) {
       setState({ status: "idle", data: null });
       return Promise.resolve();
     }
+    if (options.discardCurrent) setState({ status: "loading", data: null });
     if (refreshInFlight.current) return refreshInFlight.current;
 
     const request = (async () => {
