@@ -67,7 +67,7 @@ describe("PrivacyPage", () => {
     })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AWS 인프라의 국외 처리" }))
       .toBeInTheDocument();
-    expect(screen.getByText(/주된 Backend·세션·데이터베이스·운영 로그 처리 및 저장 위치는 대한민국 서울 리전/))
+    expect(screen.getByText(/주된 Front 서버·Backend·세션·데이터베이스·운영 로그 처리 및 저장 위치는 대한민국 서울 리전/))
       .toBeInTheDocument();
     expect(screen.getAllByText(/개인정보 보호법 제28조의8 제1항 제3호 가목/))
       .toHaveLength(2);
@@ -138,5 +138,8 @@ describe("PrivacyPage", () => {
       .toHaveAttribute("href", "https://www.kopico.go.kr");
     expect(screen.getByRole("link", { name: "개인정보침해 신고센터" }))
       .toHaveAttribute("href", "https://privacy.kisa.or.kr");
+    // The two links sit on separate JSX lines; the spaces around "또는" must survive.
+    expect(screen.getByRole("link", { name: "개인정보분쟁조정위원회" }).closest("p"))
+      .toHaveTextContent("개인정보분쟁조정위원회 또는 개인정보침해 신고센터를 이용할 수 있습니다.");
   });
 });

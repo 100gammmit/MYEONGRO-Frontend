@@ -40,6 +40,8 @@ describe("AWS processing disclosure", () => {
     });
     expect(AWS_PROCESSING_DISCLOSURE.primaryProcessingLocation)
       .toContain("서울 리전 ap-northeast-2");
+    expect(AWS_PROCESSING_DISCLOSURE.primaryProcessingLocation)
+      .toContain("Front 서버(Amplify)");
     expect(AWS_PROCESSING_DISCLOSURE.dynamicProcessingLocation)
       .toContain("CloudFront 엣지 로케이션 소재국");
     expect(AWS_PROCESSING_DISCLOSURE.transferItems).toContain("원본 출생정보");

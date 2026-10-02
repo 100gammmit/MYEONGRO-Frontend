@@ -212,7 +212,7 @@ export function ConsentDocumentContent({
         에서 확인할 수 있고, OpenAI의 처리자는 아래 표에서 확인할 수 있습니다.
       </p>
       <Heading>AWS 인프라의 국외 처리</Heading>
-      <p>명로의 주된 Backend·세션·데이터베이스·운영 로그 처리 및 저장 위치는 대한민국 서울 리전입니다. 다만 Front 콘텐츠 전송과 API 요청 중계 과정에서는 이용자 접속 위치에 따라 국외의 AWS CloudFront 엣지 로케이션과 AWS가 공개한 서비스 제공 계열사·하위처리자가 관여할 수 있습니다. 모든 이용자 요청이 국외에서 처리되는 것은 아닙니다.</p>
+      <p>명로의 주된 Front 서버·Backend·세션·데이터베이스·운영 로그 처리 및 저장 위치는 대한민국 서울 리전입니다. 다만 Front 콘텐츠 전송과 API 요청 중계 과정에서는 이용자 접속 위치에 따라 국외의 AWS CloudFront 엣지 로케이션과 AWS가 공개한 서비스 제공 계열사·하위처리자가 관여할 수 있습니다. 모든 이용자 요청이 국외에서 처리되는 것은 아닙니다.</p>
       <dl>
         <div><dt>수탁자</dt><dd>{AWS_PROCESSING_DISCLOSURE.processor.name}</dd></div>
         <div><dt>주소</dt><dd>{AWS_PROCESSING_DISCLOSURE.processor.address}</dd></div>
@@ -245,7 +245,7 @@ export function ConsentDocumentContent({
       <p>
         개인정보 침해에 관한 별도 상담이나 분쟁조정이 필요한 경우 {" "}
         <a href="https://www.kopico.go.kr" rel="noreferrer" target="_blank">개인정보분쟁조정위원회</a>
-        또는 {" "}
+        {" "}또는{" "}
         <a href="https://privacy.kisa.or.kr" rel="noreferrer" target="_blank">개인정보침해 신고센터</a>
         를 이용할 수 있습니다.
       </p>

@@ -18,7 +18,7 @@ export const AWS_PROCESSING_DISCLOSURE = {
   outsourcedTasks:
     "Front 호스팅·콘텐츠 전송·API 요청 중계, Backend·세션·데이터베이스·자동 백업·운영 로그 인프라 제공",
   primaryProcessingLocation:
-    "대한민국(Backend·Redis·RDS·CloudWatch는 서울 리전 ap-northeast-2)",
+    "대한민국(Front 서버(Amplify)·Backend·Redis·RDS·CloudWatch는 서울 리전 ap-northeast-2)",
   dynamicProcessingLocation:
     "이용자와 가까운 AWS CloudFront 엣지 로케이션 소재국 및 AWS가 공개한 서비스 제공 계열사·하위처리자 소재국",
   transferItems:
