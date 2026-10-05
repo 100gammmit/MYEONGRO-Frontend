@@ -36,7 +36,6 @@ describe("AuthenticatedPageBoundary", () => {
     );
 
     expect(screen.queryByText("보호된 계정 본문")).not.toBeInTheDocument();
-    expect(screen.queryByText(/로그인.*확인/)).not.toBeInTheDocument();
 
     pending.resolve(Response.json({
       authenticated: true,

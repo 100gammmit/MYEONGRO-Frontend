@@ -151,7 +151,6 @@ describe("TarotExperience", () => {
 
   it("shows spread choices before consent and checks consent only for AI readings", async () => {
     consent.autoComplete = false;
-    const fetchMock = vi.spyOn(globalThis, "fetch");
 
     render(<TarotExperience />);
 
@@ -160,10 +159,8 @@ describe("TarotExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
     expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
     expect(screen.getByText("시작하기 전에")).toBeInTheDocument();
-    expect(screen.queryByText("1 / 4")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "동의 완료" }));
     expect(await screen.findByText("상황을 들려주세요")).toBeInTheDocument();
-    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("warns about storage, external transfer, and the limited identifier check", async () => {
@@ -363,7 +360,6 @@ describe("TarotExperience", () => {
       expect(screen.getAllByRole("button", { name: /숨은 카드/ })).toHaveLength(5);
       selectSlots(slots);
 
-      expect(screen.queryByText("카드 선택을 마쳤어요")).not.toBeInTheDocument();
       expect(await screen.findByRole("button", { name: "리딩 생성" })).toBeEnabled();
       const completedCardBacks = screen.getAllByRole("button", { name: /숨은 카드/ });
       expect(completedCardBacks).toHaveLength(5);
@@ -375,7 +371,6 @@ describe("TarotExperience", () => {
       });
       expect(selectedCard).toHaveAttribute("aria-pressed", "true");
       expect(selectedCard).toHaveClass(styles.selectedCard);
-      expect(screen.queryByLabelText("확정된 위치")).not.toBeInTheDocument();
       for (const card of MAJOR_ARCANA) {
         expect(screen.queryByText(card.name)).not.toBeInTheDocument();
       }
@@ -416,7 +411,6 @@ describe("TarotExperience", () => {
       .toBeInTheDocument();
     expect(screen.getByText("선택한 카드를 확인하고 있어요.")).toBeInTheDocument();
     expect(document.querySelector(".reading-loading .mark-glyph")).not.toBeNull();
-    expect(screen.queryByRole("link", { name: /홈으로/ })).not.toBeInTheDocument();
   });
 
   it("does not show or trigger reading generation before the last card", async () => {
@@ -646,6 +640,5 @@ describe("TarotExperience", () => {
     expect(first).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "다음 카드 고르러 가기" }));
     expect(await screen.findByText("2 / 3")).toBeInTheDocument();
-    expect(screen.queryByText("카드 선택을 마쳤어요")).not.toBeInTheDocument();
   });
 });

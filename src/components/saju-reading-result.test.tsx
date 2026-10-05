@@ -14,7 +14,6 @@ describe("SajuReadingResult", () => {
     expect(screen.getByLabelText("생성형 AI 사용 안내")).toHaveTextContent(AI_GENERATED_NOTICE);
     expect(screen.getByText("병오 · 2023-2032")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "새 사주 리딩" })).toHaveAttribute("href", "/saju");
-    expect(screen.queryByText("같은 출생정보로 새 질문")).not.toBeInTheDocument();
     expect(container).not.toHaveTextContent("출생 시각 정확도");
     expect(container).not.toHaveTextContent("후보 1,440개");
     expect(container).not.toHaveTextContent("1992-08-17");

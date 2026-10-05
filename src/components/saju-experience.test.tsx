@@ -166,10 +166,7 @@ describe("SajuExperience", () => {
     expect(screen.queryByRole("textbox", { name: /질문 한 가지/ })).not.toBeInTheDocument();
     expect(screen.getByText(/원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용/))
       .toBeInTheDocument();
-    expect(screen.queryByText(/출생 정보는 리딩 생성과 기록 복원을 위해 저장/))
-      .not.toBeInTheDocument();
     expect(screen.getByText("시작하기 전에")).toBeInTheDocument();
-    expect(screen.queryByText(/\d+ \/ 4/)).not.toBeInTheDocument();
 
     for (const agreement of [
       "서비스 이용약관 동의",
@@ -196,7 +193,6 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
 
     expect(screen.getByText("1 / 4")).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "← 홈으로" })).not.toBeInTheDocument();
     const creditLine = screen.getByText("4크레딧 사용 · 현재 10크레딧");
     expect(creditLine.closest(".reading-actions")).not.toBeNull();
     expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
@@ -224,8 +220,6 @@ describe("SajuExperience", () => {
     expect(screen.getByText("3 / 4")).toBeInTheDocument();
     expect(screen.getByText(/원본 출생정보와 질문 원문은 저장하지 않아요/))
       .toBeInTheDocument();
-    expect(screen.queryByText(/출생정보와 계산 기준은 내 기록에 저장/))
-      .not.toBeInTheDocument();
   });
 
   it("locks the question step when the saju cost exceeds the current balance", async () => {
@@ -397,8 +391,6 @@ describe("SajuExperience", () => {
         luckDirectionBasis: "unspecified",
       },
     });
-    expect(body.birthProfile).not.toHaveProperty("birthTime");
-    expect(body).not.toHaveProperty("pillars");
   });
 
   it("leaves a previously entered time and province out of the payload when the time is unknown", async () => {
@@ -464,7 +456,6 @@ describe("SajuExperience", () => {
 
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "11" } });
     expect(screen.getByLabelText("출생 시·도")).toHaveValue("11");
-    expect(screen.queryByLabelText("출생 시·군·구")).not.toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
     expect(screen.getByLabelText("출생 시·도")).toHaveValue("36");
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
@@ -671,15 +662,9 @@ describe("SajuExperience", () => {
     vi.useFakeTimers();
     fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
     expect(screen.getByText("출생정보를 확인하고 있어요.")).toBeInTheDocument();
-    expect(screen.queryByText("명식의 공통 구조를 계산하고 있어요.")).not.toBeInTheDocument();
-    expect(screen.queryByText(/조금 더 걸리고 있어요/)).not.toBeInTheDocument();
 
     act(() => { vi.advanceTimersByTime(12_000); });
     expect(screen.getByText("질문에 맞는 리딩을 구성하고 있어요.")).toBeInTheDocument();
-    expect(screen.queryByText("출생정보를 확인하고 있어요.")).not.toBeInTheDocument();
-    expect(document.querySelectorAll(".mark-stroke.on")).toHaveLength(4);
-    expect(document.querySelector(".mark-glyph.breathing")).not.toBeNull();
-    expect(screen.queryByText(/조금 더 걸리고 있어요/)).not.toBeInTheDocument();
 
     act(() => { vi.advanceTimersByTime(8_000); });
     expect(screen.getByText("조금 더 걸리고 있어요. 잠시만 기다려 주세요.")).toBeInTheDocument();

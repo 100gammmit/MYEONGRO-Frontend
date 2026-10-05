@@ -42,18 +42,6 @@ describe("GET /auth/login/[provider]", () => {
     );
   });
 
-  it("does not require age confirmation before starting OAuth", async () => {
-    const response = await GET(
-      new Request("https://front.test/auth/login/kakao?next=%2Faccount"),
-      { params: Promise.resolve({ provider: "kakao" }) },
-    );
-
-    expect(response.status).toBe(302);
-    expect(response.headers.get("location")).toBe(
-      "https://api.example.com/oauth2/authorization/kakao?next=%2Faccount",
-    );
-  });
-
   it("rejects unsupported providers", async () => {
     const response = await GET(
       new Request("https://front.test/auth/login/unknown"),

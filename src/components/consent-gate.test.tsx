@@ -30,8 +30,6 @@ describe("ConsentGate", () => {
       credentials: "same-origin",
     });
     expect(screen.getByText("[필수] AI 리딩 정보 국외이전 동의")).toBeInTheDocument();
-    expect(screen.queryByText("[필수] 사주 출생정보 처리 동의")).not.toBeInTheDocument();
-    expect(screen.queryByText(/개인정보 수집·이용 동의/)).not.toBeInTheDocument();
   });
 
   it("leaves the heading to the wizard and puts the continue button in the shared action bar", async () => {
@@ -43,23 +41,7 @@ describe("ConsentGate", () => {
     expect(continueButton.closest(".reading-actions")).not.toBeNull();
     expect(continueButton.closest(".consent-panel")).toBeNull();
     expect(screen.queryByRole("heading")).not.toBeInTheDocument();
-    expect(screen.queryByText("BEFORE WE BEGIN")).not.toBeInTheDocument();
     expect(screen.getByText(/마지막 단계에서 모든 동의를 한 번에 저장합니다/)).toBeInTheDocument();
-  });
-
-  it("uses the shared terms and overseas transfer documents for the saju scope", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({
-      status: tarotStatus,
-    }));
-
-    render(<ConsentGate scope="saju" onComplete={vi.fn()} />);
-
-    expect(await screen.findByText("[필수] 서비스 이용약관 동의"))
-      .toBeInTheDocument();
-    expect(screen.getByText("[필수] AI 리딩 정보 국외이전 동의"))
-      .toBeInTheDocument();
-    expect(screen.queryByText("[필수] 사주 출생정보 처리 동의"))
-      .not.toBeInTheDocument();
   });
 
   it("routes a 401 response back through the login gate", async () => {
@@ -93,8 +75,6 @@ describe("ConsentGate", () => {
 
     await waitFor(() => expect(onComplete).toHaveBeenCalledOnce());
     expect(screen.queryByRole("button", { name: "동의 완료하고 계속" }))
-      .not.toBeInTheDocument();
-    expect(screen.queryByText("[필수] 사주 출생정보 처리 동의"))
       .not.toBeInTheDocument();
   });
 

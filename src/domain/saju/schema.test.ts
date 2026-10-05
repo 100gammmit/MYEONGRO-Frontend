@@ -69,7 +69,7 @@ describe("saju v3 schemas", () => {
     })).toThrow();
   });
 
-  it("accepts only a saju schema v3 creation response", () => {
+  it("accepts only a saju schema v5 creation response", () => {
     expect(parseSajuReadingCreatedResponse({
       reading: {
         id: "reading-id",

@@ -188,8 +188,6 @@ describe("SignupAgeConfirmation", () => {
 
     expect(await screen.findByText(/AI 타로·사주 리딩을 처음 생성할 때/))
       .toHaveTextContent("OpenAI 국외이전 동의를 별도로 요청합니다");
-    expect(screen.queryByRole("button", { name: /국외이전 동의 내용 확인/ }))
-      .not.toBeInTheDocument();
   });
 });
 

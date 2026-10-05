@@ -80,13 +80,12 @@ describe("RecordsPage", () => {
     expect(screen.getByText(TAROT_SPREADS.relationship_three_card.name)).toBeInTheDocument();
     expect(screen.getByText(TAROT_SPREADS.relationship_three_card.summary)).toBeInTheDocument();
     expect(screen.getByText("2026년 · 직업·생활")).toBeInTheDocument();
-    expect(screen.queryByText("앞으로의 관계 흐름이 궁금해요.")).not.toBeInTheDocument();
-    expect(screen.queryByText("올해 일의 흐름이 궁금해요.")).not.toBeInTheDocument();
   });
 
   it("shows an authenticated empty state without another login prompt", async () => {
     await renderRecordsPage();
 
+    expect(screen.getByRole("heading", { name: "아직 저장된 이야기가 없어요" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /로그인/ })).not.toBeInTheDocument();
   });
 

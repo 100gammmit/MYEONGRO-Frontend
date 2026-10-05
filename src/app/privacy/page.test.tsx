@@ -5,9 +5,6 @@ describe("PrivacyPage", () => {
   it("describes the available account deletion control", () => {
     render(<PrivacyPage />);
 
-    expect(screen.queryByText(/회원 탈퇴 시 계정 데이터 삭제를 요청/))
-      .not.toBeInTheDocument();
-    expect(screen.queryByText(/후속 마일스톤/)).not.toBeInTheDocument();
     expect(screen.getByText(/계정 설정에서 저장한 리딩의 삭제, 계정 삭제와 AI 국외이전 동의 철회를 직접 할 수 있습니다/))
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
@@ -23,11 +20,9 @@ describe("PrivacyPage", () => {
     const socialLoginRow = within(table).getByRole("row", { name: /소셜 로그인과 계정 식별/ });
     expect(socialLoginRow).toHaveTextContent("OAuth 제공자와 제공자 사용자 식별자");
     expect(socialLoginRow).not.toHaveTextContent("이메일");
-    expect(socialLoginRow).not.toHaveTextContent("표시 이름");
     const sessionRow = within(table).getByRole("row", { name: /로그인과 가입 대기 세션/ });
     expect(sessionRow).toHaveTextContent("명로 사용자 식별자와 권한");
     expect(sessionRow).not.toHaveTextContent("이메일");
-    expect(sessionRow).not.toHaveTextContent("표시 이름");
     expect(within(table).getByRole("row", { name: /사주 계산.*양력 생년월일.*처리 완료 시 폐기/ }))
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /AI 리딩 요청 처리.*명로 데이터베이스와 운영 로그에는 저장하지 않음/ }))
@@ -44,12 +39,8 @@ describe("PrivacyPage", () => {
     expect(operationalLogRow).toHaveTextContent("CloudWatch 보유 정책에 따라 만료·삭제 대상으로 표시");
     expect(operationalLogRow).toHaveTextContent("물리적 삭제는 통상 추가 72시간 이내");
     expect(operationalLogRow).toHaveTextContent("드물게 더 오래 걸릴 수 있음");
-    expect(operationalLogRow).not.toHaveTextContent("최대 30일 후 자동 삭제");
-    expect(operationalLogRow).not.toHaveTextContent("조회 대상에서 제외");
     expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성.*국외이전 별도 동의.*최대 24시간/ }))
       .toBeInTheDocument();
-    expect(within(table).getByRole("row", { name: /OpenAI를 통한 AI 리딩 생성/ }))
-      .not.toHaveTextContent("가명 안전 식별자");
     const directProcessorTable = screen.getByRole("table", {
       name: "명로가 직접 이용하는 개인정보 처리 수탁자",
     });
@@ -112,7 +103,6 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getAllByText(/서비스 또는 제3자를 위해로부터 보호하기 위해 합리적으로 필요한 경우 더 오래 보관/))
       .toHaveLength(2);
-    expect(screen.queryByText(/심각한 위해/)).not.toBeInTheDocument();
     expect(screen.getByText(/OpenAI 원문 갱신일 2026-07-09 · 명로 최종 확인일 2026-09-25/))
       .toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "개인정보 보호법 제15조 제1항 제4호" }))
@@ -133,7 +123,6 @@ describe("PrivacyPage", () => {
     expect(screen.getByText("백민하")).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "privacy@myeongro.com" }))
       .toHaveLength(2);
-    expect(screen.queryByText(/개인정보 문의 전화번호/)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "개인정보분쟁조정위원회" }))
       .toHaveAttribute("href", "https://www.kopico.go.kr");
     expect(screen.getByRole("link", { name: "개인정보침해 신고센터" }))

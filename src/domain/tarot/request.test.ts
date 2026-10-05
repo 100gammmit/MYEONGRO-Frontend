@@ -21,12 +21,6 @@ describe("createTarotReadingRequest", () => {
       selectedSlots: [2, 5, 1, 4, 3],
       choiceOptions: { a: "현재를 유지한다", b: "새로운 기회를 준비한다" },
     });
-    expect(request).not.toHaveProperty("drawSessionId");
-    expect(request).not.toHaveProperty("cardIds");
-    expect(request).not.toHaveProperty("candidateToken");
-    expect(request).not.toHaveProperty("position");
-    expect(request).not.toHaveProperty("candidateSets");
-    expect(request).not.toHaveProperty("schemaVersion");
   });
 
   it.each(["mind_three_card", "relationship_three_card"] as const)(

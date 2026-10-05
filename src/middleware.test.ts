@@ -59,19 +59,16 @@ describe("session middleware", () => {
     expect(response.headers.get("location")).toBeNull();
   });
 
-  it.each(["502 response", "network failure"])(
-    "does not redirect records when session verification has a %s",
-    async () => {
-      sessionState.value = { status: "unavailable", user: null };
+  it("does not redirect records when session verification is unavailable", async () => {
+    sessionState.value = { status: "unavailable", user: null };
 
-      const response = await middleware(
-        new NextRequest("https://fortune.test/records/reading-1"),
-      );
+    const response = await middleware(
+      new NextRequest("https://fortune.test/records/reading-1"),
+    );
 
-      expect(response.status).toBe(200);
-      expect(response.headers.get("location")).toBeNull();
-    },
-  );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("location")).toBeNull();
+  });
 
   it.each([
     "/_next/static/chunk.js",

@@ -21,7 +21,6 @@ describe("BackendReadingRecordsClient", () => {
     });
     const headers = fetchMock.mock.calls[0][1].headers as Headers;
     expect(headers.get("cookie")).toBe("JSESSIONID=session");
-    expect(headers.has("Authorization")).toBe(false);
   });
 
   it("returns a saju v2 result payload without coercing it to the tarot shape", async () => {

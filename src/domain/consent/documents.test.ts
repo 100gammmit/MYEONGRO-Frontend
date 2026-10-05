@@ -95,9 +95,6 @@ describe("OpenAI transfer snapshot", () => {
       "Cinder Technologies, Inc.",
       "Okta, Inc.",
     ]);
-    expect(processors).not.toContain("Fivetran, Inc.");
-    expect(processors).not.toContain("WorkOS, Inc.");
-    expect(processors).not.toContain("Merge API, Inc.");
     expect(OPENAI_TRANSFER_SNAPSHOT.dynamicProcessor).toMatchObject({
       name: "Cloudflare, Ltd.",
       location: "최종 사용자와 가장 가까운 데이터센터 소재국",

@@ -56,50 +56,6 @@ describe("ReadingDetailPage", () => {
     });
   });
 
-  it("renders a completed structured reading", async () => {
-    mocks.get.mockResolvedValue({
-      id: "reading-1",
-      kind: "tarot",
-      spreadType: "mind_three_card",
-      schemaVersion: 2,
-      status: "completed",
-      title: "관계의 흐름",
-      input: {
-        cards: [
-          { cardId: "major-00-fool", position: "emotion", reversed: false },
-          { cardId: "major-06-lovers", position: "underlying_need", reversed: false },
-          { cardId: "major-17-star", position: "self_action", reversed: false },
-        ],
-      },
-      result: {
-        questionRedirected: false,
-        title: "관계의 흐름",
-        summary: "천천히 확인할 시기입니다.",
-        sections: [
-          { position: "emotion", heading: "지금의 감정", body: "감정을 알아차리세요." },
-          { position: "underlying_need", heading: "감정 뒤의 욕구", body: "바라는 것을 적어보세요." },
-          { position: "self_action", heading: "나를 위한 행동", body: "대화를 이어가세요." },
-        ],
-        guidance: ["서두르지 마세요."],
-        disclaimer: "자기 성찰을 위한 참고 정보입니다.",
-      },
-      createdAt: "2026-06-12T00:00:00.000Z",
-      updatedAt: "2026-06-12T00:00:01.000Z",
-    });
-
-    await renderPage();
-
-    expect(mocks.getSessionState).toHaveBeenCalledWith("JSESSIONID=session");
-    expect(mocks.get).toHaveBeenCalledWith("reading-1");
-    expect(screen.getByRole("heading", { name: "관계의 흐름" })).toBeInTheDocument();
-    expect(screen.getByText("천천히 확인할 시기입니다.")).toBeInTheDocument();
-    expect(screen.getByText("대화를 이어가세요.")).toBeInTheDocument();
-    expect(screen.getByText("바보")).toBeInTheDocument();
-    expect(screen.getByText("연인")).toBeInTheDocument();
-    expect(screen.getByText("별")).toBeInTheDocument();
-    expect(screen.queryByText("앞으로 어떻게 흘러갈까요?")).not.toBeInTheDocument();
-  });
-
   it("reopens a saved tarot reading as its result screen with every card face up", async () => {
     mocks.get.mockResolvedValue({
       id: "reading-1",
@@ -133,9 +89,16 @@ describe("ReadingDetailPage", () => {
 
     const { container } = await renderPage();
 
+    expect(mocks.getSessionState).toHaveBeenCalledWith("JSESSIONID=session");
+    expect(mocks.get).toHaveBeenCalledWith("reading-1");
+    expect(screen.getByRole("heading", { name: "관계의 흐름" })).toBeInTheDocument();
+    expect(screen.getByText("천천히 확인할 시기입니다.")).toBeInTheDocument();
+    expect(screen.getByText("대화를 이어가세요.")).toBeInTheDocument();
+    for (const cardName of ["바보", "연인", "별"]) {
+      expect(screen.getByText(cardName)).toBeInTheDocument();
+    }
     expect(screen.getByRole("heading", { level: 1, name: "카드가 전하는 메시지" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "← 내 기록" })).toHaveAttribute("href", "/records");
-    expect(screen.queryByRole("link", { name: "← 홈으로" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "첫 카드 공개" })).not.toBeInTheDocument();
     expect(container.querySelectorAll(".card-flip-inner")).toHaveLength(3);
     expect(container.querySelectorAll(".card-flip-inner.flipped")).toHaveLength(3);
@@ -170,8 +133,6 @@ describe("ReadingDetailPage", () => {
     expect(screen.getByRole("heading", {
       name: "건강에 관한 중요한 결정은 리딩으로 답하기 어려워요",
     })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "다시 생성" }))
-      .not.toBeInTheDocument();
   });
 
   it("returns not found for an unsupported legacy tarot payload", async () => {
@@ -257,7 +218,6 @@ describe("ReadingDetailPage", () => {
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "새 질문 입력하기" })).toHaveAttribute("href", "/saju");
-    expect(screen.queryByText("올해의 흐름이 궁금해요.")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "기록 삭제" })).toBeInTheDocument();
   });
 

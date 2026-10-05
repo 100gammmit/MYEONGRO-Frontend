@@ -43,7 +43,6 @@ describe("DailyCardExperience", () => {
       .toHaveAttribute("src", "/images/tarot/major-arcana/major-17-star-480.webp");
     expect(screen.queryByText("이 결과는 생성형 AI를 활용해 생성되었습니다."))
       .not.toBeInTheDocument();
-    expect(screen.queryByRole("complementary", { name: "광고" })).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
       drawId,

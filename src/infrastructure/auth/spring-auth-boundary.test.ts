@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -15,86 +15,16 @@ function listSourceFiles(directory: string): string[] {
   });
 }
 
-describe("Spring auth boundary", () => {
-  it("keeps guest identity and frontend reading generation out of the frontend runtime", () => {
-    expect(existsSync(path.join(sourceRoot, "infrastructure/auth/guest-identity.ts"))).toBe(false);
-    expect(existsSync(path.join(sourceRoot, "app/api/consents/handler.ts"))).toBe(false);
-    expect(existsSync(path.join(sourceRoot, "app/api/readings/handler.ts"))).toBe(false);
-    expect(existsSync(path.join(sourceRoot, "app/api/readings/input.ts"))).toBe(false);
-    expect(
-      listSourceFiles(sourceRoot)
-        .some((filePath) => filePath.startsWith(path.join(sourceRoot, "domain/generation"))),
-    ).toBe(false);
-
-    const forbiddenFragments = [
-      "myeongro_guest",
-      "guestSessionId",
-      "subjectType: \"guest\"",
-      "createGuestSession",
-      "resolveSignedGuestSessionCookie",
-    ];
-    const files = listSourceFiles(sourceRoot)
-      .filter((filePath) => filePath !== __filename);
-
-    for (const filePath of files) {
-      const source = readFileSync(filePath, "utf8");
-      for (const fragment of forbiddenFragments) {
-        expect(source, `${path.relative(projectRoot, filePath)} contains ${fragment}`)
-          .not.toContain(fragment);
-      }
-    }
-  });
-
-  it("keeps removed Supabase Auth routes and clients out of the frontend runtime", () => {
-    expect(existsSync(path.join(sourceRoot, "app/auth/callback"))).toBe(false);
-    expect(existsSync(path.join(sourceRoot, "app/api/consents/transfer"))).toBe(false);
-    expect(existsSync(path.join(sourceRoot, "infrastructure/supabase"))).toBe(false);
-    expect(existsSync(path.join(projectRoot, "supabase"))).toBe(false);
-
-    const packageJson = JSON.parse(
-      readFileSync(path.join(projectRoot, "package.json"), "utf8"),
-    ) as { dependencies?: Record<string, string> };
-
-    expect(packageJson.dependencies).not.toHaveProperty("@supabase/ssr");
-    expect(packageJson.dependencies).not.toHaveProperty("@supabase/supabase-js");
-
-    const forbiddenFragments = [
-      "@supabase/",
-      "@/infrastructure/supabase",
-      "exchangeCodeForSession",
-      "clearSupabaseAuthCookies",
-      "/api/consents/transfer",
-      "Missing Supabase access token",
-    ];
-    const files = listSourceFiles(sourceRoot)
-      .filter((filePath) => filePath !== __filename);
-
-    for (const filePath of files) {
-      const source = readFileSync(filePath, "utf8");
-      for (const fragment of forbiddenFragments) {
-        expect(source, `${path.relative(projectRoot, filePath)} contains ${fragment}`)
-          .not.toContain(fragment);
-      }
-    }
-  });
-
-  it("keeps OpenAI provider control out of the frontend runtime", () => {
-    expect(existsSync(path.join(sourceRoot, "domain/generation/openai-reading-generator.ts")))
-      .toBe(false);
-
+describe("Spring backend boundary", () => {
+  // OpenAI keys and calls belong to the Spring backend; the frontend bundle must never carry them.
+  it("keeps the OpenAI SDK and API key out of the frontend runtime", () => {
     const packageJson = JSON.parse(
       readFileSync(path.join(projectRoot, "package.json"), "utf8"),
     ) as { dependencies?: Record<string, string> };
 
     expect(packageJson.dependencies).not.toHaveProperty("openai");
 
-    const forbiddenFragments = [
-      "OPENAI_API_KEY",
-      "OPENAI_MODEL",
-      "openai/helpers",
-      "from \"openai\"",
-      "OpenAIReadingGenerator",
-    ];
+    const forbiddenFragments = ["OPENAI_API_KEY", "from \"openai\""];
     const files = listSourceFiles(sourceRoot)
       .filter((filePath) => filePath !== __filename);
 

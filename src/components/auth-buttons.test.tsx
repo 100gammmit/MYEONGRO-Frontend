@@ -21,7 +21,6 @@ describe("AuthButtons", () => {
       "href",
       "/auth/login/google?next=%2Frecords%2Freading-1%3Ftab%3Ddetail",
     );
-    expect(screen.queryByText(/만 19세/)).not.toBeInTheDocument();
     expect(screen.getByTestId("kakao-login-logo")).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByTestId("google-login-logo")).toHaveAttribute("aria-hidden", "true");
   });

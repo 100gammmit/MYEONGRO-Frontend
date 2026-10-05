@@ -10,19 +10,10 @@ describe("ReadingMethodPage", () => {
       level: 1,
       name: "그냥 AI에게 물어보는 것과 무엇이 다를까요?",
     })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "계산과 해석, 선택의 역할을 나눠요" }))
-      .not.toBeInTheDocument();
     expect(screen.getByText(/어느 쪽이 낫다는 비교가 아니라.*구조의 차이를 정리했어요/))
       .toBeInTheDocument();
     expect(screen.getByText(/특정 운세로 바꿔 읽은 이유를 안내하고.*다룰 수 없는 질문은 따로 알려드려요/))
       .toBeInTheDocument();
-  });
-
-  it("leaves data handling to the privacy policy instead of repeating it here", () => {
-    render(<ReadingMethodPage />);
-
-    expect(screen.queryByText(/데이터베이스/)).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: /개인정보/ })).not.toBeInTheDocument();
   });
 
   it("puts Myeongro next to the row labels in an accessible comparison table", () => {
@@ -34,7 +25,6 @@ describe("ReadingMethodPage", () => {
       .toEqual(["구분", "명로", "AI 챗봇 대화"]);
     expect(within(comparison).getByRole("rowheader", { name: "사주" }))
       .toBeInTheDocument();
-    expect(screen.queryByText(/LLM|미리 작성된/)).not.toBeInTheDocument();
   });
 
   it("keeps step numbers out of the spoken list text", () => {

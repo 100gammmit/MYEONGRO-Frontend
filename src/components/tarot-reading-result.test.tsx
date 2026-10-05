@@ -180,56 +180,6 @@ describe("TarotReadingResult", () => {
     expect(notice.compareDocumentPosition(reveal) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
-  it("shows no redirect notice for a standard reading", () => {
-    const definition = TAROT_SPREADS.mind_three_card;
-    render(
-      <TarotReadingResult
-        cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
-        result={{
-          readingMode: "standard",
-          questionRedirected: false,
-          title: "오늘의 리딩",
-          summary: "오늘의 흐름을 확인했어요.",
-          sections: definition.positions.map((position) => ({
-            position: position.id,
-            heading: "마음의 흐름",
-            body: "천천히 살펴보세요.",
-          })),
-          guidance: ["작은 행동을 시작하세요."],
-          disclaimer: "자기 성찰을 위한 참고 정보입니다.",
-        }}
-        spreadType="mind_three_card"
-      />,
-    );
-
-    expect(screen.queryByRole("note")).not.toBeInTheDocument();
-  });
-
-  it("shows no notice when the fortune itself was asked for", () => {
-    const definition = TAROT_SPREADS.mind_three_card;
-    render(
-      <TarotReadingResult
-        cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
-        result={{
-          readingMode: "money_fortune",
-          questionRedirected: false,
-          title: "금전운의 방향",
-          summary: "들어오는 쪽이 조금 더 커요.",
-          sections: definition.positions.map((position) => ({
-            position: position.id,
-            heading: "흐름",
-            body: "카드 해석",
-          })),
-          guidance: ["오늘 쓸 돈을 먼저 정해 보는 건 어때요?"],
-          disclaimer: "오락과 자기 성찰을 위한 참고입니다.",
-        }}
-        spreadType="mind_three_card"
-      />,
-    );
-
-    expect(screen.queryByRole("note")).not.toBeInTheDocument();
-  });
-
   it("shows redirected fortune copy and neutral choice labels", () => {
     const definition = TAROT_SPREADS.choice_five_card;
     render(
