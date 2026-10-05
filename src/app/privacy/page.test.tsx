@@ -9,7 +9,7 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
       .toBeInTheDocument();
-    expect(screen.getByText(/문서 버전 2026-10-02/)).toBeInTheDocument();
+    expect(screen.getByText("문서 버전 2026-10-06 · 시행일 2026-10-06")).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
@@ -30,7 +30,7 @@ describe("PrivacyPage", () => {
     expect(within(table).getByRole("row", { name: /무료 오늘의 운세 이어보기.*SHA-256 계정 범위값.*현재 브라우저/ }))
       .toBeInTheDocument();
     expect(within(table).getByRole("row", {
-      name: /개인정보 문의와 권리행사 처리.*발신자 이름·이메일 주소.*문의 처리를 완료한 날부터 30일/,
+      name: /개인정보 문의와 권리행사 처리.*발신자 이름·이메일 주소.*문의 처리를 완료한 날부터 최대 30일 이내/,
     })).toBeInTheDocument();
     const operationalLogRow = within(table).getByRole("row", {
       name: /서비스 보안과 오류·장애 대응.*리딩 식별자.*최대 30일/,
@@ -50,11 +50,10 @@ describe("PrivacyPage", () => {
     expect(within(directProcessorTable).getByRole("row", {
       name: /OpenAI OpCo, LLC.*AI 타로·사주 리딩 생성.*OpenAI 국외이전/,
     })).toBeInTheDocument();
+    expect(within(directProcessorTable).getAllByRole("rowheader").map((cell) => cell.textContent))
+      .toEqual(["Amazon Web Services Korea LLC", "OpenAI OpCo, LLC", "Google Asia Pacific Pte. Ltd."]);
     expect(within(directProcessorTable).getByRole("row", {
-      name: /Cloudflare, Inc..*개인정보 문의 메일 수신·인증·전달.*최대 31일/,
-    })).toBeInTheDocument();
-    expect(within(directProcessorTable).getByRole("row", {
-      name: /Google LLC.*개인정보 문의 메일·첨부파일·답변.*약 2개월.*최대 6개월/,
+      name: /Google Asia Pacific Pte. Ltd..*개인정보 문의 메일·첨부파일·답변.*Google 복구·삭제 기준/,
     })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AWS 인프라의 국외 처리" }))
       .toBeInTheDocument();
@@ -70,16 +69,35 @@ describe("PrivacyPage", () => {
       .toHaveAttribute("href", "https://aws.amazon.com/cloudfront/features/");
     expect(screen.getByRole("heading", { name: "개인정보 문의 이메일 국외 처리" }))
       .toBeInTheDocument();
-    expect(screen.getByText(/Cloudflare Email Routing을 거쳐 운영자의 개인 Gmail 메일함/))
+    expect(screen.getByText(/Google Workspace에서 직접 수신·저장·회신.*개인 Gmail 전달은 사용하지 않음/))
       .toBeInTheDocument();
-    expect(screen.getByText(/발신자·수신자·제목·메시지 ID 등 라우팅 이벤트는 최대 31일/))
-      .toBeInTheDocument();
-    expect(screen.getByText(/Google 활성 시스템의 삭제 완료에는 일반적으로 약 2개월.*암호화된 백업에는 최대 6개월/))
+    expect(screen.getByText(/최대 25일의 관리자 복구 가능 기간.*고객이 복구할 수 없는 상태의 삭제 지시 후.*최대 180일/))
       .toBeInTheDocument();
     expect(screen.getByText(/메일 국외 처리를 거부하면 이메일을 통한 문의·권리행사는 처리할 수 없음/))
       .toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Google 개인정보 보호 문의" }))
-      .toHaveAttribute("href", "https://support.google.com/policies/answer/9581826");
+    expect(screen.getByRole("link", { name: "Google Workspace 개인정보 담당팀 문의" }))
+      .toHaveAttribute("href", "https://support.google.com/a/contact/googlecloud_dpr");
+    expect(screen.getByText(/Workspace 관리자 로그인 필요/)).toBeInTheDocument();
+    expect(screen.getByText(/Business Starter에는 명로가 한국 저장 리전을 지정하지 않았습니다/))
+      .toBeInTheDocument();
+    expect(screen.getByText(/CDPA는 처리 계약이며 그 수락 자체가 국외이전의 법적 근거를 대신하지 않습니다/))
+      .toBeInTheDocument();
+    const mailProcessorTable = screen.getByRole("table", {
+      name: "Google Workspace 문의 메일 처리 역할과 처리 가능 국가",
+    });
+    expect(within(mailProcessorTable).getAllByRole("rowheader")).toHaveLength(4);
+    const maintenanceCells = within(within(mailProcessorTable).getByRole("row", {
+      name: /서비스 유지보수/,
+    })).getAllByRole("cell");
+    expect(maintenanceCells[0]).not.toHaveTextContent("대한민국");
+    expect(maintenanceCells[1]).toHaveTextContent("대한민국");
+    expect(within(mailProcessorTable).getByRole("row", {
+      name: /조건부 기술 지원.*콜롬비아.*명시적으로 허용/,
+    })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Google Workspace 공식 하위처리자 목록" }))
+      .toHaveAttribute("href", "https://workspace.google.com/intl/en/terms/subprocessors/");
+    expect(screen.getByRole("link", { name: "Google Cloud 데이터 처리 부속약정(CDPA) 제6조" }))
+      .toHaveAttribute("href", "https://cloud.google.com/terms/data-processing-addendum");
     const processorTable = screen.getByRole("table", {
       name: "OpenAI API 외부 처리자와 처리 가능 국가",
     });

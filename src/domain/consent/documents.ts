@@ -1,5 +1,6 @@
 export const TERMS_DOCUMENT_VERSION = "2026-09-27";
-export const PRIVACY_DOCUMENT_VERSION = "2026-10-02";
+export const PRIVACY_DOCUMENT_VERSION = "2026-10-06";
+export const PRIVACY_DOCUMENT_EFFECTIVE_DATE = "2026-10-06";
 export const AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION = "2026-09-25";
 
 export const AWS_PROCESSING_DISCLOSURE = {
@@ -34,48 +35,75 @@ export const AWS_PROCESSING_DISCLOSURE = {
 } as const;
 
 export const PRIVACY_INQUIRY_EMAIL_PROCESSING = {
-  verifiedAt: "2026-10-02",
+  verifiedAt: "2026-10-06",
+  sourceUpdatedAt: "2026-07-23",
   address: "privacy@myeongro.com",
   items:
-    "발신자 이름·이메일 주소, 메일 제목·본문·첨부파일, 답변과 권리행사 처리 이력",
+    "발신자 이름·이메일 주소, 메일 제목·본문·첨부파일, 수신 주소·메시지 식별자·메일 인증 및 전달 정보, 답변과 권리행사 처리 이력",
   operatorRetention:
-    "문의 처리를 완료한 날부터 30일간 보관한 뒤 Gmail에서 영구 삭제",
+    "문의 처리를 완료한 날부터 최대 30일 이내에 대화·첨부파일·답변 사본을 Workspace Gmail에서 영구 삭제. 법령상 보존 의무 또는 실제 진행 중인 분쟁 대응에 필요한 자료는 해당 사유가 끝날 때까지 필요한 범위에서 별도 보관한 뒤 삭제",
   method:
-    "이용자가 개인정보 문의 메일을 보내면 Cloudflare Email Routing을 거쳐 운영자의 개인 Gmail 메일함으로 암호화 전송·처리",
+    "이용자가 개인정보 문의 메일을 보내거나 명로가 답변할 때 Google Workspace에서 직접 수신·저장·회신. Workspace 메일함 접속에는 HTTPS 암호화 통신을 사용하며 Cloudflare Email Routing과 개인 Gmail 전달은 사용하지 않음",
   refusalMethod:
     "메일 전송 전 발송을 중단하여 국외 처리를 거부하거나, 전송 후 privacy@myeongro.com으로 삭제 요청",
   refusalEffect:
     "메일 국외 처리를 거부하면 이메일을 통한 문의·권리행사는 처리할 수 없음. 서비스 화면에서 제공하는 리딩 삭제, 계정 삭제와 AI 국외이전 동의 철회 기능은 계속 이용 가능",
   processors: {
-    cloudflare: {
-      name: "Cloudflare, Inc.",
-      country: "미국 등 Cloudflare 글로벌 네트워크·계열사·하위처리자 소재국",
-      address: "101 Townsend St, San Francisco, California 94107, United States",
-      contact: "privacyquestions@cloudflare.com",
-      purpose: "개인정보 문의 메일 수신·인증·전달 및 라우팅 상태 기록",
-      retention:
-        "메일 본문은 최종 메일함으로 전달하는 동안 처리하며, 발신자·수신자·제목·메시지 ID 등 라우팅 이벤트는 최대 31일",
-      sourceUrls: {
-        routing: "https://developers.cloudflare.com/email-service/get-started/route-emails/",
-        retention: "https://developers.cloudflare.com/email-service/observability/metrics-analytics/",
-        subprocessors: "https://www.cloudflare.com/gdpr/subprocessors/cloudflare-services/",
-      },
-    },
     google: {
-      name: "Google LLC",
-      country: "미국 등 Google 데이터센터 소재국",
-      address: "1600 Amphitheatre Parkway, Mountain View, California 94043, United States",
-      contactUrl: "https://support.google.com/policies/answer/9581826",
-      purpose: "개인정보 문의 메일·첨부파일·답변 및 처리 이력의 저장·열람·답변",
+      name: "Google Asia Pacific Pte. Ltd.",
+      country: "싱가포르(직접 수탁자의 계약 법인 소재국). 실제 처리 가능 위치는 아래 역할별 국가 참조",
+      address: "70 Pasir Panjang Road, #03-71, Mapletree Business City II Singapore 117371",
+      contactUrl: "https://support.google.com/a/contact/googlecloud_dpr",
+      purpose: "개인정보 문의 메일·첨부파일·답변 및 처리 이력의 수신·저장·열람·회신과 서비스 유지·보안",
       retention:
-        "명로의 보관기간 종료 후 Gmail에서 영구 삭제 동작을 수행. Google 활성 시스템의 삭제 완료에는 일반적으로 약 2개월이 걸리고 유지보수·장애·오류 등의 사유로 더 길어질 수 있으며, 암호화된 백업에는 최대 6개월간 잔존할 수 있음",
+        "명로의 보관기간 종료 시 Gmail에서 영구 삭제. 휴지통에서 제거된 데이터에도 최대 25일의 관리자 복구 가능 기간이 있음. 고객이 복구할 수 없는 상태의 삭제 지시 후 Google은 원칙적으로 최대 180일 이내에 시스템에서 삭제하며 법령상 보존 예외가 있음. 명로는 보유기한이 끝난 문의를 통상적인 운영 목적으로 복구하지 않음",
       sourceUrls: {
-        terms: "https://policies.google.com/terms",
-        privacy: "https://policies.google.com/privacy",
-        retention: "https://policies.google.com/technologies/retention",
+        contractingParty: "https://cloud.google.com/terms/google-entity",
+        cdpa: "https://cloud.google.com/terms/data-processing-addendum",
+        subprocessors: "https://workspace.google.com/intl/en/terms/subprocessors/",
+        dataCenters: "https://datacenters.google/locations/",
+        recovery: "https://workspace.google.com/learn-more/security/security-whitepaper/data-recovery/",
       },
     },
   },
+  // Country where processing is performed, not country of registration.
+  // Core Services/Gmail only; AppSheet and Assured Support-only features excluded.
+  // Data-center footprint additionally includes published, non-development locations.
+  // Check detail-page status too: Canelones is in development despite the index label.
+  processingRoles: [
+    {
+      id: "data-centers",
+      role: "데이터센터 운영·저장 가능 위치",
+      processors: "Google 계열사 및 Google 공개 데이터센터",
+      countries: ["미국", "캐나다", "멕시코", "칠레", "벨기에", "덴마크", "핀란드", "독일", "아일랜드", "네덜란드", "영국", "일본", "싱가포르", "대만"],
+      purpose: "메일 데이터 저장 인프라 운영·유지",
+      condition: "공개 데이터센터와 Core Services 공통 데이터센터 운영 위치. 개발 중인 위치는 제외하며 데이터센터 운영 인력의 업무에는 고객 데이터 접근이 필요하지 않음",
+    },
+    {
+      id: "maintenance",
+      role: "서비스 유지보수",
+      processors: "Google 계열사",
+      countries: ["아르헨티나", "호주", "벨기에", "브라질", "캐나다", "칠레", "프랑스", "독일", "홍콩", "인도", "아일랜드", "이스라엘", "이탈리아", "일본", "대한민국", "멕시코", "네덜란드", "뉴질랜드", "폴란드", "싱가포르", "스페인", "스웨덴", "스위스", "대만", "영국", "미국"],
+      purpose: "시스템 개발·유지보수 및 장애 해결",
+      condition: "문제 해결에 필요한 경우 제한적이고 승인된 데이터 접근 가능",
+    },
+    {
+      id: "support",
+      role: "조건부 기술 지원",
+      processors: "Google 계열사 및 공식 목록의 Core Services 공통 기술 지원 하위처리자",
+      countries: ["아르헨티나", "호주", "벨기에", "브라질", "불가리아", "캐나다", "칠레", "콜롬비아", "엘살바도르", "프랑스", "독일", "홍콩", "인도", "아일랜드", "이스라엘", "이탈리아", "일본", "대한민국", "말레이시아", "멕시코", "네덜란드", "뉴질랜드", "필리핀", "폴란드", "루마니아", "싱가포르", "스페인", "스리랑카", "스웨덴", "스위스", "대만", "영국", "미국"],
+      purpose: "고객이 요청한 기술 지원",
+      condition: "지원 요청 시 적용 가능. 제3자 지원 사업자의 고객 데이터 접근은 고객이 지원 과정에서 명시적으로 허용한 경우로 제한",
+    },
+    {
+      id: "security",
+      role: "조건부 보안 위험 탐지",
+      processors: "Wipro LLC 및 해당 계열사",
+      countries: ["인도", "필리핀", "미국"],
+      purpose: "계정 침해·오남용 징후 검토",
+      condition: "침해·오남용이 의심되는 계정의 의심스러운 검색어에 한정한 검토",
+    },
+  ],
 } as const;
 
 export type ConsentScope = "tarot" | "saju";

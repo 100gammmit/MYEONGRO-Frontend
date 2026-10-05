@@ -6,6 +6,7 @@ import {
   OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
   OPENAI_TRANSFER_SNAPSHOT,
   PRIVACY_INQUIRY_EMAIL_PROCESSING,
+  PRIVACY_DOCUMENT_EFFECTIVE_DATE,
   PRIVACY_DOCUMENT_VERSION,
   TERMS_DOCUMENT_VERSION,
   type ConsentDocumentType as RequiredConsentDocumentType,
@@ -70,7 +71,7 @@ export function ConsentDocumentContent({
 
   return (
     <div className="consent-document-content">
-      <DocumentMeta version={PRIVACY_DOCUMENT_VERSION} />
+      <DocumentMeta version={PRIVACY_DOCUMENT_VERSION} effectiveDate={PRIVACY_DOCUMENT_EFFECTIVE_DATE} />
       <p>서비스 &quot;명로&quot;를 운영하는 {LEGAL_METADATA.operatorName}은 서비스 제공을 위해 필요한 범위에서 개인정보를 처리합니다.</p>
       <Heading>개인정보 처리 항목과 보유기간</Heading>
       <div className="consent-table-wrapper">
@@ -192,14 +193,9 @@ export function ConsentDocumentContent({
               <td>아래 OpenAI 국외이전 세부 내용의 보유·이용 기간에 따름</td>
             </tr>
             <tr>
-              <th scope="row">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.cloudflare.name}</th>
-              <td>개인정보 문의 메일 수신·인증·전달 및 라우팅 상태 기록</td>
-              <td>메일 전달에 필요한 동안. 라우팅 이벤트는 최대 31일</td>
-            </tr>
-            <tr>
               <th scope="row">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.name}</th>
-              <td>개인정보 문의 메일·첨부파일·답변 및 처리 이력의 저장·열람·답변</td>
-              <td>문의 처리 완료 후 30일에 Gmail 영구 삭제 동작 수행. Google 활성 시스템 삭제에는 일반적으로 약 2개월이 걸리며 더 길어질 수 있고, 암호화 백업에는 최대 6개월 잔존 가능</td>
+              <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.purpose}</td>
+              <td>아래 개인정보 문의 이메일 국외 처리 항목의 명로 보유기간과 Google 복구·삭제 기준에 따름</td>
             </tr>
           </tbody>
         </table>
@@ -241,7 +237,7 @@ export function ConsentDocumentContent({
       <p>보유기간이 끝나거나 처리 목적이 달성된 개인정보는 지체 없이 파기 대상으로 확정합니다. 이용자가 개별 리딩이나 계정을 삭제하면 운영 데이터베이스의 관련 레코드를 복구 유예 없이 영구 삭제하고, 계정 삭제 시 Redis 세션과 현재 브라우저의 해당 계정 오늘의 카드 값도 삭제합니다. 질문·선택지·관심 분야와 원본 출생정보는 요청 처리가 끝나면 별도로 보유하지 않습니다.</p>
       <p>전자적 기록은 해당 저장소의 삭제 기능으로 복구 대상에서 제거합니다. 재해복구용 자동 백업은 최대 7일, 운영 로그는 명로의 운영 조회·이용 기준 최대 30일이 지나면 각 인프라의 보유 정책에 따라 만료·삭제됩니다. 외부 처리자의 자체 보유분은 위 수탁·국외이전 항목에 적힌 기준을 따릅니다.</p>
       <Heading>이용자 권리와 이의제기</Heading>
-      <p>이용자는 계정 설정에서 저장한 리딩의 삭제, 계정 삭제와 AI 국외이전 동의 철회를 직접 할 수 있습니다. 개인정보의 열람·정정·삭제·처리정지, 동의 철회와 처리 결과에 대한 이의제기는 <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a>로 요청할 수 있습니다. 이 주소로 보낸 메일은 Cloudflare Email Routing을 거쳐 Google의 Gmail에 저장되며, 세부 내용은 위 개인정보 문의 이메일 국외 처리 항목을 따릅니다. 명로는 본인 여부를 확인한 뒤 관련 법령에 따라 처리하고, 요청을 전부 또는 일부 받아들이기 어려운 경우에는 그 사유와 이의제기 방법을 안내합니다.</p>
+      <p>이용자는 계정 설정에서 저장한 리딩의 삭제, 계정 삭제와 AI 국외이전 동의 철회를 직접 할 수 있습니다. 개인정보의 열람·정정·삭제·처리정지, 동의 철회와 처리 결과에 대한 이의제기는 <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a>로 요청할 수 있습니다. 이 주소로 보낸 메일은 Google Workspace에서 직접 수신·저장·회신하며, 세부 내용은 위 개인정보 문의 이메일 국외 처리 항목을 따릅니다. 명로는 본인 여부를 확인한 뒤 관련 법령에 따라 처리하고, 요청을 전부 또는 일부 받아들이기 어려운 경우에는 그 사유와 이의제기 방법을 안내합니다.</p>
       <p>
         개인정보 침해에 관한 별도 상담이나 분쟁조정이 필요한 경우 {" "}
         <a href="https://www.kopico.go.kr" rel="noreferrer" target="_blank">개인정보분쟁조정위원회</a>
@@ -285,10 +281,13 @@ function OverseasTransferConsentBasis() {
   );
 }
 
-function DocumentMeta({ version }: { version: string }) {
+function DocumentMeta({ version, effectiveDate = LEGAL_METADATA.effectiveDate }: {
+  version: string;
+  effectiveDate?: string;
+}) {
   return (
     <p className="consent-document-meta">
-      문서 버전 {version} · 시행일 {LEGAL_METADATA.effectiveDate}
+      문서 버전 {version} · 시행일 {effectiveDate}
     </p>
   );
 }
@@ -305,10 +304,10 @@ function PrivacyInquiryEmailOverseasDetails({
     <>
       <Heading>개인정보 문의 이메일 국외 처리</Heading>
       <p>
-        개인정보 문의와 권리행사 메일은 미국 소재 Cloudflare와 Google의 서비스를 통해
-        국외에서 처리될 수 있습니다. 이 처리는 이용자가 요청한 문의·권리행사 처리에
+        서비스 이용에 관한 개인정보 문의와 권리행사 메일은 싱가포르 소재 Google Asia Pacific Pte. Ltd.의
+        Google Workspace를 통해 아래 공개된 위치에서 처리될 수 있습니다. 이 처리는 이용자가 요청한 서비스 문의·권리행사 처리에
         필요한 위탁·보관으로, 개인정보 보호법 제28조의8 제1항 제3호 가목에 따라 이
-        처리방침으로 공개합니다.
+        처리방침으로 공개합니다. CDPA는 처리 계약이며 그 수락 자체가 국외이전의 법적 근거를 대신하지 않습니다.
       </p>
       <dl>
         <div><dt>처리 항목</dt><dd>{PRIVACY_INQUIRY_EMAIL_PROCESSING.items}</dd></div>
@@ -317,37 +316,48 @@ function PrivacyInquiryEmailOverseasDetails({
         <div><dt>거부 방법·절차</dt><dd>{PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalMethod}</dd></div>
         <div><dt>거부 효과</dt><dd>{PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalEffect}</dd></div>
       </dl>
-      <p><strong>Cloudflare Email Routing</strong></p>
-      <dl>
-        <div><dt>수탁자</dt><dd>{processors.cloudflare.name}</dd></div>
-        <div><dt>주소·연락처</dt><dd>{processors.cloudflare.address} · {processors.cloudflare.contact}</dd></div>
-        <div><dt>처리 국가</dt><dd>{processors.cloudflare.country}</dd></div>
-        <div><dt>처리 목적</dt><dd>{processors.cloudflare.purpose}</dd></div>
-        <div><dt>보유·이용 기간</dt><dd>{processors.cloudflare.retention}</dd></div>
-      </dl>
-      <p>
-        Cloudflare Email Routing의 처리 방식·보유기간과 참여 사업자는 {" "}
-        <a href={processors.cloudflare.sourceUrls.routing} rel="noreferrer" target="_blank">서비스 설명</a>, {" "}
-        <a href={processors.cloudflare.sourceUrls.retention} rel="noreferrer" target="_blank">로그 보유기간</a>, {" "}
-        <a href={processors.cloudflare.sourceUrls.subprocessors} rel="noreferrer" target="_blank">하위처리자 목록</a>
-        에서 확인할 수 있습니다.
-      </p>
-      <p><strong>개인 Gmail</strong></p>
+      <p><strong>Google Workspace</strong></p>
       <dl>
         <div><dt>수탁자</dt><dd>{processors.google.name}</dd></div>
         <div><dt>주소</dt><dd>{processors.google.address}</dd></div>
-        <div><dt>개인정보 문의</dt><dd><a href={processors.google.contactUrl} rel="noreferrer" target="_blank">Google 개인정보 보호 문의</a></dd></div>
-        <div><dt>처리 국가</dt><dd>{processors.google.country}</dd></div>
+        <div><dt>개인정보 문의</dt><dd><a href={processors.google.contactUrl} rel="noreferrer" target="_blank">Google Workspace 개인정보 담당팀 문의</a> (Workspace 관리자 로그인 필요). 이용자는 명로 문의처를 통해 권리를 행사할 수 있습니다.</dd></div>
+        <div><dt>계약 법인 소재국과 처리 위치</dt><dd>{processors.google.country}</dd></div>
         <div><dt>처리 목적</dt><dd>{processors.google.purpose}</dd></div>
         <div><dt>보유·이용 기간</dt><dd>{processors.google.retention}</dd></div>
       </dl>
+      <p>Business Starter에는 명로가 한국 저장 리전을 지정하지 않았습니다. 아래 국가는 공개 자료 기준 처리 가능 위치이며 모든 처리자가 모든 문의를 처리하거나 모든 국가에 저장되는 것은 아닙니다. 국내 처리 가능 위치인 대한민국은 국외 국가와 구분합니다.</p>
+      <div className="consent-table-wrapper">
+        <table className="consent-processing-table consent-processor-table">
+          <caption>Google Workspace 문의 메일 처리 역할과 처리 가능 국가</caption>
+          <thead>
+            <tr>
+              <th scope="col">역할·처리자</th>
+              <th scope="col">국외 처리 가능 국가</th>
+              <th scope="col">국내 처리 가능 위치</th>
+              <th scope="col">목적·적용 조건</th>
+            </tr>
+          </thead>
+          <tbody>
+            {PRIVACY_INQUIRY_EMAIL_PROCESSING.processingRoles.map((entry) => (
+              <tr key={entry.id}>
+                <th scope="row">{entry.role}<br />{entry.processors}</th>
+                <td>{entry.countries.filter((country) => country !== "대한민국").join(", ")}</td>
+                <td>{entry.countries.some((country) => country === "대한민국") ? "대한민국" : "해당 역할의 공개 위치 없음"}</td>
+                <td>{entry.purpose}. {entry.condition}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <p>
-        Google의 서비스 제공 법인·글로벌 처리와 삭제 절차는 {" "}
-        <a href={processors.google.sourceUrls.terms} rel="noreferrer" target="_blank">Google 서비스 약관</a>, {" "}
-        <a href={processors.google.sourceUrls.privacy} rel="noreferrer" target="_blank">개인정보처리방침</a>, {" "}
-        <a href={processors.google.sourceUrls.retention} rel="noreferrer" target="_blank">데이터 보유기간 안내</a>
-        에서 확인할 수 있습니다. 최종 확인일은 {PRIVACY_INQUIRY_EMAIL_PROCESSING.verifiedAt}입니다.
+        수령 법인은 <a href={processors.google.sourceUrls.contractingParty} rel="noreferrer" target="_blank">Google 계약 법인 안내</a>, {" "}
+        적용 처리자의 이름·국가·업무는 <a href={processors.google.sourceUrls.subprocessors} rel="noreferrer" target="_blank">Google Workspace 공식 하위처리자 목록</a>, {" "}
+        저장 인프라는 <a href={processors.google.sourceUrls.dataCenters} rel="noreferrer" target="_blank">Google 공개 데이터센터 위치</a>를 참고합니다. {" "}
+        AppSheet와 명로가 사용하지 않는 Assured Support 전용 업무 및 개발 중인 데이터센터는 위 표에서 제외했습니다.
+        하위처리자 원문 갱신일 {PRIVACY_INQUIRY_EMAIL_PROCESSING.sourceUpdatedAt} · 명로 최종 확인일 {PRIVACY_INQUIRY_EMAIL_PROCESSING.verifiedAt}.
       </p>
+      <p>관리자 복구와 공급자 삭제 완료 기간은 <a href={processors.google.sourceUrls.recovery} rel="noreferrer" target="_blank">Google Workspace 복구·삭제 안내</a>와 {" "}
+        <a href={processors.google.sourceUrls.cdpa} rel="noreferrer" target="_blank">Google Cloud 데이터 처리 부속약정(CDPA) 제6조</a>를 따릅니다. 명로의 최대 30일 보관 상한은 모든 공급자 사본이 30일 안에 물리적으로 삭제된다는 뜻이 아닙니다.</p>
     </>
   );
 }

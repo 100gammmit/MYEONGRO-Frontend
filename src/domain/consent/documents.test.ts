@@ -7,28 +7,58 @@ import {
   OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
   OPENAI_TRANSFER_SNAPSHOT,
   PRIVACY_INQUIRY_EMAIL_PROCESSING,
+  PRIVACY_DOCUMENT_EFFECTIVE_DATE,
+  PRIVACY_DOCUMENT_VERSION,
 } from "./documents";
 
 describe("privacy inquiry email processing", () => {
-  it("records Cloudflare routing and the personal Gmail destination separately", () => {
-    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.cloudflare).toMatchObject({
-      name: "Cloudflare, Inc.",
-      contact: "privacyquestions@cloudflare.com",
-    });
-    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.cloudflare.retention)
-      .toContain("최대 31일");
+  it("records the Workspace contracting entity and direct mail path", () => {
+    expect(Object.keys(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors)).toEqual(["google"]);
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google).toMatchObject({
-      name: "Google LLC",
-      country: "미국 등 Google 데이터센터 소재국",
+      name: "Google Asia Pacific Pte. Ltd.",
+      address: "70 Pasir Panjang Road, #03-71, Mapletree Business City II Singapore 117371",
+      contactUrl: "https://support.google.com/a/contact/googlecloud_dpr",
     });
-    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.retention)
-      .toContain("일반적으로 약 2개월");
-    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.retention)
-      .toContain("최대 6개월");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.country).toContain("싱가포르");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.method).toContain("직접 수신·저장·회신");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.items).toContain("메일 인증 및 전달 정보");
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention)
-      .toContain("완료한 날부터 30일");
+      .toContain("완료한 날부터 최대 30일 이내");
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalEffect)
       .toContain("이메일을 통한 문의·권리행사");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.verifiedAt).toBe("2026-10-06");
+    expect(PRIVACY_DOCUMENT_VERSION).toBe("2026-10-06");
+    expect(PRIVACY_DOCUMENT_EFFECTIVE_DATE).toBe("2026-10-06");
+  });
+
+  it("separates the operator deadline, administrator recovery and CDPA deletion instruction", () => {
+    const { retention, sourceUrls } = PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google;
+    expect(retention).toContain("최대 25일의 관리자 복구 가능 기간");
+    expect(retention).toContain("고객이 복구할 수 없는 상태의 삭제 지시 후");
+    expect(retention).toContain("최대 180일 이내");
+    expect(retention).toContain("법령상 보존 예외");
+    expect(retention).toContain("통상적인 운영 목적으로 복구하지 않음");
+    expect(sourceUrls.cdpa).toBe("https://cloud.google.com/terms/data-processing-addendum");
+    expect(sourceUrls.subprocessors).toBe("https://workspace.google.com/intl/en/terms/subprocessors/");
+    expect(sourceUrls.recovery).toBe("https://workspace.google.com/learn-more/security/security-whitepaper/data-recovery/");
+  });
+
+  it("keeps dated processing-country groups and their conditional access boundaries", () => {
+    const { processingRoles, sourceUpdatedAt } = PRIVACY_INQUIRY_EMAIL_PROCESSING;
+    expect(sourceUpdatedAt).toBe("2026-07-23");
+    expect(processingRoles.map((entry) => entry.id))
+      .toEqual(["data-centers", "maintenance", "support", "security"]);
+    expect(processingRoles.map((entry) => entry.countries.length)).toEqual([14, 26, 33, 3]);
+    for (const entry of processingRoles) {
+      expect(new Set(entry.countries).size).toBe(entry.countries.length);
+    }
+    expect(processingRoles[0].countries).toEqual(expect.arrayContaining(["독일", "영국"]));
+    expect(processingRoles[0].countries).not.toContain("우루과이");
+    expect(processingRoles[1].countries).toContain("대한민국");
+    expect(processingRoles[2].countries).toEqual(expect.arrayContaining(["대한민국", "콜롬비아", "엘살바도르"]));
+    expect(processingRoles[2].condition).toContain("명시적으로 허용");
+    expect(processingRoles[3].countries).toEqual(["인도", "필리핀", "미국"]);
+    expect(processingRoles[3].condition).toContain("의심스러운 검색어");
   });
 });
 
