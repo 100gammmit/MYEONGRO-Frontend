@@ -154,8 +154,8 @@ describe("TarotExperience", () => {
 
     render(<TarotExperience />);
 
-    expect(screen.getByText("어떤 마음을 들여다볼까요?")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
+    expect(screen.getByText("어떤 고민을 살펴볼까요?")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
     expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
     expect(screen.getByText("시작하기 전에")).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe("TarotExperience", () => {
   it("blocks a verifiable identifier in the browser before the draw or API request", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: /마음 정리/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /고민 리딩/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
 
     const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
@@ -229,7 +229,7 @@ describe("TarotExperience", () => {
     credits.state.status = "idle";
     render(<TarotExperience />);
 
-    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
+    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
     const start = screen.getByRole("button", { name: "이 유형으로 시작" });
     expect(start).toBeEnabled();
     fireEvent.click(start);
@@ -249,7 +249,7 @@ describe("TarotExperience", () => {
     render(<TarotExperience />);
 
     expect(credits.requestPricing).toHaveBeenCalled();
-    expect(screen.getByText(/카드 3장.*감정 정리.*2 크레딧/)).toBeInTheDocument();
+    expect(screen.getByText(/카드 3장.*고민의 다음 전개.*2 크레딧/)).toBeInTheDocument();
     expect(screen.getByText(/카드 5장.*선택 A와 B 비교.*3 크레딧/)).toBeInTheDocument();
     expect(screen.queryByText(/… 크레딧/)).not.toBeInTheDocument();
   });
@@ -319,7 +319,7 @@ describe("TarotExperience", () => {
   it("blocks a new spread while another reading is generating", async () => {
     credits.state.data.generationInProgress = true;
     render(<TarotExperience />);
-    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
+    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
 
     expect(await screen.findByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
     expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
@@ -328,9 +328,9 @@ describe("TarotExperience", () => {
   it("keeps costs and spread entry available while credits refresh", () => {
     credits.state.status = "loading";
     render(<TarotExperience />);
-    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
+    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
 
-    expect(screen.getByText(/카드 3장.*감정 정리.*2 크레딧/)).toBeInTheDocument();
+    expect(screen.getByText(/카드 3장.*고민의 다음 전개.*2 크레딧/)).toBeInTheDocument();
     expect(screen.queryByText(/… 크레딧/)).not.toBeInTheDocument();
     expect(screen.getByText("2크레딧 사용 · 현재 10크레딧")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "이 유형으로 시작" })).toBeEnabled();
@@ -339,7 +339,7 @@ describe("TarotExperience", () => {
   it("blocks spread entry and offers retry when credit refresh fails after prior data", async () => {
     credits.state.status = "error";
     render(<TarotExperience />);
-    fireEvent.click(screen.getByRole("button", { name: /마음 정리/ }));
+    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
 
     expect(await screen.findByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
     expect(screen.getByRole("alert")).toHaveTextContent("크레딧을 확인하지 못했어요");

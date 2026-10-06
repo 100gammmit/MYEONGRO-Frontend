@@ -17,13 +17,13 @@ export type ReadingModeNoticeCopy = { headline: string; body: string };
 const REDIRECT_BODY =
   "중대한 결정이 걸린 질문은 명로가 대신 답할 수 없어요. 결정은 직접 내려 주시고, 리딩은 흐름만 참고해 주세요.";
 
-const REDIRECTED_CHOICE_LABELS: Record<string, string> = {
+const FORTUNE_POSITION_LABELS: Record<string, string> = {
   emotion: "현재의 운",
-  underlying_need: "흐름을 움직이는 요인",
-  self_action: "앞으로의 방향",
-  my_heart: "운의 출발점",
-  relationship_flow: "이어지는 흐름",
-  check_point: "주의할 지점",
+  underlying_need: "운에 영향을 주는 요인",
+  self_action: "앞으로의 운",
+  my_heart: "현재의 운",
+  relationship_flow: "운에 영향을 주는 요인",
+  check_point: "앞으로의 운",
   desire: "바라는 흐름",
   fear: "주의할 흐름",
   core_value: "중심이 되는 힘",
@@ -107,5 +107,5 @@ export function tarotPositionLabel(
   position: string,
   defaultLabel: string,
 ): string {
-  return mode === "standard" ? defaultLabel : REDIRECTED_CHOICE_LABELS[position] ?? defaultLabel;
+  return mode === "standard" ? defaultLabel : FORTUNE_POSITION_LABELS[position] ?? defaultLabel;
 }

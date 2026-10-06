@@ -145,6 +145,11 @@ describe("TarotReadingResult", () => {
     expect(container.querySelectorAll(".tarot-card-caption.shown")).toHaveLength(3);
     expect(screen.getByRole("link", { name: "← 내 기록" })).toHaveAttribute("href", "/records");
     expect(screen.getByText("2026. 9. 15.")).toBeInTheDocument();
+    expect(screen.getByText("고민 리딩")).toBeInTheDocument();
+    for (const position of definition.positions) {
+      expect(screen.getByText(position.label)).toBeInTheDocument();
+    }
+    expect(screen.getAllByText("천천히 살펴보세요.")).toHaveLength(3);
     expect(container.querySelector(".progress-track")).toBeNull();
     expect(screen.getByText("오늘의 리딩")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "기록 삭제" })).toBeInTheDocument();
@@ -212,8 +217,8 @@ describe("TarotReadingResult", () => {
   });
 
   it.each([
-    ["mind_three_card", "health_fortune", "현재의 운", "지금의 감정"],
-    ["relationship_three_card", "money_fortune", "운의 출발점", "내가 가져온 마음"],
+    ["mind_three_card", "health_fortune", "현재의 운", "지금의 상황"],
+    ["relationship_three_card", "money_fortune", "현재의 운", "내가 바라는 관계"],
   ] as const)("uses fortune labels for redirected %s readings", (spreadType, readingMode, label, oldLabel) => {
     const definition = TAROT_SPREADS[spreadType];
     render(
@@ -237,7 +242,11 @@ describe("TarotReadingResult", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "첫 카드 공개" }));
+    fireEvent.click(screen.getByRole("button", { name: "다음 카드 공개" }));
+    fireEvent.click(screen.getByRole("button", { name: "다음 카드 공개" }));
     expect(screen.getByText(label)).toBeInTheDocument();
+    expect(screen.getByText("운에 영향을 주는 요인")).toBeInTheDocument();
+    expect(screen.getByText("앞으로의 운")).toBeInTheDocument();
     expect(screen.queryByText(oldLabel)).not.toBeInTheDocument();
   });
 });

@@ -321,7 +321,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
 
   if (phase === "spread") {
     return (
-      <ReadingShell eyebrow="AI TAROT" title="어떤 마음을 들여다볼까요?" step={1} totalSteps={4}>
+      <ReadingShell eyebrow="AI TAROT" title="어떤 고민을 살펴볼까요?" step={1} totalSteps={4}>
         <ul className="spread-grid">
           {TAROT_SPREAD_LIST.map((spread) => (
             <li key={spread.id}>

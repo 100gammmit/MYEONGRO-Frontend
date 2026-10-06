@@ -19,11 +19,20 @@ describe("reading mode", () => {
   it("provides neutral choice labels for fortune readings", () => {
     expect(tarotPositionLabel("money_fortune", "option_a", "선택 A"))
       .toBe("운을 돕는 요소");
-    expect(tarotPositionLabel("health_fortune", "emotion", "지금의 감정"))
+    expect(tarotPositionLabel("health_fortune", "emotion", "지금의 상황"))
       .toBe("현재의 운");
-    expect(tarotPositionLabel("career_life_fortune", "relationship_flow", "관계에서 드러난 흐름"))
-      .toBe("이어지는 흐름");
+    expect(tarotPositionLabel("career_life_fortune", "relationship_flow", "현재의 관계 흐름"))
+      .toBe("운에 영향을 주는 요인");
     expect(tarotPositionLabel("standard", "option_a", "선택 A")).toBe("선택 A");
+  });
+
+  it("gives both three-card spreads the same roles in every fortune mode", () => {
+    for (const mode of ["health_fortune", "money_fortune", "relationship_fortune", "career_life_fortune"] as const) {
+      for (const positions of [["emotion", "underlying_need", "self_action"], ["my_heart", "relationship_flow", "check_point"]]) {
+        expect(positions.map((position) => tarotPositionLabel(mode, position, "standard label")))
+          .toEqual(["현재의 운", "운에 영향을 주는 요인", "앞으로의 운"]);
+      }
+    }
   });
 
   it("explains a redirected decision question for every fortune, and nothing for an explicit request", () => {
