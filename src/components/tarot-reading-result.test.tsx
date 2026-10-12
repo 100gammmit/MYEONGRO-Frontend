@@ -212,7 +212,10 @@ describe("TarotReadingResult", () => {
     }
 
     expect(screen.getByText(/명로가 대신 답할 수 없어요\./)).toBeInTheDocument();
-    expect(screen.getByText("운을 돕는 요소")).toBeInTheDocument();
+    expect(screen.getByText("첫 번째 조건")).toBeInTheDocument();
+    expect(screen.getByText("두 번째 조건")).toBeInTheDocument();
+    expect(screen.queryByText("운을 돕는 요소")).not.toBeInTheDocument();
+    expect(screen.queryByText("운을 막는 요소")).not.toBeInTheDocument();
     expect(screen.queryByText("선택 A")).not.toBeInTheDocument();
   });
 

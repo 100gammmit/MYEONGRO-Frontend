@@ -27,8 +27,8 @@ const FORTUNE_POSITION_LABELS: Record<string, string> = {
   desire: "바라는 흐름",
   fear: "주의할 흐름",
   core_value: "중심이 되는 힘",
-  option_a: "운을 돕는 요소",
-  option_b: "운을 막는 요소",
+  option_a: "첫 번째 조건",
+  option_b: "두 번째 조건",
 };
 
 export function parseReadingMode(value: unknown): ReadingMode | null {

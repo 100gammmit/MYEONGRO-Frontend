@@ -17,13 +17,18 @@ describe("reading mode", () => {
   });
 
   it("provides neutral choice labels for fortune readings", () => {
-    expect(tarotPositionLabel("money_fortune", "option_a", "선택 A"))
-      .toBe("운을 돕는 요소");
+    for (const mode of ["health_fortune", "money_fortune", "relationship_fortune", "career_life_fortune"] as const) {
+      expect(tarotPositionLabel(mode, "option_a", "선택 A"))
+        .toBe("첫 번째 조건");
+      expect(tarotPositionLabel(mode, "option_b", "선택 B"))
+        .toBe("두 번째 조건");
+    }
     expect(tarotPositionLabel("health_fortune", "emotion", "지금의 상황"))
       .toBe("현재의 운");
     expect(tarotPositionLabel("career_life_fortune", "relationship_flow", "현재의 관계 흐름"))
       .toBe("운에 영향을 주는 요인");
     expect(tarotPositionLabel("standard", "option_a", "선택 A")).toBe("선택 A");
+    expect(tarotPositionLabel("standard", "option_b", "선택 B")).toBe("선택 B");
   });
 
   it("gives both three-card spreads the same roles in every fortune mode", () => {
