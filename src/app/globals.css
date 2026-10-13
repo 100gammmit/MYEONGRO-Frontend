@@ -198,7 +198,7 @@ h1, h2, h3, blockquote {
 .service-update-date { color: var(--text-subtle); font-variant-numeric: tabular-nums; }
 
 .eyebrow { color: var(--text-accent); letter-spacing: .28em; font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; margin: 0 0 20px; text-transform: uppercase; }
-.primary-button, .secondary-button { border: 0; display: inline-flex; align-items: center; justify-content: space-between; gap: 28px; padding: 16px 22px; background: var(--accent-cta); color: var(--text-inverse); font-weight: 700; border-radius: var(--radius-sm); transition: .2s ease; }
+.primary-button, .secondary-button { border: 0; display: inline-flex; align-items: center; justify-content: center; gap: 28px; padding: 16px 22px; background: var(--accent-cta); color: var(--text-inverse); font-weight: 700; border-radius: var(--radius-sm); transition: .2s ease; }
 .primary-button:hover { background: var(--accent-cta-hover); transform: translateY(-1px); box-shadow: var(--glow-cta); }
 .primary-button:disabled { cursor: not-allowed; transform: none; box-shadow: none; background: var(--surface-segment); color: var(--text-subtle); }
 .secondary-button { background: var(--surface-tint-2); color: var(--text-primary); border: 1px solid var(--border-strong); }
@@ -320,7 +320,7 @@ h1, h2, h3, blockquote {
 .method-closing { padding: 70px 0 78px; border-top: 1px solid var(--border-default); text-align: center; }
 .method-closing h2 { margin: 0; font-size: 32px; line-height: 1.4; letter-spacing: -.035em; }
 .method-closing > div > div { display: flex; justify-content: center; gap: 12px; margin-top: 30px; }
-.method-closing .primary-button, .method-closing .secondary-button { min-width: 168px; justify-content: center; }
+.method-closing .primary-button, .method-closing .secondary-button { min-width: 168px; }
 .method-daily-link { display: inline-flex; min-height: 44px; align-items: center; margin-top: 16px; color: var(--text-muted); font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
 .reading-method-page a { transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease; }
 .reading-method-page a:focus-visible { border-radius: var(--radius-xs); box-shadow: var(--focus-ring); }
@@ -575,8 +575,8 @@ h1, h2, h3, blockquote {
 .revealed-card { max-width: 190px; margin: 15px auto 22px; }
 .result-actions { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
 .wizard-nav { display: flex; gap: 10px; }
-.wizard-nav .secondary-button { flex: 0 0 120px; justify-content: center; }
-.wizard-nav .primary-button { flex: 1; justify-content: center; }
+.wizard-nav .secondary-button { flex: 0 0 120px; }
+.wizard-nav .primary-button { flex: 1; }
 .reading-actions .credit-notice { margin: 0; }
 .pillars { display: grid; grid-template-columns: repeat(4,1fr); max-width: var(--w-read); margin: 42px auto; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; background: var(--surface-tint-1); }
 .pillars div { text-align: center; padding: 26px 10px; border-right: 1px solid var(--border-default); }

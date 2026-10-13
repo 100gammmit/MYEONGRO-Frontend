@@ -39,6 +39,8 @@ export interface TarotSpreadDefinition {
   readonly metaLabel: string;
   readonly cardCount: 1 | 3 | 5;
   readonly inputMode: "fixed" | "question" | "choice";
+  /** Placeholder shown in the question box; free daily cards take no question. */
+  readonly questionExample?: string;
   readonly positions: readonly TarotPositionDefinition[];
 }
 
@@ -65,6 +67,7 @@ export const TAROT_SPREADS: Readonly<Record<TarotSpreadType, TarotSpreadDefiniti
     metaLabel: "카드 3장 · 고민의 다음 전개",
     cardCount: 3,
     inputMode: "question",
+    questionExample: "예시) 요즘 이직 준비가 자꾸 미뤄지는데 앞으로 어떻게 흘러갈까요?",
     positions: [
       {
         id: "emotion",
@@ -90,6 +93,7 @@ export const TAROT_SPREADS: Readonly<Record<TarotSpreadType, TarotSpreadDefiniti
     metaLabel: "카드 3장 · 대인관계 살펴보기",
     cardCount: 3,
     inputMode: "question",
+    questionExample: "예시) 연락이 뜸해진 친구와의 관계가 앞으로 어떻게 될까요?",
     positions: [
       {
         id: "my_heart",
@@ -115,6 +119,7 @@ export const TAROT_SPREADS: Readonly<Record<TarotSpreadType, TarotSpreadDefiniti
     metaLabel: "카드 5장 · 선택 A와 B 비교",
     cardCount: 5,
     inputMode: "choice",
+    questionExample: "예시) 주말에 새 취미를 시작할지, 쉬는 시간을 늘릴지 고민돼요.",
     positions: [
       {
         id: "desire",

@@ -2,6 +2,8 @@
 
 import type { ReadingCreditAccess } from "@/domain/reading-credit";
 
+export const INSUFFICIENT_CREDITS_MESSAGE = "크레딧이 부족합니다. 내일 다시 시도해 주세요.";
+
 export function ReadingCreditAccessNotice({
   access,
   onRetry,
@@ -20,10 +22,7 @@ export function ReadingCreditAccessNotice({
   }
   if (access.status === "insufficient") {
     return (
-      <p className="credit-notice" role="alert">
-        이 리딩에는 {access.required}크레딧이 필요한데 지금 {access.remaining}크레딧이 남아 있어요.
-        크레딧은 내일 0시에 다시 채워지니, 내일 다시 시도해 주세요.
-      </p>
+      <p className="credit-notice" role="alert">{INSUFFICIENT_CREDITS_MESSAGE}</p>
     );
   }
   return (

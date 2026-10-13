@@ -28,7 +28,7 @@ describe("ReadingCreditAccessNotice", () => {
     />);
 
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "이 리딩에는 4크레딧이 필요한데 지금 2크레딧이 남아 있어요. 크레딧은 내일 0시에 다시 채워지니, 내일 다시 시도해 주세요.",
+      "크레딧이 부족합니다. 내일 다시 시도해 주세요.",
     );
   });
 });

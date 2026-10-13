@@ -229,8 +229,7 @@ describe("SajuExperience", () => {
     render(<SajuExperience />);
 
     expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
-    expect(screen.getByRole("alert")).toHaveTextContent("4크레딧이 필요");
-    expect(screen.getByRole("alert")).toHaveTextContent("내일 다시 시도해 주세요");
+    expect(screen.getByRole("alert")).toHaveTextContent("크레딧이 부족합니다. 내일 다시 시도해 주세요.");
     fillQuestion();
     expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();

@@ -34,7 +34,7 @@ import {
 
 import { ReadingLoading } from "./reading-loading";
 import { ConsentGate } from "./consent-gate";
-import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
+import { INSUFFICIENT_CREDITS_MESSAGE, ReadingCreditAccessNotice } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 
@@ -405,7 +405,7 @@ export function SajuExperience() {
       error.code === "READING_GENERATION_IN_PROGRESS"
         ? "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요."
         : error.code === "INSUFFICIENT_READING_CREDITS"
-          ? "크레딧이 부족해요. 크레딧은 내일 0시에 다시 채워지니, 내일 다시 시도해 주세요."
+          ? INSUFFICIENT_CREDITS_MESSAGE
           : error.message || "리딩 요청을 처리하지 못했어요.",
     );
     setPhase("review");
@@ -493,7 +493,7 @@ export function SajuExperience() {
               aria-invalid={Boolean(fieldErrors.question)}
               maxLength={MAX_QUESTION_LENGTH}
               onChange={(event) => updateForm({ question: event.target.value })}
-              placeholder={selectedFocus?.example ?? "지금 가장 궁금한 한 가지를 적어주세요."}
+              placeholder={selectedFocus ? `예시) ${selectedFocus.example}` : "지금 가장 궁금한 한 가지를 적어주세요."}
               value={form.question}
             />
             <p className="field-guidance" id="saju-question-guidance">

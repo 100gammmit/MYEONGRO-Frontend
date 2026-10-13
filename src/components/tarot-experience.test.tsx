@@ -312,8 +312,7 @@ describe("TarotExperience", () => {
 
     expect(screen.getByText(/카드 5장.*3 크레딧/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
-    expect(screen.getByRole("alert")).toHaveTextContent("지금 2크레딧이 남아 있어요");
-    expect(screen.getByRole("alert")).toHaveTextContent("내일 다시 시도해 주세요");
+    expect(screen.getByRole("alert")).toHaveTextContent("크레딧이 부족합니다. 내일 다시 시도해 주세요.");
   });
 
   it("blocks a new spread while another reading is generating", async () => {

@@ -22,7 +22,7 @@ import {
 import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
 import { ConsentGate } from "./consent-gate";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
-import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
+import { INSUFFICIENT_CREDITS_MESSAGE, ReadingCreditAccessNotice } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingLoading, type ReadingLoadingMessages } from "./reading-loading";
 import { ReadingShell } from "./reading-shell";
@@ -383,7 +383,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
                 setQuestion(event.target.value);
                 clearInputError("question");
               }}
-              placeholder="지금 들여다보고 싶은 상황을 적어주세요."
+              placeholder={definition.questionExample}
             />
             <p className="field-guidance" id="tarot-question-guidance">
               개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문과 선택지는 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
@@ -404,6 +404,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
                   aria-invalid={inputErrorField === "choiceOptions.a"}
                   aria-label="선택 A"
                   maxLength={MAX_CHOICE_LENGTH}
+                  placeholder="예시) 새 취미 시작하기"
                   ref={choiceAInputRef}
                   value={choiceOptions.a}
                   onChange={(event) => {
@@ -422,6 +423,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
                   aria-invalid={inputErrorField === "choiceOptions.b"}
                   aria-label="선택 B"
                   maxLength={MAX_CHOICE_LENGTH}
+                  placeholder="예시) 쉬는 시간 늘리기"
                   ref={choiceBInputRef}
                   value={choiceOptions.b}
                   onChange={(event) => {
@@ -521,7 +523,7 @@ function readingErrorMessage(status: number, error: ApiError): string | undefine
     return "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요.";
   }
   if (error.code === "INSUFFICIENT_READING_CREDITS") {
-    return "크레딧이 부족해요. 크레딧은 내일 0시에 다시 채워지니, 내일 다시 시도해 주세요.";
+    return INSUFFICIENT_CREDITS_MESSAGE;
   }
   return READING_ERROR_MESSAGES[status];
 }
