@@ -189,10 +189,6 @@ export function SajuExperience() {
     credits.state.status === "idle" || displayedCredits.loading,
     creditCost,
   );
-  // Blocking states surface at the top of the question step; allowed and loading stay next to the button.
-  const creditBlocked = creditAccess.status === "insufficient"
-    || creditAccess.status === "generation-in-progress"
-    || creditAccess.status === "unavailable";
   const questionReady = isQuestionReady(form);
 
   const redirectToLogin = useCallback(() => {
@@ -442,9 +438,7 @@ export function SajuExperience() {
         showHomeLink={false}
         actions={(
           <>
-            {creditBlocked ? null : (
-              <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
-            )}
+            <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
             <button
               className="primary-button full-button"
               disabled={!questionReady || creditAccess.status !== "allowed"}
@@ -456,9 +450,6 @@ export function SajuExperience() {
           </>
         )}
       >
-        {creditBlocked ? (
-          <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
-        ) : null}
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
           <fieldset
