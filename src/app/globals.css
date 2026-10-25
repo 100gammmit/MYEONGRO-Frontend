@@ -404,6 +404,9 @@ h1, h2, h3, blockquote {
 .credit-notice { max-width: var(--w-read); margin: 14px auto; color: var(--text-secondary); text-align: center; font-size: 13px; line-height: 1.6; }
 .credit-notice p { margin: 0 0 10px; }
 .credit-notice .secondary-button { margin: auto; padding: 10px 15px; }
+/* Match the 10px notice-to-button gap that .reading-actions gives the saju steps. */
+.credit-notice:has(+ .narrow-button) { margin-bottom: 0; }
+.credit-notice + .narrow-button { margin-top: 10px; }
 .saju-option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .saju-option { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 12px; padding: 16px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); cursor: pointer; transition: border-color .2s ease, background .2s ease; }
 .saju-option:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-tint-3); }
