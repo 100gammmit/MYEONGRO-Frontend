@@ -103,7 +103,8 @@ describe("ReadingDetailPage", () => {
     expect(container.querySelectorAll(".card-flip-inner")).toHaveLength(3);
     expect(container.querySelectorAll(".card-flip-inner.flipped")).toHaveLength(3);
     expect(container.querySelector(".progress-track")).toBeNull();
-    expect(screen.getByText("서두르지 마세요.")).toBeInTheDocument();
+    expect(screen.queryByText("서두르지 마세요.")).not.toBeInTheDocument();
+    expect(screen.getByText("천천히 확인할 시기입니다.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "기록 삭제" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "내 기록 보기" })).not.toBeInTheDocument();
   });

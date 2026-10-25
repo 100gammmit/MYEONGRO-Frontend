@@ -144,10 +144,6 @@ export function TarotReadingResult({
             <h2>{result.title}</h2>
             <p>{result.summary}</p>
           </div>
-          <section className="reading-guidance">
-            <h3>오늘부터 시도할 작은 행동</h3>
-            <ul>{result.guidance.map((item) => <li key={item}>{item}</li>)}</ul>
-          </section>
           <p className="reading-disclaimer">{result.disclaimer}</p>
           {record ? record.footer : (
             <div className="result-actions">

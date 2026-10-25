@@ -22,7 +22,6 @@ describe("TarotReadingResult", () => {
             heading: "마음의 흐름",
             body: "천천히 살펴보세요.",
           })),
-          guidance: ["작은 행동을 시작하세요."],
           disclaimer: "자기 성찰을 위한 참고 정보입니다.",
         }}
         spreadType="mind_three_card"
@@ -34,6 +33,7 @@ describe("TarotReadingResult", () => {
     fireEvent.click(screen.getByRole("button", { name: "다음 카드 공개" }));
 
     expect(screen.getByText("오늘의 리딩")).toBeInTheDocument();
+    expect(screen.queryByText("오늘부터 시도할 작은 행동")).not.toBeInTheDocument();
     expect(screen.getByLabelText("생성형 AI 사용 안내")).toHaveTextContent(AI_GENERATED_NOTICE);
     expect(screen.getByRole("link", { name: "새로운 리딩 시작" }))
       .toHaveAttribute("href", "/tarot");
@@ -56,7 +56,6 @@ describe("TarotReadingResult", () => {
             heading: "마음의 흐름",
             body: "천천히 살펴보세요.",
           })),
-          guidance: ["작은 행동을 시작하세요."],
           disclaimer: "자기 성찰을 위한 참고 정보입니다.",
         }}
         spreadType="mind_three_card"
@@ -97,7 +96,6 @@ describe("TarotReadingResult", () => {
             heading: "마음의 흐름",
             body: "천천히 살펴보세요.",
           })),
-          guidance: ["작은 행동을 시작하세요."],
           disclaimer: "자기 성찰을 위한 참고 정보입니다.",
         }}
         spreadType="mind_three_card"
@@ -133,7 +131,6 @@ describe("TarotReadingResult", () => {
             heading: "마음의 흐름",
             body: "천천히 살펴보세요.",
           })),
-          guidance: ["작은 행동을 시작하세요."],
           disclaimer: "자기 성찰을 위한 참고 정보입니다.",
         }}
         spreadType="mind_three_card"
@@ -171,7 +168,6 @@ describe("TarotReadingResult", () => {
             heading: "흐름",
             body: "카드 해석",
           })),
-          guidance: ["지출 한도를 먼저 정해 두세요."],
           disclaimer: "오락과 자기 성찰을 위한 참고입니다.",
         }}
         spreadType="choice_five_card"
@@ -200,7 +196,6 @@ describe("TarotReadingResult", () => {
             heading: "흐름",
             body: "카드 해석",
           })),
-          guidance: ["지출 한도를 먼저 정해 두세요."],
           disclaimer: "오락과 자기 성찰을 위한 참고입니다.",
         }}
         spreadType="choice_five_card"
@@ -237,7 +232,6 @@ describe("TarotReadingResult", () => {
             heading: "흐름",
             body: "카드 해석",
           })),
-          guidance: ["오늘 할 수 있는 한 가지를 정하세요."],
           disclaimer: "오락과 자기 성찰을 위한 참고입니다.",
         }}
         spreadType={spreadType}

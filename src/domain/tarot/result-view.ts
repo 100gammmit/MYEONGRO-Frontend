@@ -19,7 +19,6 @@ export type TarotReadingResultData = {
     heading: string;
     body: string;
   }>;
-  guidance: string[];
   disclaimer: string;
 };
 
@@ -66,8 +65,7 @@ export function parseTarotResultView(reading: StoredTarotReading): TarotResultVi
     || cards.length !== definition.cardCount
     || !Array.isArray(result.sections)
     || result.sections.length !== definition.cardCount
-    || !Array.isArray(result.guidance)
-    || result.guidance.some((item) => typeof item !== "string")
+    || (result.resultType !== undefined && result.resultType !== "reading")
     || typeof result.title !== "string"
     || typeof result.summary !== "string"
     || typeof result.disclaimer !== "string"
@@ -116,7 +114,6 @@ export function parseTarotResultView(reading: StoredTarotReading): TarotResultVi
       title: result.title,
       summary: result.summary,
       sections,
-      guidance: result.guidance,
       disclaimer: result.disclaimer,
     },
   };

@@ -687,11 +687,11 @@ h1, h2, h3, blockquote {
 .saju-reading-sections { display: grid; gap: 16px; }
 .saju-reading-sections section { padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-tint-1); }
 .saju-reading-sections h2 { margin: 0 0 14px; font-size: 25px; font-weight: 300; }
-.saju-reading-sections p, .saju-guidance li, .saju-limitations p { color: var(--text-secondary); line-height: 1.85; }
+.saju-reading-sections p, .saju-reading-summary p, .saju-limitations p { color: var(--text-secondary); line-height: 1.85; }
 .saju-evidence { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-default); }
 .saju-evidence ul { margin-bottom: 0; padding-left: 20px; color: var(--text-muted); font-size: 13px; line-height: 1.8; }
-.saju-guidance { margin: 36px 0 16px; padding: 30px; border: 1px solid var(--border-strong); border-radius: var(--radius-lg); }
-.saju-guidance h2, .saju-limitations h2 { margin-top: 0; font-weight: 300; }
+.saju-reading-summary { margin: 36px 0 16px; padding: 30px; border: 1px solid var(--border-strong); border-radius: var(--radius-lg); }
+.saju-reading-summary h2, .saju-limitations h2 { margin-top: 0; font-weight: 300; }
 .saju-limitations { padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); }
 .saju-limitations article + article { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--border-default); }
 .saju-limitations h3 { margin: 0 0 8px; font-size: 16px; }
@@ -828,7 +828,7 @@ h1, h2, h3, blockquote {
   .saju-limitation-summary { align-items: flex-start; flex-direction: column; }
   .saju-result-toc, .saju-calculation-facts, .saju-calculation-meta dl { grid-template-columns: 1fr; }
   .saju-pillar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .saju-calculation, .saju-reading-sections section, .saju-guidance, .saju-limitations { padding: 22px 20px; }
+  .saju-calculation, .saju-reading-sections section, .saju-reading-summary, .saju-limitations { padding: 22px 20px; }
   .saju-result-actions { flex-direction: column; }
   .saju-result-actions a, .saju-result-actions button { width: 100%; }
   .spread-option { min-height: auto; }

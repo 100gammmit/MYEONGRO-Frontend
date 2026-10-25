@@ -27,8 +27,11 @@ describe("SajuReadingResult", () => {
 
     expect(ids).toEqual([
       "saju-calculation", "saju-core", "saju-strengths", "saju-relationship",
-      "saju-work", "saju-annual", "saju-question", "saju-guidance", "saju-limitations",
+      "saju-work", "saju-annual", "saju-question", "saju-summary", "saju-limitations",
     ]);
+    expect(screen.getByRole("link", { name: "리딩 요약" })).toHaveAttribute("href", "#saju-summary");
+    expect(container.querySelector("#saju-summary")).toHaveTextContent(sajuReadingView().result.summary);
+    expect(screen.queryByText("지금 시도할 작은 행동")).not.toBeInTheDocument();
   });
 
   it("renders confirmed pillars, evidence, limitations, and current luck", () => {

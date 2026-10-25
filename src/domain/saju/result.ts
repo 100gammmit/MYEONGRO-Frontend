@@ -211,9 +211,8 @@ const resultSchema = z.object({
     body: textSchema,
     evidenceKeys: evidenceKeysSchema,
   }).strict(),
-  guidance: z.array(textSchema).min(1).max(2),
   disclaimer: textSchema,
-}).strict().superRefine((result, context) => {
+}).strip().superRefine((result, context) => {
   if (result.questionRedirected && result.readingMode === "standard") {
     context.addIssue({
       code: z.ZodIssueCode.custom,
@@ -321,6 +320,11 @@ export type SajuBirthProfile = z.infer<typeof legacyBirthProfileSchema>
   | z.infer<typeof currentBirthProfileSchema>;
 
 export function parseSajuReadingView(value: unknown): SajuReadingView | null {
+  if (typeof value === "object" && value !== null && "result" in value) {
+    const result = value.result;
+    if (typeof result === "object" && result !== null && "resultType" in result
+      && result.resultType !== "reading") return null;
+  }
   const parsed = completedSajuRecordSchema.safeParse(value);
   return parsed.success ? parsed.data : null;
 }

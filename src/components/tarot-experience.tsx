@@ -52,7 +52,6 @@ type TarotReadingResult = {
   title: string;
   summary: string;
   sections: TarotReadingSection[];
-  guidance: string[];
   disclaimer: string;
 };
 

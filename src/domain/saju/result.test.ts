@@ -192,14 +192,19 @@ describe("parseSajuReadingView", () => {
     expect(parseSajuReadingView(currentKnown)).toBeNull();
   });
 
-  it("accepts one guidance item and rejects more than two", () => {
-    const one = completedSajuRecord();
-    one.result.guidance = ["오늘 할 수 있는 한 가지만 정하세요."];
-    expect(parseSajuReadingView(one)).not.toBeNull();
-
-    const three = completedSajuRecord();
-    three.result.guidance = ["하나", "둘", "셋"];
-    expect(parseSajuReadingView(three)).toBeNull();
+  it("ignores obsolete and unknown normal result fields without compatibility branches", () => {
+    const value = completedSajuRecord();
+    const { guidance: _obsolete, ...normal } = value.result;
+    expect(_obsolete).toBeDefined();
+    expect(parseSajuReadingView({ ...value, result: normal })).not.toBeNull();
+    const parsed = parseSajuReadingView({
+      ...value, result: { ...normal, guidance: 123, unused: "old field" },
+    });
+    expect(parsed).not.toBeNull();
+    expect(parsed?.result).not.toHaveProperty("guidance");
+    expect(parsed?.result).not.toHaveProperty("unused");
+    expect(parseSajuReadingView({ ...value, result: { ...normal, summary: undefined } })).toBeNull();
+    expect(parseSajuReadingView({ ...value, result: { ...normal, resultType: "declined" } })).toBeNull();
   });
 
   it("rejects unsupported versions and mismatched result metadata", () => {

@@ -101,7 +101,6 @@ export function SajuReadingResult({
       <header className="saju-result-hero">
         <p className="eyebrow">AI SAJU · {resultFocusLabel}</p>
         <h1>{view.result.title}</h1>
-        <p>{view.result.summary}</p>
       </header>
 
 
@@ -120,7 +119,7 @@ export function SajuReadingResult({
         {view.result.natalSections.map((section) => <a href={`#saju-${section.id}`} key={section.id}>{section.heading}</a>)}
         <a href="#saju-annual">{view.result.annualReading.heading}</a>
         <a href="#saju-question">질문 리딩</a>
-        <a href="#saju-guidance">지금 시도할 행동</a>
+        <a href="#saju-summary">리딩 요약</a>
         <a href="#saju-limitations">계산 제한사항</a>
       </nav>
 
@@ -178,9 +177,9 @@ export function SajuReadingResult({
         </section>
       </div>
 
-      <section className="reading-guidance saju-guidance" id="saju-guidance">
-        <h2>지금 시도할 작은 행동</h2>
-        <ol>{view.result.guidance.map((item) => <li key={item}>{item}</li>)}</ol>
+      <section className="saju-reading-summary" id="saju-summary">
+        <h2>리딩 요약</h2>
+        <p>{view.result.summary}</p>
       </section>
 
       <section className="saju-limitations" id="saju-limitations">
