@@ -130,6 +130,20 @@ function selectSlots(slots: readonly number[]) {
 }
 
 describe("TarotExperience", () => {
+  it("keeps a drafted question when opening the guide in a new tab", async () => {
+    render(<TarotExperience />);
+    fireEvent.click(await screen.findByRole("button", { name: /고민 리딩/ }));
+    fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
+    const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
+    fireEvent.change(question, { target: { value: "새 프로젝트의 흐름이 궁금합니다." } });
+    const help = screen.getByRole("link", { name: "타로 사용 가이드 (새 탭)" });
+    expect(help).toHaveAttribute("target", "_blank");
+    expect(help).toHaveAttribute("href", "/guide/tarot");
+    fireEvent.click(help);
+    expect(question).toHaveValue("새 프로젝트의 흐름이 궁금합니다.");
+    expect(navigation.push).not.toHaveBeenCalled();
+  });
+
   beforeEach(() => {
     vi.restoreAllMocks();
     navigation.push.mockReset();

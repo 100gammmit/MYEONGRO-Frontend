@@ -139,6 +139,28 @@ async function reachReview(precision: "exact" | "approximate" | "unknown" = "exa
 }
 
 describe("SajuExperience", () => {
+  it("keeps question and birth inputs when opening help in a new tab", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
+    await startWithAcceptedConsent();
+    fillQuestion("올해 일의 흐름이 궁금합니다.");
+    const questionHelp = screen.getByRole("link", { name: "사주 사용 가이드 (새 탭)" });
+    expect(questionHelp).toHaveAttribute("target", "_blank");
+    fireEvent.click(questionHelp);
+    expect(screen.getByRole("textbox", { name: /질문 한 가지/ })).toHaveValue("올해 일의 흐름이 궁금합니다.");
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await screen.findByRole("heading", { name: BIRTH_HEADING });
+    await fillBirth("exact");
+    const birthHelp = screen.getByRole("link", { name: "사주 사용 가이드 (새 탭)" });
+    expect(birthHelp).toHaveAttribute("target", "_blank");
+    expect(birthHelp).toHaveAttribute("href", "/guide/saju");
+    fireEvent.click(birthHelp);
+    expect(screen.getByLabelText("양력 생년월일")).toHaveValue("1992-08-17");
+    expect(screen.getByLabelText("태어난 시각")).toHaveValue("14:30");
+    expect(screen.getByLabelText("출생 시·도")).toHaveValue("36");
+  });
+
   beforeEach(() => {
     vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   });

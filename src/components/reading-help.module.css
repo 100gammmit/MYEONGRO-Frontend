@@ -1,0 +1,41 @@
+.page { width: min(100% - 40px, 820px); margin-inline: auto; padding: 64px 0 80px; }
+.hero { margin-bottom: 36px; }
+.hero h1 { margin: 12px 0 20px; font-size: clamp(30px, 5vw, 44px); line-height: 1.3; }
+.hero p, .section p, .answer p { line-height: 1.85; color: var(--text-secondary); word-break: keep-all; overflow-wrap: anywhere; }
+.summary { padding: 24px; border: 1px solid var(--border-default); border-radius: 16px; background: var(--surface-tint-1); }
+.summary h2 { font-size: 18px; margin: 0 0 12px; }
+.summary ul, .section ul { padding-left: 22px; margin-block: 12px; }
+.summary li, .section li { margin-block: 10px; line-height: 1.8; color: var(--text-secondary); }
+.toc { display: grid; gap: 12px; padding: 24px 0; border-bottom: 1px solid var(--border-default); }
+.toc a, .links a, .answer a, .entry a, .inline a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 4px; line-height: 1.7; }
+.section { padding-block: 32px; border-bottom: 1px solid var(--border-hairline); scroll-margin-top: 100px; }
+.section h2 { font-size: 23px; line-height: 1.5; margin: 0 0 20px; word-break: keep-all; }
+.section p + p, .answer p + p { margin-top: 14px; }
+.example { margin-top: 24px; padding: 24px; border-radius: 12px; background: var(--surface-tint-1); border-left: 3px solid var(--accent-primary); }
+.example h3 { font-size: 18px; margin: 0 0 16px; }
+.example dt { font-size: 13px; color: var(--text-muted); margin-top: 16px; }
+.example dd { margin: 8px 0 0; line-height: 1.85; color: var(--text-secondary); }
+.example p { font-size: 14px; margin-top: 18px; }
+.links { display: flex; flex-wrap: wrap; gap: 14px 24px; margin-top: 20px; }
+.related { margin-top: 36px; }
+.related h2 { font-size: 20px; }
+.start { margin-top: 32px; display: inline-flex; }
+.group { margin-top: 36px; scroll-margin-top: 100px; }
+.group h2 { font-size: 23px; margin-bottom: 16px; }
+.question { border-bottom: 1px solid var(--border-default); scroll-margin-top: 100px; }
+.question:target { outline: 2px solid var(--focus-outline); outline-offset: 5px; border-radius: 4px; }
+.question summary { cursor: pointer; padding: 20px 4px; font-size: 17px; line-height: 1.6; }
+.question summary::marker { color: var(--text-accent); }
+.answer { padding: 0 16px 24px; }
+.entry { padding: 32px 0; }
+.entry h2 { font-size: 23px; margin-bottom: 12px; }
+.entry p { color: var(--text-secondary); line-height: 1.8; }
+.inline { margin: 16px 0 24px; font-size: 14px; }
+@media (max-width: 600px) {
+  .page { width: calc(100% - 32px); padding-block: 36px 60px; }
+  .summary, .example { padding: 20px; }
+  .section h2, .group h2 { font-size: 21px; }
+  .question summary { font-size: 16px; }
+  .answer { padding-inline: 4px; }
+  .start { width: 100%; justify-content: center; }
+}

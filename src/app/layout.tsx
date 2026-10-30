@@ -38,6 +38,9 @@ export default async function RootLayout({
               명로의 해석은 자기 성찰을 위한 콘텐츠이며 중요한 결정을 대신하지 않습니다.
             </p>
             <div>
+              <FooterLink href="/faq">자주 묻는 질문</FooterLink>
+              <FooterLink href="/guide/tarot">타로 사용 가이드</FooterLink>
+              <FooterLink href="/guide/saju">사주 사용 가이드</FooterLink>
               <FooterLink href="/about/reading">명로의 리딩 방식</FooterLink>
               <FooterLink href="/updates">업데이트 소식</FooterLink>
               <FooterLink href="/terms">서비스 이용약관</FooterLink>

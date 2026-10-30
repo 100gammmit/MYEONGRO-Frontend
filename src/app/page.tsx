@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ReadingHelpEntry } from "@/components/reading-help-links";
 import { HeroQuestionRotator } from "@/components/hero-question-rotator";
 import { LandingSky } from "@/components/landing-sky";
 import { TarotStone } from "@/components/tarot-stone";
@@ -151,6 +152,7 @@ export default function HomePage() {
         </Link>
       </section>
 
+      <ReadingHelpEntry />
       <section className="landing-closing" aria-labelledby="landing-closing-title">
         <div className="page-width">
           <h2 id="landing-closing-title">오늘은 어떤 마음인가요?</h2>

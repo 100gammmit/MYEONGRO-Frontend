@@ -1,5 +1,7 @@
 "use client";
 
+import { ReadingGuideLink } from "./reading-help-links";
+
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 
@@ -321,6 +323,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
   if (phase === "spread") {
     return (
       <ReadingShell eyebrow="AI TAROT" title="어떤 고민을 살펴볼까요?" step={1} totalSteps={4}>
+        <ReadingGuideLink kind="tarot" />
         <ul className="spread-grid">
           {TAROT_SPREAD_LIST.map((spread) => (
             <li key={spread.id}>
@@ -366,6 +369,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
         step={2}
         totalSteps={4}
       >
+        <ReadingGuideLink kind="tarot" />
         <div className="wizard-card">
           <label className="field">
             <span>카드에게 묻고 싶은 질문</span>

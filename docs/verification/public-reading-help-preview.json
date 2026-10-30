@@ -1,0 +1,923 @@
+{
+  "description": "Synthetic guide evaluation only. One generation per input; not a prediction-accuracy benchmark.",
+  "fixtures": [
+    {
+      "id": "guide-career-context",
+      "kind": "saju",
+      "spreadType": null,
+      "question": "현재 맡은 일을 깊게 익히는 것과 새로운 역할을 경험하는 것 사이에서 고민하고 있습니다. 올해 일의 흐름과 제 성향에서 함께 살펴볼 점이 궁금합니다.",
+      "input": {
+        "focusArea": "career",
+        "targetYear": 2026,
+        "calculation": {
+          "pillars": {
+            "year": {
+              "ganZhi": "임신",
+              "stem": "임수",
+              "branch": "신금"
+            },
+            "month": {
+              "ganZhi": "무신",
+              "stem": "무토",
+              "branch": "신금"
+            },
+            "day": {
+              "ganZhi": "갑진",
+              "stem": "갑목",
+              "branch": "진토"
+            }
+          },
+          "dayMaster": "갑목",
+          "elementBalance": {
+            "목": 1,
+            "화": 0,
+            "토": 2,
+            "금": 2,
+            "수": 1
+          },
+          "tenGods": {
+            "year": {
+              "stem": "편인",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "month": {
+              "stem": "편재",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "day": {
+              "stem": "비견",
+              "branch": [
+                "편재",
+                "겁재",
+                "정인"
+              ]
+            }
+          },
+          "annualFlow": {
+            "year": 2026,
+            "ganZhi": "병오",
+            "stemTenGod": "식신"
+          },
+          "uncertainty": {
+            "varyingFields": [
+              "timePillar"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "guide-career-short",
+      "kind": "saju",
+      "spreadType": null,
+      "question": "올해 직장운은 어떤가요?",
+      "input": {
+        "focusArea": "career",
+        "targetYear": 2026,
+        "calculation": {
+          "pillars": {
+            "year": {
+              "ganZhi": "임신",
+              "stem": "임수",
+              "branch": "신금"
+            },
+            "month": {
+              "ganZhi": "무신",
+              "stem": "무토",
+              "branch": "신금"
+            },
+            "day": {
+              "ganZhi": "갑진",
+              "stem": "갑목",
+              "branch": "진토"
+            }
+          },
+          "dayMaster": "갑목",
+          "elementBalance": {
+            "목": 1,
+            "화": 0,
+            "토": 2,
+            "금": 2,
+            "수": 1
+          },
+          "tenGods": {
+            "year": {
+              "stem": "편인",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "month": {
+              "stem": "편재",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "day": {
+              "stem": "비견",
+              "branch": [
+                "편재",
+                "겁재",
+                "정인"
+              ]
+            }
+          },
+          "annualFlow": {
+            "year": 2026,
+            "ganZhi": "병오",
+            "stemTenGod": "식신"
+          },
+          "uncertainty": {
+            "varyingFields": [
+              "timePillar"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "guide-relationship-context",
+      "kind": "saju",
+      "spreadType": null,
+      "question": "새로운 모임에 참여했는데 처음 보는 사람에게 말을 걸기까지 시간이 걸립니다. 올해 새로운 관계를 맺는 흐름과 제 성향에서 살펴볼 점이 궁금합니다.",
+      "input": {
+        "focusArea": "relationship",
+        "targetYear": 2026,
+        "calculation": {
+          "pillars": {
+            "year": {
+              "ganZhi": "임신",
+              "stem": "임수",
+              "branch": "신금"
+            },
+            "month": {
+              "ganZhi": "무신",
+              "stem": "무토",
+              "branch": "신금"
+            },
+            "day": {
+              "ganZhi": "갑진",
+              "stem": "갑목",
+              "branch": "진토"
+            }
+          },
+          "dayMaster": "갑목",
+          "elementBalance": {
+            "목": 1,
+            "화": 0,
+            "토": 2,
+            "금": 2,
+            "수": 1
+          },
+          "tenGods": {
+            "year": {
+              "stem": "편인",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "month": {
+              "stem": "편재",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "day": {
+              "stem": "비견",
+              "branch": [
+                "편재",
+                "겁재",
+                "정인"
+              ]
+            }
+          },
+          "annualFlow": {
+            "year": 2026,
+            "ganZhi": "병오",
+            "stemTenGod": "식신"
+          },
+          "uncertainty": {
+            "varyingFields": [
+              "timePillar"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "guide-relationship-short",
+      "kind": "saju",
+      "spreadType": null,
+      "question": "올해 관계운은 어떤가요?",
+      "input": {
+        "focusArea": "relationship",
+        "targetYear": 2026,
+        "calculation": {
+          "pillars": {
+            "year": {
+              "ganZhi": "임신",
+              "stem": "임수",
+              "branch": "신금"
+            },
+            "month": {
+              "ganZhi": "무신",
+              "stem": "무토",
+              "branch": "신금"
+            },
+            "day": {
+              "ganZhi": "갑진",
+              "stem": "갑목",
+              "branch": "진토"
+            }
+          },
+          "dayMaster": "갑목",
+          "elementBalance": {
+            "목": 1,
+            "화": 0,
+            "토": 2,
+            "금": 2,
+            "수": 1
+          },
+          "tenGods": {
+            "year": {
+              "stem": "편인",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "month": {
+              "stem": "편재",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "day": {
+              "stem": "비견",
+              "branch": [
+                "편재",
+                "겁재",
+                "정인"
+              ]
+            }
+          },
+          "annualFlow": {
+            "year": 2026,
+            "ganZhi": "병오",
+            "stemTenGod": "식신"
+          },
+          "uncertainty": {
+            "varyingFields": [
+              "timePillar"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "guide-self-context",
+      "kind": "saju",
+      "spreadType": null,
+      "question": "새로운 일을 시작할 때 자료를 오래 모으다가 실행이 늦어지는 편입니다. 제 성향에서 이 모습과 연결해 살펴볼 부분과 올해 흐름이 궁금합니다.",
+      "input": {
+        "focusArea": "self",
+        "targetYear": 2026,
+        "calculation": {
+          "pillars": {
+            "year": {
+              "ganZhi": "임신",
+              "stem": "임수",
+              "branch": "신금"
+            },
+            "month": {
+              "ganZhi": "무신",
+              "stem": "무토",
+              "branch": "신금"
+            },
+            "day": {
+              "ganZhi": "갑진",
+              "stem": "갑목",
+              "branch": "진토"
+            }
+          },
+          "dayMaster": "갑목",
+          "elementBalance": {
+            "목": 1,
+            "화": 0,
+            "토": 2,
+            "금": 2,
+            "수": 1
+          },
+          "tenGods": {
+            "year": {
+              "stem": "편인",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "month": {
+              "stem": "편재",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "day": {
+              "stem": "비견",
+              "branch": [
+                "편재",
+                "겁재",
+                "정인"
+              ]
+            }
+          },
+          "annualFlow": {
+            "year": 2026,
+            "ganZhi": "병오",
+            "stemTenGod": "식신"
+          },
+          "uncertainty": {
+            "varyingFields": [
+              "timePillar"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "guide-self-short",
+      "kind": "saju",
+      "spreadType": null,
+      "question": "저는 어떤 사람인가요?",
+      "input": {
+        "focusArea": "self",
+        "targetYear": 2026,
+        "calculation": {
+          "pillars": {
+            "year": {
+              "ganZhi": "임신",
+              "stem": "임수",
+              "branch": "신금"
+            },
+            "month": {
+              "ganZhi": "무신",
+              "stem": "무토",
+              "branch": "신금"
+            },
+            "day": {
+              "ganZhi": "갑진",
+              "stem": "갑목",
+              "branch": "진토"
+            }
+          },
+          "dayMaster": "갑목",
+          "elementBalance": {
+            "목": 1,
+            "화": 0,
+            "토": 2,
+            "금": 2,
+            "수": 1
+          },
+          "tenGods": {
+            "year": {
+              "stem": "편인",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "month": {
+              "stem": "편재",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "day": {
+              "stem": "비견",
+              "branch": [
+                "편재",
+                "겁재",
+                "정인"
+              ]
+            }
+          },
+          "annualFlow": {
+            "year": 2026,
+            "ganZhi": "병오",
+            "stemTenGod": "식신"
+          },
+          "uncertainty": {
+            "varyingFields": [
+              "timePillar"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "guide-choice-context",
+      "kind": "tarot",
+      "spreadType": "choice_five_card",
+      "question": "퇴근 후 공부 시간을 정하려고 합니다. 혼자 하면 일정이 자유롭지만 자주 미루고, 스터디에 참여하면 정해진 시간을 지켜야 합니다. 두 방식으로 공부할 때의 흐름과 제가 중요하게 보는 기준을 살펴보고 싶습니다.",
+      "input": {
+        "cards": [
+          {
+            "cardId": "major-02-high-priestess",
+            "position": "desire",
+            "reversed": false
+          },
+          {
+            "cardId": "major-18-moon",
+            "position": "fear",
+            "reversed": false
+          },
+          {
+            "cardId": "major-01-magician",
+            "position": "core_value",
+            "reversed": false
+          },
+          {
+            "cardId": "major-07-chariot",
+            "position": "option_a",
+            "reversed": false
+          },
+          {
+            "cardId": "major-14-temperance",
+            "position": "option_b",
+            "reversed": false
+          }
+        ],
+        "choiceOptions": {
+          "a": "혼자 공부하기",
+          "b": "스터디 참여하기"
+        }
+      }
+    },
+    {
+      "id": "guide-choice-short",
+      "kind": "tarot",
+      "spreadType": "choice_five_card",
+      "question": "어떤 선택이 좋을까요?",
+      "input": {
+        "cards": [
+          {
+            "cardId": "major-02-high-priestess",
+            "position": "desire",
+            "reversed": false
+          },
+          {
+            "cardId": "major-18-moon",
+            "position": "fear",
+            "reversed": false
+          },
+          {
+            "cardId": "major-01-magician",
+            "position": "core_value",
+            "reversed": false
+          },
+          {
+            "cardId": "major-07-chariot",
+            "position": "option_a",
+            "reversed": false
+          },
+          {
+            "cardId": "major-14-temperance",
+            "position": "option_b",
+            "reversed": false
+          }
+        ],
+        "choiceOptions": {
+          "a": "혼자 공부하기",
+          "b": "스터디 참여하기"
+        }
+      }
+    },
+    {
+      "id": "guide-mind-context",
+      "kind": "tarot",
+      "spreadType": "mind_three_card",
+      "question": "새 프로젝트에서 맡은 업무의 범위가 아직 정해지지 않아 동료와 조율 중입니다. 다음 한 달 동안 업무가 어떻게 전개될지 궁금합니다.",
+      "input": {
+        "cards": [
+          {
+            "cardId": "major-02-high-priestess",
+            "position": "emotion",
+            "reversed": false
+          },
+          {
+            "cardId": "major-18-moon",
+            "position": "underlying_need",
+            "reversed": false
+          },
+          {
+            "cardId": "major-01-magician",
+            "position": "self_action",
+            "reversed": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "guide-mind-short",
+      "kind": "tarot",
+      "spreadType": "mind_three_card",
+      "question": "일이 잘될까요?",
+      "input": {
+        "cards": [
+          {
+            "cardId": "major-02-high-priestess",
+            "position": "emotion",
+            "reversed": false
+          },
+          {
+            "cardId": "major-18-moon",
+            "position": "underlying_need",
+            "reversed": false
+          },
+          {
+            "cardId": "major-01-magician",
+            "position": "self_action",
+            "reversed": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "guide-relationship-context",
+      "kind": "tarot",
+      "spreadType": "relationship_three_card",
+      "question": "서로 알아가는 중인 사람과 최근 연락 간격이 길어졌습니다. 이유는 아직 듣지 못했습니다. 앞으로 한 달 동안 관계의 흐름과 제가 기대하는 관계 사이에 어떤 차이가 있을지 궁금합니다.",
+      "input": {
+        "cards": [
+          {
+            "cardId": "major-02-high-priestess",
+            "position": "my_heart",
+            "reversed": false
+          },
+          {
+            "cardId": "major-18-moon",
+            "position": "relationship_flow",
+            "reversed": false
+          },
+          {
+            "cardId": "major-01-magician",
+            "position": "check_point",
+            "reversed": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "guide-relationship-short",
+      "kind": "tarot",
+      "spreadType": "relationship_three_card",
+      "question": "그 사람과 잘될까요?",
+      "input": {
+        "cards": [
+          {
+            "cardId": "major-02-high-priestess",
+            "position": "my_heart",
+            "reversed": false
+          },
+          {
+            "cardId": "major-18-moon",
+            "position": "relationship_flow",
+            "reversed": false
+          },
+          {
+            "cardId": "major-01-magician",
+            "position": "check_point",
+            "reversed": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "guide-life-money-short",
+      "kind": "saju",
+      "spreadType": null,
+      "question": "생활과 돈의 흐름은 어떤가요?",
+      "input": {
+        "focusArea": "life_money",
+        "targetYear": 2026,
+        "calculation": {
+          "pillars": {
+            "year": {
+              "ganZhi": "임신",
+              "stem": "임수",
+              "branch": "신금"
+            },
+            "month": {
+              "ganZhi": "무신",
+              "stem": "무토",
+              "branch": "신금"
+            },
+            "day": {
+              "ganZhi": "갑진",
+              "stem": "갑목",
+              "branch": "진토"
+            }
+          },
+          "dayMaster": "갑목",
+          "elementBalance": {
+            "목": 1,
+            "화": 0,
+            "토": 2,
+            "금": 2,
+            "수": 1
+          },
+          "tenGods": {
+            "year": {
+              "stem": "편인",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "month": {
+              "stem": "편재",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "day": {
+              "stem": "비견",
+              "branch": [
+                "편재",
+                "겁재",
+                "정인"
+              ]
+            }
+          },
+          "annualFlow": {
+            "year": 2026,
+            "ganZhi": "병오",
+            "stemTenGod": "식신"
+          },
+          "uncertainty": {
+            "varyingFields": [
+              "timePillar"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "guide-life-money-context",
+      "kind": "saju",
+      "spreadType": null,
+      "question": "계획에 없던 소액 지출이 자주 생겨 생활비를 돌아보고 있습니다. 올해 생활과 돈의 흐름에서 살펴볼 점과 제 성향이 궁금합니다.",
+      "input": {
+        "focusArea": "life_money",
+        "targetYear": 2026,
+        "calculation": {
+          "pillars": {
+            "year": {
+              "ganZhi": "임신",
+              "stem": "임수",
+              "branch": "신금"
+            },
+            "month": {
+              "ganZhi": "무신",
+              "stem": "무토",
+              "branch": "신금"
+            },
+            "day": {
+              "ganZhi": "갑진",
+              "stem": "갑목",
+              "branch": "진토"
+            }
+          },
+          "dayMaster": "갑목",
+          "elementBalance": {
+            "목": 1,
+            "화": 0,
+            "토": 2,
+            "금": 2,
+            "수": 1
+          },
+          "tenGods": {
+            "year": {
+              "stem": "편인",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "month": {
+              "stem": "편재",
+              "branch": [
+                "편관",
+                "편인",
+                "편재"
+              ]
+            },
+            "day": {
+              "stem": "비견",
+              "branch": [
+                "편재",
+                "겁재",
+                "정인"
+              ]
+            }
+          },
+          "annualFlow": {
+            "year": 2026,
+            "ganZhi": "병오",
+            "stemTenGod": "식신"
+          },
+          "uncertainty": {
+            "varyingFields": [
+              "timePillar"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "runs": [
+    {
+      "caseId": "guide-mind-short",
+      "kind": "tarot",
+      "label": "20261030-175927-tarot",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v165+major-arcana-ko-v4+mind-three-card-ko-v73+reading-safety-ko-v3",
+      "promptSha256": "23872ae8079c4a17d9538297ec05ae184cf0da84e2229370fbb44db3f48e6afe",
+      "durationMillis": 11930,
+      "summary": "일은 잘될 가능성이 있어요. 다만 지금은 확인되지 않은 부분 때문에 진척이 더디게 느껴질 수 있고, 앞으로 실행이 한 방향으로 모일수록 구체적인 결과를 내기 쉬워 보여요. 눈앞의 한 단계에 집중해 보며 부담을 덜어도 괜찮아요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-mind-context",
+      "kind": "tarot",
+      "label": "20261030-180004-tarot",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v165+major-arcana-ko-v4+mind-three-card-ko-v73+reading-safety-ko-v3",
+      "promptSha256": "23872ae8079c4a17d9538297ec05ae184cf0da84e2229370fbb44db3f48e6afe",
+      "durationMillis": 13112,
+      "summary": "다음 한 달에는 업무 범위가 처음부터 명확하기보다 조율을 거쳐 구체화되고, 그 내용이 실제 업무로 이어질 가능성이 커요. 아직 정해지지 않은 부분을 서로 다르게 이해하면 대화가 되풀이되고 착수가 늦어질 수 있으니, 조율이 끝난 내용만 짧게 기록해 두면 미정인 일과 진행할 일을 구분하기 쉬워요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-relationship-short",
+      "kind": "tarot",
+      "label": "20261030-180023-tarot",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v165+major-arcana-ko-v4+relationship-three-card-ko-v24+reading-safety-ko-v3",
+      "promptSha256": "5e594b4648773892dd668d249974a416c67a89b743257b2c78bcc215190416bc",
+      "durationMillis": 11064,
+      "summary": "잘될 가능성은 열려 있지만, 지금은 저절로 가까워지기보다 애매함을 지나야 하는 흐름이에요. 서로의 말과 행동이 분명하게 맞물리면 관계가 실제로 진전될 여지가 있으니, 부담 없는 표현으로 대화를 이어가 봐도 좋아요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-relationship-context",
+      "kind": "tarot",
+      "label": "20261030-180038-tarot",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v165+major-arcana-ko-v4+relationship-three-card-ko-v24+reading-safety-ko-v3",
+      "promptSha256": "5e594b4648773892dd668d249974a416c67a89b743257b2c78bcc215190416bc",
+      "durationMillis": 16977,
+      "summary": "앞으로 한 달은 연락 공백 때문에 당신이 바라는 차분한 상호 이해보다 모호함이 먼저 두드러질 수 있지만, 이후에는 구체적인 대화가 이어지며 관계가 다시 움직일 가능성이 있어요. 가까워짐은 연락이 잠깐 늘어나는 것보다 서로의 말과 실제 주고받음이 이어지는 데 달려 있어요. 이유를 추측해 결론 내리기보다 확인된 대화에 기대어 마음의 속도를 조금 늦춰 보셔도 좋아요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-choice-short",
+      "kind": "tarot",
+      "label": "20261030-180059-tarot",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v165+major-arcana-ko-v4+choice-five-card-ko-v20+reading-safety-ko-v3",
+      "promptSha256": "c015c6ca6e009a7baeeffa29e117cb7dddea1cfe687a4e2d12443e8147834a91",
+      "durationMillis": 10770,
+      "summary": "현재는 스터디 참여보다 혼자 공부하기가 조금 더 나아 보여요. 배운 내용을 한곳에 모아 진도를 내기 쉽지만, 속도를 높이다 지칠 수 있고 스터디는 조율하는 만큼 진도가 느려질 수 있어요. 혼자 공부할 때는 무리하게 많이 하기보다 오늘 다룰 분량을 가볍게 정해두면 부담을 덜 수 있어요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-choice-context",
+      "kind": "tarot",
+      "label": "20261030-180114-tarot",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v165+major-arcana-ko-v4+choice-five-card-ko-v20+reading-safety-ko-v3",
+      "promptSha256": "c015c6ca6e009a7baeeffa29e117cb7dddea1cfe687a4e2d12443e8147834a91",
+      "durationMillis": 16479,
+      "summary": "지금은 스터디 참여가 더 잘 맞아요. 정해진 시작 시간이 퇴근 후 공부를 미루는 틈을 줄여, 혼자 할 때보다 꾸준한 진도로 이어질 가능성이 커요. 진도가 천천히 조율될 수 있으니, 정해진 시간 안에 마칠 분량은 가볍게 잡아도 괜찮아요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-self-short",
+      "kind": "saju",
+      "label": "20261030-180134-saju",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v10+interpretation-guide-ko-v5+birth-annual-question-ko-v6+reading-safety-ko-v3",
+      "promptSha256": "d13ad372b1d09a0cc1f333e1da1f7ab1fe74049726c1fb4047a67a578cc7d130",
+      "durationMillis": 20923,
+      "summary": "자기 방향을 세우면서도 현실 조건과 정보를 꼼꼼히 살피는 편으로 읽혀요. 선택지가 많을 때는 지금 중요한 한 가지에 초점을 두어도 좋아요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-self-context",
+      "kind": "saju",
+      "label": "20261030-180159-saju",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v10+interpretation-guide-ko-v5+birth-annual-question-ko-v6+reading-safety-ko-v3",
+      "promptSha256": "d13ad372b1d09a0cc1f333e1da1f7ab1fe74049726c1fb4047a67a578cc7d130",
+      "durationMillis": 12826,
+      "summary": "자료를 오래 모으는 모습은 신중하게 조건을 따지는 성향과 연결해 볼 수 있어요. 2026년에는 직접 움직이고 표현하는 일이 늘 수 있으니, 충분히 준비될 때까지 기다리기보다 확인된 내용으로 작은 시작을 해보는 편이 어울려요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-career-short",
+      "kind": "saju",
+      "label": "20261030-180216-saju",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v10+interpretation-guide-ko-v5+birth-annual-question-ko-v6+reading-safety-ko-v3",
+      "promptSha256": "d13ad372b1d09a0cc1f333e1da1f7ab1fe74049726c1fb4047a67a578cc7d130",
+      "durationMillis": 12641,
+      "summary": "올해 직장에서는 맡은 일을 결과로 보여주는 데 유리한 편이에요. 일을 넓히는 것보다 마무리한 성과가 무엇인지 드러날 때 더 보람을 얻기 쉬워요.",
+      "readingMode": "career_life_fortune"
+    },
+    {
+      "caseId": "guide-career-context",
+      "kind": "saju",
+      "label": "20261030-180233-saju",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v10+interpretation-guide-ko-v5+birth-annual-question-ko-v6+reading-safety-ko-v3",
+      "promptSha256": "d13ad372b1d09a0cc1f333e1da1f7ab1fe74049726c1fb4047a67a578cc7d130",
+      "durationMillis": 19570,
+      "summary": "올해는 맡은 일을 깊게 익히면서 배운 내용을 실제로 써 보는 일이 잘 맞아 보여요. 새 역할도 살펴볼 수 있지만, 기존 업무와 연결되는 경험부터 보면 두 방향을 함께 이어갈 수 있어요.",
+      "readingMode": "standard"
+    },
+    {
+      "caseId": "guide-relationship-short",
+      "kind": "saju",
+      "label": "20261030-180256-saju",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v10+interpretation-guide-ko-v5+birth-annual-question-ko-v6+reading-safety-ko-v3",
+      "promptSha256": "d13ad372b1d09a0cc1f333e1da1f7ab1fe74049726c1fb4047a67a578cc7d130",
+      "durationMillis": 18182,
+      "summary": "올해 관계운은 대화와 함께하는 활동이 늘어 관계를 넓히기 쉬운 쪽이에요. 평소 소통에서 서로의 속도를 살피면 편하게 이어 가는 데 도움이 될 수 있어요.",
+      "readingMode": "relationship_fortune"
+    },
+    {
+      "caseId": "guide-relationship-context",
+      "kind": "saju",
+      "label": "20261030-180320-saju",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v10+interpretation-guide-ko-v5+birth-annual-question-ko-v6+reading-safety-ko-v3",
+      "promptSha256": "d13ad372b1d09a0cc1f333e1da1f7ab1fe74049726c1fb4047a67a578cc7d130",
+      "durationMillis": 18870,
+      "summary": "올해 새로운 사람을 만날 계기는 생기기 쉬우나, 친해지는 속도는 천천히 이어질 수 있어요. 부담 없는 짧은 인사와 반복적인 접촉이 편하게 느껴질 수 있습니다.",
+      "readingMode": "relationship_fortune"
+    },
+    {
+      "caseId": "guide-life-money-short",
+      "kind": "saju",
+      "label": "20261030-180802-saju",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v10+interpretation-guide-ko-v5+birth-annual-question-ko-v6+reading-safety-ko-v3",
+      "promptSha256": "d13ad372b1d09a0cc1f333e1da1f7ab1fe74049726c1fb4047a67a578cc7d130",
+      "durationMillis": 21299,
+      "summary": "2026년에는 돈을 벌기 위한 활동이 늘 수 있지만, 생활비와 활동비도 함께 살필 필요가 있어요. 부담이 적다면 평소 소비와 결제 내역을 가볍게 확인해 보세요.",
+      "readingMode": "money_fortune"
+    },
+    {
+      "caseId": "guide-life-money-context",
+      "kind": "saju",
+      "label": "20261030-180827-saju",
+      "model": "gpt-6-luna",
+      "promptVersion": "common-ko-v10+interpretation-guide-ko-v5+birth-annual-question-ko-v6+reading-safety-ko-v3",
+      "promptSha256": "d13ad372b1d09a0cc1f333e1da1f7ab1fe74049726c1fb4047a67a578cc7d130",
+      "durationMillis": 28636,
+      "summary": "올해는 생활비에서 반복되는 소액 지출을 먼저 살펴볼 만하고, 큰 재정 변화가 정해져 있다고 보기는 어려워요. 평소 결제 내역을 가볍게 확인해 보셔도 좋아요.",
+      "readingMode": "money_fortune"
+    }
+  ]
+}

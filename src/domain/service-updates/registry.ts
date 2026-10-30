@@ -4,6 +4,26 @@ import { defineServiceUpdates } from "./model";
 // entry with correctionOf rather than rewriting what users were shown.
 export const SERVICE_UPDATES = defineServiceUpdates([
   {
+    id: "2026-10-30-reading-help",
+    category: "release",
+    noticeLevel: "routine",
+    title: "FAQ와 타로·사주 사용 가이드를 추가했습니다",
+    summary: "로그인 없이 이용 안내와 질문 준비, 결과 읽는 방법을 확인할 수 있습니다.",
+    changes: [
+      "자주 묻는 질문에서 크레딧·기록·개인정보와 입력 관련 안내를 확인할 수 있습니다.",
+      "타로와 사주 가이드에 각각의 진행 방법과 가상 질문 예시를 담았습니다.",
+      "입력 화면의 가이드 링크는 새 탭으로 열려 작성 중인 화면을 유지합니다.",
+      "리딩 생성 방식과 이용 크레딧, 개인정보 처리 범위는 바뀌지 않습니다.",
+    ],
+    publishedDate: "2026-10-30",
+    effectiveDate: "2026-10-30",
+    links: [
+      { href: "/faq", label: "자주 묻는 질문" },
+      { href: "/guide/tarot", label: "타로 사용 가이드" },
+      { href: "/guide/saju", label: "사주 사용 가이드" },
+    ],
+  },
+  {
     id: "2026-10-25-reading-summary",
     category: "release",
     noticeLevel: "routine",

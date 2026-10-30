@@ -1,5 +1,7 @@
 "use client";
 
+import { ReadingGuideLink } from "./reading-help-links";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -416,6 +418,7 @@ export function SajuExperience() {
         description="원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용하고 요청 처리가 끝나면 별도로 보유하지 않아요. 내 기록에는 최소 계산정보와 리딩 결과만 저장돼요."
         stepLabel="시작하기 전에"
       >
+        <ReadingGuideLink kind="saju" />
         <ConsentGate
           scope="saju"
           onComplete={handleConsentComplete}
@@ -452,6 +455,7 @@ export function SajuExperience() {
       >
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
+          <ReadingGuideLink kind="saju" />
           <fieldset
             className="field"
             aria-describedby={fieldErrors.focusArea ? "focus-error" : undefined}
@@ -517,6 +521,7 @@ export function SajuExperience() {
           <aside aria-label="사주 출생정보 처리 안내" className="notice">
             생년월일, 출생시각·정확도, 출생 시·도와 대운 계산 기준은 사주 계산 중에만 사용합니다. 원본 출생정보는 데이터베이스에 저장하거나 OpenAI에 전송하지 않으며, 요청 처리가 끝나면 별도로 보유하지 않습니다. 계산된 최소 정보와 리딩 결과는 내 기록에 저장되며 언제든 삭제할 수 있습니다. 자세한 내용은 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다.
           </aside>
+          <ReadingGuideLink kind="saju" />
           <div className="field">
             <label htmlFor="saju-birth-date">양력 생년월일</label>
             <input
