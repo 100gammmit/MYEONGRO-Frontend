@@ -3,6 +3,8 @@
 import type { ReadingCreditAccess } from "@/domain/reading-credit";
 
 export const INSUFFICIENT_CREDITS_MESSAGE = "크레딧이 부족합니다. 내일 다시 시도해 주세요.";
+export const DAILY_CAPACITY_MESSAGE = "오늘은 새 리딩을 더 만들 수 없어요. 내일 다시 시도해 주세요.";
+export const GENERATION_EXPIRED_MESSAGE = "리딩 생성 시간이 초과됐어요. 다시 시도해 주세요.";
 
 export function ReadingCreditAccessNotice({
   access,

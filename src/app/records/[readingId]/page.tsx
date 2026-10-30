@@ -116,8 +116,8 @@ export default async function ReadingDetailPage({
         </div>
       )}
 
-      {/* Deleting mid-generation would only make the pending completion conflict, and a stuck
-          generation is failed by the stale cleanup, which brings the button back. */}
+      {/* The backend refuses to delete a generation in progress, and a stuck generation is failed
+          by the stale cleanup, which brings the button back. */}
       {reading.status === "generating" ? null : (
         <ReadingRecordActions
           readingCompleted={reading.status === "completed"}

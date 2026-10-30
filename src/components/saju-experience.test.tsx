@@ -545,6 +545,56 @@ describe("SajuExperience", () => {
     expect(second.requestId).toBe(SECOND_REQUEST_ID);
   });
 
+  it("creates a new request id after the generation expired", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID")
+      .mockReturnValueOnce(REQUEST_ID)
+      .mockReturnValueOnce(SECOND_REQUEST_ID);
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(jsonResponse({
+        code: "READING_GENERATION_EXPIRED",
+        message: "리딩 생성이 만료되었습니다. 다시 시도해 주세요.",
+      }, { status: 409 }))
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    await reachReview();
+
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    const failure = await screen.findByRole("alert");
+    expect(failure).toHaveTextContent("리딩 생성 시간이 초과됐어요.");
+    expect(failure).toHaveTextContent("크레딧은 차감되지 않았어요.");
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalled());
+    const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
+    expect(second.requestId).toBe(SECOND_REQUEST_ID);
+  });
+
+  it("keeps the request id when the daily capacity is reached", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(jsonResponse({
+        code: "READING_DAILY_CAPACITY_REACHED",
+        message: "오늘 준비된 리딩 생성량을 모두 사용했습니다.",
+      }, { status: 429 }))
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    await reachReview();
+
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    const failure = await screen.findByRole("alert");
+    expect(failure).toHaveTextContent("오늘은 새 리딩을 더 만들 수 없어요.");
+    expect(failure).not.toHaveTextContent("크레딧은 차감되지 않았어요.");
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalled());
+    const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
+    expect(second.requestId).toBe(REQUEST_ID);
+  });
+
   it("creates a new request id after the user goes back and changes the question", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID")
       .mockReturnValueOnce(REQUEST_ID)

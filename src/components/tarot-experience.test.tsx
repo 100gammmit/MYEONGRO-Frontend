@@ -468,6 +468,56 @@ describe("TarotExperience", () => {
     expect(second.requestId).not.toBe(first.requestId);
   });
 
+  it("creates a fresh request after the generation expired", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json({
+        code: "READING_GENERATION_EXPIRED",
+        message: "리딩 생성이 만료되었습니다. 다시 시도해 주세요.",
+      }, { status: 409 }))
+      .mockResolvedValueOnce(readingResponse("mind_three_card"));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([2, 3, 4]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("리딩 생성 시간이 초과됐어요.");
+    fireEvent.click(screen.getByRole("button", { name: "같은 질문으로 다시 시도" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const first = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    const second = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
+    expect(second.requestId).not.toBe(first.requestId);
+  });
+
+  it("keeps the request id when the daily capacity is reached", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(Response.json({
+        code: "READING_DAILY_CAPACITY_REACHED",
+        message: "오늘 준비된 리딩 생성량을 모두 사용했습니다.",
+      }, { status: 429 }))
+      .mockResolvedValueOnce(readingResponse("mind_three_card"));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([2, 3, 4]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("오늘은 새 리딩을 더 만들 수 없어요.");
+    fireEvent.click(screen.getByRole("button", { name: "같은 질문으로 다시 시도" }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const first = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    const second = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
+    expect(second.requestId).toBe(first.requestId);
+  });
+
+  it("falls back to a generic message when the error response has no message", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response("gateway error", { status: 500 }));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([2, 3, 4]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("리딩 요청을 처리하지 못했어요.");
+  });
+
   it("shows the stable credit error and refreshes shared status after a 429", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
       code: "INSUFFICIENT_READING_CREDITS",

@@ -36,7 +36,12 @@ import {
 
 import { ReadingLoading } from "./reading-loading";
 import { ConsentGate } from "./consent-gate";
-import { INSUFFICIENT_CREDITS_MESSAGE, ReadingCreditAccessNotice } from "./reading-credit-access-notice";
+import {
+  DAILY_CAPACITY_MESSAGE,
+  GENERATION_EXPIRED_MESSAGE,
+  INSUFFICIENT_CREDITS_MESSAGE,
+  ReadingCreditAccessNotice,
+} from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 
@@ -386,7 +391,10 @@ export function SajuExperience() {
   }
 
   function handleSubmissionError(error: SajuApiError) {
-    if (error.code === "OPENAI_READING_GENERATION_FAILED") {
+    // Both end the stored attempt as failed, so the same request id would only replay that failure.
+    const attemptFailed = error.code === "OPENAI_READING_GENERATION_FAILED"
+      || error.code === "READING_GENERATION_EXPIRED";
+    if (attemptFailed) {
       requestIdRef.current = null;
     }
     const errorPhase = error.field ? FIELD_PHASE[error.field] : undefined;
@@ -398,13 +406,17 @@ export function SajuExperience() {
     }
     // Credits are charged only when a reading completes, so a confirmed generation failure charged nothing.
     // Network and proxy failures stay silent on credits: the backend may still have finished.
-    setCreditUntouched(error.code === "OPENAI_READING_GENERATION_FAILED");
+    setCreditUntouched(attemptFailed);
     setGeneralError(
       error.code === "READING_GENERATION_IN_PROGRESS"
         ? "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요."
         : error.code === "INSUFFICIENT_READING_CREDITS"
           ? INSUFFICIENT_CREDITS_MESSAGE
-          : error.message || "리딩 요청을 처리하지 못했어요.",
+          : error.code === "READING_DAILY_CAPACITY_REACHED"
+            ? DAILY_CAPACITY_MESSAGE
+            : error.code === "READING_GENERATION_EXPIRED"
+              ? GENERATION_EXPIRED_MESSAGE
+              : error.message || "리딩 요청을 처리하지 못했어요.",
     );
     setPhase("review");
   }

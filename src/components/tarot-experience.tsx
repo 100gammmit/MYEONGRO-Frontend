@@ -24,7 +24,12 @@ import {
 import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
 import { ConsentGate } from "./consent-gate";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
-import { INSUFFICIENT_CREDITS_MESSAGE, ReadingCreditAccessNotice } from "./reading-credit-access-notice";
+import {
+  DAILY_CAPACITY_MESSAGE,
+  GENERATION_EXPIRED_MESSAGE,
+  INSUFFICIENT_CREDITS_MESSAGE,
+  ReadingCreditAccessNotice,
+} from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingLoading, type ReadingLoadingMessages } from "./reading-loading";
 import { ReadingShell } from "./reading-shell";
@@ -258,13 +263,16 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
         ) {
           void credits.refresh({ discardCurrent: true });
         }
-        if (apiError.code === "OPENAI_READING_GENERATION_FAILED") {
+        // Both end the stored attempt as failed, so the same request id would only replay that failure.
+        if (
+          apiError.code === "OPENAI_READING_GENERATION_FAILED"
+          || apiError.code === "READING_GENERATION_EXPIRED"
+        ) {
           setRequestId(null);
         }
         setError(
           readingErrorMessage(response.status, apiError)
-          ?? apiError.message
-          ?? "리딩 요청을 처리하지 못했어요.",
+          ?? (apiError.message || "리딩 요청을 처리하지 못했어요."),
         );
         setPhase("error");
         return;
@@ -527,6 +535,12 @@ function readingErrorMessage(status: number, error: ApiError): string | undefine
   }
   if (error.code === "INSUFFICIENT_READING_CREDITS") {
     return INSUFFICIENT_CREDITS_MESSAGE;
+  }
+  if (error.code === "READING_DAILY_CAPACITY_REACHED") {
+    return DAILY_CAPACITY_MESSAGE;
+  }
+  if (error.code === "READING_GENERATION_EXPIRED") {
+    return GENERATION_EXPIRED_MESSAGE;
   }
   return READING_ERROR_MESSAGES[status];
 }
