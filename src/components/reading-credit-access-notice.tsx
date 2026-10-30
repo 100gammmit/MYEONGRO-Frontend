@@ -3,8 +3,21 @@
 import type { ReadingCreditAccess } from "@/domain/reading-credit";
 
 export const INSUFFICIENT_CREDITS_MESSAGE = "크레딧이 부족합니다. 내일 다시 시도해 주세요.";
-export const DAILY_CAPACITY_MESSAGE = "오늘은 새 리딩을 더 만들 수 없어요. 내일 다시 시도해 주세요.";
-export const GENERATION_EXPIRED_MESSAGE = "리딩 생성 시간이 초과됐어요. 다시 시도해 주세요.";
+
+export function readingCreationErrorMessage(code: string): string | undefined {
+  switch (code) {
+    case "READING_GENERATION_IN_PROGRESS":
+      return "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요.";
+    case "INSUFFICIENT_READING_CREDITS":
+      return INSUFFICIENT_CREDITS_MESSAGE;
+    case "READING_DAILY_CAPACITY_REACHED":
+      return "오늘은 새 리딩을 더 만들 수 없어요. 내일 다시 시도해 주세요.";
+    case "READING_GENERATION_EXPIRED":
+      return "리딩 생성 시간이 초과됐어요. 다시 시도해 주세요.";
+    default:
+      return undefined;
+  }
+}
 
 export function ReadingCreditAccessNotice({
   access,

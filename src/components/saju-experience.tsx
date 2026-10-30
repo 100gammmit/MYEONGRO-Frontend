@@ -36,12 +36,7 @@ import {
 
 import { ReadingLoading } from "./reading-loading";
 import { ConsentGate } from "./consent-gate";
-import {
-  DAILY_CAPACITY_MESSAGE,
-  GENERATION_EXPIRED_MESSAGE,
-  INSUFFICIENT_CREDITS_MESSAGE,
-  ReadingCreditAccessNotice,
-} from "./reading-credit-access-notice";
+import { ReadingCreditAccessNotice, readingCreationErrorMessage } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 
@@ -408,15 +403,8 @@ export function SajuExperience() {
     // Network and proxy failures stay silent on credits: the backend may still have finished.
     setCreditUntouched(attemptFailed);
     setGeneralError(
-      error.code === "READING_GENERATION_IN_PROGRESS"
-        ? "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요."
-        : error.code === "INSUFFICIENT_READING_CREDITS"
-          ? INSUFFICIENT_CREDITS_MESSAGE
-          : error.code === "READING_DAILY_CAPACITY_REACHED"
-            ? DAILY_CAPACITY_MESSAGE
-            : error.code === "READING_GENERATION_EXPIRED"
-              ? GENERATION_EXPIRED_MESSAGE
-              : error.message || "리딩 요청을 처리하지 못했어요.",
+      readingCreationErrorMessage(error.code)
+      ?? (error.message || "리딩 요청을 처리하지 못했어요."),
     );
     setPhase("review");
   }

@@ -24,12 +24,7 @@ import {
 import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
 import { ConsentGate } from "./consent-gate";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
-import {
-  DAILY_CAPACITY_MESSAGE,
-  GENERATION_EXPIRED_MESSAGE,
-  INSUFFICIENT_CREDITS_MESSAGE,
-  ReadingCreditAccessNotice,
-} from "./reading-credit-access-notice";
+import { ReadingCreditAccessNotice, readingCreationErrorMessage } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingLoading, type ReadingLoadingMessages } from "./reading-loading";
 import { ReadingShell } from "./reading-shell";
@@ -271,7 +266,8 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
           setRequestId(null);
         }
         setError(
-          readingErrorMessage(response.status, apiError)
+          readingCreationErrorMessage(apiError.code)
+          ?? READING_ERROR_MESSAGES[response.status]
           ?? (apiError.message || "리딩 요청을 처리하지 못했어요."),
         );
         setPhase("error");
@@ -527,22 +523,6 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
   }
 
   return null;
-}
-
-function readingErrorMessage(status: number, error: ApiError): string | undefined {
-  if (error.code === "READING_GENERATION_IN_PROGRESS") {
-    return "이미 생성 중인 리딩이 있어요. 완료 후 다시 시도해 주세요.";
-  }
-  if (error.code === "INSUFFICIENT_READING_CREDITS") {
-    return INSUFFICIENT_CREDITS_MESSAGE;
-  }
-  if (error.code === "READING_DAILY_CAPACITY_REACHED") {
-    return DAILY_CAPACITY_MESSAGE;
-  }
-  if (error.code === "READING_GENERATION_EXPIRED") {
-    return GENERATION_EXPIRED_MESSAGE;
-  }
-  return READING_ERROR_MESSAGES[status];
 }
 
 function DrawScreen({
