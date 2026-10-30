@@ -3,8 +3,6 @@ import { toBackendUrl } from "./url";
 const FORWARDED_REQUEST_HEADERS = [
   "content-type",
   "cookie",
-  "x-forwarded-for",
-  "x-real-ip",
 ] as const;
 
 const FORWARDED_RESPONSE_HEADERS = [

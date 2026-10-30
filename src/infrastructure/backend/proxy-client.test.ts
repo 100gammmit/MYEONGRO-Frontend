@@ -40,7 +40,6 @@ describe("proxyBackendRequest", () => {
       headers: {
         "content-type": "application/json",
         cookie: "MYEONGRO_SESSION=session",
-        "x-forwarded-for": "203.0.113.8",
       },
       body: JSON.stringify({ kind: "tarot" }),
       cache: "no-store",

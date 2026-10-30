@@ -9,14 +9,17 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
       .toBeInTheDocument();
-    expect(screen.getByText("문서 버전 2026-10-06 · 시행일 2026-10-06")).toBeInTheDocument();
+    expect(screen.getByText("문서 버전 2026-10-31 · 시행일 2026-10-31")).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
     const table = screen.getByRole("table", { name: "명로 개인정보 처리 항목과 보유기간" });
     expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent))
       .toEqual(["처리 목적", "처리 항목", "처리 근거", "보유기간·삭제 기준"]);
-    expect(within(table).getAllByRole("rowheader")).toHaveLength(13);
+    expect(within(table).getAllByRole("rowheader")).toHaveLength(14);
+    const abuseLimitRow = within(table).getByRole("row", { name: /로그인·가입 요청 남용 방지/ });
+    expect(abuseLimitRow).toHaveTextContent("IP 주소 자체는 저장하지 않음");
+    expect(abuseLimitRow).toHaveTextContent("최대 24시간 후 자동 삭제");
     const socialLoginRow = within(table).getByRole("row", { name: /소셜 로그인과 계정 식별/ });
     expect(socialLoginRow).toHaveTextContent("OAuth 제공자와 제공자 사용자 식별자");
     expect(socialLoginRow).not.toHaveTextContent("이메일");

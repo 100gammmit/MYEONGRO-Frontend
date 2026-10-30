@@ -159,6 +159,12 @@ export function ConsentDocumentContent({
               <td>명로는 로그 event 시각부터 최대 30일 동안만 운영 조회·이용. 30일 경과 시 CloudWatch 보유 정책에 따라 만료·삭제 대상으로 표시되며, 공급자 시스템의 물리적 삭제는 통상 추가 72시간 이내에 처리되나 드물게 더 오래 걸릴 수 있음</td>
             </tr>
             <tr>
+              <th scope="row">로그인·가입 요청 남용 방지</th>
+              <td>접속 IP 주소를 비밀키로 변환한 해시값과 요청 횟수. IP 주소 자체는 저장하지 않음</td>
+              <td>개인정보 보호법 제15조 제1항 제6호에 따른 서비스의 안정적 운영과 정당한 이익</td>
+              <td>최대 24시간 후 자동 삭제. 비영속 Redis 재시작 시 삭제</td>
+            </tr>
+            <tr>
               <th scope="row">OpenAI를 통한 AI 리딩 생성</th>
               <td>질문·선택지·관심 분야, 카드 선택정보, 최소 사주 계산정보</td>
               <td><OverseasTransferConsentBasis /></td>
