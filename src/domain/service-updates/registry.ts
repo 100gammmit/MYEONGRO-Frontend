@@ -4,22 +4,6 @@ import { defineServiceUpdates } from "./model";
 // entry with correctionOf rather than rewriting what users were shown.
 export const SERVICE_UPDATES = defineServiceUpdates([
   {
-    id: "2026-11-01-abuse-limits",
-    category: "policy",
-    noticeLevel: "routine",
-    title: "서비스 안정을 위해 요청 제한을 적용합니다",
-    summary: "과도한 로그인 요청과 서비스 과부하를 막기 위한 제한을 추가했습니다.",
-    changes: [
-      "같은 네트워크에서 로그인 요청이 지나치게 많으면 잠시 이용이 제한될 수 있습니다.",
-      "하루 리딩 생성량이 서비스 한도에 이르면 새 리딩 생성이 다음 날까지 제한될 수 있습니다.",
-      "개인정보 처리방침에 요청 제한을 위한 IP 해시값 처리 항목을 추가했습니다. 해시값은 1분 뒤 삭제됩니다.",
-      "이용 크레딧과 기존 리딩 기록은 바뀌지 않습니다.",
-    ],
-    publishedDate: "2026-11-01",
-    effectiveDate: "2026-11-01",
-    links: [{ href: "/privacy", label: "개인정보 처리방침" }],
-  },
-  {
     id: "2026-10-30-reading-help",
     category: "release",
     noticeLevel: "routine",
