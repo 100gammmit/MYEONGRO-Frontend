@@ -17,9 +17,9 @@ describe("PrivacyPage", () => {
     expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent))
       .toEqual(["처리 목적", "처리 항목", "처리 근거", "보유기간·삭제 기준"]);
     expect(within(table).getAllByRole("rowheader")).toHaveLength(14);
-    const abuseLimitRow = within(table).getByRole("row", { name: /로그인·가입 요청 남용 방지/ });
+    const abuseLimitRow = within(table).getByRole("row", { name: /로그인 요청 남용 방지/ });
     expect(abuseLimitRow).toHaveTextContent("IP 주소 자체는 저장하지 않음");
-    expect(abuseLimitRow).toHaveTextContent("최대 24시간 후 자동 삭제");
+    expect(abuseLimitRow).toHaveTextContent("1분 후 자동 삭제");
     const socialLoginRow = within(table).getByRole("row", { name: /소셜 로그인과 계정 식별/ });
     expect(socialLoginRow).toHaveTextContent("OAuth 제공자와 제공자 사용자 식별자");
     expect(socialLoginRow).not.toHaveTextContent("이메일");

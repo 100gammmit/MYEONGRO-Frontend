@@ -21,7 +21,6 @@ describe("LoginPage", () => {
 
   it.each([
     ["rate-limited", "로그인 요청이 많아 잠시 제한됐어요."],
-    ["signup-limited", "이 네트워크에서 가입 요청이 많았어요."],
     ["signup-eligibility-missing", "로그인을 완료하지 못했어요."],
   ])("explains the %s redirect", async (reason, message) => {
     render(await LoginPage({ searchParams: Promise.resolve({ reason }) }));
