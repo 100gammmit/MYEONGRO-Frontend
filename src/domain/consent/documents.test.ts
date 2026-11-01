@@ -27,8 +27,8 @@ describe("privacy inquiry email processing", () => {
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalEffect)
       .toContain("이메일을 통한 문의·권리행사");
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.verifiedAt).toBe("2026-10-06");
-    expect(PRIVACY_DOCUMENT_VERSION).toBe("2026-10-31");
-    expect(PRIVACY_DOCUMENT_EFFECTIVE_DATE).toBe("2026-10-31");
+    expect(PRIVACY_DOCUMENT_VERSION).toBe("2026-11-01");
+    expect(PRIVACY_DOCUMENT_EFFECTIVE_DATE).toBe("2026-11-01");
   });
 
   it("separates the operator deadline, administrator recovery and CDPA deletion instruction", () => {

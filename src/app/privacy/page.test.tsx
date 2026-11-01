@@ -9,7 +9,7 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
       .toBeInTheDocument();
-    expect(screen.getByText("문서 버전 2026-10-31 · 시행일 2026-10-31")).toBeInTheDocument();
+    expect(screen.getByText("문서 버전 2026-11-01 · 시행일 2026-11-01")).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
