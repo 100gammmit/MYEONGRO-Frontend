@@ -28,7 +28,7 @@ describe("SajuCalculationExplorer", () => {
     const nav = screen.getByRole("navigation", { name: "선택한 계산을 사용한 리딩" });
     expect(within(nav).getByRole("link", { name: "일하는 방식 →" })).toHaveAttribute("href", "#saju-work");
     expect(within(nav).queryByText("나를 움직이는 중심 →")).not.toBeInTheDocument();
-    expect(screen.getByText(/많고 적음이 좋고 나쁨이나 강약을 뜻하지는 않습니다/)).toBeInTheDocument();
+    expect(screen.getByText("오행의 개수와 상생·상극만으로 좋고 나쁨이나 강약을 판단하지 않습니다.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "금 · 쇠 0개" }));
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
     expect(screen.getByText(/이 명식에는 0개가 있습니다/)).toBeInTheDocument();
@@ -84,7 +84,8 @@ describe("SajuCalculationExplorer", () => {
     expect(within(flows).getByText(generates)).toBeInTheDocument();
     expect(within(flows).getByText(controls)).toBeInTheDocument();
     expect(flows).not.toHaveTextContent(/\d+개|이 명식/);
-    expect(screen.getAllByText("오행 사이의 흐름을 설명하는 틀이며, 좋고 나쁨을 가리는 기준은 아닙니다.")).toHaveLength(1);
+    expect(screen.getAllByText(/좋고 나쁨|강약/)).toHaveLength(1);
+    expect(within(flows).getByText("오행의 개수와 상생·상극만으로 좋고 나쁨이나 강약을 판단하지 않습니다.")).toBeInTheDocument();
     expect(container).not.toHaveTextContent(/저장된|snapshot|확정된 기둥|결함|보완이 필요/);
     expect(container).toHaveTextContent("개인별 AI 해석을 추가로 생성하지 않습니다.");
   });
@@ -98,6 +99,9 @@ describe("SajuCalculationExplorer", () => {
       const explanation = screen.getByText(/전통 규칙에서/);
       expect(explanation).toHaveTextContent(/지지의 합/);
       expect(explanation).toHaveTextContent(/지지의 파/);
+      expect(explanation).toHaveTextContent(relation === "지지의 합"
+        ? "지지의 합과 지지의 파에 함께 속하는 짝입니다."
+        : "지지의 파와 지지의 합에 함께 속하는 짝입니다.");
       expect(explanation).toHaveTextContent("서로 묶이면서도 틈이 생길 수 있는 관계");
       expect(explanation).not.toHaveTextContent(/寅|亥|巳|申/);
       expect(screen.getAllByText("관계는 앞으로 일어날 사건을 예고하지 않습니다.")).toHaveLength(1);
@@ -112,5 +116,16 @@ describe("SajuCalculationExplorer", () => {
     fireEvent.click(screen.getByRole("button", { name: /지지의 충/ }));
     expect(screen.queryByText(/전통 규칙에서/)).not.toBeInTheDocument();
     expect(screen.getByText(/변화와 움직임이 생기기 쉬운 지점/)).toBeInTheDocument();
+  });
+
+  it.each(["year", "month", "day", "time"] as const)("shows the partial-pillar notice only when %s is missing", (missing) => {
+    const snapshot = fixture();
+    snapshot.pillars.time = { ganZhi: "병술" };
+    const { rerender } = render(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
+    fireEvent.click(screen.getByRole("button", { name: "목 · 나무 1개" }));
+    expect(screen.queryByText(/출생 시각이 확정되지 않은 기둥/)).not.toBeInTheDocument();
+    snapshot.pillars[missing] = null;
+    rerender(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
+    expect(screen.getAllByText(/출생 시각이 확정되지 않은 기둥/)).toHaveLength(1);
   });
 });

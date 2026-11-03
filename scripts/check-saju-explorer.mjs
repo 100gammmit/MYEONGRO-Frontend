@@ -28,6 +28,13 @@ const record = {
   },
 };
 const records = new Map([[record.id, record]]);
+const fullPillars = structuredClone(record);
+fullPillars.id = "synthetic-full-pillars";
+fullPillars.input.calculationSnapshot.pillars.time = { ganZhi: "병술" };
+fullPillars.input.calculationSnapshot.fiveElements = { wood: 1, fire: 2, earth: 3, metal: 0, water: 2 };
+fullPillars.input.calculationSnapshot.limitations = [];
+fullPillars.input.calculationSnapshot.uncertainty.varyingFields = [];
+records.set(fullPillars.id, fullPillars);
 for (const [id, first, second] of [["synthetic-paired", "인", "해"], ["synthetic-paired-si-shin", "사", "신"]]) {
   const paired = structuredClone(record);
   paired.id = id;
@@ -117,6 +124,7 @@ try {
       await panel.getByRole("heading", { name: "상생 · 돕는 흐름" }).waitFor();
       await panel.getByRole("heading", { name: "상극 · 다스리고 조절하는 흐름" }).waitFor();
       assert.doesNotMatch(await panel.textContent(), /저장된|snapshot|확정된 기둥/);
+      assert.equal(await panel.getByText(/좋고 나쁨|강약/).count(), 1);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await panel.screenshot({ path: `${output}/symbol-${name.slice(0, 1)}-${width}.png` });
     }
@@ -139,6 +147,9 @@ try {
         await page.getByRole("button", { name: new RegExp(type) }).click();
         const panel = page.locator("#saju-explorer-description");
         await panel.getByText(/서로 묶이면서도 틈이 생길 수 있는 관계/).waitFor();
+        await panel.getByText(type === "지지의 합"
+          ? /지지의 합과 지지의 파에 함께 속하는 짝/
+          : /지지의 파와 지지의 합에 함께 속하는 짝/).waitFor();
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
         await panel.screenshot({ path: `${output}/${id}-${type.endsWith("합") ? "combination" : "break"}-${width}.png` });
       }
@@ -153,6 +164,12 @@ try {
     await page.getByText(/출생 시각이 확정되지 않은 기둥은 개수와 표시에서 빠집니다/).waitFor();
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.locator("#saju-calculation").screenshot({ path: `${output}/unknown-time-${width}.png` });
+    await page.goto(`${base}/saju/results/synthetic-full-pillars`);
+    await page.getByRole("button", { name: "목 · 나무 1개" }).click();
+    assert.equal(await page.locator(".saju-pillar-grid article").count(), 4);
+    assert.equal(await page.getByText(/출생 시각이 확정되지 않은 기둥/).count(), 0);
+    assert.equal(await page.locator("#saju-explorer-description").getByText(/좋고 나쁨|강약/).count(), 1);
+    await page.locator("#saju-explorer-description").screenshot({ path: `${output}/full-pillars-${width}.png` });
     await context.close();
   }
   assert.deepEqual(errors, []);

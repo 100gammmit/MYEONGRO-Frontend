@@ -17,6 +17,10 @@ function elementWithParticle(element: Element, role: "subject" | "object") {
   return role === "subject" ? withParticle(elementName(element), "은", "는")
     : withParticle(elementName(element), "을", "를");
 }
+function joinWithAnd(labels: string[]) {
+  if (labels.length < 2) return labels.join("");
+  return `${withParticle(labels.slice(0, -1).join(", "), "과", "와")} ${labels[labels.length - 1]}`;
+}
 
 export function SajuCalculationExplorer({ snapshot, links }: { snapshot: SajuCalculationSnapshot; links: ExplorationLink[] }) {
   const [selection, setSelection] = useState<string>("dayMaster");
@@ -25,9 +29,10 @@ export function SajuCalculationExplorer({ snapshot, links }: { snapshot: SajuCal
   const relation = selection.startsWith("relation:") ? snapshot.relations[Number(selection.slice(9))] : undefined;
   const relationDefinition = relation ? relationInfo(relation.type) : undefined;
   const pairs = relation ? pairedRelations(snapshot, relation) : [];
-  const pairLabels = relation ? Array.from(new Set([relation, ...pairs].map((value) =>
+  const pairLabels = relation ? joinWithAnd(Array.from(new Set([relation, ...pairs].map((value) =>
     relationInfo(value.type)?.label.split(" · ")[0],
-  ).filter(Boolean))).join(" · ") : "";
+  ).filter((label): label is string => Boolean(label))))) : "";
+  const hasMissingPillar = Object.values(snapshot.pillars).some((pillar) => pillar === null);
   const combinationAndBreak = relation && [relation, ...pairs].some((value) => value.type === "branch_combination")
     && [relation, ...pairs].some((value) => value.type === "branch_break");
   const day = snapshot.dayMaster ? symbolInfo(snapshot.dayMaster, "stem") : undefined;
@@ -76,14 +81,14 @@ export function SajuCalculationExplorer({ snapshot, links }: { snapshot: SajuCal
           <div><dt>계절의 상징</dt><dd>{ELEMENTS[element].season}</dd></div>
           <div><dt>방향의 상징</dt><dd>{ELEMENTS[element].direction}</dd></div>
         </dl>
-        <p>이 명식에는 {snapshot.fiveElements[element]}개가 있습니다. 표시된 기둥의 위·아래 글자를 센 값이며, 많고 적음이 좋고 나쁨이나 강약을 뜻하지는 않습니다.</p>
-        <p>{highlighted.length ? `이 분류에 해당하는 글자 ${highlighted.length}곳을 표시했습니다.` : "현재 표시된 명식에서 이 분류의 글자는 확인되지 않습니다."} 출생 시각이 확정되지 않은 기둥은 개수와 표시에서 빠집니다.</p>
+        <p>이 명식에는 {snapshot.fiveElements[element]}개가 있습니다. 표시된 기둥의 위·아래 글자를 센 값입니다.</p>
+        <p>{highlighted.length ? `이 분류에 해당하는 글자 ${highlighted.length}곳을 표시했습니다.` : "현재 표시된 명식에서 이 분류의 글자는 확인되지 않습니다."}{hasMissingPillar ? " 출생 시각이 확정되지 않은 기둥은 개수와 표시에서 빠집니다." : null}</p>
         <section className={styles.flows} aria-label="오행 사이의 흐름">
           <h4>상생 · 돕는 흐름</h4>
           <p>{elementWithParticle(element, "subject")} {elementWithParticle(GENERATES[element], "object")} 돕고, {elementName(elementKeys.find((key) => GENERATES[key] === element)!)}에게서 도움을 받습니다.</p>
           <h4>상극 · 다스리고 조절하는 흐름</h4>
           <p>{elementWithParticle(element, "subject")} {elementWithParticle(CONTROLS[element], "object")} 조절하고, {elementName(elementKeys.find((key) => CONTROLS[key] === element)!)}에게서 조절을 받습니다.</p>
-          <p className={styles.flowNote}>오행 사이의 흐름을 설명하는 틀이며, 좋고 나쁨을 가리는 기준은 아닙니다.</p>
+          <p className={styles.flowNote}>오행의 개수와 상생·상극만으로 좋고 나쁨이나 강약을 판단하지 않습니다.</p>
         </section>
       </> : relation ? <>
         <p>{relationDefinition?.description ?? "이 관계에 대한 설명은 아직 준비되지 않았습니다."}</p>
