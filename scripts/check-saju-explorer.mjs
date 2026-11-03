@@ -3,10 +3,13 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
-import { mkdir } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { chromium } from "playwright";
 
 const output = "build/saju-explorer-check";
+// --m3 consumes only the public target-year artifact exported by Backend's synthetic verification test.
+const m3Mode = process.argv.includes("--m3");
+const nextCalendar = m3Mode ? JSON.parse(await readFile(new URL("../../MYEONGRO-Backend/build/saju-m3/calendar-next-year.json", import.meta.url), "utf8")) : null;
 const record = {
   id: "synthetic-saju", kind: "saju", schemaVersion: 5, status: "completed", spreadType: null,
   title: "합성 사주 탐색 검증", createdAt: "2026-11-03T00:00:00Z", updatedAt: "2026-11-03T00:00:00Z",
@@ -28,6 +31,18 @@ const record = {
   },
 };
 const records = new Map([[record.id, record]]);
+if (nextCalendar) {
+  const current = structuredClone(record);
+  current.id = "synthetic-saju-m3"; current.schemaVersion = 6;
+  current.input.targetYear = nextCalendar.targetYear;
+  current.input.calculationSnapshot.targetYear = nextCalendar.targetYear;
+  current.input.calculationSnapshot.monthlyCalendar = nextCalendar;
+  current.input.calculationSnapshot.annualFortune.year = nextCalendar.targetYear;
+  current.input.calculationSnapshot.annualFortune.ganZhi = nextCalendar.months.at(-1).periods.at(-1).yearGanZhi;
+  current.result.annualReading.year = nextCalendar.targetYear;
+  current.result.annualReading.heading = `${nextCalendar.targetYear}년의 설명`;
+  records.set(current.id, current);
+}
 const fullPillars = structuredClone(record);
 fullPillars.id = "synthetic-full-pillars";
 fullPillars.input.calculationSnapshot.pillars.time = { ganZhi: "병술" };
@@ -62,21 +77,57 @@ unknownTime.result.natalSections[0].evidenceKeys = ["pillars"];
 unknownTime.result.questionReading.evidenceKeys = ["pillars"];
 records.set(unknownTime.id, unknownTime);
 const requests = [];
-const backend = createServer((request, response) => {
+const generatedYears = [];
+const handleSyntheticRequest = (request, response) => {
   requests.push(`${request.method} ${request.url}`);
   response.setHeader("content-type", "application/json");
   if (request.url === "/api/auth/me") response.end(JSON.stringify({ authenticated: true, user: { id: "synthetic-user" } }));
+  else if (m3Mode && request.url?.startsWith("/api/consents")) response.end(JSON.stringify({ status: {
+    acceptedDocumentTypes: ["terms", "ai-overseas-transfer"], requiredDocumentTypes: ["terms", "ai-overseas-transfer"], hasAcceptedRequired: true,
+  } }));
+  else if (m3Mode && request.url === "/api/saju/birth-places") response.end(JSON.stringify({ version: "synthetic", provinces: [{ provinceCode: "11", provinceName: "서울특별시" }] }));
+  else if (m3Mode && request.url === "/api/reading-credits") response.end(JSON.stringify({
+    dailyFreeGrant: 10, balance: { free: 10, paid: 0, total: 10 }, nextResetAt: new Date(Date.now() + 86400000).toISOString(),
+    generationInProgress: false, costs: { saju: 4, tarot: { mind_three_card: 2, relationship_three_card: 2, choice_five_card: 3 } },
+  }));
+  else if (m3Mode && request.url === "/api/saju/readings" && request.method === "POST") {
+    let body = "";
+    request.on("data", (chunk) => { body += chunk; });
+    request.on("end", () => {
+      const input = JSON.parse(body);
+      generatedYears.push(input.targetYear);
+      if (input.targetYear !== nextCalendar.targetYear) { response.statusCode = 400; response.end("{}"); return; }
+      response.end(JSON.stringify({ reading: records.get("synthetic-saju-m3") }));
+    });
+  }
   else if (request.url?.startsWith("/api/readings/") && records.has(request.url.slice("/api/readings/".length))) {
     response.end(JSON.stringify({ reading: records.get(request.url.slice("/api/readings/".length)) }));
   }
   else if (request.url === "/api/readings") response.end(JSON.stringify({ items: [record] }));
   else { response.statusCode = 404; response.end("{}"); }
-});
+};
+const backend = createServer(handleSyntheticRequest);
 await new Promise((resolve, reject) => { backend.once("error", reject); backend.listen(3118, "127.0.0.1", resolve); });
 let app;
 let browser;
+let rewriteBackend;
 let logs = "";
 try {
+  if (m3Mode) {
+    const manifest = JSON.parse(await readFile(".next/routes-manifest.json", "utf8"));
+    const destination = manifest.rewrites.beforeFiles.find((route) => route.source === "/api/consents")?.destination;
+    assert.ok(destination, "Expected the build-time consent rewrite");
+    const rewriteUrl = new URL(destination);
+    assert.ok(["localhost", "127.0.0.1"].includes(rewriteUrl.hostname), "Refuse a non-local build-time backend");
+    const port = Number(rewriteUrl.port || 80);
+    if (port !== 3118 || rewriteUrl.hostname !== "127.0.0.1") {
+      rewriteBackend = createServer(handleSyntheticRequest);
+      await new Promise((resolve, reject) => {
+        rewriteBackend.once("error", reject);
+        rewriteBackend.listen(port, rewriteUrl.hostname, resolve);
+      });
+    }
+  }
   await mkdir(output, { recursive: true });
   app = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "--hostname", "127.0.0.1", "--port", "3119"], {
     env: { ...process.env, BACKEND_API_URL: "http://127.0.0.1:3118" }, windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
@@ -170,13 +221,46 @@ try {
     assert.equal(await page.getByText(/출생 시각이 확정되지 않은 기둥/).count(), 0);
     assert.equal(await page.locator("#saju-explorer-description").getByText(/좋고 나쁨|강약/).count(), 1);
     await page.locator("#saju-explorer-description").screenshot({ path: `${output}/full-pillars-${width}.png` });
+    if (m3Mode) {
+      await page.goto(`${base}/saju`);
+      const year = page.getByRole("combobox", { name: "살펴볼 연도" });
+      try { await year.selectOption(String(nextCalendar.targetYear)); }
+      catch (error) {
+        await page.screenshot({ path: `${output}/m3-start-error-${width}.png`, fullPage: true });
+        console.error(await page.locator("main").innerText());
+        console.error(requests.join("\n"));
+        console.error(logs);
+        throw error;
+      }
+      await page.getByRole("radio", { name: /일·진로/ }).check();
+      await page.getByRole("textbox", { name: /질문 한 가지/ }).fill("내년 일의 방향이 궁금합니다.");
+      await page.getByRole("button", { name: "다음", exact: true }).click();
+      await page.getByLabel("양력 생년월일").fill("1992-08-17");
+      await page.getByRole("radio", { name: /시간을 몰라요/ }).check();
+      await page.getByRole("button", { name: "다음", exact: true }).click();
+      await page.getByText(`${nextCalendar.targetYear}년`, { exact: true }).waitFor();
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      await page.screenshot({ path: `${output}/m3-review-${width}.png`, fullPage: true });
+      await page.getByRole("button", { name: "사주 리딩 생성", exact: true }).click();
+      await page.waitForURL(`${base}/saju/results/synthetic-saju-m3`);
+      await page.getByText(`${nextCalendar.targetYear}년 세운`, { exact: true }).waitFor();
+      await page.reload();
+      await page.getByRole("group", { name: "사주 탐색 항목" }).waitFor();
+      await page.goto(`${base}/records/synthetic-saju-m3`);
+      await page.getByText(`${nextCalendar.targetYear}년 세운`, { exact: true }).waitFor();
+      await page.screenshot({ path: `${output}/m3-record-${width}.png`, fullPage: true });
+    }
     await context.close();
   }
   assert.deepEqual(errors, []);
-  assert.ok(requests.every((request) => request.startsWith("GET ")), "Exploration must not generate a reading");
-  console.log("PASS: synthetic backend, 375/1280px, Enter/Space, selection markers, reading focus, reload/records, 5 elements/flows, paired combination/break, no relations and unknown time; no mutation requests");
+  assert.ok(requests.every((request) => request.startsWith("GET ") || (m3Mode && request === "POST /api/saju/readings")), "Only synthetic M3 submissions may POST");
+  if (m3Mode) assert.deepEqual(generatedYears, [nextCalendar.targetYear, nextCalendar.targetYear]);
+  console.log(m3Mode
+    ? "PASS M3: synthetic next-year selection/submission, v6 result/reload/records and explorer regressions at 375/1280px; POST only to the local synthetic reading endpoint"
+    : "PASS: synthetic backend, 375/1280px, Enter/Space, selection markers, reading focus, reload/records, 5 elements/flows, paired combination/break, no relations and unknown time; no mutation requests");
 } finally {
   await browser?.close();
   app?.kill();
+  if (rewriteBackend?.listening) await new Promise((resolve) => rewriteBackend.close(resolve));
   await new Promise((resolve) => backend.close(resolve));
 }

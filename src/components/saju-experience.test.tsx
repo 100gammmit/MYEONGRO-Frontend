@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SajuExperience } from "./saju-experience";
+import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
 
 const navigation = vi.hoisted(() => ({ push: vi.fn() }));
 const credits = vi.hoisted(() => ({
@@ -78,7 +79,7 @@ function createdReading() {
     reading: {
       id: "reading-1",
       kind: "saju",
-      schemaVersion: 5,
+      schemaVersion: 6,
       status: "completed",
     },
   };
@@ -139,6 +140,48 @@ async function reachReview(precision: "exact" | "approximate" | "unknown" = "exa
 }
 
 describe("SajuExperience", () => {
+  it("submits the selected next year and shows it on review", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    const nextYear = getSajuCurrentYear() + 1;
+    fireEvent.change(screen.getByLabelText("살펴볼 연도"), { target: { value: String(nextYear) } });
+    await reachBirth("내년 일의 방향이 궁금해요");
+    await fillBirth("unknown");
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await screen.findByRole("heading", { name: REVIEW_HEADING });
+    expect(screen.getByText(`${nextYear}년`)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
+    const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    expect(body.targetYear).toBe(nextYear);
+  });
+
+  it("rotates the request id when the reading year is edited after an ambiguous failure", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValueOnce(REQUEST_ID).mockReturnValueOnce(SECOND_REQUEST_ID);
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    await reachReview("unknown");
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    await screen.findByText(/리딩 서버에 연결하지 못했어요/);
+    fireEvent.click(screen.getByRole("button", { name: "질문 고치기" }));
+    fireEvent.change(screen.getByRole("combobox", { name: "살펴볼 연도" }), { target: { value: String(getSajuCurrentYear() + 1) } });
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await screen.findByRole("heading", { name: REVIEW_HEADING });
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalled());
+    const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
+    expect(first.requestId).toBe(REQUEST_ID);
+    expect(second.requestId).toBe(SECOND_REQUEST_ID);
+    expect(second.targetYear).toBe(first.targetYear + 1);
+  });
   it("keeps question and birth inputs when opening help in a new tab", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
@@ -402,6 +445,7 @@ describe("SajuExperience", () => {
     expect(fetchMock.mock.calls[2]?.[0]).toBe("/api/saju/readings");
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     expect(body).toEqual({
+      targetYear: getSajuCurrentYear(),
       requestId: REQUEST_ID,
       question: "올해 이직을 준비해도 괜찮을까요?",
       focusArea: "career",

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { readingModeSchema } from "@/domain/reading/reading-mode";
+import { monthlyCalendarSchema } from "./monthly-calendar";
 
 const textSchema = z.string().trim().min(1);
 const focusAreaSchema = z.enum(["self", "career", "relationship", "life_money"]);
@@ -270,8 +271,20 @@ const completedSajuRecordSchema = z.union([
       calculationSnapshot: minimalCalculationSnapshotSchema,
     }).strict(),
   }).passthrough(),
+  z.object({
+    ...completedRecordCommon,
+    schemaVersion: z.literal(6),
+    input: z.object({
+      targetYear: z.number().int(),
+      calculationSnapshot: minimalCalculationSnapshotSchema.extend({ monthlyCalendar: monthlyCalendarSchema }),
+    }).strict(),
+  }).passthrough(),
 ]).superRefine((reading, context) => {
   const snapshot = reading.input.calculationSnapshot;
+  if ("monthlyCalendar" in snapshot && (snapshot.monthlyCalendar.targetYear !== reading.input.targetYear
+    || (!snapshot.dayMaster && snapshot.monthlyCalendar.months.some((month) => month.periods.some((period) => period.stemTenGod !== undefined))))) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["input", "calculationSnapshot", "monthlyCalendar"], message: "월운의 연도 또는 일간 근거가 일치하지 않습니다." });
+  }
   const expectedSections = ["core", "strengths", "relationship", "work"];
   if (reading.result.natalSections.some((section, index) => section.id !== expectedSections[index])) {
     context.addIssue({

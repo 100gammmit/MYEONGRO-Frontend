@@ -58,6 +58,7 @@ const birthProfileSchema = z.object({
 });
 
 const readingCreateRequestSchema = z.object({
+  targetYear: z.number().int().min(1900).max(2100).optional(),
   requestId: z.string().uuid(),
   question: z.string().trim().min(1).max(300),
   focusArea: z.enum(["self", "career", "relationship", "life_money"]),
@@ -68,7 +69,7 @@ const readingCreatedResponseSchema = z.object({
   reading: z.object({
     id: z.string().min(1),
     kind: z.literal("saju"),
-    schemaVersion: z.literal(5),
+    schemaVersion: z.union([z.literal(5), z.literal(6)]),
     status: z.enum(["generating", "completed", "failed"]),
   }).passthrough(),
 }).strict();

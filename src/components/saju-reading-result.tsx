@@ -69,7 +69,7 @@ export function SajuReadingResult({
   footer?: ReactNode;
 }) {
   const snapshot = view.input.calculationSnapshot;
-  const isVersionFive = view.schemaVersion === 5;
+  const isVersionFive = view.schemaVersion === 5 || view.schemaVersion === 6;
   const currentLuck = "currentLuckCycle" in snapshot
     ? snapshot.currentLuckCycle
     : "luckCycle" in snapshot ? snapshot.luckCycle?.periods.find(

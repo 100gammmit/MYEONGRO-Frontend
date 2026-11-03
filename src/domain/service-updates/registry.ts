@@ -4,6 +4,20 @@ import { defineServiceUpdates } from "./model";
 // entry with correctionOf rather than rewriting what users were shown.
 export const SERVICE_UPDATES = defineServiceUpdates([
   {
+    id: "2026-11-03-saju-year-selection",
+    category: "release",
+    noticeLevel: "routine",
+    title: "사주에서 올해와 내년을 선택할 수 있습니다",
+    summary: "살펴볼 연도를 고르면 해당 연도를 기준으로 연간 해석과 질문 리딩을 제공합니다.",
+    changes: [
+      "입력 확인 화면에서 선택한 리딩 연도를 다시 확인할 수 있습니다.",
+      "기존 기록은 원래 연도와 결과를 유지하며 다시 계산하지 않습니다.",
+      "월별 풀이 화면은 아직 제공하지 않습니다. 이용 크레딧과 원본 출생정보 비보관 원칙은 그대로입니다.",
+    ],
+    publishedDate: "2026-11-03",
+    effectiveDate: "2026-11-03",
+  },
+  {
     id: "2026-11-03-saju-explorer",
     category: "release",
     noticeLevel: "routine",

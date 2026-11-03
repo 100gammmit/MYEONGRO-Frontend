@@ -1,6 +1,7 @@
 "use client";
 
 import { ReadingGuideLink } from "./reading-help-links";
+import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -43,9 +44,10 @@ import { ReadingShell } from "./reading-shell";
 type Phase = "consent" | "question" | "birth" | "review" | "loading";
 type WizardStep = "question" | "birth" | "review";
 type CatalogStatus = "idle" | "loading" | "ready" | "error";
-type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request";
+type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request" | "targetYear";
 
 interface SajuFormState {
+  targetYear: number;
   birthDate: string;
   birthTimePrecision: BirthTimePrecision | "";
   birthTime: string;
@@ -59,6 +61,7 @@ interface SajuFormState {
 const TOTAL_STEPS = 4;
 const MAX_QUESTION_LENGTH = 300;
 const initialForm: SajuFormState = {
+  targetYear: 0,
   birthDate: "",
   birthTimePrecision: "",
   birthTime: "",
@@ -91,11 +94,12 @@ const FOCUS_OPTIONS: ReadonlyArray<{ value: SajuFocusArea; label: string; exampl
 const LOADING_MESSAGES = [
   "출생정보를 확인하고 있어요.",
   "명식의 공통 구조를 계산하고 있어요.",
-  "올해의 흐름을 연결하고 있어요.",
+  "선택한 연도의 흐름을 연결하고 있어요.",
   "질문에 맞는 리딩을 구성하고 있어요.",
 ] as const;
 
 const FIELD_PHASE: Partial<Record<string, Phase>> = {
+  targetYear: "question",
   "birthProfile.birthDate": "birth",
   "birthProfile.birthTimePrecision": "birth",
   "birthProfile.birthTime": "birth",
@@ -106,6 +110,7 @@ const FIELD_PHASE: Partial<Record<string, Phase>> = {
 };
 
 const FIELD_KEY: Partial<Record<string, FieldKey>> = {
+  targetYear: "targetYear",
   "birthProfile.birthDate": "birthDate",
   "birthProfile.birthTimePrecision": "birthTimePrecision",
   "birthProfile.birthTime": "birthTime",
@@ -142,7 +147,9 @@ function findMissingBirthFields(form: SajuFormState): Partial<Record<FieldKey, s
 }
 
 function isQuestionReady(form: SajuFormState): boolean {
-  return Boolean(form.focusArea && form.question.trim().length > 0 && form.question.length <= MAX_QUESTION_LENGTH);
+  const currentYear = getSajuCurrentYear();
+  return Boolean((form.targetYear === currentYear || form.targetYear === currentYear + 1)
+    && form.focusArea && form.question.trim().length > 0 && form.question.length <= MAX_QUESTION_LENGTH);
 }
 
 // The browser's forward button can land on a later step; only allow it when the steps before it still pass their checks.
@@ -163,10 +170,11 @@ function ensureRequestId(requestIdRef: MutableRefObject<string | null>): string 
 }
 
 export function SajuExperience() {
+  const currentYear = getSajuCurrentYear();
   const router = useRouter();
   const credits = useReadingCredits();
   const [phase, setPhase] = useState<Phase>("consent");
-  const [form, setForm] = useState<SajuFormState>(initialForm);
+  const [form, setForm] = useState<SajuFormState>(() => ({ ...initialForm, targetYear: getSajuCurrentYear() }));
   const [catalog, setCatalog] = useState<SajuBirthPlacesResponse | null>(null);
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatus>("idle");
   const [catalogError, setCatalogError] = useState<string | null>(null);
@@ -456,6 +464,17 @@ export function SajuExperience() {
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
           <ReadingGuideLink kind="saju" />
+          <label className="field" htmlFor="saju-target-year">
+            <span id="saju-target-year-label">살펴볼 연도</span>
+            <select id="saju-target-year" value={form.targetYear === currentYear || form.targetYear === currentYear + 1 ? form.targetYear : ""} aria-invalid={Boolean(fieldErrors.targetYear)}
+              aria-labelledby="saju-target-year-label"
+              aria-describedby={fieldErrors.targetYear ? "saju-target-year-hint target-year-error" : "saju-target-year-hint"} onChange={(event) => updateForm({ targetYear: Number(event.target.value) })}>
+              <option value="" disabled>살펴볼 연도를 다시 선택해 주세요</option>
+              {[currentYear, currentYear + 1].map((year) => <option key={year} value={year}>{year}년 · {year === currentYear ? "올해" : "내년"}</option>)}
+            </select>
+            <p className="field-guidance" id="saju-target-year-hint">질문과 연간 해석은 선택한 연도를 기준으로 읽습니다. 월별 풀이 화면은 아직 제공하지 않습니다.</p>
+            <FieldError id="target-year-error" message={fieldErrors.targetYear} />
+          </label>
           <fieldset
             className="field"
             aria-describedby={fieldErrors.focusArea ? "focus-error" : undefined}
@@ -632,7 +651,7 @@ export function SajuExperience() {
                 </label>
               ))}
             </div>
-            {form.luckDirectionBasis === "unspecified" ? <p className="notice">원국과 올해 흐름은 제공하지만 대운 계산과 해석은 제외합니다.</p> : null}
+            {form.luckDirectionBasis === "unspecified" ? <p className="notice">원국과 선택한 연도의 흐름은 제공하지만 대운 계산과 해석은 제외합니다.</p> : null}
             <FieldError id="luck-error" message={fieldErrors.luckDirectionBasis} />
           </fieldset>
         </div>
@@ -692,6 +711,7 @@ export function SajuExperience() {
           note={creditUntouched ? "크레딧은 차감되지 않았어요." : undefined}
         />
         <ReviewGroup id="review-question" title="질문" onEdit={() => leaveReview("question", true)} disabled={submitting}>
+          <div><dt>리딩 연도</dt><dd>{form.targetYear}년</dd></div>
           <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
           <div><dt>질문</dt><dd>{form.question.trim()}</dd></div>
         </ReviewGroup>
@@ -708,6 +728,7 @@ export function SajuExperience() {
 
 function buildRequest(form: SajuFormState, requestId: string): SajuReadingCreateRequest {
   const request = {
+    targetYear: form.targetYear,
     requestId,
     question: form.question.trim(),
     focusArea: form.focusArea,
