@@ -1,13 +1,19 @@
 import type { SajuCalculationSnapshot } from "./result";
 
 export const ELEMENTS = {
-  wood: { label: "목 · 나무", description: "자라나고 뻗어가는 나무의 모습에 빗대어 설명하는 분류입니다." },
-  fire: { label: "화 · 불", description: "빛과 열을 내는 불의 모습에 빗대어 설명하는 분류입니다." },
-  earth: { label: "토 · 흙", description: "받치고 담아내는 흙의 모습에 빗대어 설명하는 분류입니다." },
-  metal: { label: "금 · 쇠", description: "단단하고 형태를 갖춘 쇠의 모습에 빗대어 설명하는 분류입니다." },
-  water: { label: "수 · 물", description: "흐르고 스며드는 물의 모습에 빗대어 설명하는 분류입니다." },
+  wood: { label: "목 · 나무", season: "봄", direction: "동쪽", description: "자라고 위로 뻗어 나가는 성질을 나무에 빗대어 표현합니다." },
+  fire: { label: "화 · 불", season: "여름", direction: "남쪽", description: "밖으로 퍼지고 드러나는 성질을 불에 빗대어 표현합니다." },
+  earth: { label: "토 · 흙", season: "계절이 바뀌는 사이", direction: "가운데", description: "받치고 이어 주며 조율하는 성질을 흙에 빗대어 표현합니다." },
+  metal: { label: "금 · 쇠", season: "가을", direction: "서쪽", description: "거두고 다듬어 정리하는 성질을 쇠에 빗대어 표현합니다." },
+  water: { label: "수 · 물", season: "겨울", direction: "북쪽", description: "모으고 깊이 저장하는 성질을 물에 빗대어 표현합니다." },
 } as const;
 export type Element = keyof typeof ELEMENTS;
+export const GENERATES: Record<Element, Element> = {
+  wood: "fire", fire: "earth", earth: "metal", metal: "water", water: "wood",
+};
+export const CONTROLS: Record<Element, Element> = {
+  wood: "earth", earth: "water", water: "fire", fire: "metal", metal: "wood",
+};
 export const PILLARS = { year: "연주", month: "월주", day: "일주", time: "시주" } as const;
 export type PillarKey = keyof typeof PILLARS;
 export type Character = { id: string; pillar: PillarKey; lane: "stem" | "branch"; symbol: string; element?: Element };
@@ -41,17 +47,35 @@ export function characters(snapshot: SajuCalculationSnapshot): Character[] {
   });
 }
 export const RELATIONS: Record<string, { label: string; description: string; lane: Character["lane"] }> = {
-  stem_combination: { label: "천간의 합 · 위 글자의 연결", description: "위 글자 사이의 결합을 살피는 전통적인 관계입니다. 좋은 관계나 결과를 보장하는 뜻은 아닙니다.", lane: "stem" },
-  stem_clash: { label: "천간의 충 · 위 글자의 대립", description: "위 글자 사이의 대립을 살피는 관계입니다. 실제 갈등이나 나쁜 일이 생긴다는 예고는 아닙니다.", lane: "stem" },
-  branch_combination: { label: "지지의 합 · 아래 글자의 연결", description: "아래 글자 사이의 결합을 살피는 관계입니다. 다른 명식 요소와 함께 해석합니다.", lane: "branch" },
-  branch_clash: { label: "지지의 충 · 아래 글자의 대립", description: "아래 글자 사이의 대립을 살피는 관계입니다. 변화나 긴장을 읽는 재료이지 사건의 예고는 아닙니다.", lane: "branch" },
-  branch_harm: { label: "지지의 해 · 아래 글자의 어긋남", description: "아래 글자 사이의 어긋남을 살피는 관계입니다. 누군가에게 해를 입는다는 뜻으로 단정하지 않습니다.", lane: "branch" },
-  branch_break: { label: "지지의 파 · 아래 글자의 균열", description: "아래 글자 사이의 균열을 살피는 관계입니다. 실제 관계가 깨진다는 예언은 아닙니다.", lane: "branch" },
-  branch_punishment: { label: "지지의 형 · 아래 글자의 마찰", description: "아래 글자 사이의 마찰을 살피는 관계입니다. 처벌이나 사고를 뜻하는 말로 받아들이지 않아도 됩니다.", lane: "branch" },
+  stem_combination: { label: "천간의 합 · 위 글자의 연결", description: "위 글자 두 개가 서로 끌어당겨 묶이는 관계입니다. 서로 다른 성향이 한 방향으로 모이는 모습으로 읽습니다.", lane: "stem" },
+  stem_clash: { label: "천간의 충 · 위 글자의 대립", description: "위 글자 두 개가 서로 다른 방향으로 밀어내는 관계입니다. 서로 다른 요구 사이에서 균형을 찾는 모습으로 읽습니다.", lane: "stem" },
+  branch_combination: { label: "지지의 합 · 아래 글자의 연결", description: "아래 글자 두 개가 짝을 이루어 묶이는 관계입니다. 생활 속에서 서로 보완하는 흐름으로 읽습니다.", lane: "branch" },
+  branch_clash: { label: "지지의 충 · 아래 글자의 대립", description: "아래 글자가 정반대 자리에서 마주 보는 관계입니다. 변화와 움직임이 생기기 쉬운 지점으로 읽습니다.", lane: "branch" },
+  branch_harm: { label: "지지의 해 · 아래 글자의 어긋남", description: "아래 글자 사이에 미묘한 어긋남이 있는 관계입니다. 기대와 실제의 차이를 맞추는 지점으로 읽습니다.", lane: "branch" },
+  branch_break: { label: "지지의 파 · 아래 글자의 균열", description: "아래 글자 사이에 틈이 생기는 관계입니다. 익숙한 방식을 다시 점검하는 계기로 읽습니다.", lane: "branch" },
+  branch_punishment: { label: "지지의 형 · 아래 글자의 마찰", description: "아래 글자 사이에 마찰이 생기는 관계입니다. 같은 일이 되풀이될 때 방식을 조정하는 지점으로 읽습니다.", lane: "branch" },
 };
 
 export function relationInfo(type: string) {
   return Object.prototype.hasOwnProperty.call(RELATIONS, type) ? RELATIONS[type] : undefined;
+}
+
+export function pairedRelations(
+  snapshot: SajuCalculationSnapshot,
+  relation: SajuCalculationSnapshot["relations"][number],
+) {
+  const definition = relationInfo(relation.type);
+  if (!definition || relation.members.length < 2) return [];
+  const normalizedMembers = (members: string[]) => {
+    const normalized = members.map((member) => symbolInfo(member, definition.lane)?.korean);
+    return normalized.every((member) => member !== undefined)
+      ? normalized.sort().join("|") : undefined;
+  };
+  const members = normalizedMembers(relation.members);
+  if (!members) return [];
+  return snapshot.relations.filter((other) => other.type !== relation.type
+    && relationInfo(other.type)?.lane === definition.lane
+    && normalizedMembers(other.members) === members);
 }
 
 // Snapshot relations have symbols but no pillar positions. Highlight only when

@@ -27,12 +27,41 @@ const record = {
     questionReading: { heading: "질문의 설명", body: "합성 질문 설명입니다.", evidenceKeys: ["dayMaster"] }, disclaimer: "오락과 자기 성찰을 위한 참고입니다.",
   },
 };
+const records = new Map([[record.id, record]]);
+for (const [id, first, second] of [["synthetic-paired", "인", "해"], ["synthetic-paired-si-shin", "사", "신"]]) {
+  const paired = structuredClone(record);
+  paired.id = id;
+  const snapshot = paired.input.calculationSnapshot;
+  snapshot.pillars = { year: { ganZhi: `갑${first}` }, month: { ganZhi: `을${second}` }, day: { ganZhi: "임오" }, time: null };
+  snapshot.fiveElements = first === "인"
+    ? { wood: 3, fire: 1, earth: 0, metal: 0, water: 2 }
+    : { wood: 2, fire: 2, earth: 0, metal: 1, water: 1 };
+  snapshot.relations = [{ type: "branch_combination", members: [first, second] }, { type: "branch_break", members: [second, first] }];
+  records.set(id, paired);
+}
+const noRelations = structuredClone(record);
+noRelations.id = "synthetic-no-relations";
+noRelations.input.calculationSnapshot.relations = [];
+records.set(noRelations.id, noRelations);
+const unknownTime = structuredClone(record);
+unknownTime.id = "synthetic-unknown-time";
+delete unknownTime.input.calculationSnapshot.dayMaster;
+unknownTime.input.calculationSnapshot.pillars.day = null;
+unknownTime.input.calculationSnapshot.fiveElements = { wood: 1, fire: 0, earth: 2, metal: 0, water: 1 };
+unknownTime.input.calculationSnapshot.relations = [{ type: "stem_combination", members: ["갑", "기"] }];
+unknownTime.input.calculationSnapshot.uncertainty.varyingFields = ["pillars.day", "pillars.time"];
+unknownTime.input.calculationSnapshot.limitations = ["DAY_PILLAR_UNCERTAIN", "TIME_PILLAR_UNCERTAIN"];
+unknownTime.result.natalSections[0].evidenceKeys = ["pillars"];
+unknownTime.result.questionReading.evidenceKeys = ["pillars"];
+records.set(unknownTime.id, unknownTime);
 const requests = [];
 const backend = createServer((request, response) => {
   requests.push(`${request.method} ${request.url}`);
   response.setHeader("content-type", "application/json");
   if (request.url === "/api/auth/me") response.end(JSON.stringify({ authenticated: true, user: { id: "synthetic-user" } }));
-  else if (request.url === "/api/readings/synthetic-saju") response.end(JSON.stringify({ reading: record }));
+  else if (request.url?.startsWith("/api/readings/") && records.has(request.url.slice("/api/readings/".length))) {
+    response.end(JSON.stringify({ reading: records.get(request.url.slice("/api/readings/".length)) }));
+  }
   else if (request.url === "/api/readings") response.end(JSON.stringify({ items: [record] }));
   else { response.statusCode = 404; response.end("{}"); }
 });
@@ -77,6 +106,20 @@ try {
     assert.equal(await page.getByText("선택", { exact: true }).count(), 2);
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     await page.screenshot({ path: `${output}/elements-${width}.png`, fullPage: true });
+    for (const [name, count, season, direction] of [
+      ["목 · 나무", 1, "봄", "동쪽"], ["화 · 불", 1, "여름", "남쪽"],
+      ["토 · 흙", 2, "계절이 바뀌는 사이", "가운데"], ["금 · 쇠", 0, "가을", "서쪽"], ["수 · 물", 2, "겨울", "북쪽"],
+    ]) {
+      await page.getByRole("button", { name: `${name} ${count}개` }).click();
+      const panel = page.locator("#saju-explorer-description");
+      await panel.getByText(season, { exact: true }).waitFor();
+      await panel.getByText(direction, { exact: true }).waitFor();
+      await panel.getByRole("heading", { name: "상생 · 돕는 흐름" }).waitFor();
+      await panel.getByRole("heading", { name: "상극 · 다스리고 조절하는 흐름" }).waitFor();
+      assert.doesNotMatch(await panel.textContent(), /저장된|snapshot|확정된 기둥/);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      await panel.screenshot({ path: `${output}/symbol-${name.slice(0, 1)}-${width}.png` });
+    }
     const relation = page.getByRole("button", { name: /지지의 충.*자·오/ });
     await relation.focus();
     await page.keyboard.press("Space");
@@ -90,11 +133,31 @@ try {
     await page.goto(`${base}/records/synthetic-saju`);
     await page.getByRole("group", { name: "사주 탐색 항목" }).waitFor();
     await page.screenshot({ path: `${output}/record-${width}.png`, fullPage: true });
+    for (const id of ["synthetic-paired", "synthetic-paired-si-shin"]) {
+      await page.goto(`${base}/saju/results/${id}`);
+      for (const type of ["지지의 합", "지지의 파"]) {
+        await page.getByRole("button", { name: new RegExp(type) }).click();
+        const panel = page.locator("#saju-explorer-description");
+        await panel.getByText(/서로 묶이면서도 틈이 생길 수 있는 관계/).waitFor();
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+        await panel.screenshot({ path: `${output}/${id}-${type.endsWith("합") ? "combination" : "break"}-${width}.png` });
+      }
+    }
+    await page.goto(`${base}/saju/results/synthetic-no-relations`);
+    await page.getByText("표시된 글자 사이에 해당하는 관계가 없습니다.").waitFor();
+    await page.locator("#saju-calculation").screenshot({ path: `${output}/no-relations-${width}.png` });
+    await page.goto(`${base}/saju/results/synthetic-unknown-time`);
+    await page.getByText(/일간이 확정되지 않아/).waitFor();
+    assert.equal(await page.locator(".saju-pillar-grid article").count(), 2);
+    await page.getByRole("button", { name: "목 · 나무 1개" }).click();
+    await page.getByText(/출생 시각이 확정되지 않은 기둥은 개수와 표시에서 빠집니다/).waitFor();
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await page.locator("#saju-calculation").screenshot({ path: `${output}/unknown-time-${width}.png` });
     await context.close();
   }
   assert.deepEqual(errors, []);
   assert.ok(requests.every((request) => request.startsWith("GET ")), "Exploration must not generate a reading");
-  console.log("PASS: synthetic backend, 375/1280px, Enter/Space, selection markers, reading focus, reload and records route; no mutation requests");
+  console.log("PASS: synthetic backend, 375/1280px, Enter/Space, selection markers, reading focus, reload/records, 5 elements/flows, paired combination/break, no relations and unknown time; no mutation requests");
 } finally {
   await browser?.close();
   app?.kill();

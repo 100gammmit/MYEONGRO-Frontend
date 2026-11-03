@@ -28,10 +28,10 @@ describe("SajuCalculationExplorer", () => {
     const nav = screen.getByRole("navigation", { name: "선택한 계산을 사용한 리딩" });
     expect(within(nav).getByRole("link", { name: "일하는 방식 →" })).toHaveAttribute("href", "#saju-work");
     expect(within(nav).queryByText("나를 움직이는 중심 →")).not.toBeInTheDocument();
-    expect(screen.getByText(/기운의 강약이나 성격 점수가 아닙니다/)).toBeInTheDocument();
+    expect(screen.getByText(/많고 적음이 좋고 나쁨이나 강약을 뜻하지는 않습니다/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "금 · 쇠 0개" }));
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
-    expect(screen.getByText(/0개여도 결함/)).toBeInTheDocument();
+    expect(screen.getByText(/이 명식에는 0개가 있습니다/)).toBeInTheDocument();
   });
 
   it("does not highlight ambiguous, absent or unsupported relations", () => {
@@ -41,9 +41,9 @@ describe("SajuCalculationExplorer", () => {
     const { container } = render(<SajuCalculationExplorer snapshot={snapshot} links={links} />);
     fireEvent.click(screen.getByRole("button", { name: /지지의 충.*자·오/ }));
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
-    expect(screen.getByText(/위치를 특정할 수 없어/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /저장된 명식 관계/ }));
-    expect(screen.getByText(/의미나 위치를 추가로 추정하지 않습니다/)).toBeInTheDocument();
+    expect(screen.getByText(/같은 글자가 여러 자리에 있어/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /명식의 관계 \(/ }));
+    expect(screen.getByText(/이 관계에 대한 설명은 아직 준비되지 않았습니다/)).toBeInTheDocument();
   });
 
   it("shows confirmed relation positions and no extra pillar", () => {
@@ -61,11 +61,56 @@ describe("SajuCalculationExplorer", () => {
     snapshot.fiveElements = { wood: 1 };
     const { container, unmount } = render(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
     expect(screen.getByText(/일간이 확정되지 않아/)).toBeInTheDocument();
-    expect(screen.getByText(/저장된 관계가 없습니다/)).toBeInTheDocument();
+    expect(screen.getByText(/표시된 글자 사이에 해당하는 관계가 없습니다/)).toBeInTheDocument();
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
     expect(screen.queryByRole("button", { name: /수 · 물/ })).not.toBeInTheDocument();
     unmount();
     render(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
     expect(screen.getByText(/일간이 확정되지 않아/)).toBeInTheDocument();
+  });
+
+  it.each([
+    ["목 · 나무 1개", "봄", "동쪽", "목은 화를 돕고, 수에게서 도움을 받습니다.", "목은 토를 조절하고, 금에게서 조절을 받습니다."],
+    ["화 · 불 1개", "여름", "남쪽", "화는 토를 돕고, 목에게서 도움을 받습니다.", "화는 금을 조절하고, 수에게서 조절을 받습니다."],
+    ["토 · 흙 2개", "계절이 바뀌는 사이", "가운데", "토는 금을 돕고, 화에게서 도움을 받습니다.", "토는 수를 조절하고, 목에게서 조절을 받습니다."],
+    ["금 · 쇠 0개", "가을", "서쪽", "금은 수를 돕고, 토에게서 도움을 받습니다.", "금은 목을 조절하고, 화에게서 조절을 받습니다."],
+    ["수 · 물 2개", "겨울", "북쪽", "수는 목을 돕고, 금에게서 도움을 받습니다.", "수는 화를 조절하고, 토에게서 조절을 받습니다."],
+  ])("explains %s as traditional symbols and flows, separate from counts", (button, season, direction, generates, controls) => {
+    const { container } = render(<SajuCalculationExplorer snapshot={fixture()} links={[]} />);
+    fireEvent.click(screen.getByRole("button", { name: button }));
+    expect(screen.getByText(season)).toBeInTheDocument();
+    expect(screen.getByText(direction)).toBeInTheDocument();
+    const flows = screen.getByRole("region", { name: "오행 사이의 흐름" });
+    expect(within(flows).getByText(generates)).toBeInTheDocument();
+    expect(within(flows).getByText(controls)).toBeInTheDocument();
+    expect(flows).not.toHaveTextContent(/\d+개|이 명식/);
+    expect(screen.getAllByText("오행 사이의 흐름을 설명하는 틀이며, 좋고 나쁨을 가리는 기준은 아닙니다.")).toHaveLength(1);
+    expect(container).not.toHaveTextContent(/저장된|snapshot|확정된 기둥|결함|보완이 필요/);
+    expect(container).toHaveTextContent("개인별 AI 해석을 추가로 생성하지 않습니다.");
+  });
+
+  it.each([["인", "해", "寅", "亥"], ["사", "신", "巳", "申"]])("explains simultaneous combination/break for %s·%s from either selection", (first, second, hanjaFirst, hanjaSecond) => {
+    const snapshot = fixture();
+    snapshot.relations = [{ type: "branch_combination", members: [first, second] }, { type: "branch_break", members: [hanjaSecond, hanjaFirst] }];
+    const { container } = render(<SajuCalculationExplorer snapshot={snapshot} links={links} />);
+    for (const relation of ["지지의 합", "지지의 파"]) {
+      fireEvent.click(screen.getByRole("button", { name: new RegExp(relation) }));
+      const explanation = screen.getByText(/전통 규칙에서/);
+      expect(explanation).toHaveTextContent(/지지의 합/);
+      expect(explanation).toHaveTextContent(/지지의 파/);
+      expect(explanation).toHaveTextContent("서로 묶이면서도 틈이 생길 수 있는 관계");
+      expect(explanation).not.toHaveTextContent(/寅|亥|巳|申/);
+      expect(screen.getAllByText("관계는 앞으로 일어날 사건을 예고하지 않습니다.")).toHaveLength(1);
+      expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
+      expect(container).not.toHaveTextContent("같은 글자가 여러 자리에 있어");
+      expect(container).not.toHaveTextContent(/저장된|snapshot/);
+    }
+  });
+
+  it("does not add paired copy for a standalone relation", () => {
+    render(<SajuCalculationExplorer snapshot={fixture()} links={links} />);
+    fireEvent.click(screen.getByRole("button", { name: /지지의 충/ }));
+    expect(screen.queryByText(/전통 규칙에서/)).not.toBeInTheDocument();
+    expect(screen.getByText(/변화와 움직임이 생기기 쉬운 지점/)).toBeInTheDocument();
   });
 });

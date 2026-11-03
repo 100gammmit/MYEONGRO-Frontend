@@ -2,10 +2,21 @@
 
 import { useState } from "react";
 import type { SajuCalculationSnapshot, SajuEvidenceKey } from "@/domain/saju/result";
-import { characters, ELEMENTS, PILLARS, relationInfo, relationCharacterIds, symbolInfo, type Element } from "@/domain/saju/exploration";
+import { characters, CONTROLS, ELEMENTS, GENERATES, pairedRelations, PILLARS, relationInfo, relationCharacterIds, symbolInfo, type Element } from "@/domain/saju/exploration";
 import styles from "./saju-calculation-explorer.module.css";
 
 export type ExplorationLink = { id: string; heading: string; evidenceKeys: SajuEvidenceKey[] };
+
+const elementKeys = Object.keys(ELEMENTS) as Element[];
+const elementName = (element: Element) => ELEMENTS[element].label.split(" · ")[0];
+function withParticle(text: string, withFinal: string, withoutFinal: string) {
+  const last = text.charCodeAt(text.length - 1);
+  return text + ((last - 0xac00) % 28 !== 0 ? withFinal : withoutFinal);
+}
+function elementWithParticle(element: Element, role: "subject" | "object") {
+  return role === "subject" ? withParticle(elementName(element), "은", "는")
+    : withParticle(elementName(element), "을", "를");
+}
 
 export function SajuCalculationExplorer({ snapshot, links }: { snapshot: SajuCalculationSnapshot; links: ExplorationLink[] }) {
   const [selection, setSelection] = useState<string>("dayMaster");
@@ -13,6 +24,12 @@ export function SajuCalculationExplorer({ snapshot, links }: { snapshot: SajuCal
   const element = selection.startsWith("element:") ? selection.slice(8) as Element : undefined;
   const relation = selection.startsWith("relation:") ? snapshot.relations[Number(selection.slice(9))] : undefined;
   const relationDefinition = relation ? relationInfo(relation.type) : undefined;
+  const pairs = relation ? pairedRelations(snapshot, relation) : [];
+  const pairLabels = relation ? Array.from(new Set([relation, ...pairs].map((value) =>
+    relationInfo(value.type)?.label.split(" · ")[0],
+  ).filter(Boolean))).join(" · ") : "";
+  const combinationAndBreak = relation && [relation, ...pairs].some((value) => value.type === "branch_combination")
+    && [relation, ...pairs].some((value) => value.type === "branch_break");
   const day = snapshot.dayMaster ? symbolInfo(snapshot.dayMaster, "stem") : undefined;
   const dayCharacter = allCharacters.find((character) => character.id === "day-stem");
   const highlighted = element ? allCharacters.filter((character) => character.element === element).map((character) => character.id)
@@ -20,7 +37,13 @@ export function SajuCalculationExplorer({ snapshot, links }: { snapshot: SajuCal
       : day && dayCharacter && symbolInfo(dayCharacter.symbol, "stem")?.korean === day.korean ? [dayCharacter.id] : [];
   const evidence: SajuEvidenceKey = element ? "elementBalance" : relation ? "interactions" : "dayMaster";
   const related = links.filter((link) => link.evidenceKeys.includes(evidence));
-  const title = element ? ELEMENTS[element].label : relation ? relationDefinition?.label ?? "저장된 명식 관계" : "일간 · 나를 읽는 기준 글자";
+  const title = element ? ELEMENTS[element].label : relation ? relationDefinition?.label ?? "명식의 관계" : "일간 · 나를 읽는 기준 글자";
+  const repeatedMembers = relation && relationDefinition && relation.members.some((member) => {
+    const normalized = symbolInfo(member, relationDefinition.lane)?.korean;
+    return normalized && allCharacters.filter((character) => character.lane === relationDefinition.lane
+      && symbolInfo(character.symbol, character.lane)?.korean === normalized).length
+      > relation.members.filter((value) => symbolInfo(value, relationDefinition.lane)?.korean === normalized).length;
+  });
 
   return <div className={styles.explorer}>
     <p className={styles.intro}>내 사주 탐색 <span>항목을 선택하면 명식의 글자와 설명을 함께 살펴볼 수 있습니다.</span></p>
@@ -29,7 +52,7 @@ export function SajuCalculationExplorer({ snapshot, links }: { snapshot: SajuCal
       <div className={styles.groupLabel}>오행 · 글자의 다섯 분류</div>
       {(Object.keys(ELEMENTS) as Element[]).filter((key) => key in snapshot.fiveElements).map((key) => <button key={key} type="button" aria-pressed={element === key} aria-controls="saju-explorer-description" onClick={() => setSelection(`element:${key}`)}>{ELEMENTS[key].label} {snapshot.fiveElements[key]}개</button>)}
       <div className={styles.groupLabel}>명식의 관계 · 글자 사이의 연결</div>
-      {snapshot.relations.length ? snapshot.relations.map((value, index) => <button key={index} type="button" aria-pressed={relation === value} aria-controls="saju-explorer-description" onClick={() => setSelection(`relation:${index}`)}>{relationInfo(value.type)?.label ?? "저장된 명식 관계"} ({value.members.join("·")})</button>) : <p>확정된 글자 사이에 저장된 관계가 없습니다. 관계가 없다고 좋거나 나쁜 명식은 아닙니다.</p>}
+      {snapshot.relations.length ? snapshot.relations.map((value, index) => <button key={index} type="button" aria-pressed={relation === value} aria-controls="saju-explorer-description" onClick={() => setSelection(`relation:${index}`)}>{relationInfo(value.type)?.label ?? "명식의 관계"} ({value.members.join("·")})</button>) : <p>표시된 글자 사이에 해당하는 관계가 없습니다.</p>}
     </div>
     <div className="saju-pillar-grid">
       {(Object.keys(PILLARS) as (keyof typeof PILLARS)[]).map((key) => {
@@ -49,11 +72,30 @@ export function SajuCalculationExplorer({ snapshot, links }: { snapshot: SajuCal
       <h3>{title}</h3>
       {element ? <>
         <p>{ELEMENTS[element].description}</p>
-        <p>저장된 구성은 {snapshot.fiveElements[element]}개입니다. 확정된 기둥의 위·아래 글자를 센 값이며, 기운의 강약이나 성격 점수가 아닙니다. 0개여도 결함이나 보완이 필요하다는 뜻은 아닙니다.</p>
-        <p>{highlighted.length ? `이 분류에 해당하는 글자 ${highlighted.length}곳을 표시했습니다.` : "현재 표시된 명식에서 이 분류의 글자는 확인되지 않습니다."} 미확정 기둥은 수치와 표시의 해석에서 제외합니다.</p>
+        <dl className={styles.symbolism}>
+          <div><dt>계절의 상징</dt><dd>{ELEMENTS[element].season}</dd></div>
+          <div><dt>방향의 상징</dt><dd>{ELEMENTS[element].direction}</dd></div>
+        </dl>
+        <p>이 명식에는 {snapshot.fiveElements[element]}개가 있습니다. 표시된 기둥의 위·아래 글자를 센 값이며, 많고 적음이 좋고 나쁨이나 강약을 뜻하지는 않습니다.</p>
+        <p>{highlighted.length ? `이 분류에 해당하는 글자 ${highlighted.length}곳을 표시했습니다.` : "현재 표시된 명식에서 이 분류의 글자는 확인되지 않습니다."} 출생 시각이 확정되지 않은 기둥은 개수와 표시에서 빠집니다.</p>
+        <section className={styles.flows} aria-label="오행 사이의 흐름">
+          <h4>상생 · 돕는 흐름</h4>
+          <p>{elementWithParticle(element, "subject")} {elementWithParticle(GENERATES[element], "object")} 돕고, {elementName(elementKeys.find((key) => GENERATES[key] === element)!)}에게서 도움을 받습니다.</p>
+          <h4>상극 · 다스리고 조절하는 흐름</h4>
+          <p>{elementWithParticle(element, "subject")} {elementWithParticle(CONTROLS[element], "object")} 조절하고, {elementName(elementKeys.find((key) => CONTROLS[key] === element)!)}에게서 조절을 받습니다.</p>
+          <p className={styles.flowNote}>오행 사이의 흐름을 설명하는 틀이며, 좋고 나쁨을 가리는 기준은 아닙니다.</p>
+        </section>
       </> : relation ? <>
-        <p>{relationDefinition?.description ?? "저장된 관계 이름에 대응하는 설명이 없어 의미나 위치를 추가로 추정하지 않습니다."}</p>
-        <p>{highlighted.length ? "저장된 관계의 글자 위치를 표시했습니다." : "저장된 정보만으로 글자의 위치를 특정할 수 없어 강조하지 않았습니다."}</p>
+        <p>{relationDefinition?.description ?? "이 관계에 대한 설명은 아직 준비되지 않았습니다."}</p>
+        {pairs.length > 0 && relationDefinition ? <p>
+          {withParticle(relation.members.map((member) => symbolInfo(member, relationDefinition.lane)?.korean).join("·"), "은", "는")} 전통 규칙에서 {pairLabels}에 함께 속하는 짝입니다.{" "}
+          {combinationAndBreak ? "서로 묶이면서도 틈이 생길 수 있는 관계로, " : "같은 글자 사이의 관계를 여러 측면에서 읽는 방식으로, "}
+          명로는 이 관계들을 함께 보여 주고 어느 한쪽으로 정하지 않습니다.
+        </p> : null}
+        {relationDefinition ? <p>{highlighted.length ? "관계에 해당하는 글자 위치를 표시했습니다." : repeatedMembers
+          ? "같은 글자가 여러 자리에 있어 위치를 따로 표시하지 않았습니다."
+          : "이 명식에서 관계에 해당하는 위치를 확인하기 어려워 따로 표시하지 않았습니다."}</p> : null}
+        <p>관계는 앞으로 일어날 사건을 예고하지 않습니다.</p>
       </> : <>
         <p>일간은 태어난 날을 나타내는 일주의 위 글자입니다. 사주에서는 다른 글자와의 관계를 읽는 기준으로 사용합니다.</p>
         <p>{snapshot.dayMaster ? `이 기록의 일간은 ${snapshot.dayMaster}입니다.${day ? ` 오행에서는 ${ELEMENTS[day.element].label}에 속합니다.` : " 대응 설명이 없어 분류를 추정하지 않습니다."}` : "이 기록은 일간이 확정되지 않아 개인별 설명과 강조를 제공하지 않습니다."} 일간 하나로 성격이나 운명을 정하지 않습니다.</p>
