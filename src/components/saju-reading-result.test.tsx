@@ -1,12 +1,53 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { sajuReadingView } from "@/test-fixtures/saju-reading";
 
 import { SajuReadingResult } from "./saju-reading-result";
 import { AI_GENERATED_NOTICE } from "./ai-generated-notice";
+import { parseSajuReadingView } from "@/domain/saju/result";
+import { sajuReadingRecord } from "@/test-fixtures/saju-reading";
 
 describe("SajuReadingResult", () => {
+  it("moves focus from calculation evidence to the corresponding reading", () => {
+    render(<SajuReadingResult view={sajuReadingView()} />);
+    const nav = screen.getByRole("navigation", { name: "선택한 계산을 사용한 리딩" });
+    fireEvent.click(within(nav).getByRole("link", { name: "나를 움직이는 중심 →" }));
+    expect(document.activeElement?.id).toBe("saju-core");
+  });
+
+  it.each([2, 3, 4])("uses the same explorer for legacy schema %i without exposing raw birth data", (schemaVersion) => {
+    const record = sajuReadingRecord();
+    const pillar = { ganZhi: "임신", stem: "임", branch: "신", fiveElements: "수금", stemTenGod: "정인", branchTenGods: [] };
+    const snapshot = {
+      ...record.input.calculationSnapshot,
+      pillars: { year: pillar, month: pillar, day: pillar, time: null },
+      timeCorrection: null,
+      luckCycle: null,
+      uncertainty: { precision: "unknown", candidateCount: 1440, rangeStart: "1992-08-17T00:00", rangeEnd: "1992-08-17T23:59", varyingFields: ["pillars.time"], candidateZoneOffsets: ["+09:00"] },
+    };
+    const { currentLuckCycle: _currentLuckCycle, ...legacySnapshot } = snapshot;
+    void _currentLuckCycle;
+    const view = parseSajuReadingView({
+      ...record, schemaVersion,
+      input: {
+        targetYear: 2026, focusArea: "self",
+        ...(schemaVersion !== 4 ? { question: "합성 질문" } : {}),
+        birthProfile: {
+          calendarType: "solar", birthDate: "1992-08-17", birthTimePrecision: "unknown", luckDirectionBasis: "unspecified",
+          ...(schemaVersion === 2 ? { provinceCode: "36", cityCode: "36110" } : {}),
+        },
+        calculationSnapshot: legacySnapshot,
+      },
+    });
+    expect(view).not.toBeNull();
+    const { container, unmount } = render(<SajuReadingResult view={view!} />);
+    expect(screen.getByRole("group", { name: "사주 탐색 항목" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "수 · 물 2개" }));
+    expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(3);
+    expect(container).not.toHaveTextContent("1992-08-17");
+    unmount();
+  });
   it("renders a v5 record without raw birth details or precision metadata", () => {
     const { container } = render(<SajuReadingResult view={sajuReadingView()} />);
 
@@ -26,7 +67,7 @@ describe("SajuReadingResult", () => {
     );
 
     expect(ids).toEqual([
-      "saju-calculation", "saju-core", "saju-strengths", "saju-relationship",
+      "saju-calculation", "saju-explorer-description", "saju-core", "saju-strengths", "saju-relationship",
       "saju-work", "saju-annual", "saju-question", "saju-summary", "saju-limitations",
     ]);
     expect(screen.getByRole("link", { name: "리딩 요약" })).toHaveAttribute("href", "#saju-summary");

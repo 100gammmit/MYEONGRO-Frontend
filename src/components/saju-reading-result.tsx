@@ -15,13 +15,7 @@ import {
 
 import { ReadingModeNotice } from "./reading-mode-notice";
 import { AiGeneratedNotice } from "./ai-generated-notice";
-
-const PILLAR_LABELS = {
-  year: "연주",
-  month: "월주",
-  day: "일주",
-  time: "시주",
-} as const;
+import { SajuCalculationExplorer } from "./saju-calculation-explorer";
 
 const ELEMENT_LABELS: Record<string, string> = {
   wood: "목",
@@ -76,7 +70,6 @@ export function SajuReadingResult({
 }) {
   const snapshot = view.input.calculationSnapshot;
   const isVersionFive = view.schemaVersion === 5;
-  const confirmedPillars = Object.entries(snapshot.pillars).filter((entry) => entry[1] !== null);
   const currentLuck = "currentLuckCycle" in snapshot
     ? snapshot.currentLuckCycle
     : "luckCycle" in snapshot ? snapshot.luckCycle?.periods.find(
@@ -129,15 +122,11 @@ export function SajuReadingResult({
           <h2>확정된 명식과 계산 기준</h2>
           <p>가능한 출생 시각 후보에서 공통으로 확인된 계산만 표시합니다.</p>
         </div>
-        <div className="saju-pillar-grid">
-          {confirmedPillars.map(([key, pillar]) => pillar ? (
-            <article key={key}>
-              <span>{PILLAR_LABELS[key as keyof typeof PILLAR_LABELS]}</span>
-              <strong>{pillar.ganZhi}</strong>
-              {pillar.stemTenGod ? <small>{pillar.stemTenGod}</small> : null}
-            </article>
-          ) : null)}
-        </div>
+        <SajuCalculationExplorer key={view.id} snapshot={snapshot} links={[
+          ...view.result.natalSections.map((section) => ({ ...section, id: `saju-${section.id}` })),
+          { ...view.result.annualReading, id: "saju-annual" },
+          { ...view.result.questionReading, id: "saju-question" },
+        ]} />
         <dl className="saju-calculation-facts">
           {snapshot.dayMaster ? <div><dt>일간</dt><dd>{snapshot.dayMaster}</dd></div> : null}
           <div><dt>오행 분포</dt><dd>{elementBalanceText(snapshot)}</dd></div>
@@ -158,18 +147,18 @@ export function SajuReadingResult({
 
       <div className="saju-reading-sections">
         {view.result.natalSections.map((section) => (
-          <section id={`saju-${section.id}`} key={section.id}>
+          <section id={`saju-${section.id}`} key={section.id} tabIndex={-1}>
             <h2>{section.heading}</h2>
             <p>{section.body}</p>
             <EvidenceDetails evidenceKeys={section.evidenceKeys} snapshot={snapshot} />
           </section>
         ))}
-        <section id="saju-annual">
+        <section id="saju-annual" tabIndex={-1}>
           <h2>{view.result.annualReading.heading}</h2>
           <p>{view.result.annualReading.body}</p>
           <EvidenceDetails evidenceKeys={view.result.annualReading.evidenceKeys} snapshot={snapshot} />
         </section>
-        <section className="saju-question-reading" id="saju-question">
+        <section className="saju-question-reading" id="saju-question" tabIndex={-1}>
           <p className="eyebrow">YOUR QUESTION</p>
           <h2>{view.result.questionReading.heading}</h2>
           <p>{view.result.questionReading.body}</p>

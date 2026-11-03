@@ -4,6 +4,21 @@ import { defineServiceUpdates } from "./model";
 // entry with correctionOf rather than rewriting what users were shown.
 export const SERVICE_UPDATES = defineServiceUpdates([
   {
+    id: "2026-11-03-saju-explorer",
+    category: "release",
+    noticeLevel: "routine",
+    title: "사주 결과에서 내 명식을 탐색할 수 있습니다",
+    summary: "일간·오행·글자 사이 관계를 선택하고 설명과 관련 리딩을 함께 살펴보세요.",
+    changes: [
+      "오행과 관계를 선택하면 위치를 확인할 수 있는 명식 글자를 표시합니다.",
+      "확정되지 않은 글자나 위치를 추정하지 않고, 오행 개수를 강약 점수로 표현하지 않습니다.",
+      "기존 기록에서도 저장된 계산 범위 안에서 탐색할 수 있으며 리딩 본문은 바뀌지 않습니다.",
+      "추가 AI 생성 없이 제공하며 이용 크레딧과 개인정보 처리 범위는 그대로입니다.",
+    ],
+    publishedDate: "2026-11-03",
+    effectiveDate: "2026-11-03",
+  },
+  {
     id: "2026-10-30-reading-help",
     category: "release",
     noticeLevel: "routine",
