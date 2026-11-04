@@ -46,7 +46,7 @@ function getRecordContext(reading: PublicReadingRecord): string {
   const targetYear = typeof reading.input.targetYear === "number"
     ? `${reading.input.targetYear}년`
     : null;
-  return [targetYear, focusArea].filter(Boolean).join(" · ") || "사주 리딩";
+  return [targetYear, reading.schemaVersion === 7 && reading.input.reportType === "annual_monthly" ? "한 해 리포트" : focusArea].filter(Boolean).join(" · ") || "사주 리딩";
 }
 
 function isSupportedRecord(reading: PublicReadingRecord): boolean {

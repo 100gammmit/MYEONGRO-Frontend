@@ -5,6 +5,8 @@ import { ReadingRecordActions } from "@/components/reading-record-actions";
 import { ReadingDeclinedResult } from "@/components/reading-declined-result";
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
 import { SajuReadingResult } from "@/components/saju-reading-result";
+import { SajuAnnualReadingResult } from "@/components/saju-annual-reading-result";
+import { parseSajuAnnualReadingView } from "@/domain/saju/annual-result";
 import { TarotReadingResult } from "@/components/tarot-reading-result";
 import { parseSajuReadingView } from "@/domain/saju/result";
 import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
@@ -40,13 +42,14 @@ export default async function ReadingDetailPage({
 
   const tarotView = parseTarotResultView(reading);
   const sajuView = parseSajuReadingView(reading);
+  const annualView = parseSajuAnnualReadingView(reading);
   const declinedView = parseDeclinedReadingView(reading);
   const unreadableTarot = reading.kind === "tarot"
     && reading.status === "completed"
     && !tarotView;
   const unreadableSaju = reading.kind === "saju"
     && reading.status === "completed"
-    && !sajuView;
+    && !sajuView && !annualView;
 
   if (declinedView) {
     return (
@@ -59,6 +62,7 @@ export default async function ReadingDetailPage({
     );
   }
 
+  if (annualView) return <SajuAnnualReadingResult view={annualView} backHref="/records" backLabel="내 기록" footer={<ReadingRecordActions readingCompleted readingId={reading.id} />} />;
   if (sajuView) {
     return (
       <SajuReadingResult

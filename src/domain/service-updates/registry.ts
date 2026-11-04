@@ -4,6 +4,21 @@ import { defineServiceUpdates } from "./model";
 // entry with correctionOf rather than rewriting what users were shown.
 export const SERVICE_UPDATES = defineServiceUpdates([
   {
+    id: "2026-11-05-saju-annual-report",
+    category: "release", noticeLevel: "routine",
+    title: "월별로 다시 읽는 한 해 리포트를 추가했습니다",
+    summary: "올해·내년을 골라 연간 개요와 12개월의 흐름을 살펴보세요. 기존 종합 사주도 그대로 이용할 수 있습니다.",
+    changes: [
+      "질문은 선택이며, 관심 분야와 출생정보를 바탕으로 한 해를 읽습니다.",
+      "각 월의 절입 전·후 적용 시각은 한국 시각으로 표시하며, 달을 넘겨 이어지는 구간은 같은 해석을 공유합니다.",
+      "일간이 확정되지 않으면 연간 개요·월별 요약·계산 구간을 담은 간략형으로 제공합니다. 상세형과 간략형 모두 4크레딧입니다.",
+      "완료된 리포트의 월 전환·새로고침·내 기록 재열람에는 추가 생성이나 차감이 없습니다.",
+      "원본 출생정보와 질문 원문은 기록에 저장하지 않으며 기존 리딩은 다시 계산하지 않습니다.",
+    ],
+    publishedDate: "2026-11-05", effectiveDate: "2026-11-05",
+    links: [{ href: "/saju", label: "사주 리딩 시작" }],
+  },
+  {
     id: "2026-11-03-saju-year-selection",
     category: "release",
     noticeLevel: "routine",

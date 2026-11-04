@@ -1,0 +1,538 @@
+{
+  "id": "synthetic-annual-full",
+  "kind": "saju",
+  "schemaVersion": 7,
+  "status": "completed",
+  "spreadType": null,
+  "title": "표현과 확인이 함께 자라는 한 해",
+  "createdAt": "2026-11-05T00:00:00Z",
+  "updatedAt": "2026-11-05T00:00:00Z",
+  "input": {
+    "reportType": "annual_monthly",
+    "targetYear": 2027,
+    "calculationSnapshot": {
+      "calculationVersion": "saju-ko-v4",
+      "engine": "lunar-java",
+      "engineVersion": "1.7.7",
+      "cityCatalogVersion": "kr-admin-v1-province",
+      "targetYear": 2027,
+      "pillars": {
+        "year": {
+          "ganZhi": "임신",
+          "stemTenGod": "정인"
+        },
+        "month": {
+          "ganZhi": "무신",
+          "stemTenGod": "정재"
+        },
+        "day": {
+          "ganZhi": "을축",
+          "stemTenGod": "비견"
+        },
+        "time": {
+          "ganZhi": "임오",
+          "stemTenGod": "정인"
+        }
+      },
+      "dayMaster": "을",
+      "fiveElements": {
+        "water": 2,
+        "wood": 1,
+        "fire": 1,
+        "earth": 2,
+        "metal": 2
+      },
+      "relations": [
+        {
+          "members": [
+            "축",
+            "오"
+          ],
+          "type": "branch_harm"
+        }
+      ],
+      "annualFortune": {
+        "year": 2027,
+        "ganZhi": "정미",
+        "stemTenGod": "식신"
+      },
+      "limitations": [
+        "LUCK_DIRECTION_UNSPECIFIED"
+      ],
+      "uncertainty": {
+        "varyingFields": []
+      },
+      "monthlyCalendar": {
+        "calculationVersion": "saju-monthly-ko-v1",
+        "timeZone": "Asia/Seoul",
+        "targetYear": 2027,
+        "months": [
+          {
+            "month": 1,
+            "periods": [
+              {
+                "startInclusive": "2027-01-01T00:00:00+09:00",
+                "endExclusive": "2027-01-05T23:09:58+09:00",
+                "yearGanZhi": "병오",
+                "monthGanZhi": "경자",
+                "stemTenGod": "정관"
+              },
+              {
+                "startInclusive": "2027-01-05T23:09:58+09:00",
+                "endExclusive": "2027-02-01T00:00:00+09:00",
+                "yearGanZhi": "병오",
+                "monthGanZhi": "신축",
+                "stemTenGod": "편관"
+              }
+            ]
+          },
+          {
+            "month": 2,
+            "periods": [
+              {
+                "startInclusive": "2027-02-01T00:00:00+09:00",
+                "endExclusive": "2027-02-04T10:46:18+09:00",
+                "yearGanZhi": "병오",
+                "monthGanZhi": "신축",
+                "stemTenGod": "편관"
+              },
+              {
+                "startInclusive": "2027-02-04T10:46:18+09:00",
+                "endExclusive": "2027-03-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "임인",
+                "stemTenGod": "정인"
+              }
+            ]
+          },
+          {
+            "month": 3,
+            "periods": [
+              {
+                "startInclusive": "2027-03-01T00:00:00+09:00",
+                "endExclusive": "2027-03-06T04:39:33+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "임인",
+                "stemTenGod": "정인"
+              },
+              {
+                "startInclusive": "2027-03-06T04:39:33+09:00",
+                "endExclusive": "2027-04-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "계묘",
+                "stemTenGod": "편인"
+              }
+            ]
+          },
+          {
+            "month": 4,
+            "periods": [
+              {
+                "startInclusive": "2027-04-01T00:00:00+09:00",
+                "endExclusive": "2027-04-05T09:17:31+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "계묘",
+                "stemTenGod": "편인"
+              },
+              {
+                "startInclusive": "2027-04-05T09:17:31+09:00",
+                "endExclusive": "2027-05-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "갑진",
+                "stemTenGod": "겁재"
+              }
+            ]
+          },
+          {
+            "month": 5,
+            "periods": [
+              {
+                "startInclusive": "2027-05-01T00:00:00+09:00",
+                "endExclusive": "2027-05-06T02:25:12+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "갑진",
+                "stemTenGod": "겁재"
+              },
+              {
+                "startInclusive": "2027-05-06T02:25:12+09:00",
+                "endExclusive": "2027-06-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "을사",
+                "stemTenGod": "비견"
+              }
+            ]
+          },
+          {
+            "month": 6,
+            "periods": [
+              {
+                "startInclusive": "2027-06-01T00:00:00+09:00",
+                "endExclusive": "2027-06-06T06:25:48+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "을사",
+                "stemTenGod": "비견"
+              },
+              {
+                "startInclusive": "2027-06-06T06:25:48+09:00",
+                "endExclusive": "2027-07-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "병오",
+                "stemTenGod": "상관"
+              }
+            ]
+          },
+          {
+            "month": 7,
+            "periods": [
+              {
+                "startInclusive": "2027-07-01T00:00:00+09:00",
+                "endExclusive": "2027-07-07T16:37:03+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "병오",
+                "stemTenGod": "상관"
+              },
+              {
+                "startInclusive": "2027-07-07T16:37:03+09:00",
+                "endExclusive": "2027-08-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "정미",
+                "stemTenGod": "식신"
+              }
+            ]
+          },
+          {
+            "month": 8,
+            "periods": [
+              {
+                "startInclusive": "2027-08-01T00:00:00+09:00",
+                "endExclusive": "2027-08-08T02:26:46+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "정미",
+                "stemTenGod": "식신"
+              },
+              {
+                "startInclusive": "2027-08-08T02:26:46+09:00",
+                "endExclusive": "2027-09-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "무신",
+                "stemTenGod": "정재"
+              }
+            ]
+          },
+          {
+            "month": 9,
+            "periods": [
+              {
+                "startInclusive": "2027-09-01T00:00:00+09:00",
+                "endExclusive": "2027-09-08T05:28:28+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "무신",
+                "stemTenGod": "정재"
+              },
+              {
+                "startInclusive": "2027-09-08T05:28:28+09:00",
+                "endExclusive": "2027-10-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "기유",
+                "stemTenGod": "편재"
+              }
+            ]
+          },
+          {
+            "month": 10,
+            "periods": [
+              {
+                "startInclusive": "2027-10-01T00:00:00+09:00",
+                "endExclusive": "2027-10-08T21:17:06+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "기유",
+                "stemTenGod": "편재"
+              },
+              {
+                "startInclusive": "2027-10-08T21:17:06+09:00",
+                "endExclusive": "2027-11-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "경술",
+                "stemTenGod": "정관"
+              }
+            ]
+          },
+          {
+            "month": 11,
+            "periods": [
+              {
+                "startInclusive": "2027-11-01T00:00:00+09:00",
+                "endExclusive": "2027-11-08T00:38:35+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "경술",
+                "stemTenGod": "정관"
+              },
+              {
+                "startInclusive": "2027-11-08T00:38:35+09:00",
+                "endExclusive": "2027-12-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "신해",
+                "stemTenGod": "편관"
+              }
+            ]
+          },
+          {
+            "month": 12,
+            "periods": [
+              {
+                "startInclusive": "2027-12-01T00:00:00+09:00",
+                "endExclusive": "2027-12-07T17:37:41+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "신해",
+                "stemTenGod": "편관"
+              },
+              {
+                "startInclusive": "2027-12-07T17:37:41+09:00",
+                "endExclusive": "2028-01-01T00:00:00+09:00",
+                "yearGanZhi": "정미",
+                "monthGanZhi": "임자",
+                "stemTenGod": "정인"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "result": {
+    "reportType": "annual_monthly",
+    "detailLevel": "full",
+    "targetYear": 2027,
+    "readingMode": "standard",
+    "questionRedirected": false,
+    "title": "표현과 확인이 함께 자라는 한 해",
+    "annualOverview": {
+      "heading": "올해의 큰 흐름",
+      "body": "올해는 생각에 머문 내용을 표현하고 꾸준한 결과로 이어가려는 흐름이 더해질 수 있어요. 확인과 배움을 중시하는 면도 함께 보여, 드러내는 움직임과 차분히 살피는 움직임이 나란히 나타날 수 있습니다.",
+      "evidenceKeys": [
+        "annualFlow",
+        "dayMaster",
+        "tenGods"
+      ]
+    },
+    "months": [
+      {
+        "month": 1,
+        "heading": "기준을 세우고 책임을 다지는 달",
+        "body": "기준과 책임을 살피는 흐름에서 긴장 속 대응으로 이어져, 정해진 절차를 의식하면서도 요구에 맞춰 움직이는 모습이 함께 나타날 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p01",
+          "monthlyFlow.p02"
+        ]
+      },
+      {
+        "month": 2,
+        "heading": "대응에서 배움으로 옮겨가는 달",
+        "body": "압박에 대응하는 흐름에서 배움과 뒷받침을 살피는 흐름으로 이어져, 해야 할 일을 의식하던 시선이 상황을 이해하는 쪽으로 옮겨갈 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p02",
+          "monthlyFlow.p03"
+        ]
+      },
+      {
+        "month": 3,
+        "heading": "새로운 방향을 이해하는 달",
+        "body": "배움과 정보에 관심이 이어지다가 생각을 안에서 다듬는 흐름으로 넘어가, 새롭게 알게 된 내용을 천천히 정리하는 모습이 나타날 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p03",
+          "monthlyFlow.p04"
+        ]
+      },
+      {
+        "month": 4,
+        "heading": "생각을 다듬고 몫을 조율하는 달",
+        "body": "숙고의 흐름에서 주변과 몫을 조율하는 흐름으로 이어져, 정리한 관점을 다른 사람들과 나누는 과정이 눈에 띌 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p04",
+          "monthlyFlow.p05"
+        ]
+      },
+      {
+        "month": 5,
+        "heading": "함께 움직이며 자기 몫을 찾는 달",
+        "body": "서로의 관점과 몫을 조율하다가 자신의 방식이 또렷해지는 흐름으로 이어져, 함께하는 과정과 개인의 판단이 나란히 부각될 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p05",
+          "monthlyFlow.p06"
+        ]
+      },
+      {
+        "month": 6,
+        "heading": "자기 방식에서 표현으로 이어지는 달",
+        "body": "자신의 속도를 중심에 두는 흐름에서 생각을 드러내는 흐름으로 옮겨가, 독립적인 판단이 표현이나 문제 제기로 이어질 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p06",
+          "monthlyFlow.p07"
+        ]
+      },
+      {
+        "month": 7,
+        "heading": "표현을 꾸준한 결과로 잇는 달",
+        "body": "생각을 눈에 띄게 드러내는 흐름이 꾸준한 결과를 다루는 흐름으로 이어져, 표현한 내용을 차근차근 정리하는 방향이 두드러질 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p07",
+          "monthlyFlow.p08"
+        ]
+      },
+      {
+        "month": 8,
+        "heading": "결과를 현실적인 가치로 살피는 달",
+        "body": "해온 일을 결과로 정리하는 흐름에서 실질적인 가치를 살피는 흐름으로 이어져, 완성한 것의 조건과 쓰임을 함께 바라볼 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p08",
+          "monthlyFlow.p09"
+        ]
+      },
+      {
+        "month": 9,
+        "heading": "안정성과 새로운 가능성을 함께 보는 달",
+        "body": "구체적인 조건을 확인하는 흐름에서 변하는 기회를 살피는 흐름으로 이어져, 안정적으로 관리할 부분과 새롭게 고려할 가능성이 함께 눈에 들어올 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p09",
+          "monthlyFlow.p10"
+        ]
+      },
+      {
+        "month": 10,
+        "heading": "가능성을 살피고 기준을 확인하는 달",
+        "body": "유동적인 선택지를 살피다가 약속과 절차를 확인하는 흐름으로 이어져, 가능성을 따져보는 시선이 책임과 신뢰를 점검하는 쪽으로 이동할 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p10",
+          "monthlyFlow.p11"
+        ]
+      },
+      {
+        "month": 11,
+        "heading": "책임을 마주하고 의미를 찾는 달",
+        "body": "기준과 책임을 확인하는 흐름에서 배움과 정보에 관심을 두는 흐름으로 이어져, 맡은 일을 살피면서 그 안에서 이해와 의미를 찾는 모습이 나타날 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p11",
+          "monthlyFlow.p12"
+        ]
+      },
+      {
+        "month": 12,
+        "heading": "대응을 정리와 이해로 잇는 달",
+        "body": "요구에 대응하는 흐름이 배운 것을 정리하는 흐름으로 이어져, 해야 할 일을 의식하던 시선이 경험을 이해하고 정돈하는 쪽으로 옮겨갈 수 있어요.",
+        "evidenceKeys": [
+          "monthlyFlow.p12",
+          "monthlyFlow.p13"
+        ]
+      }
+    ],
+    "periods": [
+      {
+        "periodId": "p01",
+        "heading": "기준과 책임을 살피는 때",
+        "body": "정해진 기준과 맡은 일을 의식하며 차분히 진행하려는 흐름이 두드러질 수 있어요. 이 구간은 약속과 절차를 중시하는 상징이 앞서 있어, 결과보다 책임 있게 처리하는 과정이 눈에 들어옵니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p01"
+        ]
+      },
+      {
+        "periodId": "p02",
+        "heading": "긴장 속에서 대응하는 때",
+        "body": "해야 할 일을 빠르게 파악하고 압박에 대응하려는 마음이 커질 수 있어요. 주어진 상황에 맞춰 행동을 요구하는 상징이 강조되어, 책임감과 부담이 함께 느껴질 수 있습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p02"
+        ]
+      },
+      {
+        "periodId": "p03",
+        "heading": "배움과 뒷받침이 더해지는 때",
+        "body": "한 해의 배경이 바뀌면서 새로운 방향을 이해하고 필요한 정보를 받아들이는 흐름이 더해질 수 있어요. 이 구간은 배움과 도움을 살피는 상징이 중심이므로, 변화의 의미를 파악하는 쪽에 관심이 쏠릴 수 있습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p03"
+        ]
+      },
+      {
+        "periodId": "p04",
+        "heading": "생각을 안에서 다듬는 때",
+        "body": "바깥으로 바로 드러내기보다 생각을 정리하고 여러 해석을 살피는 경향이 나타날 수 있어요. 배움과 숙고를 향하는 상징이 이어져, 익숙한 내용도 다시 검토하는 흐름으로 읽힙니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p04"
+        ]
+      },
+      {
+        "periodId": "p05",
+        "heading": "각자의 몫을 조율하는 때",
+        "body": "주변과 관점이나 자원을 나누는 과정이 눈에 띄며, 서로의 몫을 조율하는 흐름이 생길 수 있어요. 함께 움직이는 사람들의 영향이 강조되는 상징이 있어, 협력과 자기 몫을 함께 의식하기 쉽습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p05"
+        ]
+      },
+      {
+        "periodId": "p06",
+        "heading": "내 방식이 또렷해지는 때",
+        "body": "자신의 속도와 판단을 중심에 두고 움직이려는 흐름이 나타날 수 있어요. 자기 주도성과 독립적인 선택을 드러내는 상징이 강조되어, 주변과 보폭을 맞추는 일도 함께 의식될 수 있습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p06"
+        ]
+      },
+      {
+        "periodId": "p07",
+        "heading": "표현과 문제 제기가 늘어나는 때",
+        "body": "생각을 솔직하게 드러내거나 기존 방식에 의문을 던지는 흐름이 두드러질 수 있어요. 표현과 틀을 벗어난 발상이 강조되는 상징이 있어, 말과 결과물이 이전보다 눈에 띄기 쉽습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p07"
+        ]
+      },
+      {
+        "periodId": "p08",
+        "heading": "꾸준한 결과를 다루는 때",
+        "body": "해온 일을 차근차근 표현하고 결과로 정리하려는 흐름이 이어질 수 있어요. 즐거움과 꾸준한 생산성을 나타내는 상징이 중심이 되어, 과정과 완성도를 함께 살피는 구간으로 읽힙니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p08"
+        ]
+      },
+      {
+        "periodId": "p09",
+        "heading": "실질적인 가치를 살피는 때",
+        "body": "일의 가치나 자원의 안정성을 현실적으로 살피려는 흐름이 커질 수 있어요. 꾸준히 관리하고 확인하는 태도를 나타내는 상징이 있어, 구체적인 조건과 실질적인 결과가 관심의 중심에 놓일 수 있습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p09"
+        ]
+      },
+      {
+        "periodId": "p10",
+        "heading": "변화하는 기회를 살피는 때",
+        "body": "여러 가능성 가운데 현실적으로 다룰 수 있는 선택지를 살피는 흐름이 나타날 수 있어요. 유동적인 기회와 실리적 판단을 나타내는 상징이 강조되어, 상황에 따라 관심의 방향이 달라질 수 있습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p10"
+        ]
+      },
+      {
+        "periodId": "p11",
+        "heading": "약속과 절차를 다시 살피는 때",
+        "body": "맡은 일의 기준과 책임을 다시 확인하려는 흐름이 두드러질 수 있어요. 정해진 규칙과 신뢰를 중시하는 상징이 나타나, 약속을 지키는 과정이 중요하게 느껴질 수 있습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p11"
+        ]
+      },
+      {
+        "periodId": "p12",
+        "heading": "요구에 맞춰 대응하는 때",
+        "body": "주변의 요구를 의식하며 긴장감 있게 대응하는 흐름이 나타날 수 있어요. 책임과 빠른 대처를 강조하는 상징이 이어져, 할 일의 무게를 체감하는 모습으로 읽힙니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p12"
+        ]
+      },
+      {
+        "periodId": "p13",
+        "heading": "배운 것을 정리하는 때",
+        "body": "필요한 정보를 받아들이고 경험에서 의미를 찾으려는 흐름이 더해질 수 있어요. 배움과 뒷받침을 살피는 상징이 중심이 되어, 내용을 이해하고 정리하는 과정이 두드러질 수 있습니다.",
+        "evidenceKeys": [
+          "monthlyFlow.p13"
+        ]
+      }
+    ],
+    "questionReading": null,
+    "summary": "올해는 표현과 꾸준한 결과를 향한 흐름에 배움과 확인의 움직임이 함께 더해질 수 있습니다. 시기마다 드러내는 힘과 살펴보는 힘의 비중이 달라지는 점이 핵심이에요.",
+    "disclaimer": "이 리딩은 오락과 자기 성찰을 위한 참고이며 의료·법률·재정 등 전문적인 조언을 대신하지 않습니다."
+  }
+}

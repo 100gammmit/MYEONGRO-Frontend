@@ -38,7 +38,7 @@ const RELATION_LABELS: Record<string, string> = {
   branch_punishment: "지지의 형",
 };
 
-const LIMITATION_COPY: Record<string, { title: string; body: string }> = {
+export const LIMITATION_COPY: Record<string, { title: string; body: string }> = {
   BIRTH_TIME_UNKNOWN: {
     title: "출생 시각 미상",
     body: "시주와 시간에 따라 달라질 수 있는 해석은 확정하지 않았어요.",

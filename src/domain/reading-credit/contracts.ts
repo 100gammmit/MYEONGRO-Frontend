@@ -12,6 +12,7 @@ export interface ReadingCreditStatus {
   costs: {
     tarot: Record<AiTarotSpreadType, number>;
     saju: number;
+    sajuAnnual?: number;
   };
 }
 

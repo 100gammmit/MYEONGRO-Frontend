@@ -47,6 +47,7 @@ type CatalogStatus = "idle" | "loading" | "ready" | "error";
 type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request" | "targetYear";
 
 interface SajuFormState {
+  reportType: "birth_annual_question" | "annual_monthly";
   targetYear: number;
   birthDate: string;
   birthTimePrecision: BirthTimePrecision | "";
@@ -61,6 +62,7 @@ interface SajuFormState {
 const TOTAL_STEPS = 4;
 const MAX_QUESTION_LENGTH = 300;
 const initialForm: SajuFormState = {
+  reportType: "birth_annual_question",
   targetYear: 0,
   birthDate: "",
   birthTimePrecision: "",
@@ -149,7 +151,7 @@ function findMissingBirthFields(form: SajuFormState): Partial<Record<FieldKey, s
 function isQuestionReady(form: SajuFormState): boolean {
   const currentYear = getSajuCurrentYear();
   return Boolean((form.targetYear === currentYear || form.targetYear === currentYear + 1)
-    && form.focusArea && form.question.trim().length > 0 && form.question.length <= MAX_QUESTION_LENGTH);
+    && form.focusArea && (form.reportType === "annual_monthly" || form.question.trim().length > 0) && form.question.length <= MAX_QUESTION_LENGTH);
 }
 
 // The browser's forward button can land on a later step; only allow it when the steps before it still pass their checks.
@@ -193,7 +195,7 @@ export function SajuExperience() {
   const poppedRef = useRef(false);
   const displayedCredits = getDisplayedReadingCredits(credits.state);
   const creditData = displayedCredits.data;
-  const creditCost = creditData?.costs.saju ?? null;
+  const creditCost = (form.reportType === "annual_monthly" ? creditData?.costs.sajuAnnual ?? creditData?.costs.saju : creditData?.costs.saju) ?? null;
   const creditAccess = getReadingCreditAccess(
     creditData,
     credits.state.status === "idle" || displayedCredits.loading,
@@ -442,8 +444,8 @@ export function SajuExperience() {
       <ReadingShell
         eyebrow="AI SAJU"
         form
-        title="지금 가장 살펴보고 싶은 한 가지는 무엇인가요?"
-        description="관심 분야를 고른 뒤, 현재 선택에 도움이 될 질문을 하나 적어주세요."
+        title="어떤 흐름을 살펴볼까요?"
+        description={form.reportType === "annual_monthly" ? "한 해의 흐름을 월별로 읽습니다. 질문 없이도 시작할 수 있습니다." : "관심 분야를 고른 뒤, 현재 선택에 도움이 될 질문을 하나 적어주세요."}
         step={1}
         totalSteps={TOTAL_STEPS}
         showHomeLink={false}
@@ -464,6 +466,18 @@ export function SajuExperience() {
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
           <ReadingGuideLink kind="saju" />
+          <fieldset className="field">
+            <legend>리포트 종류</legend>
+            <div className="saju-option-list">
+              {([['birth_annual_question', '종합 사주', '나의 성향과 연간 흐름, 질문을 함께 읽습니다.'], ['annual_monthly', '한 해 리포트', '연간 개요와 12개월의 흐름을 다시 찾아 읽습니다.']] as const).map(([value, label, description]) => (
+                <label className="saju-option" key={value}>
+                  <input type="radio" name="report-type" checked={form.reportType === value} onChange={() => updateForm({ reportType: value })} />
+                  <span><strong>{label}</strong><small>{description}</small></span>
+                </label>
+              ))}
+            </div>
+            {form.reportType === "annual_monthly" ? <p className="field-guidance">일간이 확정되지 않으면 연간 개요·월별 한 줄 요약·계산 구간을 담은 간략형으로 제공합니다. 상세형과 간략형 모두 {creditCost ?? 4}크레딧이며, 저장된 리포트는 추가 차감 없이 다시 읽을 수 있습니다.</p> : null}
+          </fieldset>
           <label className="field" htmlFor="saju-target-year">
             <span id="saju-target-year-label">살펴볼 연도</span>
             <select id="saju-target-year" value={form.targetYear === currentYear || form.targetYear === currentYear + 1 ? form.targetYear : ""} aria-invalid={Boolean(fieldErrors.targetYear)}
@@ -472,7 +486,7 @@ export function SajuExperience() {
               <option value="" disabled>살펴볼 연도를 다시 선택해 주세요</option>
               {[currentYear, currentYear + 1].map((year) => <option key={year} value={year}>{year}년 · {year === currentYear ? "올해" : "내년"}</option>)}
             </select>
-            <p className="field-guidance" id="saju-target-year-hint">질문과 연간 해석은 선택한 연도를 기준으로 읽습니다. 월별 풀이 화면은 아직 제공하지 않습니다.</p>
+            <p className="field-guidance" id="saju-target-year-hint">{form.reportType === "annual_monthly" ? "달력의 1~12월을 기준으로, 각 월의 절입 전·후 흐름을 구분합니다." : "질문과 연간 해석은 선택한 연도를 기준으로 읽습니다."}</p>
             <FieldError id="target-year-error" message={fieldErrors.targetYear} />
           </label>
           <fieldset
@@ -498,7 +512,7 @@ export function SajuExperience() {
             <FieldError id="focus-error" message={fieldErrors.focusArea} />
           </fieldset>
           <label className="field" htmlFor="saju-question">
-            <span>질문 한 가지</span>
+            <span>{form.reportType === "annual_monthly" ? "질문 (선택)" : "질문 한 가지"}</span>
             <textarea
               id="saju-question"
               aria-describedby={fieldErrors.question
@@ -711,9 +725,10 @@ export function SajuExperience() {
           note={creditUntouched ? "크레딧은 차감되지 않았어요." : undefined}
         />
         <ReviewGroup id="review-question" title="질문" onEdit={() => leaveReview("question", true)} disabled={submitting}>
+          <div><dt>리포트 종류</dt><dd>{form.reportType === "annual_monthly" ? "한 해 리포트" : "종합 사주"}</dd></div>
           <div><dt>리딩 연도</dt><dd>{form.targetYear}년</dd></div>
           <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
-          <div><dt>질문</dt><dd>{form.question.trim()}</dd></div>
+          <div><dt>질문</dt><dd>{form.question.trim() || "입력하지 않음"}</dd></div>
         </ReviewGroup>
         <ReviewGroup id="review-birth" title="출생 정보" onEdit={() => leaveReview("birth", true)} disabled={submitting}>
           <div><dt>생년월일</dt><dd>{formatBirthDate(form.birthDate)} · 양력</dd></div>
@@ -728,6 +743,7 @@ export function SajuExperience() {
 
 function buildRequest(form: SajuFormState, requestId: string): SajuReadingCreateRequest {
   const request = {
+    ...(form.reportType === "annual_monthly" ? { reportType: form.reportType } : {}),
     targetYear: form.targetYear,
     requestId,
     question: form.question.trim(),

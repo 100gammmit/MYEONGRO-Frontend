@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
 import { ReadingDeclinedResult } from "@/components/reading-declined-result";
 import { SajuReadingResult } from "@/components/saju-reading-result";
+import { SajuAnnualReadingResult } from "@/components/saju-annual-reading-result";
+import { parseSajuAnnualReadingView } from "@/domain/saju/annual-result";
 import { parseDeclinedReadingView } from "@/domain/reading/declined-result";
 import { parseSajuReadingView } from "@/domain/saju/result";
 import {
@@ -39,6 +41,8 @@ export default async function SajuResultPage({
       />
     );
   }
+  const annual = parseSajuAnnualReadingView(reading);
+  if (annual) return <SajuAnnualReadingResult view={annual} />;
   const view = parseSajuReadingView(reading);
   if (!view) notFound();
 

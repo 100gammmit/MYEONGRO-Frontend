@@ -37,7 +37,7 @@ vi.mock("./reading-credit-provider", () => ({
 const REQUIRED_CONSENTS = ["terms", "ai-overseas-transfer"] as const;
 const REQUEST_ID = "11111111-1111-4111-8111-111111111111";
 const SECOND_REQUEST_ID = "22222222-2222-4222-8222-222222222222";
-const QUESTION_HEADING = "지금 가장 살펴보고 싶은 한 가지는 무엇인가요?";
+const QUESTION_HEADING = "어떤 흐름을 살펴볼까요?";
 const BIRTH_HEADING = "출생 정보를 알려주세요";
 const REVIEW_HEADING = "입력한 내용을 확인해 주세요";
 
@@ -140,6 +140,30 @@ async function reachReview(precision: "exact" | "approximate" | "unknown" = "exa
 }
 
 describe("SajuExperience", () => {
+  it("creates an annual report without inventing a question and keeps the choice when editing", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(jsonResponse({ reading: { ...createdReading().reading, schemaVersion: 7 } }));
+    await startWithAcceptedConsent();
+    fireEvent.click(screen.getByRole("radio", { name: /한 해 리포트/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
+    expect(screen.getByRole("textbox", { name: /질문 \(선택\)/ })).toHaveValue("");
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await fillBirth("unknown");
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await screen.findByRole("heading", { name: REVIEW_HEADING });
+    expect(screen.getByText("입력하지 않음")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "질문 고치기" }));
+    expect(screen.getByRole("radio", { name: /한 해 리포트/ })).toBeChecked();
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
+    const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    expect(body.reportType).toBe("annual_monthly");
+    expect(body.question).toBe("");
+    expect(body.birthProfile).not.toHaveProperty("birthTime");
+  });
   it("submits the selected next year and shows it on review", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))

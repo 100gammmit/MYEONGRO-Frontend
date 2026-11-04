@@ -58,18 +58,23 @@ const birthProfileSchema = z.object({
 });
 
 const readingCreateRequestSchema = z.object({
+  reportType: z.enum(["birth_annual_question", "annual_monthly"]).optional(),
   targetYear: z.number().int().min(1900).max(2100).optional(),
   requestId: z.string().uuid(),
-  question: z.string().trim().min(1).max(300),
+  question: z.string().trim().max(300).optional(),
   focusArea: z.enum(["self", "career", "relationship", "life_money"]),
   birthProfile: birthProfileSchema,
-}).strict();
+}).strict().superRefine((request, context) => {
+  if (request.reportType !== "annual_monthly" && !request.question) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["question"], message: "질문을 입력해 주세요." });
+  }
+});
 
 const readingCreatedResponseSchema = z.object({
   reading: z.object({
     id: z.string().min(1),
     kind: z.literal("saju"),
-    schemaVersion: z.union([z.literal(5), z.literal(6)]),
+    schemaVersion: z.union([z.literal(5), z.literal(6), z.literal(7)]),
     status: z.enum(["generating", "completed", "failed"]),
   }).passthrough(),
 }).strict();

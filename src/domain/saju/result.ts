@@ -138,7 +138,7 @@ const minimalPillarSchema = z.object({
   stemTenGod: textSchema.optional(),
 }).strict();
 
-const minimalCalculationSnapshotSchema = z.object({
+export const minimalCalculationSnapshotSchema = z.object({
   calculationVersion: textSchema,
   engine: textSchema,
   engineVersion: textSchema,

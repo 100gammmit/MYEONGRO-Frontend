@@ -22,9 +22,10 @@ export interface SajuBirthProfile {
 }
 
 export interface SajuReadingCreateRequest {
+	readonly reportType?: "birth_annual_question" | "annual_monthly";
 	readonly targetYear?: number;
   readonly requestId: string;
-  readonly question: string;
+  readonly question?: string;
   readonly focusArea: SajuFocusArea;
   readonly birthProfile: SajuBirthProfile;
 }
@@ -33,7 +34,7 @@ export interface SajuReadingCreatedResponse {
   readonly reading: {
     readonly id: string;
     readonly kind: "saju";
-    readonly schemaVersion: 5 | 6;
+    readonly schemaVersion: 5 | 6 | 7;
     readonly status: "generating" | "completed" | "failed";
   };
 }

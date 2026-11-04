@@ -19,6 +19,7 @@ const costsSchema = z.object({
     choice_five_card: positiveCost,
   }).strict(),
   saju: positiveCost,
+  sajuAnnual: positiveCost.optional(),
 }).strict();
 
 const dailyFreeGrantSchema = z.number().int().nonnegative();
