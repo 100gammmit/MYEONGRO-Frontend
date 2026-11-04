@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { sajuReadingRecord } from "@/test-fixtures/saju-reading";
+import { annualFixture } from "@/domain/saju/annual-fixture.test-helper";
 
 const mocks = vi.hoisted(() => ({
   getCookieHeader: vi.fn(),
@@ -40,6 +41,15 @@ async function renderPage() {
 }
 
 describe("SajuResultPage", () => {
+  it.each(["excess result months", "short calendar", "empty calendar"])("uses notFound for malformed annual records: %s", async (scenario) => {
+    const value = annualFixture();
+    if (scenario === "excess result months") value.result.months.push({ ...value.result.months[0], month: 13 });
+    if (scenario === "short calendar") value.input.calculationSnapshot.monthlyCalendar.months.pop();
+    if (scenario === "empty calendar") value.input.calculationSnapshot.monthlyCalendar.months.splice(0);
+    mocks.get.mockResolvedValue(value);
+    await expect(renderPage()).rejects.toThrow("NOT_FOUND");
+    expect(mocks.notFound).toHaveBeenCalled();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getCookieHeader.mockResolvedValue("JSESSIONID=session");

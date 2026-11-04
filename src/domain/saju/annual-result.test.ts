@@ -34,4 +34,17 @@ describe("annual report contract", () => {
     expect(parseSajuReadingCreateRequest({ ...request, question: "  " }).question).toBe("");
     expect(() => parseSajuReadingCreateRequest({ ...request, reportType: "birth_annual_question" })).toThrow();
   });
+  it.each(["excess result months", "missing result months", "short calendar", "empty calendar", "excess calendar", "empty periods", "excess periods"])("returns null without throwing for %s", (scenario) => {
+    const value = annualFixture();
+    const months = value.input.calculationSnapshot.monthlyCalendar.months;
+    if (scenario === "excess result months") value.result.months.push({ ...value.result.months[0], month: 13 });
+    if (scenario === "missing result months") value.result.months.pop();
+    if (scenario === "short calendar") months.pop();
+    if (scenario === "empty calendar") months.splice(0);
+    if (scenario === "excess calendar") months.push({ ...months[0], month: 13 });
+    if (scenario === "empty periods") months[0].periods.splice(0);
+    if (scenario === "excess periods") months[0].periods.push({ ...months[0].periods[0] });
+    expect(() => parseSajuAnnualReadingView(value)).not.toThrow();
+    expect(parseSajuAnnualReadingView(value)).toBeNull();
+  });
 });

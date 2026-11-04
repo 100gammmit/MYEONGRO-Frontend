@@ -46,8 +46,15 @@ const recordSchema = z.object({
 }).passthrough().superRefine((view, context) => {
   const { result, input } = view;
   const snapshot = input.calculationSnapshot;
-  const calendar = annualCalendar(snapshot.monthlyCalendar);
   const fail = () => context.addIssue({ code: z.ZodIssueCode.custom, message: "연간 리포트의 계산 근거가 일치하지 않습니다." });
+  // Zod length failures are dirty, not aborted: refinements still run on these arrays.
+  // Reject incomplete calendars/results before deriving IDs or indexing corresponding months.
+  if (result.months.length !== 12 || snapshot.monthlyCalendar.months.length !== 12
+    || snapshot.monthlyCalendar.months.some((month) => month.periods.length !== 2)) {
+    fail();
+    return;
+  }
+  const calendar = annualCalendar(snapshot.monthlyCalendar);
   if ([snapshot.targetYear, snapshot.monthlyCalendar.targetYear, snapshot.annualFortune.year, result.targetYear].some((year) => year !== input.targetYear)
     || result.detailLevel !== (snapshot.dayMaster ? "full" : "brief")
     || (result.questionRedirected && (result.readingMode === "standard" || !result.questionReading))) fail();

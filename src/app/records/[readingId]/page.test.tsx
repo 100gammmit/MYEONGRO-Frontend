@@ -3,6 +3,7 @@ import { render, screen, within } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { sajuReadingRecord } from "@/test-fixtures/saju-reading";
+import { annualFixture } from "@/domain/saju/annual-fixture.test-helper";
 
 const mocks = vi.hoisted(() => ({
   getCookieHeader: vi.fn(),
@@ -47,6 +48,16 @@ async function renderPage() {
 }
 
 describe("ReadingDetailPage", () => {
+  it.each(["excess result months", "short calendar", "empty calendar"])("shows an unreadable-record notice for malformed annual records: %s", async (scenario) => {
+    const value = annualFixture();
+    if (scenario === "excess result months") value.result.months.push({ ...value.result.months[0], month: 13 });
+    if (scenario === "short calendar") value.input.calculationSnapshot.monthlyCalendar.months.pop();
+    if (scenario === "empty calendar") value.input.calculationSnapshot.monthlyCalendar.months.splice(0);
+    mocks.get.mockResolvedValue(value);
+    await renderPage();
+    expect(screen.getByRole("heading", { name: "이 리딩은 현재 형식으로 표시할 수 없어요" })).toBeInTheDocument();
+    expect(mocks.notFound).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getCookieHeader.mockResolvedValue("JSESSIONID=session");
