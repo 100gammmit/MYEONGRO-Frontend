@@ -4,6 +4,22 @@ import { defineServiceUpdates } from "./model";
 // entry with correctionOf rather than rewriting what users were shown.
 export const SERVICE_UPDATES = defineServiceUpdates([
   {
+    id: "2026-11-07-public-reading-articles",
+    category: "release", noticeLevel: "routine",
+    title: "타로 리딩 예시와 한 해 리포트 안내를 추가했습니다",
+    summary: "로그인 없이 가상의 타로 3장 리딩과 한 해 사주 리포트를 읽는 방법을 확인할 수 있습니다.",
+    changes: [
+      "타로 예시에서 질문과 카드의 자리, 해석, 마지막 요약을 연결해 읽을 수 있습니다.",
+      "한 해 리포트 안내에서 월별 탐색과 절입 전후 구간, 상세형·간략형의 차이를 확인할 수 있습니다.",
+      "홈과 사용 가이드에서 새 글로 연결합니다. 리딩 생성과 이용 크레딧, 개인정보 처리 범위는 바뀌지 않습니다.",
+    ],
+    publishedDate: "2026-11-07", effectiveDate: "2026-11-07",
+    links: [
+      { href: "/guide/tarot/example", label: "타로 3장 리딩 예시" },
+      { href: "/guide/saju/annual-report", label: "한 해 사주 리포트 읽는 법" },
+    ],
+  },
+  {
     id: "2026-11-05-saju-annual-report",
     category: "release", noticeLevel: "routine",
     title: "월별로 다시 읽는 한 해 리포트를 추가했습니다",

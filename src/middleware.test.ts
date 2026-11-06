@@ -74,6 +74,8 @@ describe("session middleware", () => {
     "/_next/static/chunk.js",
     "/_next/image",
     "/favicon.ico",
+    "/robots.txt",
+    "/sitemap.xml",
     "/assets/poster.avif",
     "/assets/site.webmanifest",
     "/media/intro.mp4",

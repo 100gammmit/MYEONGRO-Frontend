@@ -1,0 +1,27 @@
+{
+  "origin": "https://www.myeongro.com",
+  "publicPages": [
+    "/",
+    "/tarot",
+    "/tarot/daily",
+    "/saju",
+    "/faq",
+    "/guide/tarot",
+    "/guide/tarot/example",
+    "/guide/saju",
+    "/guide/saju/annual-report",
+    "/about/reading",
+    "/updates",
+    "/terms",
+    "/privacy"
+  ],
+  "privateRoutePrefixes": [
+    "/login",
+    "/signup",
+    "/account",
+    "/records",
+    "/tarot/draw",
+    "/tarot/results",
+    "/saju/results"
+  ]
+}

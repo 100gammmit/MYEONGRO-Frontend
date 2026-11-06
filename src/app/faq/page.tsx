@@ -1,13 +1,14 @@
-import type { Metadata } from "next";
+import { publicPageMetadata } from "@/infrastructure/site-metadata";
 import Link from "next/link";
 import { FaqList } from "@/components/faq-list";
 import { FAQ_GROUPS } from "@/content/reading-help";
 import styles from "@/components/reading-help.module.css";
 
-export const metadata: Metadata = {
-  title: "자주 묻는 질문 | 명로",
-  description: "크레딧, 기록, 개인정보, 사주 입력과 타로 이용 중 궁금한 점을 확인하세요.",
-};
+export const metadata = publicPageMetadata(
+  "/faq",
+  "자주 묻는 질문 | 명로",
+  "크레딧, 기록, 개인정보, 사주 입력과 타로 이용 중 궁금한 점을 확인하세요.",
+);
 
 export default function FaqPage() {
   return (

@@ -13,6 +13,7 @@ export type ReadingGuide = {
   kind: "tarot" | "saju";
   title: string;
   description: string;
+  editorialNote?: string;
   summary: readonly string[];
   sections: readonly GuideSection[];
   related: readonly HelpLink[];
@@ -110,7 +111,7 @@ export const TAROT_GUIDE: ReadingGuide = {
       "리딩은 상징을 통한 해석이지 검증된 미래 예측이 아닙니다. 불편한 카드가 나왔다고 사건이 확정되는 것도, 긍정적인 해석이 나왔다고 결과가 보장되는 것도 아닙니다. 중요한 결정은 현실의 정보와 필요한 전문적 도움을 함께 고려하세요.",
     ] },
   ],
-  related: [{ href: "/faq#repeat-question", label: "같은 질문으로 다시 봐도 되나요?" }, { href: "/faq#generation-error", label: "생성 중 오류가 났다면" }, { href: "/about/reading", label: "명로의 리딩 방식" }],
+  related: [{ href: "/guide/tarot/example", label: "타로 3장 리딩 예시" }, { href: "/faq#repeat-question", label: "같은 질문으로 다시 봐도 되나요?" }, { href: "/faq#generation-error", label: "생성 중 오류가 났다면" }, { href: "/about/reading", label: "명로의 리딩 방식" }],
 };
 
 export const SAJU_GUIDE: ReadingGuide = {
@@ -149,9 +150,9 @@ export const SAJU_GUIDE: ReadingGuide = {
     { id: "read-result", title: "6. 계산의 범위와 해석을 구분해 읽기", paragraphs: [
       "결과에 불확실성이나 계산 제한 안내가 있다면 먼저 읽어 주세요. 출생 시각에 따라 달라지는 항목이 비어 있는 것은 입력을 임의로 추정해 채우지 않았다는 뜻입니다.",
       "명식은 출생정보에 정해진 규칙을 적용한 계산이고, 그 의미를 현재의 질문과 연결하는 설명은 AI 해석입니다. 일간은 태어난 날의 천간을 가리키며, 오행과 십성은 전통 명리학에서 관계와 성향을 설명하는 분류입니다. 이를 사람의 능력이나 가치에 대한 객관적인 점수로 받아들이지 마세요.",
-      "종합 사주는 성향, 선택한 연도의 흐름, 질문에 대한 해설을 차례로 읽고 마지막 요약에서 핵심을 확인합니다. 한 해 리포트는 올해·내년 중 한 해를 골라 연간 개요와 12개월의 흐름을 살펴보며 질문은 선택입니다. 월별 적용 구간은 달력의 첫날이 아닌 절입 시각에 바뀝니다. 일간이 확정되지 않으면 구간별 장문 없이 간략형으로 제공합니다. 두 형식 모두 4크레딧이며, 완료한 리포트의 재열람에는 추가 크레딧을 쓰지 않습니다. 특정 오행의 수가 적다고 결핍이나 불운이 확정되는 것은 아닙니다. 실제 경험과 맞는 부분과 맞지 않는 부분을 구분해 참고하세요.",
+      "종합 사주는 성향, 선택한 연도의 흐름, 질문에 대한 해설을 차례로 읽고 마지막 요약에서 핵심을 확인합니다. 한 해 리포트는 올해·내년 중 한 해를 골라 연간 개요와 12개월의 흐름을 살펴보며 질문은 선택입니다. 월별 적용 구간은 달력의 첫날이 아닌 절입 시각에 바뀝니다. 일간이 확정되지 않으면 구간별 장문 없이 간략형으로 제공합니다. 이용 크레딧은 시작 화면에서 확인할 수 있고 상세형과 간략형에 동일하게 적용하며, 완료한 리포트의 재열람에는 추가 크레딧을 쓰지 않습니다. 특정 오행의 수가 적다고 결핍이나 불운이 확정되는 것은 아닙니다. 실제 경험과 맞는 부분과 맞지 않는 부분을 구분해 참고하세요.",
       "계산이 일관된다는 것과 미래 예측이 입증됐다는 것은 다릅니다. 사주 리딩은 자기 이해를 위한 참고 콘텐츠이며, 의료·법률·금융 판단이나 중요한 결정을 대신하지 않습니다.",
     ] },
   ],
-  related: [{ href: "/faq#birth-time", label: "출생 시각을 모를 때" }, { href: "/faq#reading-records", label: "기록 확인과 삭제" }, { href: "/about/reading", label: "계산과 AI 해석의 차이" }],
+  related: [{ href: "/guide/saju/annual-report", label: "한 해 사주 리포트 읽는 법" }, { href: "/faq#birth-time", label: "출생 시각을 모를 때" }, { href: "/faq#reading-records", label: "기록 확인과 삭제" }, { href: "/about/reading", label: "계산과 AI 해석의 차이" }],
 };
