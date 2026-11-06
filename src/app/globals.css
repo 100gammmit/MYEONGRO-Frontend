@@ -408,6 +408,7 @@ h1, h2, h3, blockquote {
 .credit-notice:has(+ .narrow-button) { margin-bottom: 0; }
 .credit-notice + .narrow-button { margin-top: 10px; }
 .saju-option-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.saju-option-list.two-columns { grid-template-columns: repeat(2, 1fr); }
 .saju-option { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 12px; padding: 16px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); cursor: pointer; transition: border-color .2s ease, background .2s ease; }
 .saju-option:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-tint-3); }
 .saju-option input, .saju-choice input, .saju-category input { width: auto; margin-top: 3px; accent-color: var(--accent-strong); }
@@ -850,7 +851,7 @@ h1, h2, h3, blockquote {
   .form-shell .wizard-heading { margin-top: 32px; }
   .form-shell .wizard-heading h1 { font-size: 25px; }
   .form-shell .wizard-heading p { font-size: 13px; }
-  .saju-option-list, .birth-reveal { grid-template-columns: 1fr; }
+  .saju-option-list, .saju-option-list.two-columns, .birth-reveal { grid-template-columns: 1fr; }
   .result-hero blockquote { font-size: 32px; }
   .simple-page > h1 { font-size: 40px; }
   .updates-intro { margin-top: -14px; margin-bottom: 32px; font-size: 14px; }

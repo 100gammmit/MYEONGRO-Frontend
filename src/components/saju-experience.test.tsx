@@ -147,6 +147,7 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse({ reading: { ...createdReading().reading, schemaVersion: 7 } }));
     await startWithAcceptedConsent();
     fireEvent.click(screen.getByRole("radio", { name: /한 해 리포트/ }));
+    expect(screen.getByText(/출생 시각을 모르면 나를 읽는 기준\(일간\)을 확정하지 못해/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
     expect(screen.getByRole("textbox", { name: /질문 \(선택\)/ })).toHaveValue("");
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
@@ -154,10 +155,11 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     await screen.findByRole("heading", { name: REVIEW_HEADING });
     expect(screen.getByText("입력하지 않음")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "질문 고치기" }));
+    fireEvent.click(screen.getByRole("button", { name: "리딩 내용 고치기" }));
     expect(screen.getByRole("radio", { name: /한 해 리포트/ })).toBeChecked();
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    expect(screen.queryByRole("button", { name: "사주 리딩 생성" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "한 해 리포트 생성" }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     expect(body.reportType).toBe("annual_monthly");
@@ -194,7 +196,7 @@ describe("SajuExperience", () => {
     await reachReview("unknown");
     fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
     await screen.findByText(/리딩 서버에 연결하지 못했어요/);
-    fireEvent.click(screen.getByRole("button", { name: "질문 고치기" }));
+    fireEvent.click(screen.getByRole("button", { name: "리딩 내용 고치기" }));
     fireEvent.change(screen.getByRole("combobox", { name: "살펴볼 연도" }), { target: { value: String(getSajuCurrentYear() + 1) } });
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     await screen.findByRole("heading", { name: REVIEW_HEADING });
@@ -753,7 +755,7 @@ describe("SajuExperience", () => {
     await reachReview("exact");
 
     expect(screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent))
-      .toEqual(["질문", "출생 정보"]);
+      .toEqual(["리딩 내용", "출생 정보"]);
     expect(screen.getByText("1992년 8월 17일 · 양력")).toBeInTheDocument();
     expect(screen.getByText("세종특별자치시")).toBeInTheDocument();
 
@@ -763,7 +765,7 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "질문 고치기" }));
+    fireEvent.click(screen.getByRole("button", { name: "리딩 내용 고치기" }));
     expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();

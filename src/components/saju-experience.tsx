@@ -196,6 +196,7 @@ export function SajuExperience() {
   const displayedCredits = getDisplayedReadingCredits(credits.state);
   const creditData = displayedCredits.data;
   const creditCost = (form.reportType === "annual_monthly" ? creditData?.costs.sajuAnnual ?? creditData?.costs.saju : creditData?.costs.saju) ?? null;
+  const submitLabel = form.reportType === "annual_monthly" ? "한 해 리포트 생성" : "사주 리딩 생성";
   const creditAccess = getReadingCreditAccess(
     creditData,
     credits.state.status === "idle" || displayedCredits.loading,
@@ -468,7 +469,7 @@ export function SajuExperience() {
           <ReadingGuideLink kind="saju" />
           <fieldset className="field">
             <legend>리포트 종류</legend>
-            <div className="saju-option-list">
+            <div className="saju-option-list two-columns">
               {([['birth_annual_question', '종합 사주', '나의 성향과 연간 흐름, 질문을 함께 읽습니다.'], ['annual_monthly', '한 해 리포트', '연간 개요와 12개월의 흐름을 다시 찾아 읽습니다.']] as const).map(([value, label, description]) => (
                 <label className="saju-option" key={value}>
                   <input type="radio" name="report-type" checked={form.reportType === value} onChange={() => updateForm({ reportType: value })} />
@@ -476,7 +477,7 @@ export function SajuExperience() {
                 </label>
               ))}
             </div>
-            {form.reportType === "annual_monthly" ? <p className="field-guidance">일간이 확정되지 않으면 연간 개요·월별 한 줄 요약·계산 구간을 담은 간략형으로 제공합니다. 상세형과 간략형 모두 {creditCost ?? 4}크레딧이며, 저장된 리포트는 추가 차감 없이 다시 읽을 수 있습니다.</p> : null}
+            {form.reportType === "annual_monthly" ? <p className="field-guidance">출생 시각을 모르면 나를 읽는 기준(일간)을 확정하지 못해 간략형으로 제공될 수 있어요. 상세형과 간략형 모두 {creditCost ?? 4}크레딧이며, 저장된 리포트는 추가 차감 없이 다시 읽을 수 있습니다.</p> : null}
           </fieldset>
           <label className="field" htmlFor="saju-target-year">
             <span id="saju-target-year-label">살펴볼 연도</span>
@@ -705,12 +706,12 @@ export function SajuExperience() {
           <div className="wizard-nav">
             <button className="secondary-button" disabled={submitting} onClick={() => leaveReview("birth", false)} type="button">이전</button>
             <button
-              aria-label="사주 리딩 생성"
+              aria-label={submitLabel}
               className="primary-button"
               disabled={submitting || creditAccess.status !== "allowed"}
               onClick={() => void submitReading()}
               type="button"
-            >사주 리딩 생성 · {creditCost ?? "…"}크레딧</button>
+            >{submitLabel} · {creditCost ?? "…"}크레딧</button>
           </div>
         </>
       )}
@@ -724,7 +725,7 @@ export function SajuExperience() {
           title={generalError ? "리딩을 만들지 못했어요." : undefined}
           note={creditUntouched ? "크레딧은 차감되지 않았어요." : undefined}
         />
-        <ReviewGroup id="review-question" title="질문" onEdit={() => leaveReview("question", true)} disabled={submitting}>
+        <ReviewGroup id="review-question" title="리딩 내용" onEdit={() => leaveReview("question", true)} disabled={submitting}>
           <div><dt>리포트 종류</dt><dd>{form.reportType === "annual_monthly" ? "한 해 리포트" : "종합 사주"}</dd></div>
           <div><dt>리딩 연도</dt><dd>{form.targetYear}년</dd></div>
           <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>

@@ -72,7 +72,17 @@ try {
       const months = page.getByRole("group", { name: "살펴볼 달" });
       await months.getByRole("button", { name: /^2월 · 선택됨/ }).waitFor();
       assert.equal(await months.getByRole("button").count(), 12);
-      await page.getByText(/앞달 후반과 이어지는 구간/).waitFor();
+      if (mode === "full") await page.getByText(/앞달 후반과 이어지는 구간/).waitFor();
+      else await page.getByRole("region", { name: "2월 적용 구간" }).waitFor();
+      if (width === 375) {
+        // Choosing a month near the top must bring its detail on screen, not leave it below the grid.
+        await months.getByRole("button", { name: /^1월/ }).click();
+        await page.waitForFunction(() => {
+          const top = document.getElementById("annual-month-detail").getBoundingClientRect().top;
+          return top >= 0 && top < innerHeight / 2;
+        });
+        await months.getByRole("button", { name: /^2월/ }).click();
+      }
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await page.screenshot({ path: `build/saju-annual-check/${mode}-${width}.png`, fullPage: true });
       const december = months.getByRole("button", { name: /^12월/ });
@@ -98,7 +108,7 @@ try {
     await page.getByRole("radio", { name: /시간을 몰라요/ }).check();
     await page.getByRole("button", { name: "다음", exact: true }).click();
     await page.getByText("입력하지 않음", { exact: true }).waitFor();
-    await page.getByRole("button", { name: "사주 리딩 생성", exact: true }).click();
+    await page.getByRole("button", { name: "한 해 리포트 생성", exact: true }).click();
     await page.getByRole("group", { name: "살펴볼 달" }).waitFor();
     assert.equal(submissions.length, before + 1);
     assert.equal(submissions.at(-1).reportType, "annual_monthly");
