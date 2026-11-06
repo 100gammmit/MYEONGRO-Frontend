@@ -143,6 +143,16 @@ try {
     assert.equal(await page.locator('footer a[href="/about"]').textContent(), "명로 소개");
     assert.equal(await page.locator('footer a[href="mailto:contact@myeongro.com"]').count(), 1);
     await page.screenshot({ path: `${output}/about-${width}.png`, fullPage: true });
+    await page.goto(`${base}/privacy`);
+    for (const [label, address] of [
+      ["일반 문의", "contact@myeongro.com"],
+      ["개인정보 권리행사", "privacy@myeongro.com"],
+    ]) {
+      const item = page.locator("dt").filter({ hasText: new RegExp(`^${label}$`) }).locator("..");
+      assert.equal(await item.locator(`a[href="mailto:${address}"]`).count(), 1);
+    }
+    await page.getByRole("heading", { name: "개인정보 보호책임자와 문의처", exact: true }).scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `${output}/privacy-contact-${width}.png` });
     await page.goto(base);
     await page.getByRole("navigation", { name: "리딩 예시와 해설" }).getByRole("link").first().click();
     await page.waitForURL(`${base}${articles[0]}`);

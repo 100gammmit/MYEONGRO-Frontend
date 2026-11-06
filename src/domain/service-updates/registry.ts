@@ -4,6 +4,22 @@ import { defineServiceUpdates } from "./model";
 // entry with correctionOf rather than rewriting what users were shown.
 export const SERVICE_UPDATES = defineServiceUpdates([
   {
+    id: "2026-11-07-about-contact",
+    category: "policy", noticeLevel: "routine",
+    title: "명로 소개와 일반 문의 창구를 마련했습니다",
+    summary: "명로 소개에서 서비스 목적과 콘텐츠 제작 방식, 운영·문의 정보를 확인할 수 있습니다.",
+    changes: [
+      "기존 리딩 방식 안내를 명로 소개로 통합했습니다. 이전 주소로 접속하면 새 소개 페이지로 이동합니다.",
+      "일반 문의는 contact@myeongro.com, 개인정보 권리행사는 privacy@myeongro.com으로 받습니다.",
+      "개인정보 처리방침의 문의 이메일 항목에 일반 문의 주소와 동일 Workspace 사용자의 별칭 수신·회신 경로를 추가했습니다. 처리 항목과 보유기간은 유지하며 별도 재동의를 요구하지 않습니다.",
+    ],
+    publishedDate: "2026-11-07", effectiveDate: "2026-11-07",
+    links: [
+      { href: "/about", label: "명로 소개" },
+      { href: "/privacy", label: "개인정보 처리방침" },
+    ],
+  },
+  {
     id: "2026-11-07-public-reading-articles",
     category: "release", noticeLevel: "routine",
     title: "타로 리딩 예시와 한 해 리포트 안내를 추가했습니다",

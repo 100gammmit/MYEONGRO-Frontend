@@ -147,10 +147,10 @@ export function ConsentDocumentContent({
               <td>명로 서버에는 저장하지 않고 현재 브라우저에만 저장. 날짜가 지난 뒤 다음 페이지 방문 시 삭제하며, 계정 삭제 성공 시 현재 브라우저의 해당 계정 값 삭제</td>
             </tr>
             <tr>
-              <th scope="row">개인정보 문의와 권리행사 처리</th>
+              <th scope="row">일반 문의와 개인정보 권리행사 처리</th>
               <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.items}</td>
               <td><ContractPerformanceBasis /></td>
-              <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention}. 외부 사업자의 삭제 절차는 아래 개인정보 문의 이메일 국외 처리 항목을 따름</td>
+              <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention}. 외부 사업자의 삭제 절차는 아래 문의 이메일(일반 문의·개인정보 권리행사) 국외 처리 항목을 따름</td>
             </tr>
             <tr>
               <th scope="row">서비스 보안과 오류·장애 대응</th>
@@ -201,7 +201,7 @@ export function ConsentDocumentContent({
             <tr>
               <th scope="row">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.name}</th>
               <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.purpose}</td>
-              <td>아래 개인정보 문의 이메일 국외 처리 항목의 명로 보유기간과 Google 복구·삭제 기준에 따름</td>
+              <td>아래 문의 이메일(일반 문의·개인정보 권리행사) 국외 처리 항목의 명로 보유기간과 Google 복구·삭제 기준에 따름</td>
             </tr>
           </tbody>
         </table>
@@ -243,7 +243,7 @@ export function ConsentDocumentContent({
       <p>보유기간이 끝나거나 처리 목적이 달성된 개인정보는 지체 없이 파기 대상으로 확정합니다. 이용자가 개별 리딩이나 계정을 삭제하면 운영 데이터베이스의 관련 레코드를 복구 유예 없이 영구 삭제하고, 계정 삭제 시 Redis 세션과 현재 브라우저의 해당 계정 오늘의 카드 값도 삭제합니다. 질문·선택지·관심 분야와 원본 출생정보는 요청 처리가 끝나면 별도로 보유하지 않습니다.</p>
       <p>전자적 기록은 해당 저장소의 삭제 기능으로 복구 대상에서 제거합니다. 재해복구용 자동 백업은 최대 7일, 운영 로그는 명로의 운영 조회·이용 기준 최대 30일이 지나면 각 인프라의 보유 정책에 따라 만료·삭제됩니다. 외부 처리자의 자체 보유분은 위 수탁·국외이전 항목에 적힌 기준을 따릅니다.</p>
       <Heading>이용자 권리와 이의제기</Heading>
-      <p>이용자는 계정 설정에서 저장한 리딩의 삭제, 계정 삭제와 AI 국외이전 동의 철회를 직접 할 수 있습니다. 개인정보의 열람·정정·삭제·처리정지, 동의 철회와 처리 결과에 대한 이의제기는 <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a>로 요청할 수 있습니다. 이 주소로 보낸 메일은 Google Workspace에서 직접 수신·저장·회신하며, 세부 내용은 위 개인정보 문의 이메일 국외 처리 항목을 따릅니다. 명로는 본인 여부를 확인한 뒤 관련 법령에 따라 처리하고, 요청을 전부 또는 일부 받아들이기 어려운 경우에는 그 사유와 이의제기 방법을 안내합니다.</p>
+      <p>이용자는 계정 설정에서 저장한 리딩의 삭제, 계정 삭제와 AI 국외이전 동의 철회를 직접 할 수 있습니다. 개인정보의 열람·정정·삭제·처리정지, 동의 철회와 처리 결과에 대한 이의제기는 <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a>로 요청할 수 있습니다. 이 주소로 보낸 메일은 Google Workspace에서 직접 수신·저장·회신하며, 세부 내용은 위 문의 이메일(일반 문의·개인정보 권리행사) 국외 처리 항목을 따릅니다. 명로는 본인 여부를 확인한 뒤 관련 법령에 따라 처리하고, 요청을 전부 또는 일부 받아들이기 어려운 경우에는 그 사유와 이의제기 방법을 안내합니다.</p>
       <p>
         개인정보 침해에 관한 별도 상담이나 분쟁조정이 필요한 경우 {" "}
         <a href="https://www.kopico.go.kr" rel="noreferrer" target="_blank">개인정보분쟁조정위원회</a>
@@ -257,7 +257,8 @@ export function ConsentDocumentContent({
       <Heading>개인정보 보호책임자와 문의처</Heading>
       <dl>
         <div><dt>개인정보 보호책임자</dt><dd>{LEGAL_METADATA.operatorName}</dd></div>
-        <div><dt>문의·권리행사</dt><dd><a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a></dd></div>
+        <div><dt>일반 문의</dt><dd><a href={`mailto:${LEGAL_METADATA.contactEmail}`}>{LEGAL_METADATA.contactEmail}</a></dd></div>
+        <div><dt>개인정보 권리행사</dt><dd><a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a></dd></div>
       </dl>
       <Heading>안전성 확보 조치</Heading>
       <p>질문·선택지 원문은 명로 데이터베이스와 운영 로그에 남기지 않고, 인증 비밀 값은 서버 환경에서 관리합니다. 질문 입력 전 일부 직접 식별정보 형식을 자동 검사하지만 모든 개인정보나 민감한 내용을 탐지한다고 보장하지 않습니다.</p>
@@ -308,9 +309,9 @@ function PrivacyInquiryEmailOverseasDetails({
 
   return (
     <>
-      <Heading>개인정보 문의 이메일 국외 처리</Heading>
+      <Heading>문의 이메일(일반 문의·개인정보 권리행사) 국외 처리</Heading>
       <p>
-        서비스 이용에 관한 개인정보 문의와 권리행사 메일은 싱가포르 소재 Google Asia Pacific Pte. Ltd.의
+        서비스 이용에 관한 일반 문의와 개인정보 권리행사 메일은 싱가포르 소재 Google Asia Pacific Pte. Ltd.의
         Google Workspace를 통해 아래 공개된 위치에서 처리될 수 있습니다. 이 처리는 이용자가 요청한 서비스 문의·권리행사 처리에
         필요한 위탁·보관으로, 개인정보 보호법 제28조의8 제1항 제3호 가목에 따라 이
         처리방침으로 공개합니다. CDPA는 처리 계약이며 그 수락 자체가 국외이전의 법적 근거를 대신하지 않습니다.

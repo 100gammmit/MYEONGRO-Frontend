@@ -1,6 +1,8 @@
+import { LEGAL_METADATA } from "./legal-metadata";
+
 export const TERMS_DOCUMENT_VERSION = "2026-09-27";
-export const PRIVACY_DOCUMENT_VERSION = "2026-11-01";
-export const PRIVACY_DOCUMENT_EFFECTIVE_DATE = "2026-11-01";
+export const PRIVACY_DOCUMENT_VERSION = "2026-11-07";
+export const PRIVACY_DOCUMENT_EFFECTIVE_DATE = "2026-11-07";
 export const AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION = "2026-09-25";
 
 export const AWS_PROCESSING_DISCLOSURE = {
@@ -37,15 +39,16 @@ export const AWS_PROCESSING_DISCLOSURE = {
 export const PRIVACY_INQUIRY_EMAIL_PROCESSING = {
   verifiedAt: "2026-10-06",
   sourceUpdatedAt: "2026-07-23",
-  address: "privacy@myeongro.com",
+  address: LEGAL_METADATA.privacyEmail,
+  generalAddress: LEGAL_METADATA.contactEmail,
   items:
     "발신자 이름·이메일 주소, 메일 제목·본문·첨부파일, 수신 주소·메시지 식별자·메일 인증 및 전달 정보, 답변과 권리행사 처리 이력",
   operatorRetention:
     "문의 처리를 완료한 날부터 최대 30일 이내에 대화·첨부파일·답변 사본을 Workspace Gmail에서 영구 삭제. 법령상 보존 의무 또는 실제 진행 중인 분쟁 대응에 필요한 자료는 해당 사유가 끝날 때까지 필요한 범위에서 별도 보관한 뒤 삭제",
   method:
-    "이용자가 개인정보 문의 메일을 보내거나 명로가 답변할 때 Google Workspace에서 직접 수신·저장·회신. Workspace 메일함 접속에는 HTTPS 암호화 통신을 사용하며 Cloudflare Email Routing과 개인 Gmail 전달은 사용하지 않음",
+    `이용자가 일반 문의(${LEGAL_METADATA.contactEmail}) 또는 개인정보 권리행사(${LEGAL_METADATA.privacyEmail}) 메일을 보내거나 명로가 답변할 때 Google Workspace에서 직접 수신·저장·회신. 일반 문의 주소는 개인정보 권리행사 메일을 처리하는 동일 Workspace 사용자의 별칭이며 각 문의 주소로 회신. Workspace 메일함 접속에는 HTTPS 암호화 통신을 사용하며 Cloudflare Email Routing과 개인 Gmail 전달은 사용하지 않음`,
   refusalMethod:
-    "메일 전송 전 발송을 중단하여 국외 처리를 거부하거나, 전송 후 privacy@myeongro.com으로 삭제 요청",
+    `메일 전송 전 발송을 중단하여 국외 처리를 거부하거나, 전송 후 ${LEGAL_METADATA.privacyEmail}으로 삭제 요청`,
   refusalEffect:
     "메일 국외 처리를 거부하면 이메일을 통한 문의·권리행사는 처리할 수 없음. 서비스 화면에서 제공하는 리딩 삭제, 계정 삭제와 AI 국외이전 동의 철회 기능은 계속 이용 가능",
   processors: {
@@ -54,7 +57,7 @@ export const PRIVACY_INQUIRY_EMAIL_PROCESSING = {
       country: "싱가포르(직접 수탁자의 계약 법인 소재국). 실제 처리 가능 위치는 아래 역할별 국가 참조",
       address: "70 Pasir Panjang Road, #03-71, Mapletree Business City II Singapore 117371",
       contactUrl: "https://support.google.com/a/contact/googlecloud_dpr",
-      purpose: "개인정보 문의 메일·첨부파일·답변 및 처리 이력의 수신·저장·열람·회신과 서비스 유지·보안",
+      purpose: "문의 이메일(일반 문의·개인정보 권리행사)·첨부파일·답변 및 처리 이력의 수신·저장·열람·회신과 서비스 유지·보안",
       retention:
         "명로의 보관기간 종료 시 Gmail에서 영구 삭제. 휴지통에서 제거된 데이터에도 최대 25일의 관리자 복구 가능 기간이 있음. 고객이 복구할 수 없는 상태의 삭제 지시 후 Google은 원칙적으로 최대 180일 이내에 시스템에서 삭제하며 법령상 보존 예외가 있음. 명로는 보유기한이 끝난 문의를 통상적인 운영 목적으로 복구하지 않음",
       sourceUrls: {

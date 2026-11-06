@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   AWS_PROCESSING_DISCLOSURE,
+  CONSENT_DOCUMENT_VERSIONS,
   OPENAI_DOMESTIC_PROCESSING_COUNTRIES,
   OPENAI_OVERSEAS_PROCESSING_COUNTRIES,
   OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
@@ -10,8 +11,22 @@ import {
   PRIVACY_DOCUMENT_EFFECTIVE_DATE,
   PRIVACY_DOCUMENT_VERSION,
 } from "./documents";
+import { LEGAL_METADATA } from "./legal-metadata";
 
 describe("privacy inquiry email processing", () => {
+  it("discloses both inquiry addresses without changing required consents", () => {
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.address).toBe(LEGAL_METADATA.privacyEmail);
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.generalAddress).toBe(LEGAL_METADATA.contactEmail);
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.method).toContain(LEGAL_METADATA.contactEmail);
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.method).toContain(LEGAL_METADATA.privacyEmail);
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.method).toContain("동일 Workspace 사용자의 별칭");
+    expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalMethod).toContain(LEGAL_METADATA.privacyEmail);
+    expect(CONSENT_DOCUMENT_VERSIONS).toEqual({
+      terms: "2026-09-27",
+      "ai-overseas-transfer": "2026-09-25",
+    });
+  });
+
   it("records the Workspace contracting entity and direct mail path", () => {
     expect(Object.keys(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors)).toEqual(["google"]);
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google).toMatchObject({
@@ -27,8 +42,8 @@ describe("privacy inquiry email processing", () => {
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.refusalEffect)
       .toContain("이메일을 통한 문의·권리행사");
     expect(PRIVACY_INQUIRY_EMAIL_PROCESSING.verifiedAt).toBe("2026-10-06");
-    expect(PRIVACY_DOCUMENT_VERSION).toBe("2026-11-01");
-    expect(PRIVACY_DOCUMENT_EFFECTIVE_DATE).toBe("2026-11-01");
+    expect(PRIVACY_DOCUMENT_VERSION).toBe("2026-11-07");
+    expect(PRIVACY_DOCUMENT_EFFECTIVE_DATE).toBe("2026-11-07");
   });
 
   it("separates the operator deadline, administrator recovery and CDPA deletion instruction", () => {

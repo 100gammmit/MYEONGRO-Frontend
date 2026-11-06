@@ -2,6 +2,18 @@ import { render, screen, within } from "@testing-library/react";
 import PrivacyPage from "./page";
 
 describe("PrivacyPage", () => {
+  it("separates the general contact from the rights request address", () => {
+    render(<PrivacyPage />);
+    for (const [label, address] of [
+      ["일반 문의", "contact@myeongro.com"],
+      ["개인정보 권리행사", "privacy@myeongro.com"],
+    ]) {
+      const item = screen.getByText(label, { selector: "dt" }).parentElement!;
+      expect(within(item).getByRole("link", { name: address }))
+        .toHaveAttribute("href", `mailto:${address}`);
+    }
+  });
+
   it("describes the available account deletion control", () => {
     render(<PrivacyPage />);
 
@@ -9,7 +21,7 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
       .toBeInTheDocument();
-    expect(screen.getByText("문서 버전 2026-11-01 · 시행일 2026-11-01")).toBeInTheDocument();
+    expect(screen.getByText("문서 버전 2026-11-07 · 시행일 2026-11-07")).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
@@ -33,7 +45,7 @@ describe("PrivacyPage", () => {
     expect(within(table).getByRole("row", { name: /무료 오늘의 운세 이어보기.*SHA-256 계정 범위값.*현재 브라우저/ }))
       .toBeInTheDocument();
     expect(within(table).getByRole("row", {
-      name: /개인정보 문의와 권리행사 처리.*발신자 이름·이메일 주소.*문의 처리를 완료한 날부터 최대 30일 이내/,
+      name: /일반 문의와 개인정보 권리행사 처리.*발신자 이름·이메일 주소.*문의 처리를 완료한 날부터 최대 30일 이내/,
     })).toBeInTheDocument();
     const operationalLogRow = within(table).getByRole("row", {
       name: /서비스 보안과 오류·장애 대응.*리딩 식별자.*최대 30일/,
@@ -56,7 +68,7 @@ describe("PrivacyPage", () => {
     expect(within(directProcessorTable).getAllByRole("rowheader").map((cell) => cell.textContent))
       .toEqual(["Amazon Web Services Korea LLC", "OpenAI OpCo, LLC", "Google Asia Pacific Pte. Ltd."]);
     expect(within(directProcessorTable).getByRole("row", {
-      name: /Google Asia Pacific Pte. Ltd..*개인정보 문의 메일·첨부파일·답변.*Google 복구·삭제 기준/,
+      name: /Google Asia Pacific Pte. Ltd..*문의 이메일\(일반 문의·개인정보 권리행사\)·첨부파일·답변.*Google 복구·삭제 기준/,
     })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "AWS 인프라의 국외 처리" }))
       .toBeInTheDocument();
@@ -70,7 +82,7 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByRole("link", { name: "AWS의 현재 엣지 로케이션 목록" }))
       .toHaveAttribute("href", "https://aws.amazon.com/cloudfront/features/");
-    expect(screen.getByRole("heading", { name: "개인정보 문의 이메일 국외 처리" }))
+    expect(screen.getByRole("heading", { name: "문의 이메일(일반 문의·개인정보 권리행사) 국외 처리" }))
       .toBeInTheDocument();
     expect(screen.getByText(/Google Workspace에서 직접 수신·저장·회신.*개인 Gmail 전달은 사용하지 않음/))
       .toBeInTheDocument();
