@@ -12,6 +12,10 @@ export function ReadingHelpEntry() {
         <Link href="/guide/saju">사주 사용 가이드</Link>
         <Link href="/faq">자주 묻는 질문</Link>
       </nav>
+      <nav className={styles.links} aria-label="리딩 예시와 해설">
+        <Link href="/guide/tarot/example">타로 3장 리딩 예시</Link>
+        <Link href="/guide/saju/annual-report">한 해 사주 리포트 읽는 법</Link>
+      </nav>
     </section>
   );
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE_ORIGIN } from "@/infrastructure/site-metadata";
 import { FooterLink } from "@/components/footer-link";
 import { ReadingCreditProvider } from "@/components/reading-credit-provider";
 import { ServiceUpdateBanner } from "@/components/service-update-banner";
@@ -11,6 +12,7 @@ import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_ORIGIN),
   title: "명로 | AI 사주와 타로",
   description: "오늘의 마음을 비추는 AI 사주·타로 리딩",
 };

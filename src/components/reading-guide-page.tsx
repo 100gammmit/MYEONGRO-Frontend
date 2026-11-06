@@ -9,6 +9,7 @@ export function ReadingGuidePage({ guide }: { guide: ReadingGuide }) {
         <p className="eyebrow">READING GUIDE</p>
         <h1>{guide.title}</h1>
         <p>{guide.description}</p>
+        {guide.editorialNote && <p className={styles.editorialNote}>{guide.editorialNote}</p>}
       </header>
       <section className={styles.summary} aria-labelledby="guide-summary">
         <h2 id="guide-summary">시작 전, 세 가지만 기억하세요</h2>

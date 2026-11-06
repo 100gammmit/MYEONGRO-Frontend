@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
+import { publicPageMetadata } from "@/infrastructure/site-metadata";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "명로가 리딩하는 방식 | AI 타로·사주",
-  description:
-    "일반적인 AI 대화와 달리 명로가 타로와 사주를 계산하고 구조화하고 해석하는 방식을 확인해 보세요.",
-};
+export const metadata = publicPageMetadata(
+  "/about/reading",
+  "명로가 리딩하는 방식 | AI 타로·사주",
+  "명로가 타로와 사주를 계산하고 구조화하고 해석하는 방식과 AI 해석의 한계를 확인해 보세요.",
+);
 
 const comparisonRows = [
   {

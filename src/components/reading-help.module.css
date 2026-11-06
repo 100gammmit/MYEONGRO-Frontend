@@ -31,6 +31,7 @@
 .entry h2 { font-size: 23px; margin-bottom: 12px; }
 .entry p { color: var(--text-secondary); line-height: 1.8; }
 .inline { margin: 16px 0 24px; font-size: 14px; }
+.hero .editorialNote { margin-top: 20px; padding: 16px; border-left: 2px solid var(--accent-primary); font-size: 14px; }
 @media (max-width: 600px) {
   .page { width: calc(100% - 32px); padding-block: 36px 60px; }
   .summary, .example { padding: 20px; }

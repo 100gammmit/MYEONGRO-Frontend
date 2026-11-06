@@ -1,8 +1,15 @@
+import { publicPageMetadata } from "@/infrastructure/site-metadata";
 import Link from "next/link";
 import { ReadingHelpEntry } from "@/components/reading-help-links";
 import { HeroQuestionRotator } from "@/components/hero-question-rotator";
 import { LandingSky } from "@/components/landing-sky";
 import { TarotStone } from "@/components/tarot-stone";
+
+export const metadata = publicPageMetadata(
+  "/",
+  "명로 | AI 사주와 타로",
+  "로그인 없이 보는 오늘의 카드와 AI 타로·사주 리딩, 질문 준비부터 결과 읽기까지의 공개 가이드를 만나보세요.",
+);
 
 const features = [
   {
