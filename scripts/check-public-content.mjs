@@ -2,17 +2,32 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
-import { mkdir } from "node:fs/promises";
-import { chromium } from "playwright";
+import { mkdir, readFile } from "node:fs/promises";
+import { chromium } from "@playwright/test";
+import routes from "../src/infrastructure/site-routes.json" with { type: "json" };
 
-const origin = "https://www.myeongro.com";
+const origin = routes.origin;
 const articles = ["/guide/tarot/example", "/guide/saju/annual-report"];
 const output = "build/public-content-check";
 const backendRequests = [];
+const sessionCookie = "MYEONGRO_SESSION=public-content-synthetic";
+const record = JSON.parse(await readFile(new URL("./fixtures/saju-annual-full.json", import.meta.url), "utf8"));
 const backend = createServer((request, response) => {
   backendRequests.push(request.url);
   response.setHeader("content-type", "application/json");
-  if (request.url === "/api/auth/me") return response.end(JSON.stringify({ authenticated: false }));
+  const authenticated = request.headers.cookie === sessionCookie;
+  const json = (value) => response.end(JSON.stringify(value));
+  if (request.url === "/api/auth/me") return json(authenticated
+    ? { authenticated: true, user: { id: "synthetic-public-content-user" } }
+    : { authenticated: false });
+  if (!authenticated) { response.statusCode = 401; return json({}); }
+  if (request.url === "/api/readings") return json({ items: [record] });
+  if (request.url === `/api/readings/${record.id}`) return json({ reading: record });
+  if (request.url === "/api/reading-credits") return json({
+    dailyFreeGrant: 10, balance: { free: 10, paid: 0, total: 10 },
+    nextResetAt: new Date(Date.now() + 86400000).toISOString(), generationInProgress: false,
+    costs: { saju: 4, sajuAnnual: 4, tarot: { mind_three_card: 2, relationship_three_card: 2, choice_five_card: 3 } },
+  });
   response.statusCode = 404;
   response.end("{}");
 });
@@ -39,7 +54,7 @@ try {
   for (let attempt = 0; attempt < 100; attempt++) {
     if (app.exitCode !== null) throw new Error(`Next exited: ${appLogs}`);
     try {
-      if ((await fetch(`${base}/robots.txt`)).ok) { ready = true; break; }
+      if ((await fetch(`${base}/robots.txt`, { signal: AbortSignal.timeout(2000) })).ok) { ready = true; break; }
     } catch { /* Startup only. */ }
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
@@ -55,7 +70,7 @@ try {
   const sitemap = await sitemapResponse.text();
   assert.equal(backendRequests.length, beforeDiscovery, "Discovery files must not query auth");
   const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
-  assert.equal(urls.length, 13);
+  assert.deepEqual(urls.map((url) => new URL(url).pathname).sort(), [...routes.publicPages].sort());
   for (const url of urls) {
     assert.equal(new URL(url).origin, origin);
     const path = new URL(url).pathname;
@@ -67,13 +82,43 @@ try {
     assert.equal(new URL(canonical[1]).href, new URL(url).href, `Canonical: ${path}`);
     assert.ok(!html.includes('content="noindex'), `Public noindex: ${path}`);
   }
-  for (const path of ["/login", "/signup/age", "/records", "/account"]) {
-    const response = await fetch(`${base}${path}`);
+  for (const path of ["/login", "/signup/age", "/account"]) {
+    const response = await fetch(`${base}${path}`, { redirect: "manual" });
+    assert.equal(response.status, 200, path);
+    assert.equal(new URL(response.url).pathname, path, `Wrong private page: ${path}`);
     assert.ok((await response.text()).includes('name="robots" content="noindex, nofollow"'), `Private noindex: ${path}`);
   }
+  // Guest redirection is a separate contract, never evidence for records metadata.
+  const guestRecords = await fetch(`${base}/records`, { redirect: "manual" });
+  assert.equal(guestRecords.status, 307);
+  const guestDestination = new URL(guestRecords.headers.get("location"), base);
+  assert.equal(guestDestination.pathname, "/login");
+  assert.equal(guestDestination.searchParams.get("next"), "/records");
+  for (const path of ["/records", `/records/${record.id}`, `/saju/results/${record.id}`]) {
+    const response = await fetch(`${base}${path}`, { redirect: "manual", headers: { cookie: sessionCookie } });
+    assert.equal(response.status, 200, `Authenticated private response: ${path}`);
+    assert.equal(response.headers.get("location"), null, `Unexpected redirect: ${path}`);
+    assert.equal(new URL(response.url).pathname, path, `Wrong private page: ${path}`);
+    const html = await response.text();
+    assert.ok(html.includes('name="robots" content="noindex, nofollow"'), `Authenticated private noindex: ${path}`);
+    assert.ok(!html.includes('rel="canonical"'), `Private page inherited public canonical: ${path}`);
+  }
+  assert.ok(backendRequests.includes("/api/readings"), "The authenticated records page must load records");
 
   await mkdir(output, { recursive: true });
-  browser = await chromium.launch({ channel: process.env.HELP_BROWSER_CHANNEL ?? "chrome", headless: true });
+  browser = await chromium.launch({ headless: true });
+  const authenticated = await browser.newContext();
+  await authenticated.addCookies([{ name: "MYEONGRO_SESSION", value: "public-content-synthetic", url: base }]);
+  const recordsPage = await authenticated.newPage();
+  await recordsPage.goto(`${base}/records`);
+  await recordsPage.getByRole("heading", { level: 1, name: "나의 리딩 기록" }).waitFor();
+  assert.equal(new URL(recordsPage.url()).pathname, "/records");
+  assert.equal(await recordsPage.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");
+  await recordsPage.getByRole("link", { name: new RegExp(record.title) }).click();
+  await recordsPage.waitForURL(`${base}/records/${record.id}`);
+  await recordsPage.getByRole("heading", { level: 1, name: record.title }).waitFor();
+  assert.equal(await recordsPage.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");
+  await authenticated.close();
   const errors = [];
   for (const width of [375, 1280]) {
     const context = await browser.newContext({ viewport: { width, height: 900 } });
@@ -108,7 +153,7 @@ try {
   }
   await noJs.close();
   assert.deepEqual(errors, []);
-  console.log("PASS: 13 public canonicals, robots/sitemap without auth, private noindex, 375/1280px, article links/anchors and no-JS content");
+  console.log(`PASS: ${urls.length} registered public canonicals, robots/sitemap without auth, guest redirect + authenticated records/results noindex, 375/1280px, article links/anchors and no-JS content`);
 } finally {
   await browser?.close();
   if (app && app.exitCode === null) {

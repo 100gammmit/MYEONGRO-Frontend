@@ -4,7 +4,6 @@ import TarotExamplePage, { metadata as tarotMetadata } from "@/app/guide/tarot/e
 import AnnualReportGuidePage, { metadata as annualMetadata } from "@/app/guide/saju/annual-report/page";
 import { TAROT_READING_EXAMPLE, SAJU_ANNUAL_REPORT_GUIDE } from "@/content/public-reading-articles";
 import { TAROT_GUIDE, SAJU_GUIDE } from "@/content/reading-help";
-import { SITE_ORIGIN } from "@/infrastructure/site-metadata";
 
 describe("public reading articles", () => {
   it.each([
@@ -24,7 +23,7 @@ describe("public reading articles", () => {
     const ids = [...container.querySelectorAll("[id]")].map((node) => node.id);
     expect(new Set(ids).size).toBe(ids.length);
     expect(container.querySelectorAll("form, input, button")).toHaveLength(0);
-    expect(metadata.alternates?.canonical).toBe(`${SITE_ORIGIN}${path}`);
+    expect(metadata.alternates?.canonical).toBe(path);
     expect(metadata.description).toBeTruthy();
     expect(screen.getByRole("link", { name: /리딩 시작하기/ })).toHaveAttribute("href", `/${article.kind}`);
   });
