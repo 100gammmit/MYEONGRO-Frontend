@@ -51,24 +51,27 @@ export default async function ReadingDetailPage({
     && reading.status === "completed"
     && !sajuView && !annualView;
 
+  // A result component places this among its own children, so the server-sent element carries its key.
+  const recordActions = <ReadingRecordActions key="record-actions" readingCompleted readingId={reading.id} />;
+
   if (declinedView) {
     return (
       <ReadingDeclinedResult
         backHref="/records"
         backLabel="내 기록"
-        footer={<ReadingRecordActions readingCompleted readingId={reading.id} />}
+        footer={recordActions}
         view={declinedView}
       />
     );
   }
 
-  if (annualView) return <SajuAnnualReadingResult view={annualView} backHref="/records" backLabel="내 기록" footer={<ReadingRecordActions readingCompleted readingId={reading.id} />} />;
+  if (annualView) return <SajuAnnualReadingResult view={annualView} backHref="/records" backLabel="내 기록" footer={recordActions} />;
   if (sajuView) {
     return (
       <SajuReadingResult
         backHref="/records"
         backLabel="내 기록"
-        footer={<ReadingRecordActions readingCompleted readingId={reading.id} />}
+        footer={recordActions}
         view={sajuView}
       />
     );
@@ -83,7 +86,7 @@ export default async function ReadingDetailPage({
           backHref: "/records",
           backLabel: "내 기록",
           dateLabel: formatReadingDate(reading.createdAt),
-          footer: <ReadingRecordActions readingCompleted readingId={reading.id} />,
+          footer: recordActions,
         }}
       />
     );

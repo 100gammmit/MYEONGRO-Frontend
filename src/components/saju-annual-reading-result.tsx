@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { annualCalendar, ANNUAL_BASE_EVIDENCE, type SajuAnnualReadingView } from "@/domain/saju/annual-result";
 import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
 import type { SajuEvidenceKey } from "@/domain/saju/result";
@@ -15,15 +15,20 @@ import styles from "./saju-annual-reading-result.module.css";
 function defaultMonth(year: number) {
   return year === getSajuCurrentYear() ? Number(new Intl.DateTimeFormat("en", { month: "numeric", timeZone: "Asia/Seoul" }).format(new Date())) : 1;
 }
-const dateParts = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Seoul", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
-// Seconds and the year add nothing a reader can use; a month boundary at midnight is just the date.
-function date(value: string) {
-  const parts = Object.fromEntries(dateParts.formatToParts(new Date(value)).map((part) => [part.type, part.value]));
-  const day = `${Number(parts.month)}월 ${Number(parts.day)}일`;
-  return parts.hour === "00" && parts.minute === "00" ? day : `${day} ${parts.hour}:${parts.minute}`;
+const dateParts = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Seoul", year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+function parts(value: string) {
+  return Object.fromEntries(dateParts.formatToParts(new Date(value)).map((part) => [part.type, part.value]));
+}
+// Seconds add nothing a reader can use, and a month boundary at midnight is just the date.
+// The year appears only when an interval runs into the next one, as December's does.
+function date(value: string, withYear: boolean) {
+  const p = parts(value);
+  const day = `${withYear ? `${p.year}년 ` : ""}${Number(p.month)}월 ${Number(p.day)}일`;
+  return p.hour === "00" && p.minute === "00" ? day : `${day} ${p.hour}:${p.minute}`;
 }
 function Range({ start, end }: { start: string; end: string }) {
-  return <><time dateTime={start}>{date(start)}</time>부터 <time dateTime={end}>{date(end)}</time> 전까지</>;
+  const crossesYear = parts(start).year !== parts(end).year;
+  return <><time dateTime={start}>{date(start, false)}</time>부터 <time dateTime={end}>{date(end, crossesYear)}</time> 전까지</>;
 }
 const SMALL_SCREEN = "(max-width: 600px)";
 
@@ -44,13 +49,14 @@ export function SajuAnnualReadingResult({ view, backHref = "/saju", backLabel = 
     window.addEventListener("popstate", restore);
     return () => window.removeEventListener("popstate", restore);
   }, [view.id, input.targetYear]);
-  const select = (value: number) => {
+  const select = (value: number, pointer: boolean) => {
     setMonth(value);
     const url = new URL(window.location.href);
     url.searchParams.set("month", String(value));
     window.history.replaceState(window.history.state, "", url);
     // On a phone the twelve buttons fill the screen, so the changed detail would stay out of view.
-    if (window.matchMedia?.(SMALL_SCREEN).matches) {
+    // A keyboard press keeps the focused button on screen; the heading's live region announces the change.
+    if (pointer && window.matchMedia?.(SMALL_SCREEN).matches) {
       const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       requestAnimationFrame(() => detailRef.current?.scrollIntoView({ block: "start", behavior: smooth ? "smooth" : "auto" }));
     }
@@ -73,7 +79,7 @@ export function SajuAnnualReadingResult({ view, backHref = "/saju", backLabel = 
       <h2 id="annual-months-heading">12개월의 흐름</h2>
       <p>궁금한 달을 선택해 보세요. 절입은 계절의 흐름이 바뀌는 시점으로, 달력의 첫날과 다릅니다. 사주의 해도 1월 1일이 아니라 입춘(2월 4일 무렵)에 바뀝니다.</p>
       <div className={styles.months} role="group" aria-label="살펴볼 달">
-        {result.months.map((item) => <button key={item.month} id={`annual-month-${item.month}`} type="button" aria-pressed={month === item.month} aria-controls="annual-month-detail" onClick={() => select(item.month)} className={styles.month}>
+        {result.months.map((item) => <button key={item.month} id={`annual-month-${item.month}`} type="button" aria-pressed={month === item.month} aria-controls="annual-month-detail" onClick={(event) => select(item.month, event.detail > 0)} className={styles.month}>
           <strong>{item.month}월{month === item.month ? " · 선택됨" : ""}</strong><span>{item.heading}</span>
         </button>)}
       </div>
@@ -118,7 +124,6 @@ export function SajuAnnualReadingResult({ view, backHref = "/saju", backLabel = 
     })}</ul> : <p>별도의 계산 제한사항이 없습니다.</p>}</section>
     <p className="reading-disclaimer">{result.disclaimer}</p>
     <div className="result-actions saju-result-actions"><Link className="primary-button" href="/saju">새 사주 리딩</Link><Link className="secondary-button" href="/records">내 기록 보기</Link></div>
-    {/* The records page sends this from the server; as one of the article's children it was checked for a list key. */}
-    <Fragment>{footer}</Fragment>
+    {footer}
   </article>;
 }

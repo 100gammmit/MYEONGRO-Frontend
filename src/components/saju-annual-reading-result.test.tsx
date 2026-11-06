@@ -3,9 +3,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { annualView } from "@/domain/saju/annual-fixture.test-helper";
 import { SajuAnnualReadingResult } from "./saju-annual-reading-result";
 
+const nativeScrollIntoView = Element.prototype.scrollIntoView;
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  Element.prototype.scrollIntoView = nativeScrollIntoView;
   window.history.replaceState(null, "", "/");
 });
 
@@ -59,6 +62,14 @@ describe("annual month navigation", () => {
     expect(details).toHaveTextContent("3월 절입 전연간지 丁未 · 월간지 흐름2");
   });
 
+  it("names the next year only where December's interval runs into it", () => {
+    window.history.replaceState(null, "", "/saju/results/synthetic?month=12");
+    render(<SajuAnnualReadingResult view={annualView()} />);
+    const detail = screen.getByRole("region", { name: /12월 ·/ });
+    expect(detail.textContent).toMatch(/\d{4}년 1월 1일 전까지/);
+    expect(detail.textContent?.match(/\d{4}년/g)).toHaveLength(1);
+  });
+
   it("explains a year pillar before Ipchun only where it applies", () => {
     window.history.replaceState(null, "", "/saju/results/synthetic?month=1");
     render(<SajuAnnualReadingResult view={viewWithPreviousYearInJanuary()} />);
@@ -71,13 +82,15 @@ describe("annual month navigation", () => {
     const scrollIntoView = stubScreen(true);
     render(<SajuAnnualReadingResult view={annualView()} />);
     expect(scrollIntoView).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: /^5월/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^5월/ }), { detail: 0 });
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: /^5월/ }), { detail: 1 });
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
     cleanup();
 
     const desktopScroll = stubScreen(false);
     render(<SajuAnnualReadingResult view={annualView()} />);
-    fireEvent.click(screen.getByRole("button", { name: /^5월/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^5월/ }), { detail: 1 });
     expect(desktopScroll).not.toHaveBeenCalled();
   });
 });
