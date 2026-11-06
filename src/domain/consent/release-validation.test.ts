@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 describe("release legal configuration", () => {
+  it("rejects a placeholder in the additional general contact email", async () => {
+    const { assertReleaseLegalConfiguration } = await import("./release-validation");
+    const { LEGAL_METADATA } = await import("./legal-metadata");
+    expect(() => assertReleaseLegalConfiguration({
+      legalMetadata: { ...LEGAL_METADATA, contactEmail: "[일반 문의 주소]" },
+      documentVersions: ["2026-09-27", "2026-09-25", "2026-09-25"],
+    })).toThrow(/contactEmail/);
+  });
   it("allows complete legal metadata and released document versions", async () => {
     const { assertReleaseLegalConfiguration } = await import("./release-validation");
 

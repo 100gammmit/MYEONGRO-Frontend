@@ -62,7 +62,7 @@ export const TAROT_READING_EXAMPLE: ReadingGuide = {
   ],
   related: [
     { href: "/guide/tarot", label: "타로 사용 가이드" },
-    { href: "/about/reading", label: "명로의 리딩 방식" },
+    { href: "/about", label: "명로의 리딩 방식" },
     { href: "/guide/saju/annual-report", label: "한 해 사주 리포트 읽는 법" },
   ],
 };

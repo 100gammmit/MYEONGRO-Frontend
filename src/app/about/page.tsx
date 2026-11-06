@@ -1,10 +1,11 @@
 import { publicPageMetadata } from "@/infrastructure/site-metadata";
 import Link from "next/link";
+import { LEGAL_METADATA } from "@/domain/consent/legal-metadata";
 
 export const metadata = publicPageMetadata(
-  "/about/reading",
-  "명로가 리딩하는 방식 | AI 타로·사주",
-  "명로가 타로와 사주를 계산하고 구조화하고 해석하는 방식과 AI 해석의 한계를 확인해 보세요.",
+  "/about",
+  "명로 소개 | AI 타로·사주",
+  "개인이 운영하는 명로의 서비스 목적, AI 타로·사주 리딩 방식과 콘텐츠 제작 원칙, 문의 방법을 안내합니다.",
 );
 
 const comparisonRows = [
@@ -42,17 +43,23 @@ const sajuSteps = [
   ["03", "질문과 해설 연결", "AI가 계산된 정보와 관심 분야를 바탕으로 질문에 맞는 해설을 구성해요."],
 ] as const;
 
-export default function ReadingMethodPage() {
+export default function AboutPage() {
   return (
     <article className="reading-method-page">
       <header className="reading-method-hero page-width">
-        <p className="eyebrow">HOW MYEONGRO READS</p>
-        <h1>그냥 AI에게 물어보는 것과<br />무엇이 다를까요?</h1>
-        <p>
-          명로는 질문을 곧바로 AI에 맡기지 않아요. 먼저 계산하고, 리딩의 구조를 정하고,
-          해석이 넘지 말아야 할 경계를 세운 뒤 결과를 만들어요.
-        </p>
+        <p className="eyebrow">ABOUT MYEONGRO</p>
+        <h1>명로 소개</h1>
+        <p>명로는 사주의 명(命)과 타로가 비추는 길(路)을 결합한 이름입니다.</p>
+        <p>지금 마음에 머무는 질문을 카드와 사주로 살펴보고, 자신의 상황과 생각을 차분히 돌아볼 수 있는 콘텐츠를 제공합니다.</p>
       </header>
+
+      <section className="reading-method-section page-width" aria-labelledby="reading-method-title">
+        <div className="reading-method-heading">
+          <p className="eyebrow">HOW MYEONGRO READS</p>
+          <h2 id="reading-method-title">그냥 AI에게 물어보는 것과 무엇이 다를까요?</h2>
+          <p>명로는 질문을 곧바로 AI에 맡기지 않아요. 먼저 계산하고, 리딩의 구조를 정하고, 해석이 넘지 말아야 할 경계를 세운 뒤 결과를 만들어요.</p>
+        </div>
+      </section>
 
       <section className="reading-method-section page-width" aria-labelledby="comparison-title">
         <div className="reading-method-heading">
@@ -142,6 +149,15 @@ export default function ReadingMethodPage() {
         </ul>
       </section>
 
+      <section className="reading-method-section page-width" aria-labelledby="content-method-title">
+        <div className="reading-method-heading">
+          <p className="eyebrow">CONTENT PRINCIPLES</p>
+          <h2 id="content-method-title">콘텐츠를 만드는 방식</h2>
+          <p>공개 안내 글과 무료 오늘의 카드 콘텐츠는 AI로 초안을 작성하고, 운영자가 내용을 확인하고 다듬어 게시합니다. 오늘의 카드는 이렇게 준비한 고정 콘텐츠를 보여주며 이용할 때마다 AI를 호출하지 않습니다.</p>
+          <p>질문을 입력해 생성하는 AI 타로·사주는 요청할 때 만들어지는 해석입니다. 공개 글과 오늘의 카드, AI 리딩은 모두 오락과 자기 성찰을 위한 콘텐츠이며 중요한 결정이나 전문적인 판단을 대신하지 않습니다.</p>
+        </div>
+      </section>
+
       <section className="method-closing" aria-labelledby="method-closing-title">
         <div className="page-width">
           <p className="eyebrow">START A READING</p>
@@ -151,6 +167,16 @@ export default function ReadingMethodPage() {
             <Link className="secondary-button" href="/saju">사주로 시작</Link>
           </div>
           <Link className="method-daily-link" href="/tarot/daily">로그인 없이 오늘의 운세 보기</Link>
+        </div>
+      </section>
+      <section className="reading-method-section page-width" aria-labelledby="operation-contact-title">
+        <div className="reading-method-heading">
+          <p className="eyebrow">OPERATION & CONTACT</p>
+          <h2 id="operation-contact-title">운영과 문의</h2>
+          <p>명로는 개인이 운영하는 서비스입니다. 이용 중 궁금한 점이나 서비스에 대한 의견은 일반 문의 창구로 보내 주세요.</p>
+          <p>일반 문의: <a href={`mailto:${LEGAL_METADATA.contactEmail}`}>{LEGAL_METADATA.contactEmail}</a></p>
+          <p>개인정보 열람·정정·삭제·처리정지 등 권리행사: <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a></p>
+          <p>개인정보의 처리와 권리행사 절차는 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다. 문의에는 비밀번호나 불필요한 개인정보를 넣지 마세요.</p>
         </div>
       </section>
     </article>

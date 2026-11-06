@@ -44,7 +44,7 @@ try {
   const port = reservation.address().port;
   await new Promise((resolve) => reservation.close(resolve));
   const base = `http://localhost:${port}`;
-  app = spawn(process.execPath, ["node_modules/next/dist/bin/next", "start", "-H", "localhost", "-p", String(port)], {
+  app = spawn(process.execPath, ["node_modules/next/dist/bin/next", process.argv.includes("--dev") ? "dev" : "start", "-H", "localhost", "-p", String(port)], {
     env: { ...process.env, BACKEND_API_URL: `http://127.0.0.1:${backendPort}` },
     stdio: ["ignore", "pipe", "pipe"], windowsHide: true,
   });
@@ -69,6 +69,9 @@ try {
   assert.match(sitemapResponse.headers.get("content-type"), /xml/);
   const sitemap = await sitemapResponse.text();
   assert.equal(backendRequests.length, beforeDiscovery, "Discovery files must not query auth");
+  const oldAbout = await fetch(`${base}/about/reading`, { redirect: "manual" });
+  assert.equal(oldAbout.status, 308);
+  assert.equal(new URL(oldAbout.headers.get("location"), base).pathname, "/about");
   const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
   assert.deepEqual(urls.map((url) => new URL(url).pathname).sort(), [...routes.publicPages].sort());
   for (const url of urls) {
@@ -133,6 +136,13 @@ try {
       assert.equal(new URL(page.url()).hash, "#read-result");
       await page.screenshot({ path: `${output}/${path.split("/").at(-1)}-${width}.png`, fullPage: true });
     }
+    await page.goto(`${base}/about`);
+    await page.getByRole("heading", { level: 1, name: "명로 소개" }).waitFor();
+    assert.equal(await page.locator("h1").count(), 1);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `About overflow: ${width}`);
+    assert.equal(await page.locator('footer a[href="/about"]').textContent(), "명로 소개");
+    assert.equal(await page.locator('footer a[href="mailto:contact@myeongro.com"]').count(), 1);
+    await page.screenshot({ path: `${output}/about-${width}.png`, fullPage: true });
     await page.goto(base);
     await page.getByRole("navigation", { name: "리딩 예시와 해설" }).getByRole("link").first().click();
     await page.waitForURL(`${base}${articles[0]}`);

@@ -16,6 +16,9 @@ const nextConfig = (phase: string): NextConfig => {
 
   return {
     poweredByHeader: false,
+    async redirects() {
+      return [{ source: "/about/reading", destination: "/about", permanent: true }];
+    },
     async headers() {
       return [{ source: "/:path*", headers: [...SECURITY_HEADERS] }];
     },

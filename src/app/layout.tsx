@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LEGAL_METADATA } from "@/domain/consent/legal-metadata";
 import { SITE_ORIGIN } from "@/infrastructure/site-metadata";
 import { FooterLink } from "@/components/footer-link";
 import { ReadingCreditProvider } from "@/components/reading-credit-provider";
@@ -43,7 +44,8 @@ export default async function RootLayout({
               <FooterLink href="/faq">자주 묻는 질문</FooterLink>
               <FooterLink href="/guide/tarot">타로 사용 가이드</FooterLink>
               <FooterLink href="/guide/saju">사주 사용 가이드</FooterLink>
-              <FooterLink href="/about/reading">명로의 리딩 방식</FooterLink>
+              <FooterLink href="/about">명로 소개</FooterLink>
+              <a href={`mailto:${LEGAL_METADATA.contactEmail}`}>일반 문의: {LEGAL_METADATA.contactEmail}</a>
               <FooterLink href="/updates">업데이트 소식</FooterLink>
               <FooterLink href="/terms">서비스 이용약관</FooterLink>
               <FooterLink href="/privacy">개인정보 처리방침</FooterLink>

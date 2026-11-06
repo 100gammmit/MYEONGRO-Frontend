@@ -280,7 +280,9 @@ h1, h2, h3, blockquote {
 .reading-method-page h1, .reading-method-page h2, .reading-method-page h3 { font-weight: 300; }
 .reading-method-hero { max-width: var(--w-wide); padding-block: 112px 92px; text-align: center; }
 .reading-method-hero h1 { margin: 0; font-size: 50px; line-height: 1.3; letter-spacing: -.045em; text-wrap: balance; }
-.reading-method-hero > p:last-child { max-width: var(--w-read); margin: 28px auto 0; color: var(--text-secondary); font-size: 16px; line-height: 1.9; text-wrap: pretty; }
+.reading-method-hero > p:not(.eyebrow) { max-width: var(--w-read); margin: 28px auto 0; color: var(--text-secondary); font-size: 16px; line-height: 1.9; text-wrap: pretty; }
+.reading-method-heading p + p { margin-top: 16px; }
+.reading-method-heading a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
 .reading-method-section { max-width: var(--w-wide); padding-block: 78px; border-top: 1px solid var(--border-hairline); }
 .reading-method-heading { max-width: 680px; margin-bottom: 38px; }
 .reading-method-heading .eyebrow { margin-bottom: 14px; }
@@ -790,7 +792,7 @@ h1, h2, h3, blockquote {
   .landing-page .closing-cta { width: 100%; }
   .reading-method-hero { padding-block: 76px 64px; }
   .reading-method-hero h1 { font-size: 32px; line-height: 1.4; }
-  .reading-method-hero > p:last-child { margin-top: 20px; font-size: 14px; line-height: 1.8; }
+  .reading-method-hero > p:not(.eyebrow) { margin-top: 20px; font-size: 14px; line-height: 1.8; }
   .reading-method-section { padding-block: 52px; }
   .reading-method-heading { margin-bottom: 26px; }
   .reading-method-heading h2 { font-size: 25px; }
