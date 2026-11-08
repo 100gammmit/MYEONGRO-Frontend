@@ -263,7 +263,7 @@ h1, h2, h3, blockquote {
 .landing-page .feature h3 { margin: 12px 0 8px; font-size: 20px; font-weight: 400; }
 .landing-page .feature p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
 .landing-page .reading-method-entry { display: flex; align-items: end; justify-content: space-between; gap: 48px; max-width: var(--w-wide); margin-top: 84px; padding: 34px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--gradient-panel); }
-.landing-page .reading-method-entry > div { max-width: 590px; }
+.landing-page .reading-method-entry > div { max-width: var(--w-read); }
 .landing-page .reading-method-entry .eyebrow { margin-bottom: 12px; }
 .landing-page .reading-method-entry h2 { margin: 0; font-size: 25px; line-height: 1.4; letter-spacing: -.035em; }
 .landing-page .reading-method-entry p:not(.eyebrow) { margin: 14px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
@@ -272,7 +272,7 @@ h1, h2, h3, blockquote {
 .landing-page .landing-closing h2 { margin: 0; font-size: 32px; letter-spacing: -.035em; }
 .landing-page .closing-cta { margin-top: 26px; }
 .landing-page a:focus-visible { border-radius: var(--radius-xs); box-shadow: var(--focus-ring); }
-.site-footer { width: min(var(--w-page), calc(100% - 64px)); margin: auto; border-top: 1px solid var(--border-hairline); padding: 30px 0 44px; color: var(--text-subtle); font-size: 11px; display: flex; justify-content: space-between; gap: 20px; }
+.site-footer { width: min(var(--w-page), calc(100% - 64px)); margin: auto; border-top: 1px solid var(--border-hairline); padding: 30px 0 44px; color: var(--text-subtle); font-size: 12px; display: flex; justify-content: space-between; gap: 20px; }
 .site-footer div { display: flex; flex-wrap: wrap; align-items: center; gap: 0 22px; }
 .site-footer a { display: inline-flex; align-items: center; min-height: 44px; }
 
@@ -283,7 +283,7 @@ h1, h2, h3, blockquote {
 .reading-method-hero > p:not(.eyebrow) { max-width: var(--w-read); margin: 28px auto 0; color: var(--text-secondary); font-size: 16px; line-height: 1.9; text-wrap: pretty; }
 .reading-method-heading a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
 .reading-method-section { max-width: var(--w-wide); padding-block: 78px; border-top: 1px solid var(--border-hairline); }
-.reading-method-heading { max-width: 680px; margin-bottom: 38px; }
+.reading-method-heading { max-width: var(--w-read); margin-bottom: 38px; }
 .reading-method-heading .eyebrow { margin-bottom: 14px; }
 .reading-method-heading h2 { margin: 0; font-size: 32px; line-height: 1.4; letter-spacing: -.035em; }
 .reading-method-heading > p:not(.eyebrow) { margin: 14px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
@@ -713,7 +713,7 @@ h1, h2, h3, blockquote {
 .updates-page { max-width: var(--w-wide); }
 .updates-intro { max-width: var(--w-read); margin: -12px 0 46px; color: var(--text-secondary); font-size: 16px; line-height: 1.8; }
 .updates-empty { padding: 42px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-tint-1); text-align: center; }
-.updates-empty h2 { margin: 0; font-size: 22px; font-weight: 400; }
+.updates-empty h2 { margin: 0; font-size: 20px; font-weight: 400; }
 .updates-empty p { margin: 12px 0 0; color: var(--text-muted); line-height: 1.8; }
 .updates-list { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; }
 .update-entry { scroll-margin-top: 20px; padding: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); }
@@ -723,8 +723,8 @@ h1, h2, h3, blockquote {
 .update-entry-meta .update-kind { color: var(--text-accent-strong); }
 .update-entry-meta .update-kind.emergency, .update-entry-meta .update-notice-level { border-color: var(--border-strong); }
 .update-entry-meta .update-kind.emergency, .update-entry-meta .update-status.upcoming { color: var(--text-danger); }
-.update-entry h2 { margin: 18px 0 10px; font-size: 27px; font-weight: 300; line-height: 1.4; }
-.update-summary { margin: 0; color: var(--text-secondary); font-size: 15px; line-height: 1.8; }
+.update-entry h2 { margin: 18px 0 10px; font-size: 25px; font-weight: 300; line-height: 1.4; }
+.update-summary { margin: 0; color: var(--text-secondary); font-size: 16px; line-height: 1.8; }
 .update-dates { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 20px 0 0; color: var(--text-subtle); font-size: 12px; }
 .update-dates > div { display: flex; gap: 8px; }
 .update-dates dt { color: var(--text-muted); }
@@ -733,14 +733,15 @@ h1, h2, h3, blockquote {
 .update-emergency-reason strong { margin-right: 8px; color: var(--text-danger); }
 .update-changes { margin: 24px 0 0; padding-left: 20px; color: var(--text-secondary); line-height: 1.8; }
 .update-changes li + li { margin-top: 6px; }
-.update-links { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-hairline); }
+.update-links { display: flex; flex-wrap: wrap; gap: 0 18px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-hairline); }
 .update-links a, .update-correction a { color: var(--text-accent-strong); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.update-links a { display: inline-flex; align-items: center; min-height: 44px; }
 .update-correction { margin: 18px 0 0; padding: 12px 14px; border-radius: var(--radius-xs); background: var(--surface-tint-2); color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
 
 @media (max-width: 760px) {
   .page-width { width: min(100% - 28px, 620px); }
   .site-header { width: calc(100% - 28px); height: 56px; }
-  .brand { gap: 9px; font-size: 17px; }
+  .brand { gap: 9px; font-size: 16px; }
   .brand .mark-glyph { width: 20px; height: 20px; }
   .site-header-start, .site-header-end { gap: 2px; }
   .reading-nav { gap: 0; }
@@ -859,7 +860,7 @@ h1, h2, h3, blockquote {
   .updates-intro { margin-top: -14px; margin-bottom: 32px; font-size: 14px; }
   .updates-empty { padding: 32px 22px; }
   .update-entry { padding: 24px 20px; }
-  .update-entry h2 { font-size: 22px; }
+  .update-entry h2 { font-size: 20px; }
   .record-detail-header h1, .record-state h1 { font-size: 40px; }
   .saju-result-hero h1 { font-size: 40px; }
 }

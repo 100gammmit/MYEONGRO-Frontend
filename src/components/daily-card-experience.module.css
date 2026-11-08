@@ -37,7 +37,7 @@
   background: var(--surface-tint-2);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 760px) {
   .cards {
     gap: 0.35rem;
   }

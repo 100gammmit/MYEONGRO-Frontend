@@ -1,5 +1,5 @@
 .explorer { margin-block: 24px; }
-.intro { color: var(--text-primary); font-size: 17px; font-weight: 600; }
+.intro { color: var(--text-primary); font-size: 16px; font-weight: 600; }
 .intro span { display: block; margin-top: 8px; color: var(--text-secondary); font-size: 14px; font-weight: 400; line-height: 1.7; }
 .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 24px; }
 .controls button { padding: 10px 14px; min-height: 44px; max-width: 100%; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-record); color: var(--text-secondary); font: inherit; font-size: 14px; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
@@ -8,11 +8,11 @@
 .groupLabel { flex-basis: 100%; margin-top: 10px; font-size: 13px; color: var(--text-secondary); }
 .controls p, .note { color: var(--text-secondary); font-size: 13px; line-height: 1.8; }
 .symbols { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
-.symbols .character { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px; border: 2px solid transparent; border-radius: 6px; color: inherit; font: inherit; letter-spacing: normal; }
+.symbols .character { display: inline-flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px; border: 2px solid transparent; border-radius: var(--radius-xs); color: inherit; font: inherit; letter-spacing: normal; }
 .symbols .character[data-highlighted="true"] { border-color: var(--text-accent-strong); background: var(--surface-record); }
-.marker { font: 10px sans-serif; color: var(--text-accent-strong); }
+.marker { font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; color: var(--text-accent-strong); }
 .description { padding: 20px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); }
-.description h3 { margin: 0 0 12px; font-size: 17px; }
+.description h3 { margin: 0 0 12px; font-size: 16px; }
 .description p { font-size: 14px; line-height: 1.85; color: var(--text-secondary); }
 .symbolism { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 16px 0; }
 .symbolism dt { color: var(--text-muted); font-size: 12px; }
@@ -25,4 +25,4 @@
 .description nav { border-top: 1px solid var(--border-default); margin-top: 18px; }
 .description a { display: block; padding: 8px 0; color: var(--text-accent-strong); font-size: 14px; overflow-wrap: anywhere; }
 .note { margin: 16px 0 0; }
-@media (max-width: 600px) { .description { padding: 16px; } }
+@media (max-width: 760px) { .description { padding: 16px; } }

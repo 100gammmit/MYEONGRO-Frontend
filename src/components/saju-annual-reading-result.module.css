@@ -4,26 +4,26 @@
 .months { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem; }
 .month { min-width: 0; padding: 1rem; text-align: left; border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--text-primary); background: var(--surface-record); cursor: pointer; font: inherit; }
 .month strong, .month span { display: block; }
-.month span { margin-top: .5rem; font-size: .9rem; line-height: 1.6; }
+.month span { margin-top: .5rem; font-size: 14px; line-height: 1.6; }
 .month[aria-pressed="true"] { border-color: currentColor; box-shadow: inset 0 0 0 1px currentColor; }
 .month:focus-visible, .calculation > summary:focus-visible { outline: 3px solid currentColor; outline-offset: 4px; }
 .detail { padding: 1.5rem; border: 1px solid var(--border-default); border-radius: var(--radius-md); scroll-margin-top: 5rem; }
 .detail h2, .detail h3 { text-wrap: balance; }
 .period, .intervals { border-top: 1px solid var(--border-default); margin-top: 1.5rem; padding-top: 1rem; }
-.intervals h3 { font-size: 1rem; }
+.intervals h3 { font-size: 16px; }
 .intervals ul { margin: .75rem 0 0; padding-left: 1.1rem; }
-.intervals li { font-size: .9rem; line-height: 1.8; }
-.dates, .shared, .yearNote { font-size: .9rem; }
+.intervals li { font-size: 14px; line-height: 1.8; }
+.dates, .shared, .yearNote { font-size: 14px; }
 .yearNote { color: var(--text-secondary); }
 .valuesTitle { margin: 1.25rem 0 0; font-weight: 600; }
 .monthValues { display: grid; gap: .5rem; margin-top: .5rem; }
-.monthValues dt { font-size: .85rem; color: var(--text-secondary); }
+.monthValues dt { font-size: 13px; color: var(--text-secondary); }
 .monthValues dd { margin: .15rem 0 0; }
 .shared { font-weight: 600; }
-.calculation > summary { cursor: pointer; font-weight: 600; padding-block: .5rem; }
+.calculation > summary { cursor: pointer; font-weight: 600; padding-block: 10px; line-height: 1.5; }
 .report :global(.saju-limitations) li strong { display: block; margin-bottom: .3rem; }
 .report :global(.saju-limitations) li + li { margin-top: .75rem; }
-@media (max-width: 600px) {
+@media (max-width: 760px) {
   .months { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
   .month { padding: .85rem; }
   .detail { padding: 1rem; }
