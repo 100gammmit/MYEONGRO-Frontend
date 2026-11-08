@@ -11,7 +11,7 @@ export const SERVICE_UPDATES = defineServiceUpdates([
     changes: [
       "기존 리딩 방식 안내를 명로 소개로 통합했습니다. 이전 주소로 접속하면 새 소개 페이지로 이동합니다.",
       "일반 문의는 contact@myeongro.com, 개인정보 권리행사는 privacy@myeongro.com으로 받습니다.",
-      "개인정보 처리방침의 문의 이메일 항목에 일반 문의 주소와 동일 Workspace 사용자의 별칭 수신·회신 경로를 추가했습니다. 처리 항목과 보유기간은 유지하며 별도 재동의를 요구하지 않습니다.",
+      "개인정보 처리방침의 문의 이메일 항목에 일반 문의 주소를 추가했습니다. 두 주소로 온 메일은 같은 메일 시스템에서 처리합니다. 처리 항목과 보유기간은 유지하며 별도 재동의를 요구하지 않습니다.",
     ],
     publishedDate: "2026-11-07", effectiveDate: "2026-11-07",
     links: [

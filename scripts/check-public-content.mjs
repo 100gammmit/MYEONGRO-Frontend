@@ -142,7 +142,20 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `About overflow: ${width}`);
     assert.equal(await page.locator('footer a[href="/about"]').textContent(), "명로 소개");
     assert.equal(await page.locator('footer a[href="mailto:contact@myeongro.com"]').count(), 1);
+    assert.equal(await page.locator("article > section").last().getAttribute("class"), "method-closing");
     await page.screenshot({ path: `${output}/about-${width}.png`, fullPage: true });
+    for (const path of ["/", "/faq", "/guide/tarot", "/guide/saju", articles[0]]) {
+      await page.goto(`${base}${path}`);
+      if (path === "/faq") await page.locator("#reading-boundaries summary").click();
+      await page.locator('a[href="/about#reading-method"]').click();
+      await page.waitForURL(`${base}/about#reading-method`);
+      await page.waitForFunction(() => {
+        const heading = document.querySelector("#reading-method h2");
+        if (!heading) return false;
+        const { top, bottom } = heading.getBoundingClientRect();
+        return top >= 0 && bottom <= innerHeight;
+      });
+    }
     await page.goto(`${base}/privacy`);
     for (const [label, address] of [
       ["일반 문의", "contact@myeongro.com"],

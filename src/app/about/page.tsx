@@ -53,7 +53,7 @@ export default function AboutPage() {
         <p>지금 마음에 머무는 질문을 카드와 사주로 살펴보고, 자신의 상황과 생각을 차분히 돌아볼 수 있는 콘텐츠를 제공합니다.</p>
       </header>
 
-      <section className="reading-method-section page-width" aria-labelledby="reading-method-title">
+      <section id="reading-method" className="reading-method-section page-width" aria-labelledby="reading-method-title">
         <div className="reading-method-heading">
           <p className="eyebrow">HOW MYEONGRO READS</p>
           <h2 id="reading-method-title">그냥 AI에게 물어보는 것과 무엇이 다를까요?</h2>
@@ -158,6 +158,17 @@ export default function AboutPage() {
         </div>
       </section>
 
+      <section className="reading-method-section page-width" aria-labelledby="operation-contact-title">
+        <div className="reading-method-heading">
+          <p className="eyebrow">OPERATION & CONTACT</p>
+          <h2 id="operation-contact-title">운영과 문의</h2>
+          <p>명로는 개인이 운영하는 서비스입니다. 이용 중 궁금한 점이나 서비스에 대한 의견은 일반 문의 창구로 보내 주세요.</p>
+          <p>일반 문의: <a href={`mailto:${LEGAL_METADATA.contactEmail}`}>{LEGAL_METADATA.contactEmail}</a></p>
+          <p>개인정보 열람·정정·삭제·처리정지 등 권리행사: <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a></p>
+          <p>개인정보의 처리와 권리행사 절차는 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다. 문의에는 비밀번호나 불필요한 개인정보를 넣지 마세요.</p>
+        </div>
+      </section>
+
       <section className="method-closing" aria-labelledby="method-closing-title">
         <div className="page-width">
           <p className="eyebrow">START A READING</p>
@@ -167,16 +178,6 @@ export default function AboutPage() {
             <Link className="secondary-button" href="/saju">사주로 시작</Link>
           </div>
           <Link className="method-daily-link" href="/tarot/daily">로그인 없이 오늘의 운세 보기</Link>
-        </div>
-      </section>
-      <section className="reading-method-section page-width" aria-labelledby="operation-contact-title">
-        <div className="reading-method-heading">
-          <p className="eyebrow">OPERATION & CONTACT</p>
-          <h2 id="operation-contact-title">운영과 문의</h2>
-          <p>명로는 개인이 운영하는 서비스입니다. 이용 중 궁금한 점이나 서비스에 대한 의견은 일반 문의 창구로 보내 주세요.</p>
-          <p>일반 문의: <a href={`mailto:${LEGAL_METADATA.contactEmail}`}>{LEGAL_METADATA.contactEmail}</a></p>
-          <p>개인정보 열람·정정·삭제·처리정지 등 권리행사: <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a></p>
-          <p>개인정보의 처리와 권리행사 절차는 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다. 문의에는 비밀번호나 불필요한 개인정보를 넣지 마세요.</p>
         </div>
       </section>
     </article>

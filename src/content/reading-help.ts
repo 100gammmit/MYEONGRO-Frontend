@@ -74,7 +74,7 @@ export const FAQ_GROUPS: readonly FaqGroup[] = [
     { id: "reading-boundaries", question: "질문과 다른 방식으로 해석되거나 답변이 제한되는 이유는 무엇인가요?", paragraphs: [
       "질문에 따라 전문적인 판단을 대신하지 않도록 특정 운세의 흐름으로 바꿔 읽고, 그 이유를 안내할 수 있습니다. 안전상 다룰 수 없는 내용은 별도 안내를 제공합니다.",
       "명로의 해석은 미래의 사건이나 타인의 속마음을 사실로 확인하는 수단이 아닙니다. 의료·법률·금융 등 전문적인 판단과 중요한 결정을 대신하지 않습니다. 제한을 피하려고 표현을 바꾸기보다, 안내된 범위와 필요한 전문적 도움을 확인해 주세요.",
-    ], links: [{ href: "/about", label: "명로의 리딩 방식" }] },
+    ], links: [{ href: "/about#reading-method", label: "명로의 리딩 방식" }] },
   ] },
 ];
 
@@ -111,7 +111,7 @@ export const TAROT_GUIDE: ReadingGuide = {
       "리딩은 상징을 통한 해석이지 검증된 미래 예측이 아닙니다. 불편한 카드가 나왔다고 사건이 확정되는 것도, 긍정적인 해석이 나왔다고 결과가 보장되는 것도 아닙니다. 중요한 결정은 현실의 정보와 필요한 전문적 도움을 함께 고려하세요.",
     ] },
   ],
-  related: [{ href: "/guide/tarot/example", label: "타로 3장 리딩 예시" }, { href: "/faq#repeat-question", label: "같은 질문으로 다시 봐도 되나요?" }, { href: "/faq#generation-error", label: "생성 중 오류가 났다면" }, { href: "/about", label: "명로의 리딩 방식" }],
+  related: [{ href: "/guide/tarot/example", label: "타로 3장 리딩 예시" }, { href: "/faq#repeat-question", label: "같은 질문으로 다시 봐도 되나요?" }, { href: "/faq#generation-error", label: "생성 중 오류가 났다면" }, { href: "/about#reading-method", label: "명로의 리딩 방식" }],
 };
 
 export const SAJU_GUIDE: ReadingGuide = {
@@ -155,5 +155,5 @@ export const SAJU_GUIDE: ReadingGuide = {
       "계산이 일관된다는 것과 미래 예측이 입증됐다는 것은 다릅니다. 사주 리딩은 자기 이해를 위한 참고 콘텐츠이며, 의료·법률·금융 판단이나 중요한 결정을 대신하지 않습니다.",
     ] },
   ],
-  related: [{ href: "/guide/saju/annual-report", label: "한 해 사주 리포트 읽는 법" }, { href: "/faq#birth-time", label: "출생 시각을 모를 때" }, { href: "/faq#reading-records", label: "기록 확인과 삭제" }, { href: "/about", label: "계산과 AI 해석의 차이" }],
+  related: [{ href: "/guide/saju/annual-report", label: "한 해 사주 리포트 읽는 법" }, { href: "/faq#birth-time", label: "출생 시각을 모를 때" }, { href: "/faq#reading-records", label: "기록 확인과 삭제" }, { href: "/about#reading-method", label: "계산과 AI 해석의 차이" }],
 };

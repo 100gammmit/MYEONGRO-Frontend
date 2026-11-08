@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import AboutPage from "@/app/about/page";
 import FaqPage, { metadata as faqMetadata } from "@/app/faq/page";
 import TarotGuidePage, { metadata as tarotMetadata } from "@/app/guide/tarot/page";
 import SajuGuidePage, { metadata as sajuMetadata } from "@/app/guide/saju/page";
@@ -93,7 +94,9 @@ describe("public reading help", () => {
   it("uses unique anchors and resolves all cross-page FAQ and guide references", () => {
     const ids = FAQ_GROUPS.flatMap((group) => [group.id, ...group.items.map((item) => item.id)]);
     expect(new Set(ids).size).toBe(ids.length);
+    const { container } = render(<AboutPage />);
     const anchors: Record<string, string[]> = {
+      "/about": Array.from(container.querySelectorAll("section[id]"), (section) => section.id),
       "/faq": ids,
       "/guide/tarot": TAROT_GUIDE.sections.map((section) => section.id),
       "/guide/saju": SAJU_GUIDE.sections.map((section) => section.id),

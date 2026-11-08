@@ -154,7 +154,7 @@ export default function HomePage() {
             사주는 명식을 먼저 계산한 뒤 해석해요.
           </p>
         </div>
-        <Link href="/about" className="outline-cta">
+        <Link href="/about#reading-method" className="outline-cta">
           명로의 리딩 방식 보기 <span aria-hidden="true">→</span>
         </Link>
       </section>
