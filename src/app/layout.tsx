@@ -45,11 +45,11 @@ export default async function RootLayout({
               <FooterLink href="/guide/tarot">타로 사용 가이드</FooterLink>
               <FooterLink href="/guide/saju">사주 사용 가이드</FooterLink>
               <FooterLink href="/about">명로 소개</FooterLink>
-              <a href={`mailto:${LEGAL_METADATA.contactEmail}`}>문의: {LEGAL_METADATA.contactEmail}</a>
               <FooterLink href="/updates">업데이트 소식</FooterLink>
               <FooterLink href="/terms">서비스 이용약관</FooterLink>
               <FooterLink href="/privacy">개인정보 처리방침</FooterLink>
               <span>© 2026 MYEONGRO</span>
+              <a href={`mailto:${LEGAL_METADATA.contactEmail}`}>문의: {LEGAL_METADATA.contactEmail}</a>
             </div>
           </footer>
         </ReadingCreditProvider>
