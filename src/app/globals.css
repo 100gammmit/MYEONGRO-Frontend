@@ -281,13 +281,13 @@ h1, h2, h3, blockquote {
 .reading-method-hero { max-width: var(--w-wide); padding-block: 112px 92px; text-align: center; }
 .reading-method-hero h1 { margin: 0; font-size: 50px; line-height: 1.3; letter-spacing: -.045em; text-wrap: balance; }
 .reading-method-hero > p:not(.eyebrow) { max-width: var(--w-read); margin: 28px auto 0; color: var(--text-secondary); font-size: 16px; line-height: 1.9; text-wrap: pretty; }
-.reading-method-heading p + p { margin-top: 16px; }
 .reading-method-heading a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 4px; overflow-wrap: anywhere; }
 .reading-method-section { max-width: var(--w-wide); padding-block: 78px; border-top: 1px solid var(--border-hairline); }
 .reading-method-heading { max-width: 680px; margin-bottom: 38px; }
 .reading-method-heading .eyebrow { margin-bottom: 14px; }
 .reading-method-heading h2 { margin: 0; font-size: 32px; line-height: 1.4; letter-spacing: -.035em; }
-.reading-method-heading > p:last-child:not(.eyebrow) { margin: 14px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
+.reading-method-heading > p:not(.eyebrow) { margin: 14px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
+.reading-method-heading > p:not(.eyebrow) + p { margin-top: 10px; }
 .method-comparison-scroll { overflow-x: auto; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-record); scrollbar-color: var(--border-strong) transparent; }
 .method-comparison-scroll:focus-visible { outline-offset: 5px; box-shadow: var(--focus-ring); }
 /* Separate borders: Chrome does not paint sticky cells over their neighbours in a collapsed table. */
