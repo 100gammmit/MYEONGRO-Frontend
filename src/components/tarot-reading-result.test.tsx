@@ -34,6 +34,9 @@ describe("TarotReadingResult", () => {
 
     expect(screen.getByText("오늘의 리딩")).toBeInTheDocument();
     expect(screen.queryByText("오늘부터 시도할 작은 행동")).not.toBeInTheDocument();
+    // Each card's reading is a section of the page, so it sits at the same level as the summary.
+    expect(screen.getAllByRole("heading", { level: 2, name: "마음의 흐름" })).toHaveLength(3);
+    expect(screen.getByRole("heading", { level: 2, name: "오늘의 리딩" })).toBeInTheDocument();
     expect(screen.getByLabelText("생성형 AI 사용 안내")).toHaveTextContent(AI_GENERATED_NOTICE);
     expect(screen.getByRole("link", { name: "새로운 리딩 시작" }))
       .toHaveAttribute("href", "/tarot");

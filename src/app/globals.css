@@ -499,7 +499,7 @@ h1, h2, h3, blockquote {
 .result-reveal { display: grid; grid-template-columns: 190px 1fr; gap: 32px; align-items: center; padding: 28px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-tint-1); animation: reveal-in .45s ease both; }
 .result-reveal .revealed-card { width: 100%; margin: 0; }
 .result-reveal .revealed-card-label { display: block; margin-bottom: 10px; color: var(--text-accent); font-size: 11px; letter-spacing: .08em; text-align: center; }
-.result-reveal h3 { margin-top: 0; color: var(--text-accent-strong); font-size: 25px; }
+.result-reveal h2 { margin-top: 0; color: var(--text-accent-strong); font-size: 25px; }
 .result-reveal p { color: var(--text-secondary); line-height: 1.8; }
 .reveal-button { margin-inline: auto; }
 .result-summary { animation: reveal-in .45s ease both; }
@@ -671,22 +671,24 @@ h1, h2, h3, blockquote {
 .saju-limitation-summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0 0 22px; padding: 18px 22px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); color: var(--text-secondary); }
 .saju-limitation-summary strong { display: block; color: var(--text-primary); font-size: 14px; font-weight: 600; line-height: 1.6; }
 .saju-limitation-summary span { display: block; margin-top: 2px; font-size: 13px; line-height: 1.7; }
-.saju-limitation-summary a { flex: 0 0 auto; color: var(--text-accent-strong); font-size: 13px; }
-.saju-result-toc { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 28px 0 44px; }
-.saju-result-toc a { display: block; padding: 12px; border: 1px solid var(--border-default); border-radius: var(--radius-md); color: var(--text-secondary); text-align: center; font-size: 12px; font-weight: 600; line-height: 1.4; background: var(--surface-tint-2); }
+.saju-limitation-summary a { display: inline-flex; flex: 0 0 auto; align-items: center; min-height: 44px; color: var(--text-accent-strong); font-size: 13px; }
+/* Chips wrap by their own length, so nine sections never leave one stranded on a last row. */
+.saju-result-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 44px; }
+.saju-result-toc a { display: inline-flex; flex: 0 0 auto; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); color: var(--text-secondary); font-size: 13px; font-weight: 600; white-space: nowrap; background: var(--surface-tint-2); scroll-margin-inline: 16px; }
+.saju-result-toc a:hover { border-color: var(--border-strong); color: var(--text-primary); }
 .saju-calculation, .saju-reading-sections section, .saju-limitations { scroll-margin-top: 20px; }
 .saju-calculation { margin-bottom: 42px; padding: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); }
 .saju-section-heading { margin-bottom: 24px; }
 .saju-section-heading h2 { margin: 6px 0 0; font-size: 32px; font-weight: 300; }
 .saju-pillar-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px; }
 .saju-pillar-grid article { padding: 22px 12px; border: 1px solid var(--border-default); border-radius: var(--radius-md); text-align: center; background: var(--surface-tint-1); }
-.saju-pillar-grid span, .saju-calculation-facts dt { display: block; color: var(--text-muted); font-size: 11px; letter-spacing: .08em; }
+.saju-pillar-grid span, .saju-calculation-facts dt { display: block; color: var(--text-muted); font-size: 12px; letter-spacing: .08em; }
 .saju-pillar-grid strong { display: block; margin-top: 10px; color: var(--text-accent-strong); font: 25px "Noto Serif KR Variable", Georgia, serif; }
 .saju-calculation-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
 .saju-calculation-facts > div { padding: 20px; border-radius: 0 var(--radius-md) var(--radius-md) 0; border-left: 2px solid var(--accent-primary); background: var(--surface-tint-1); }
 .saju-calculation-facts dd { margin: 8px 0 0; line-height: 1.6; overflow-wrap: anywhere; }
 .saju-calculation-meta { margin-top: 22px; color: var(--text-secondary); }
-.saju-calculation-meta summary, .saju-evidence summary { cursor: pointer; color: var(--text-accent-strong); }
+.saju-calculation-meta summary, .saju-evidence summary { cursor: pointer; padding-block: 10px; line-height: 1.5; color: var(--text-accent-strong); }
 .saju-calculation-meta dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin-bottom: 0; }
 .saju-calculation-meta dt { color: var(--text-muted); font-size: 12px; }
 .saju-calculation-meta dd { margin: 5px 0 0; overflow-wrap: anywhere; }
@@ -697,7 +699,7 @@ h1, h2, h3, blockquote {
 .saju-evidence { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-default); }
 .saju-evidence ul { margin-bottom: 0; padding-left: 20px; color: var(--text-muted); font-size: 13px; line-height: 1.8; }
 .saju-reading-summary { margin: 36px 0 16px; padding: 30px; border: 1px solid var(--border-strong); border-radius: var(--radius-lg); }
-.saju-reading-summary h2, .saju-limitations h2 { margin-top: 0; font-weight: 300; }
+.saju-reading-summary h2, .saju-limitations h2 { margin-top: 0; font-size: 25px; font-weight: 300; }
 .saju-limitations { padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); }
 .saju-limitations article + article { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--border-default); }
 .saju-limitations h3 { margin: 0 0 8px; font-size: 16px; }
@@ -833,7 +835,11 @@ h1, h2, h3, blockquote {
   .saju-result-hero { margin-top: 42px; text-align: left; }
   .saju-result-hero blockquote { padding-inline: 0; }
   .saju-limitation-summary { align-items: flex-start; flex-direction: column; }
-  .saju-result-toc, .saju-calculation-facts, .saju-calculation-meta dl { grid-template-columns: 1fr; }
+  .saju-calculation-facts, .saju-calculation-meta dl { grid-template-columns: 1fr; }
+  /* One swipeable row instead of nine stacked buttons; the faded edge shows there is more. */
+  .saju-result-toc { flex-wrap: nowrap; overflow-x: auto; margin-inline: -14px; padding: 2px 40px 2px 14px; scroll-snap-type: x proximity; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
+  .saju-result-toc::-webkit-scrollbar { display: none; }
+  .saju-result-toc a { scroll-snap-align: start; }
   .saju-pillar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .saju-calculation, .saju-reading-sections section, .saju-reading-summary, .saju-limitations { padding: 22px 20px; }
   .saju-result-actions { flex-direction: column; }

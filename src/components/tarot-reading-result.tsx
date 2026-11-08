@@ -122,7 +122,7 @@ export function TarotReadingResult({
                 name={card?.name ?? "카드"}
               />
               <div>
-                <h3>{section.heading}</h3>
+                <h2>{section.heading}</h2>
                 <p>{section.body}</p>
               </div>
             </article>
