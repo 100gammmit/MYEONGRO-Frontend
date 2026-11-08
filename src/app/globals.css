@@ -741,7 +741,8 @@ h1, h2, h3, blockquote {
 .update-correction { margin: 18px 0 0; padding: 12px 14px; border-radius: var(--radius-xs); background: var(--surface-tint-2); color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
 
 @media (max-width: 760px) {
-  .page-width { width: min(100% - 28px, 620px); }
+  /* The gutter is named so full-bleed rows inside the page can reach the screen edge from it. */
+  .page-width { --page-gutter: max(14px, calc(50vw - 310px)); width: calc(100% - 2 * var(--page-gutter)); }
   .site-header { width: calc(100% - 28px); height: 56px; }
   .brand { gap: 9px; font-size: 16px; }
   .brand .mark-glyph { width: 20px; height: 20px; }
@@ -837,7 +838,9 @@ h1, h2, h3, blockquote {
   .saju-limitation-summary { align-items: flex-start; flex-direction: column; }
   .saju-calculation-facts, .saju-calculation-meta dl { grid-template-columns: 1fr; }
   /* One swipeable row instead of nine stacked buttons; the faded edge shows there is more. */
-  .saju-result-toc { flex-wrap: nowrap; overflow-x: auto; margin-inline: -14px; padding: 2px 40px 2px 14px; scroll-snap-type: x proximity; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
+  /* The row bleeds to the screen edges from the page gutter, keeps that gutter as its snap start,
+     and leaves room above and below for the focus outline. */
+  .saju-result-toc { flex-wrap: nowrap; overflow-x: auto; margin-inline: calc(-1 * var(--page-gutter, 14px)); padding: 8px 40px 8px var(--page-gutter, 14px); scroll-padding-inline-start: var(--page-gutter, 14px); scroll-snap-type: x proximity; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 40px), transparent); }
   .saju-result-toc::-webkit-scrollbar { display: none; }
   .saju-result-toc a { scroll-snap-align: start; }
   .saju-pillar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
