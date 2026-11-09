@@ -5,11 +5,18 @@ import { HeroQuestionRotator } from "@/components/hero-question-rotator";
 import { LandingSky } from "@/components/landing-sky";
 import { TarotStone } from "@/components/tarot-stone";
 
-export const metadata = publicPageMetadata(
-  "/",
-  "명로 | AI 사주와 타로",
-  "로그인 없이 오늘의 카드로 운세를 가볍게 확인해 보세요. 연애·일·인간관계 고민은 무료 AI 타로·사주로 살펴볼 수 있어요.",
-);
+const naverSiteVerification = "236e2f0727b5ba5140f71d738f5bf6b20465d310";
+
+export const metadata = {
+  ...publicPageMetadata(
+    "/",
+    "명로 | AI 사주와 타로",
+    "오늘의 운세는 로그인 없이 카드 한 장으로. 연애·일·인간관계 같은 고민은 무료 AI 타로·사주로 풀어 보세요.",
+  ),
+  verification: naverSiteVerification
+    ? { other: { "naver-site-verification": naverSiteVerification } }
+    : undefined,
+};
 
 const features = [
   {
