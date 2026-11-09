@@ -29,7 +29,6 @@ describe("DailyCardExperience", () => {
         dateKst: getKoreanDate(),
         cardId: "major-17-star",
         variantIndex: 3,
-        contentVersion: DAILY_CARD_CONTENT_VERSION,
       },
     }));
     render(<DailyCardExperience storageScope="guest" />);
@@ -47,9 +46,9 @@ describe("DailyCardExperience", () => {
     expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({
       drawId,
       selectedSlot: 3,
-      contentVersion: DAILY_CARD_CONTENT_VERSION,
     });
     expect(localStorage.getItem(guestStorageKey)).toContain("major-17-star");
+    expect(localStorage.getItem(guestStorageKey)).toContain(DAILY_CARD_CONTENT_VERSION);
     const expectedContent = getDailyCardContent("major-17-star", 3);
     if (!expectedContent) {
       throw new Error("Expected fixture content to exist.");
@@ -126,7 +125,6 @@ describe("DailyCardExperience", () => {
         dateKst: getKoreanDate(),
         cardId: "major-17-star",
         variantIndex: 3,
-        contentVersion: DAILY_CARD_CONTENT_VERSION,
       },
     }));
     const firstView = render(<DailyCardExperience storageScope={null} />);
@@ -152,7 +150,6 @@ describe("DailyCardExperience", () => {
         dateKst: "2026-08-25",
         cardId: "major-17-star",
         variantIndex: 3,
-        contentVersion: DAILY_CARD_CONTENT_VERSION,
       },
     }));
     render(<DailyCardExperience storageScope={null} />);
@@ -178,7 +175,6 @@ describe("DailyCardExperience", () => {
           dateKst: getKoreanDate(),
           cardId: "major-19-sun",
           variantIndex: 0,
-          contentVersion: DAILY_CARD_CONTENT_VERSION,
         },
       }));
     render(<DailyCardExperience storageScope="guest" />);
@@ -210,7 +206,6 @@ describe("DailyCardExperience", () => {
         dateKst: getKoreanDate(),
         cardId: "major-17-star",
         variantIndex: 3,
-        contentVersion: DAILY_CARD_CONTENT_VERSION,
       },
     }));
     render(<DailyCardExperience storageScope="guest" />);
@@ -246,7 +241,6 @@ describe("DailyCardExperience", () => {
         dateKst: "2026-08-25",
         cardId: "major-17-star",
         variantIndex: 3,
-        contentVersion: DAILY_CARD_CONTENT_VERSION,
       },
     })));
 

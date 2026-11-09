@@ -104,16 +104,10 @@ export function DailyCardExperience({
         method: "POST",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          drawId,
-          selectedSlot,
-          contentVersion: DAILY_CARD_CONTENT_VERSION,
-        }),
+        body: JSON.stringify({ drawId, selectedSlot }),
       });
       if (!response.ok) {
-        throw new Error(response.status === 409
-          ? "콘텐츠가 새로 바뀌었어요. 페이지를 새로고침해 주세요."
-          : "오늘의 카드를 확인하지 못했어요. 잠시 뒤 다시 시도해 주세요.");
+        throw new Error("오늘의 카드를 확인하지 못했어요. 잠시 뒤 다시 시도해 주세요.");
       }
       const selection = parseDailyCardSelectionResponse(await response.json());
       if (selection.dateKst !== getKoreanDate()) {
@@ -129,6 +123,7 @@ export function DailyCardExperience({
       }
       const stored: StoredDailyCard = {
         schemaVersion: 1,
+        contentVersion: DAILY_CARD_CONTENT_VERSION,
         drawId,
         ...selection,
       };

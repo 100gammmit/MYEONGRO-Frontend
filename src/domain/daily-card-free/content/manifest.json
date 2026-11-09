@@ -1,11 +1,7 @@
 {
-  "contentVersion" : "daily-one-card-static-v2",
-  "authoringMethod" : "codex-agent-authored",
-  "promptVersion" : "daily-static-agent-ko-v3+major-arcana-ko-v4",
-  "authoredAt" : "2026-10-02",
+  "contentVersion" : "daily-one-card-static-v3",
+  "authoringMethod" : "claude-agent-authored",
+  "authoredAt" : "2026-11-09",
   "entryCount" : 132,
-  "reviewStatus" : "quality-filter-passed",
-  "reviewedAt" : "2026-10-02",
-  "reviewedEntryCount" : 132,
-  "evaluationVersion" : 3
+  "variantEvidence" : "variantIndex 0-3 natural expression and growth task, 4-5 shadow expression and what it protects (major-arcana-ko-v4)"
 }

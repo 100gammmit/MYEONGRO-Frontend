@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import {
-  DAILY_CARD_CONTENT_VERSION,
   DAILY_CARD_VARIANT_COUNT,
   getDailyCardContent,
 } from "./content";
@@ -11,7 +10,6 @@ const selectionResponseSchema = z.object({
     dateKst: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
     cardId: z.string().min(1),
     variantIndex: z.number().int().min(0).max(DAILY_CARD_VARIANT_COUNT - 1),
-    contentVersion: z.literal(DAILY_CARD_CONTENT_VERSION),
   }).strict(),
 }).strict().refine(
   ({ selection }) => getDailyCardContent(selection.cardId, selection.variantIndex) !== null,
