@@ -15,7 +15,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
   title: "명로 | AI 사주와 타로",
-  description: "오늘의 마음을 비추는 AI 사주·타로 리딩",
+  description: "무료로 가볍게 확인하는 AI 사주·타로 리딩",
 };
 
 export default async function RootLayout({
