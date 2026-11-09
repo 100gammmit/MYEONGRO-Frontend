@@ -8,7 +8,7 @@ import { TarotStone } from "@/components/tarot-stone";
 export const metadata = publicPageMetadata(
   "/",
   "명로 | AI 사주와 타로",
-  "로그인 없이 보는 오늘의 카드와 AI 타로·사주 리딩, 질문 준비부터 결과 읽기까지의 공개 가이드를 만나보세요.",
+  "로그인 없이 오늘의 카드로 운세를 가볍게 확인해 보세요. 연애·일·인간관계 고민은 무료 AI 타로·사주로 살펴볼 수 있어요.",
 );
 
 const features = [
