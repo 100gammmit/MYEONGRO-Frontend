@@ -76,7 +76,7 @@ describe("session middleware", () => {
     "/favicon.ico",
     "/icon.svg",
     "/apple-icon.png",
-    "/opengraph-image.png",
+    "/images/og.png",
     "/robots.txt",
     "/sitemap.xml",
     "/assets/poster.avif",

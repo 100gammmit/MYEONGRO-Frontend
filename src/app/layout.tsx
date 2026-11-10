@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LEGAL_METADATA } from "@/domain/consent/legal-metadata";
-import { SITE_ORIGIN } from "@/infrastructure/site-metadata";
+import { SHARE_IMAGE, SHARE_TWITTER, SITE_ORIGIN } from "@/infrastructure/site-metadata";
 import { FooterLink } from "@/components/footer-link";
 import { ReadingCreditProvider } from "@/components/reading-credit-provider";
 import { ServiceUpdateBanner } from "@/components/service-update-banner";
@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
   title: "명로 | AI 사주와 타로",
   description: "무료로 가볍게 확인하는 AI 사주·타로 리딩",
+  openGraph: { siteName: "명로", locale: "ko_KR", type: "website", images: [SHARE_IMAGE] },
+  twitter: SHARE_TWITTER,
 };
 
 export default async function RootLayout({

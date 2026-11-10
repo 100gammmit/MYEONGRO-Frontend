@@ -3,7 +3,7 @@ import { existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 import sitemap from "./sitemap";
 import robots from "./robots";
-import { PRIVATE_PAGE_METADATA, SITE_ORIGIN, publicPageMetadata } from "@/infrastructure/site-metadata";
+import { PRIVATE_PAGE_METADATA, SHARE_IMAGE, SITE_ORIGIN, publicPageMetadata } from "@/infrastructure/site-metadata";
 import routes from "@/infrastructure/site-routes.json";
 import { metadata as accountMetadata } from "./account/layout";
 import { metadata as recordsMetadata } from "./records/layout";
@@ -41,7 +41,9 @@ describe("search discovery boundaries", () => {
       siteName: "명로",
       locale: "ko_KR",
       type: "website",
+      images: [SHARE_IMAGE],
     });
+    expect(metadata.twitter).toMatchObject({ card: "summary_large_image", images: [SHARE_IMAGE] });
   });
 
   it("rejects metadata for an unregistered public route", () => {
