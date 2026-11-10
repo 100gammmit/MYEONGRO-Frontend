@@ -12,9 +12,13 @@ export const metadata = publicPageMetadata(
   "오늘의 운세는 로그인 없이 카드 한 장으로, 연애·일·인간관계 같은 고민은 무료 AI 타로·사주로 풀어 보세요.",
 );
 
-// Every id below is a fixed major arcana card, so the lookup always returns a path.
+// Every id below is a fixed major arcana card; a typo should fail loudly with the id, not as an empty image.
 function cardSrc(cardId: string): string {
-  return tarotCardImageSrc(cardId) ?? "";
+  const src = tarotCardImageSrc(cardId);
+  if (!src) {
+    throw new Error(`Unknown tarot card id on the home page: ${cardId}`);
+  }
+  return src;
 }
 
 const features = [
@@ -168,7 +172,8 @@ export default function HomePage() {
 
       <section className="how-it-works page-width" aria-labelledby="how-it-works-title">
         <h2 id="how-it-works-title">세 단계로 만나는 나의 리딩</h2>
-        <ol className="feature-row">
+        {/* list-style: none drops list semantics in Safari, so the role is stated. */}
+        <ol className="feature-row" role="list">
           {features.map((feature) => (
             <li className="feature" key={feature.number}>
               <div aria-hidden="true" className="feature-visual">
