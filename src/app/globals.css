@@ -200,7 +200,8 @@ main:focus { outline: none; }
 .service-update-level.emergency, .service-update-level.adverse { border-color: var(--border-danger); color: var(--text-danger); }
 .service-update-date { color: var(--text-subtle); font-variant-numeric: tabular-nums; }
 
-.eyebrow { color: var(--text-accent); letter-spacing: .28em; font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; margin: 0 0 20px; text-transform: uppercase; }
+/* Korean headers: a short label in the body face, no capitals or wide tracking. */
+.eyebrow { color: var(--text-accent); letter-spacing: .02em; font: 600 13px/1.4 "Pretendard Variable", Pretendard, sans-serif; margin: 0 0 16px; }
 .primary-button, .secondary-button { border: 0; display: inline-flex; align-items: center; justify-content: center; gap: 28px; padding: 16px 22px; background: var(--accent-cta); color: var(--text-inverse); font-weight: 700; border-radius: var(--radius-sm); transition: .2s ease; }
 .primary-button:hover { background: var(--accent-cta-hover); transform: translateY(-1px); box-shadow: var(--glow-cta); }
 /* A short press: the button sinks a little under the pointer. */
@@ -324,7 +325,7 @@ main:focus { outline: none; }
 .method-path-card { position: relative; overflow: hidden; padding: 34px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--gradient-panel); }
 .method-path-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, var(--accent-primary), transparent 78%); }
 .method-path-card.saju-path::before { background: linear-gradient(90deg, var(--accent-secondary), transparent 78%); }
-.method-path-kicker { margin: 0; color: var(--text-accent); font-size: 11px; font-weight: 700; letter-spacing: .18em; }
+.method-path-kicker { margin: 0; color: var(--text-accent); font-size: 13px; font-weight: 600; letter-spacing: .02em; }
 .method-path-card.saju-path .method-path-kicker { color: var(--accent-secondary); }
 .method-path-card h3 { margin: 20px 0 28px; font-size: 25px; }
 .method-path-card ol { margin: 0; padding: 0; list-style: none; }
@@ -356,7 +357,7 @@ main:focus { outline: none; }
 .reading-actions { max-width: var(--w-read); margin: 28px auto 0; display: flex; flex-direction: column; gap: 10px; }
 .back-link { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; color: var(--text-muted); font-size: 13px; }
 .back-link:hover { color: var(--text-primary); }
-.progress-meta { display: flex; justify-content: space-between; color: var(--text-accent); font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .18em; text-transform: uppercase; margin-top: 38px; }
+.progress-meta { display: flex; justify-content: space-between; color: var(--text-accent); font: 600 13px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .02em; margin-top: 38px; }
 .progress-track { height: 2px; border-radius: var(--radius-pill); background: var(--border-hairline); margin-top: 13px; overflow: hidden; }
 .progress-track span { display: block; height: 2px; border-radius: var(--radius-pill); background: linear-gradient(90deg, var(--accent-progress-start), var(--accent-primary)); box-shadow: var(--glow-dot); transition: width .4s; }
 .wizard-heading { text-align: center; margin: 70px auto 40px; }
@@ -652,7 +653,7 @@ main:focus { outline: none; }
 .records-list { display: grid; gap: 14px; max-width: var(--w-wide); }
 .record-card { display: flex; justify-content: space-between; gap: 30px; padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); transition: border-color .2s, transform .2s; }
 .record-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
-.record-kind { color: var(--text-accent); font: 600 11px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .14em; text-transform: uppercase; }
+.record-kind { color: var(--text-accent); font: 600 12px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .02em; }
 .record-card h2 { margin: 10px 0; font-size: 25px; }
 .record-card p { margin: 0; color: var(--text-muted); }
 .record-meta { display: flex; min-width: 120px; flex-direction: column; align-items: flex-end; justify-content: space-between; color: var(--text-subtle); font-size: 12px; }

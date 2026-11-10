@@ -4,7 +4,6 @@ import styles from "./reading-help.module.css";
 export function ReadingHelpEntry() {
   return (
     <section className={`page-width ${styles.entry}`} aria-labelledby="reading-help-title">
-      <p className="eyebrow">READING GUIDE</p>
       <h2 id="reading-help-title">처음이라면, 여기서 시작하세요</h2>
       <p>질문을 준비하는 방법부터 결과 읽기까지. 이용 중 궁금한 점은 FAQ에서 확인할 수 있습니다.</p>
       <nav className={styles.links} aria-label="리딩 이용 안내">

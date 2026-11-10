@@ -10,7 +10,6 @@ export const metadata = publicPageMetadata(
 export default function PrivacyPage() {
   return (
     <article className="simple-page legal page-width">
-      <p className="eyebrow">PRIVACY</p>
       <h1>개인정보 처리방침</h1>
       <ConsentDocumentContent documentType="privacy" />
     </article>

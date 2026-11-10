@@ -20,7 +20,7 @@ export function ReadingDeclinedResult({
       <Link className="back-link" href={backHref}>← {backLabel}</Link>
       <AiGeneratedNotice />
       <header className="record-detail-header">
-        <p className="eyebrow">{view.kind === "tarot" ? "AI TAROT" : "AI SAJU"}</p>
+        <p className="eyebrow">{view.kind === "tarot" ? "AI 타로" : "AI 사주"}</p>
         <h1>{view.result.title}</h1>
         <p>{view.result.message}</p>
       </header>

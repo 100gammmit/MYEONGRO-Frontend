@@ -61,7 +61,7 @@ export function ConsentSettings() {
   return (
     <section className="account-setting-section" aria-labelledby="ai-consent-heading">
       <div>
-        <p className="eyebrow">AI DATA CONSENT</p>
+        <p className="eyebrow">동의 관리</p>
         <h2 id="ai-consent-heading">AI 리딩 정보 국외이전</h2>
         <p>
           {loading

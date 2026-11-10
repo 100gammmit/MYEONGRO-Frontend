@@ -75,9 +75,9 @@ export function SajuReadingResult({
     : "luckCycle" in snapshot ? snapshot.luckCycle?.periods.find(
       (period) => period.startYear <= snapshot.targetYear && snapshot.targetYear <= period.endYear,
     ) : undefined;
-  const resultFocusLabel = view.result.readingMode === "standard"
-    ? isVersionFive ? "사주 리딩" : sajuFocusAreaLabel(view.input.focusArea)
-    : fortuneReadingModeLabel(view.result.readingMode);
+  const resultEyebrow = view.result.readingMode === "standard"
+    ? isVersionFive ? "AI 사주" : `AI 사주 · ${sajuFocusAreaLabel(view.input.focusArea)}`
+    : `AI 사주 · ${fortuneReadingModeLabel(view.result.readingMode)}`;
   const modeNotice = isVersionFive
     ? redirectedReadingNotice(view.result.readingMode, view.result.questionRedirected)
     : sajuReadingModeNotice(
@@ -92,7 +92,7 @@ export function SajuReadingResult({
       <AiGeneratedNotice />
       <ReadingModeNotice notice={modeNotice} />
       <header className="saju-result-hero">
-        <p className="eyebrow">AI SAJU · {resultFocusLabel}</p>
+        <p className="eyebrow">{resultEyebrow}</p>
         <h1>{view.result.title}</h1>
       </header>
 
@@ -118,7 +118,6 @@ export function SajuReadingResult({
 
       <section className="saju-calculation" id="saju-calculation">
         <div className="saju-section-heading">
-          <p className="eyebrow">CONFIRMED CALCULATION</p>
           <h2>확정된 명식과 계산 기준</h2>
           <p>가능한 출생 시각 후보에서 공통으로 확인된 계산만 표시합니다.</p>
         </div>
@@ -159,7 +158,7 @@ export function SajuReadingResult({
           <EvidenceDetails evidenceKeys={view.result.annualReading.evidenceKeys} snapshot={snapshot} />
         </section>
         <section className="saju-question-reading" id="saju-question" tabIndex={-1}>
-          <p className="eyebrow">YOUR QUESTION</p>
+          <p className="eyebrow">내 질문</p>
           <h2>{view.result.questionReading.heading}</h2>
           <p>{view.result.questionReading.body}</p>
           <EvidenceDetails evidenceKeys={view.result.questionReading.evidenceKeys} snapshot={snapshot} />

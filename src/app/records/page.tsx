@@ -68,7 +68,6 @@ export default async function RecordsPage() {
 
   return (
     <section className="simple-page page-width records-page">
-      <p className="eyebrow">MY READINGS</p>
       <h1>나의 리딩 기록</h1>
 
       {supportedReadings.length === 0 ? (

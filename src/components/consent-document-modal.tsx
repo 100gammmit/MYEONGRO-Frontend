@@ -105,7 +105,7 @@ export function ConsentDocumentModal({
       >
         <header className="consent-modal-header">
           <div>
-            <p className="eyebrow">REQUIRED AGREEMENT</p>
+            <p className="eyebrow">필수 동의</p>
             <h2 id={`consent-modal-title-${documentType}`}>{title}</h2>
           </div>
           <button

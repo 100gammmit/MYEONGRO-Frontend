@@ -423,7 +423,7 @@ export function SajuExperience() {
   if (phase === "consent") {
     return (
       <ReadingShell
-        eyebrow="AI SAJU"
+        eyebrow="AI 사주"
         form
         title="사주 리딩을 시작하기 전에"
         description="원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용하고 요청 처리가 끝나면 별도로 보유하지 않아요. 내 기록에는 최소 계산정보와 리딩 결과만 저장돼요."
@@ -443,7 +443,7 @@ export function SajuExperience() {
     const selectedFocus = FOCUS_OPTIONS.find((option) => option.value === form.focusArea);
     return (
       <ReadingShell
-        eyebrow="AI SAJU"
+        eyebrow="AI 사주"
         form
         title="어떤 흐름을 살펴볼까요?"
         description={form.reportType === "annual_monthly" ? "한 해의 흐름을 월별로 읽습니다. 질문 없이도 시작할 수 있습니다." : "관심 분야를 고른 뒤, 현재 선택에 도움이 될 질문을 하나 적어주세요."}
@@ -540,7 +540,7 @@ export function SajuExperience() {
     const timeKnown = isTimeKnown(form.birthTimePrecision);
     return (
       <ReadingShell
-        eyebrow="AI SAJU"
+        eyebrow="AI 사주"
         form
         title="출생 정보를 알려주세요"
         description="원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용하고 요청 처리가 끝나면 별도로 보유하지 않아요."
@@ -677,7 +677,7 @@ export function SajuExperience() {
   if (phase === "loading") {
     return (
       <ReadingShell
-        eyebrow="AI SAJU"
+        eyebrow="AI 사주"
         form
         title="사주의 흐름을 읽고 있어요"
         step={4}
@@ -693,7 +693,7 @@ export function SajuExperience() {
   const focus = FOCUS_OPTIONS.find((item) => item.value === form.focusArea);
   return (
     <ReadingShell
-      eyebrow="AI SAJU"
+      eyebrow="AI 사주"
       form
       title="입력한 내용을 확인해 주세요"
       description="원본 출생정보와 질문 원문은 저장하지 않아요. 내 기록에는 화면 복원에 필요한 최소 계산정보와 리딩 결과만 저장돼요."

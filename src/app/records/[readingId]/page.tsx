@@ -98,7 +98,7 @@ export default async function ReadingDetailPage({
         ← 내 기록
       </Link>
       <p className="eyebrow">
-        {reading.kind === "tarot" ? "AI TAROT" : "AI SAJU"}
+        {reading.kind === "tarot" ? "AI 타로" : "AI 사주"}
       </p>
 
       {unreadableTarot || unreadableSaju ? (

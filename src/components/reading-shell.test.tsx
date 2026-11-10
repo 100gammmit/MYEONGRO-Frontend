@@ -16,7 +16,7 @@ describe("ReadingShell", () => {
 
   it("shows a threshold label instead of counting it as a step", () => {
     const { container } = render(
-      <ReadingShell eyebrow="AI SAJU" title="사주 리딩을 시작하기 전에" stepLabel="시작하기 전에">
+      <ReadingShell eyebrow="AI 사주" title="사주 리딩을 시작하기 전에" stepLabel="시작하기 전에">
         <p>content</p>
       </ReadingShell>,
     );
@@ -29,7 +29,7 @@ describe("ReadingShell", () => {
   it("renders actions after the content and can hide the home link", () => {
     const { container } = render(
       <ReadingShell
-        eyebrow="AI SAJU"
+        eyebrow="AI 사주"
         title="출생 정보를 알려주세요"
         step={2}
         totalSteps={4}
@@ -49,7 +49,7 @@ describe("ReadingShell", () => {
 
   it("narrows an input wizard to the reading column", () => {
     const { container } = render(
-      <ReadingShell eyebrow="AI SAJU" title="출생 정보를 알려주세요" step={2} totalSteps={4} form>
+      <ReadingShell eyebrow="AI 사주" title="출생 정보를 알려주세요" step={2} totalSteps={4} form>
         <p>content</p>
       </ReadingShell>,
     );

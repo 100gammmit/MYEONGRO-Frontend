@@ -151,7 +151,7 @@ export function DailyCardExperience({
 
   if (state.status === "result" && content) {
     return (
-      <ReadingShell eyebrow="FREE DAILY TAROT" title={content.title} step={2} totalSteps={2}>
+      <ReadingShell eyebrow="무료 오늘의 운세" title={content.title} step={2} totalSteps={2}>
         <article className={`wizard-card ${styles.result}`}>
           {/* The line beneath names the card, so the front itself is shown without a caption. */}
           <div className={styles.cardImage}>
@@ -173,7 +173,7 @@ export function DailyCardExperience({
   const selectedSlot = state.status === "result" ? null : state.selectedSlot;
   return (
     <ReadingShell
-      eyebrow="FREE DAILY TAROT"
+      eyebrow="무료 오늘의 운세"
       title="오늘 마음이 가는 카드 한 장을 골라보세요"
       description="로그인이나 크레딧 없이 오늘의 흐름을 가볍게 살펴볼 수 있어요."
       step={1}

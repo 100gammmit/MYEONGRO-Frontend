@@ -140,7 +140,7 @@ export function TarotReadingResult({
       ) : (
         <div className="result-summary">
           <div className="result-hero">
-            <p className="eyebrow">YOUR READING</p>
+            <p className="eyebrow">리딩 요약</p>
             <h2>{result.title}</h2>
             <p>{result.summary}</p>
           </div>

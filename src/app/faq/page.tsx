@@ -14,7 +14,6 @@ export default function FaqPage() {
   return (
     <article className={styles.page}>
       <header className={styles.hero}>
-        <p className="eyebrow">FAQ</p>
         <h1>자주 묻는 질문</h1>
         <p>이용 중 궁금한 점을 모았습니다. 질문 준비부터 결과 읽기까지는 사용 가이드에서 안내합니다.</p>
         <div className={styles.links}><Link href="/guide/tarot">타로 사용 가이드</Link><Link href="/guide/saju">사주 사용 가이드</Link></div>

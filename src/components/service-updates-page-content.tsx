@@ -22,7 +22,6 @@ export function ServiceUpdatesPageContent({
 
   return (
     <article className="simple-page updates-page page-width">
-      <p className="eyebrow">UPDATES</p>
       <h1>업데이트 내역</h1>
       {publishedUpdates.length === 0 ? (
         <div className="updates-empty">

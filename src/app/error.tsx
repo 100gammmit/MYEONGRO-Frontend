@@ -22,7 +22,7 @@ export default function ErrorPage({ reset }: { error: Error & { digest?: string 
   return (
     <StatusPanel
       alert
-      eyebrow="ERROR"
+      eyebrow="오류"
       title="잠시 문제가 생겼어요"
       heading="페이지를 불러오지 못했어요"
       description="잠시 후 다시 시도해 주세요. 문제가 계속되면 홈에서 다시 시작해 주세요."

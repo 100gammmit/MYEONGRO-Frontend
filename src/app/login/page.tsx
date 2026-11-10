@@ -20,7 +20,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <section className="simple-page page-width auth-page">
-      <p className="eyebrow">KEEP YOUR STORY</p>
+      <p className="eyebrow">로그인</p>
       <h1>리딩을 안전하게 보관하세요</h1>
       <p>로그인하면 리딩 기록을 안전하게 저장하고 다른 기기에서도 이어서 볼 수 있습니다.</p>
       <div className="auth-card">

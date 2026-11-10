@@ -47,7 +47,6 @@ export default function AboutPage() {
   return (
     <article className="reading-method-page">
       <header className="reading-method-hero page-width">
-        <p className="eyebrow">ABOUT MYEONGRO</p>
         <h1>명로 소개</h1>
         <p>명로는 사주의 명(命)과 타로가 비추는 길(路)을 결합한 이름입니다.</p>
         <p>지금 마음에 머무는 질문을 카드와 사주로 살펴보고, 자신의 상황과 생각을 차분히 돌아볼 수 있는 콘텐츠를 제공합니다.</p>
@@ -55,7 +54,7 @@ export default function AboutPage() {
 
       <section id="reading-method" className="reading-method-section page-width" aria-labelledby="reading-method-title">
         <div className="reading-method-heading">
-          <p className="eyebrow">HOW MYEONGRO READS</p>
+          <p className="eyebrow">리딩 방식</p>
           <h2 id="reading-method-title">그냥 AI에게 물어보는 것과 무엇이 다를까요?</h2>
           <p>명로는 질문을 곧바로 AI에 맡기지 않아요. 먼저 계산하고, 리딩의 구조를 정하고, 해석이 넘지 말아야 할 경계를 세운 뒤 결과를 만들어요.</p>
         </div>
@@ -63,7 +62,7 @@ export default function AboutPage() {
 
       <section className="reading-method-section page-width" aria-labelledby="comparison-title">
         <div className="reading-method-heading">
-          <p className="eyebrow">A STRUCTURED READING</p>
+          <p className="eyebrow">구조의 차이</p>
           <h2 id="comparison-title">같은 AI라도 쓰는 방식이 달라요</h2>
           <p>어느 쪽이 낫다는 비교가 아니라, 질문을 받아 결과를 만드는 구조의 차이를 정리했어요.</p>
         </div>
@@ -98,12 +97,12 @@ export default function AboutPage() {
 
       <section className="reading-method-section method-paths page-width" aria-labelledby="paths-title">
         <div className="reading-method-heading">
-          <p className="eyebrow">READING PROCESS</p>
+          <p className="eyebrow">리딩 과정</p>
           <h2 id="paths-title">타로와 사주는 서로 다른 과정을 거쳐요</h2>
         </div>
         <div className="method-path-grid">
           <article className="method-path-card tarot-path">
-            <p className="method-path-kicker">TAROT</p>
+            <p className="method-path-kicker">타로</p>
             <h3>카드의 자리를 먼저 정해요</h3>
             <ol>
               {tarotSteps.map(([number, title, copy]) => (
@@ -119,7 +118,7 @@ export default function AboutPage() {
             <Link href="/tarot">타로 리딩 살펴보기 <span aria-hidden="true">→</span></Link>
           </article>
           <article className="method-path-card saju-path">
-            <p className="method-path-kicker">SAJU</p>
+            <p className="method-path-kicker">사주</p>
             <h3>계산한 뒤 해석해요</h3>
             <ol>
               {sajuSteps.map(([number, title, copy]) => (
@@ -139,7 +138,7 @@ export default function AboutPage() {
 
       <section className="reading-method-section method-boundaries page-width" aria-labelledby="boundaries-title">
         <div className="reading-method-heading">
-          <p className="eyebrow">CLEAR BOUNDARIES</p>
+          <p className="eyebrow">리딩의 경계</p>
           <h2 id="boundaries-title">리딩이 하지 않는 일도 분명히 해요</h2>
         </div>
         <ul className="method-boundary-list">
@@ -151,7 +150,6 @@ export default function AboutPage() {
 
       <section className="reading-method-section page-width" aria-labelledby="content-method-title">
         <div className="reading-method-heading">
-          <p className="eyebrow">CONTENT PRINCIPLES</p>
           <h2 id="content-method-title">콘텐츠를 만드는 방식</h2>
           <p>공개 안내 글과 무료 오늘의 카드 콘텐츠는 AI로 초안을 작성하고, 운영자가 내용을 확인하고 다듬어 게시합니다. 오늘의 카드는 이렇게 준비한 고정 콘텐츠를 보여주며 이용할 때마다 AI를 호출하지 않습니다.</p>
           <p>질문을 입력해 생성하는 AI 타로·사주는 요청할 때 만들어지는 해석입니다. 공개 글과 오늘의 카드, AI 리딩은 모두 오락과 자기 성찰을 위한 콘텐츠이며 중요한 결정이나 전문적인 판단을 대신하지 않습니다.</p>
@@ -160,7 +158,6 @@ export default function AboutPage() {
 
       <section className="reading-method-section page-width" aria-labelledby="operation-contact-title">
         <div className="reading-method-heading">
-          <p className="eyebrow">OPERATION & CONTACT</p>
           <h2 id="operation-contact-title">운영과 문의</h2>
           <p>명로는 개인이 운영하는 서비스입니다. 이용 중 궁금한 점이나 서비스에 대한 의견은 일반 문의 창구로 보내 주세요.</p>
           <p>일반 문의: <a href={`mailto:${LEGAL_METADATA.contactEmail}`}>{LEGAL_METADATA.contactEmail}</a></p>
@@ -171,7 +168,7 @@ export default function AboutPage() {
 
       <section className="method-closing" aria-labelledby="method-closing-title">
         <div className="page-width">
-          <p className="eyebrow">START A READING</p>
+          <p className="eyebrow">리딩 시작</p>
           <h2 id="method-closing-title">어떤 방식이 지금의 질문에 더 가까운가요?</h2>
           <div>
             <Link className="primary-button" href="/tarot">타로로 시작</Link>
