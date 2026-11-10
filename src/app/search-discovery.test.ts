@@ -32,6 +32,18 @@ describe("search discovery boundaries", () => {
     }
   });
 
+  it("gives public pages share metadata with their own title and canonical path", () => {
+    const metadata = publicPageMetadata("/faq", "자주 묻는 질문 | 명로", "질문과 답");
+    expect(metadata.openGraph).toEqual({
+      title: "자주 묻는 질문 | 명로",
+      description: "질문과 답",
+      url: "/faq",
+      siteName: "명로",
+      locale: "ko_KR",
+      type: "website",
+    });
+  });
+
   it("rejects metadata for an unregistered public route", () => {
     expect(() => publicPageMetadata("/unregistered-public-article", "Example", "Example")).toThrow(/site-routes\.json/);
   });

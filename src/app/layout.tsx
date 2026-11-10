@@ -33,9 +33,11 @@ export default async function RootLayout({
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
         <ReadingCreditProvider authenticated={authenticated}>
+          {/* Keyboard users jump past the header straight to the page's own content. */}
+          <a className="skip-link" href="#main">본문 바로가기</a>
           <SiteHeader authenticated={authenticated} />
           <ServiceUpdateBanner />
-          <main>{children}</main>
+          <main id="main" tabIndex={-1}>{children}</main>
           <footer className="site-footer">
             <p>
               명로의 해석은 자기 성찰을 위한 콘텐츠이며 중요한 결정을 대신하지 않습니다.
