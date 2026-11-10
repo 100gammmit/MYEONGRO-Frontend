@@ -158,7 +158,7 @@ export function SajuReadingResult({
           <EvidenceDetails evidenceKeys={view.result.annualReading.evidenceKeys} snapshot={snapshot} />
         </section>
         <section className="saju-question-reading" id="saju-question" tabIndex={-1}>
-          <p className="eyebrow">내 질문</p>
+          <p className="eyebrow">질문 해석</p>
           <h2>{view.result.questionReading.heading}</h2>
           <p>{view.result.questionReading.body}</p>
           <EvidenceDetails evidenceKeys={view.result.questionReading.evidenceKeys} snapshot={snapshot} />
