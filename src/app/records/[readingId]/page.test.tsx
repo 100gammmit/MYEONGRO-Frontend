@@ -109,7 +109,7 @@ describe("ReadingDetailPage", () => {
       expect(screen.getByText(cardName)).toBeInTheDocument();
     }
     expect(screen.getByRole("heading", { level: 1, name: "카드가 전하는 메시지" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "← 내 기록" })).toHaveAttribute("href", "/records");
+    expect(screen.getByRole("link", { name: "내 기록" })).toHaveAttribute("href", "/records");
     expect(screen.queryByRole("button", { name: "첫 카드 공개" })).not.toBeInTheDocument();
     expect(container.querySelectorAll(".card-flip-inner")).toHaveLength(3);
     expect(container.querySelectorAll(".card-flip-inner.flipped")).toHaveLength(3);

@@ -26,9 +26,9 @@ export function ReadingCreditAccessNotice({
   access: ReadingCreditAccess;
   onRetry: () => void;
 }) {
-  if (access.status === "allowed") {
-    return <p className="credit-notice">{access.required}크레딧 사용 · 현재 {access.remaining}크레딧</p>;
-  }
+  // The header shows the balance and the choice or confirm button names the cost, so a usable
+  // balance needs no line of its own here; only a reason the reading cannot start does.
+  if (access.status === "allowed") return null;
   if (access.status === "loading") {
     return <p className="credit-notice" aria-live="polite">크레딧을 확인하고 있어요.</p>;
   }

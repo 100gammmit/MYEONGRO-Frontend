@@ -40,6 +40,8 @@ import { ConsentGate } from "./consent-gate";
 import { ReadingCreditAccessNotice, readingCreationErrorMessage } from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
+import { PrivacyNotice } from "./privacy-notice";
+import { ReviewGroup } from "./review-group";
 
 type Phase = "consent" | "question" | "birth" | "review" | "loading";
 type WizardStep = "question" | "birth" | "review";
@@ -58,8 +60,8 @@ interface SajuFormState {
   question: string;
 }
 
-// Consent is a one-time threshold, not a step: question 1, birth 2, review 3, loading 4.
-const TOTAL_STEPS = 4;
+// Consent is a one-time threshold, not a step: question 1, birth 2, review 3; loading stays on 3.
+const TOTAL_STEPS = 3;
 const MAX_QUESTION_LENGTH = 300;
 const initialForm: SajuFormState = {
   reportType: "birth_annual_question",
@@ -424,7 +426,6 @@ export function SajuExperience() {
     return (
       <ReadingShell
         eyebrow="AI 사주"
-        form
         title="사주 리딩을 시작하기 전에"
         description="원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용하고 요청 처리가 끝나면 별도로 보유하지 않아요. 내 기록에는 최소 계산정보와 리딩 결과만 저장돼요."
         stepLabel="시작하기 전에"
@@ -444,12 +445,10 @@ export function SajuExperience() {
     return (
       <ReadingShell
         eyebrow="AI 사주"
-        form
         title="어떤 흐름을 살펴볼까요?"
         description={form.reportType === "annual_monthly" ? "한 해의 흐름을 월별로 읽습니다. 질문 없이도 시작할 수 있습니다." : "관심 분야를 고른 뒤, 현재 선택에 도움이 될 질문을 하나 적어주세요."}
         step={1}
         totalSteps={TOTAL_STEPS}
-        showHomeLink={false}
         actions={(
           <>
             <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
@@ -469,11 +468,12 @@ export function SajuExperience() {
           <ReadingGuideLink kind="saju" />
           <fieldset className="field">
             <legend>리포트 종류</legend>
-            <div className="saju-option-list two-columns">
+            <div className="choice-list two-columns">
               {([['birth_annual_question', '종합 사주', '나의 성향과 연간 흐름, 질문을 함께 읽습니다.'], ['annual_monthly', '한 해 리포트', '연간 개요와 12개월의 흐름을 다시 찾아 읽습니다.']] as const).map(([value, label, description]) => (
-                <label className="saju-option" key={value}>
-                  <input type="radio" name="report-type" checked={form.reportType === value} onChange={() => updateForm({ reportType: value })} />
-                  <span><strong>{label}</strong><small>{description}</small></span>
+                <label className="choice-card" key={value}>
+                  <input className="sr-only" type="radio" name="report-type" checked={form.reportType === value} onChange={() => updateForm({ reportType: value })} />
+                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong></span>
+                  <span className="choice-desc">{description}</span>
                 </label>
               ))}
             </div>
@@ -484,8 +484,8 @@ export function SajuExperience() {
             <select id="saju-target-year" value={form.targetYear === currentYear || form.targetYear === currentYear + 1 ? form.targetYear : ""} aria-invalid={Boolean(fieldErrors.targetYear)}
               aria-labelledby="saju-target-year-label"
               aria-describedby={fieldErrors.targetYear ? "saju-target-year-hint target-year-error" : "saju-target-year-hint"} onChange={(event) => updateForm({ targetYear: Number(event.target.value) })}>
-              <option value="" disabled>살펴볼 연도를 다시 선택해 주세요</option>
-              {[currentYear, currentYear + 1].map((year) => <option key={year} value={year}>{year}년 · {year === currentYear ? "올해" : "내년"}</option>)}
+              <option value="" disabled>살펴볼 연도를 선택해 주세요</option>
+              {[currentYear, currentYear + 1].map((year) => <option key={year} value={year}>{year}년 ({year === currentYear ? "올해" : "내년"})</option>)}
             </select>
             <p className="field-guidance" id="saju-target-year-hint">{form.reportType === "annual_monthly" ? "달력의 1~12월을 기준으로, 각 월의 절입 전·후 흐름을 구분합니다." : "질문과 연간 해석은 선택한 연도를 기준으로 읽습니다."}</p>
             <FieldError id="target-year-error" message={fieldErrors.targetYear} />
@@ -496,17 +496,18 @@ export function SajuExperience() {
             aria-invalid={Boolean(fieldErrors.focusArea)}
           >
             <legend>관심 분야</legend>
-            <div className="category-grid saju-focus-grid">
+            <div className="choice-list two-columns">
               {FOCUS_OPTIONS.map((option) => (
-                <label className={`category saju-category${form.focusArea === option.value ? " active" : ""}`} key={option.value}>
+                <label className="choice-card" key={option.value}>
                   <input
                     checked={form.focusArea === option.value}
+                    className="sr-only"
                     name="focus-area"
                     onChange={() => updateForm({ focusArea: option.value })}
                     type="radio"
                   />
-                  <strong>{option.label}</strong>
-                  <span>{option.example}</span>
+                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{option.label}</strong></span>
+                  <span className="choice-desc">{option.example}</span>
                 </label>
               ))}
             </div>
@@ -525,12 +526,12 @@ export function SajuExperience() {
               placeholder={selectedFocus ? `예시) ${selectedFocus.example}` : "지금 가장 궁금한 한 가지를 적어주세요."}
               value={form.question}
             />
-            <p className="field-guidance" id="saju-question-guidance">
-              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문은 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
-            </p>
-            <small>{form.question.length} / {MAX_QUESTION_LENGTH}자</small>
+            <small>{form.question.length} / {MAX_QUESTION_LENGTH}</small>
             <FieldError id="question-error" message={fieldErrors.question} />
           </label>
+          <PrivacyNotice id="saju-question-guidance">
+            이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문은 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
+          </PrivacyNotice>
         </div>
       </ReadingShell>
     );
@@ -541,13 +542,12 @@ export function SajuExperience() {
     return (
       <ReadingShell
         eyebrow="AI 사주"
-        form
         title="출생 정보를 알려주세요"
-        description="원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용하고 요청 처리가 끝나면 별도로 보유하지 않아요."
+        description="입력한 출생정보로 명식을 계산해요. 처리 방식은 아래 안내에서 확인할 수 있어요."
         step={2}
         totalSteps={TOTAL_STEPS}
-        showHomeLink={false}
-        actions={<NavigationButtons back={() => setPhase("question")} next={submitBirth} />}
+        back={{ label: "이전", onClick: () => setPhase("question") }}
+        actions={<button className="primary-button full-button" onClick={submitBirth} type="button">다음</button>}
       >
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
@@ -577,10 +577,11 @@ export function SajuExperience() {
             aria-invalid={Boolean(fieldErrors.birthTimePrecision)}
           >
             <legend>출생 시각 정확도</legend>
-            <div className="saju-option-list">
+            <div className="choice-list three-columns">
               {TIME_OPTIONS.map((option) => (
-                <label className="saju-option" key={option.value}>
+                <label className="choice-card" key={option.value}>
                   <input
+                    className="sr-only"
                     id={`saju-precision-${option.value}`}
                     checked={form.birthTimePrecision === option.value}
                     name="birth-time-precision"
@@ -588,10 +589,8 @@ export function SajuExperience() {
                     type="radio"
                     value={option.value}
                   />
-                  <span>
-                    <strong>{option.label}</strong>
-                    {form.birthTimePrecision === option.value ? <small>{option.detail}</small> : null}
-                  </span>
+                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{option.label}</strong></span>
+                  {form.birthTimePrecision === option.value ? <span className="choice-desc">{option.detail}</span> : null}
                 </label>
               ))}
             </div>
@@ -678,11 +677,10 @@ export function SajuExperience() {
     return (
       <ReadingShell
         eyebrow="AI 사주"
-        form
         title="사주의 흐름을 읽고 있어요"
-        step={4}
+        step={3}
         totalSteps={TOTAL_STEPS}
-        showHomeLink={false}
+        back={null}
       >
         <ReadingLoading messages={LOADING_MESSAGES} />
       </ReadingShell>
@@ -694,25 +692,20 @@ export function SajuExperience() {
   return (
     <ReadingShell
       eyebrow="AI 사주"
-      form
       title="입력한 내용을 확인해 주세요"
       description="원본 출생정보와 질문 원문은 저장하지 않아요. 내 기록에는 화면 복원에 필요한 최소 계산정보와 리딩 결과만 저장돼요."
       step={3}
       totalSteps={TOTAL_STEPS}
-      showHomeLink={false}
+      back={{ label: "이전", onClick: () => leaveReview("birth", false), disabled: submitting }}
       actions={(
         <>
           <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
-          <div className="wizard-nav">
-            <button className="secondary-button" disabled={submitting} onClick={() => leaveReview("birth", false)} type="button">이전</button>
-            <button
-              aria-label={submitLabel}
-              className="primary-button"
-              disabled={submitting || creditAccess.status !== "allowed"}
-              onClick={() => void submitReading()}
-              type="button"
-            >{submitLabel} · {creditCost ?? "…"}크레딧</button>
-          </div>
+          <button
+            className="primary-button full-button"
+            disabled={submitting || creditAccess.status !== "allowed"}
+            onClick={() => void submitReading()}
+            type="button"
+          >{creditCost ?? "…"}크레딧으로 {submitLabel}</button>
         </>
       )}
     >
@@ -726,16 +719,20 @@ export function SajuExperience() {
           note={creditUntouched ? "크레딧은 차감되지 않았어요." : undefined}
         />
         <ReviewGroup id="review-question" title="리딩 내용" onEdit={() => leaveReview("question", true)} disabled={submitting}>
+          <dl className="saju-review-list">
           <div><dt>리포트 종류</dt><dd>{form.reportType === "annual_monthly" ? "한 해 리포트" : "종합 사주"}</dd></div>
           <div><dt>리딩 연도</dt><dd>{form.targetYear}년</dd></div>
           <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
           <div><dt>질문</dt><dd>{form.question.trim() || "입력하지 않음"}</dd></div>
+          </dl>
         </ReviewGroup>
         <ReviewGroup id="review-birth" title="출생 정보" onEdit={() => leaveReview("birth", true)} disabled={submitting}>
+          <dl className="saju-review-list">
           <div><dt>생년월일</dt><dd>{formatBirthDate(form.birthDate)} · 양력</dd></div>
           <div><dt>출생 시각</dt><dd>{timeSummary(form)}</dd></div>
           {form.birthTimePrecision !== "unknown" ? <div><dt>출생지</dt><dd>{province?.provinceName}</dd></div> : null}
           <div><dt>대운</dt><dd>{luckSummary(form.luckDirectionBasis)}</dd></div>
+          </dl>
         </ReviewGroup>
       </div>
     </ReadingShell>
@@ -799,36 +796,6 @@ function FieldError({ id, message }: { id: string; message?: string }) {
   return message ? <p className="form-error" id={id}>{message}</p> : null;
 }
 
-function ReviewGroup({
-  id,
-  title,
-  onEdit,
-  disabled,
-  children,
-}: {
-  id: string;
-  title: string;
-  onEdit: () => void;
-  disabled: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="saju-review-group" aria-labelledby={id}>
-      <div className="saju-review-head">
-        <h2 id={id}>{title}</h2>
-        <button
-          aria-label={`${title} 고치기`}
-          className="saju-review-edit"
-          disabled={disabled}
-          onClick={onEdit}
-          type="button"
-        >고치기</button>
-      </div>
-      <dl className="saju-review-list">{children}</dl>
-    </section>
-  );
-}
-
 const ErrorSummary = ({
   errors,
   generalError,
@@ -851,20 +818,3 @@ const ErrorSummary = ({
     </div>
   ) : null;
 };
-
-function NavigationButtons({
-  back,
-  next,
-  nextLabel = "다음",
-}: {
-  back: () => void;
-  next: () => void;
-  nextLabel?: string;
-}) {
-  return (
-    <div className="wizard-nav">
-      <button className="secondary-button" onClick={back} type="button">이전</button>
-      <button className="primary-button" onClick={next} type="button">{nextLabel}</button>
-    </div>
-  );
-}

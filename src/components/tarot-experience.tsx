@@ -28,6 +28,8 @@ import { ReadingCreditAccessNotice, readingCreationErrorMessage } from "./readin
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingLoading, type ReadingLoadingMessages } from "./reading-loading";
 import { ReadingShell } from "./reading-shell";
+import { PrivacyNotice } from "./privacy-notice";
+import { ReviewGroup } from "./review-group";
 import styles from "./tarot-experience.module.css";
 
 const MAX_QUESTION_LENGTH = 300;
@@ -42,7 +44,11 @@ const LOADING_MESSAGES: ReadingLoadingMessages = [
   "질문에 맞는 리딩을 구성하고 있어요.",
 ];
 
-type Phase = "spread" | "input" | "draw" | "consent" | "loading" | "error";
+type Phase = "spread" | "input" | "draw" | "confirm" | "consent" | "loading" | "error";
+
+// The question, the cards and the confirm step count as the reading's three steps; choosing the
+// type comes before them and the free daily card leaves for its own page.
+const TOTAL_STEPS = 3;
 
 type TarotReadingSection = {
   position: TarotPositionId;
@@ -111,7 +117,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
   const [error, setError] = useState<string | null>(null);
   const [inputErrorField, setInputErrorField] = useState<EditableInputField | null>(null);
   const inFlightRequestId = useRef<string | null>(null);
-  const initialSpreadButtonRef = useRef<HTMLButtonElement>(null);
+  const initialSpreadButtonRef = useRef<HTMLLabelElement>(null);
   const questionInputRef = useRef<HTMLTextAreaElement>(null);
   const choiceAInputRef = useRef<HTMLInputElement>(null);
   const choiceBInputRef = useRef<HTMLInputElement>(null);
@@ -293,15 +299,31 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
     }
   }, [choiceOptions, credits, definition.cardCount, question, redirectToLogin, requestId, router, selectedSlots, spreadType]);
 
+  // The last card opens the confirm step; the reading is only requested from there.
   function confirmSelection() {
     if (focusedSlot === null || selectedSlots.length >= definition.cardCount) return;
     const nextSelectedSlots = [...selectedSlots, focusedSlot];
     setSelectedSlots(nextSelectedSlots);
-    if (nextSelectedSlots.length === definition.cardCount) {
-      void submitReading(nextSelectedSlots);
+    setFocusedSlot(null);
+    if (nextSelectedSlots.length === definition.cardCount) setPhase("confirm");
+  }
+
+  // One step back from the cards or the confirm step reopens the last position with its card held.
+  function returnToLastCard() {
+    if (selectedSlots.length === 0) {
+      setPhase("input");
       return;
     }
+    setFocusedSlot(selectedSlots.at(-1) ?? null);
+    setSelectedSlots(selectedSlots.slice(0, -1));
+    setPhase("draw");
+  }
+
+  function redrawCards() {
+    setSelectedSlots([]);
     setFocusedSlot(null);
+    setRequestId(null);
+    setPhase("draw");
   }
 
   const handleConsentComplete = useCallback(() => {
@@ -326,40 +348,65 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
 
   if (phase === "spread") {
     return (
-      <ReadingShell eyebrow="AI 타로" title="어떤 고민을 살펴볼까요?" step={1} totalSteps={4}>
+      <ReadingShell
+        eyebrow="AI 타로"
+        title="어떤 고민을 살펴볼까요?"
+        actions={(
+          <>
+            {showCreditNotice ? (
+              <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+            ) : null}
+            <button
+              className="primary-button full-button"
+              disabled={creditAccess.status !== "allowed"}
+              onClick={beginSelectedSpread}
+              type="button"
+            >
+              이 유형으로 시작
+            </button>
+          </>
+        )}
+      >
         <ReadingGuideLink kind="tarot" />
-        <ul className="spread-grid">
-          {TAROT_SPREAD_LIST.map((spread) => (
-            <li key={spread.id}>
-              <button
-                aria-pressed={spread.id === spreadType}
-                className={spread.id === spreadType ? "spread-option active" : "spread-option"}
-                onClick={() => selectSpread(spread.id)}
+        <fieldset className="choice-list two-columns">
+          <legend className="sr-only">리딩 유형</legend>
+          {TAROT_SPREAD_LIST.map((spread) => {
+            const free = spread.id === "daily_one_card";
+            return (
+              <label
+                className="choice-card spread-choice"
+                key={spread.id}
                 ref={spread.id === initialSpread ? initialSpreadButtonRef : undefined}
-                type="button"
               >
-                <strong>{spread.name}</strong>
-                <span>{spread.summary}</span>
-                <small>
-                  {spread.metaLabel} · {spread.id === "daily_one_card"
-                    ? "무료"
-                    : `${displayedCosts?.tarot[spread.id] ?? "…"} 크레딧`}
-                </small>
-              </button>
-            </li>
-          ))}
-        </ul>
-        {showCreditNotice ? (
-          <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
-        ) : null}
-        <button
-          className="primary-button full-button narrow-button"
-          disabled={creditAccess.status !== "allowed"}
-          onClick={beginSelectedSpread}
-          type="button"
-        >
-          이 유형으로 시작
-        </button>
+                <input
+                  checked={spread.id === spreadType}
+                  className="sr-only"
+                  name="tarot-spread"
+                  onChange={() => selectSpread(spread.id)}
+                  type="radio"
+                />
+                <span className="choice-head">
+                  <span aria-hidden="true" className="choice-dot" />
+                  <strong>{spread.name}</strong>
+                </span>
+                <span className="choice-desc">{spread.summary}</span>
+                <span className="choice-foot">
+                  <span className="choice-count">
+                    <span aria-hidden="true" className="mini-backs">
+                      {Array.from({ length: spread.cardCount }, (_, index) => (
+                        <span className="tarot-back-art" key={index} />
+                      ))}
+                    </span>
+                    카드 {spread.cardCount}장
+                  </span>
+                  <span className={free ? "choice-price free" : "choice-price"}>
+                    {free ? "무료" : `${displayedCosts?.tarot[spread.id] ?? "…"}크레딧`}
+                  </span>
+                </span>
+              </label>
+            );
+          })}
+        </fieldset>
       </ReadingShell>
     );
   }
@@ -370,17 +417,30 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
         eyebrow={definition.name}
         title="상황을 들려주세요"
         description="입력한 내용과 카드 선택은 리딩을 요청하기 전까지 저장되지 않아요."
-        step={2}
-        totalSteps={4}
+        step={1}
+        totalSteps={TOTAL_STEPS}
+        back={{ label: "유형 다시 고르기", onClick: () => setPhase("spread") }}
+        actions={(
+          <button
+            className="primary-button full-button"
+            disabled={!inputIsValid || creditAccess.status !== "allowed"}
+            onClick={beginDraw}
+            type="button"
+          >
+            카드 고르러 가기
+          </button>
+        )}
       >
         <ReadingGuideLink kind="tarot" />
         <div className="wizard-card">
           <label className="field">
             <span>카드에게 묻고 싶은 질문</span>
             <textarea
-              aria-describedby={inputErrorField === "question"
-                ? "tarot-question-guidance tarot-input-error"
-                : "tarot-question-guidance"}
+              aria-describedby={[
+                spreadType === "relationship_three_card" ? "tarot-question-hint" : null,
+                "tarot-question-guidance",
+                inputErrorField === "question" ? "tarot-input-error" : null,
+              ].filter(Boolean).join(" ")}
               aria-invalid={inputErrorField === "question"}
               aria-label="카드에게 묻고 싶은 질문"
               maxLength={MAX_QUESTION_LENGTH}
@@ -392,14 +452,13 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
               }}
               placeholder={definition.questionExample}
             />
-            <p className="field-guidance" id="tarot-question-guidance">
-              개인정보는 제외하고 상황만 작성해 주세요. 이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문과 선택지는 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
-              {spreadType === "relationship_three_card"
-                ? " 상대방의 실명 대신 친구·연인·직장 동료처럼 관계로 적어주세요."
-                : null}
-            </p>
             <small>{question.length} / {MAX_QUESTION_LENGTH}</small>
           </label>
+          {spreadType === "relationship_three_card" ? (
+            <p className="field-hint" id="tarot-question-hint">
+              상대방의 실명 대신 친구·연인·직장 동료처럼 관계로 적어주세요.
+            </p>
+          ) : null}
           {definition.inputMode === "choice" ? (
             <div className="choice-fields">
               <label className="field">
@@ -448,14 +507,9 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
           {inputErrorField && error ? (
             <p className="form-error" id="tarot-input-error" role="alert">{error}</p>
           ) : null}
-          <button
-            className="primary-button full-button"
-            disabled={!inputIsValid || creditAccess.status !== "allowed"}
-            onClick={beginDraw}
-            type="button"
-          >
-            카드 고르러 가기
-          </button>
+          <PrivacyNotice id="tarot-question-guidance">
+            이름·이메일·전화번호·주소·주민등록번호·계좌나 카드번호와 진단·복약, 성생활, 정치·종교 신념 등 개인을 알아보거나 민감할 수 있는 내용은 입력하지 마세요. 작성한 질문과 선택지는 AI 리딩 생성을 위해 OpenAI API로 전송되지만 명로의 리딩 기록에는 저장되지 않습니다. 자동 검사는 일부 식별정보 형식만 확인하므로 전송하기 전에 불필요한 개인정보가 없는지 직접 확인해 주세요.
+          </PrivacyNotice>
         </div>
       </ReadingShell>
     );
@@ -463,20 +517,97 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
 
   if (phase === "draw") {
     return (
-      <DrawScreen
-        definition={definition}
-        focusedSlot={focusedSlot}
-        selectedSlots={selectedSlots}
-        onConfirm={confirmSelection}
-        onSelect={focusSelection}
-        onKeyDown={handleSlotKeyDown}
-      />
+      // Every phase renders the same shell in the same place, so a step change updates it and the
+      // new title takes focus instead of mounting a fresh heading that would keep the old focus.
+      <ReadingShell
+        eyebrow={definition.name}
+        title={definition.positions[selectedSlots.length].label}
+        step={2}
+        totalSteps={TOTAL_STEPS}
+        back={{ label: "이전", onClick: returnToLastCard }}
+      >
+        <DrawPanel
+          choiceOptions={choiceOptions}
+          definition={definition}
+          focusedSlot={focusedSlot}
+          selectedSlots={selectedSlots}
+          onConfirm={confirmSelection}
+          onSelect={focusSelection}
+          onKeyDown={handleSlotKeyDown}
+        />
+      </ReadingShell>
+    );
+  }
+
+  if (phase === "confirm") {
+    return (
+      <ReadingShell
+        eyebrow={definition.name}
+        title="이대로 리딩을 만들까요?"
+        description="카드는 리딩 화면에서 한 장씩 공개돼요. 질문 원문은 기록에 저장하지 않아요."
+        step={3}
+        totalSteps={TOTAL_STEPS}
+        back={{ label: "이전", onClick: returnToLastCard }}
+        actions={(
+          <>
+            {showCreditNotice ? (
+              <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
+            ) : null}
+            <button
+              className="primary-button full-button"
+              disabled={creditAccess.status !== "allowed"}
+              onClick={() => void submitReading()}
+              type="button"
+            >
+              {creditCost ?? "…"}크레딧으로 리딩 생성
+            </button>
+          </>
+        )}
+      >
+        <div className="wizard-card confirmation-card">
+          <ReviewGroup
+            disabled={false}
+            id="tarot-review-question"
+            onEdit={() => setPhase("input")}
+            title="질문"
+          >
+            <p className="review-text">{question.trim()}</p>
+            {definition.inputMode === "choice" ? (
+              <dl className="saju-review-list">
+                <div><dt>선택 A</dt><dd>{choiceOptions.a.trim()}</dd></div>
+                <div><dt>선택 B</dt><dd>{choiceOptions.b.trim()}</dd></div>
+              </dl>
+            ) : null}
+          </ReviewGroup>
+          <ReviewGroup
+            disabled={false}
+            editLabel="다시 고르기"
+            id="tarot-review-cards"
+            onEdit={redrawCards}
+            title="고른 카드"
+          >
+            <ol className={`confirm-slots count-${definition.cardCount}`}>
+              {definition.positions.map((position) => (
+                <li key={position.id}>
+                  <span aria-hidden="true" className="tarot-back-art" />
+                  <span>{position.label}</span>
+                </li>
+              ))}
+            </ol>
+          </ReviewGroup>
+        </div>
+      </ReadingShell>
     );
   }
 
   if (phase === "consent") {
     return (
-      <ReadingShell eyebrow={definition.name} title="리딩 전 필수 동의를 확인해요" stepLabel="시작하기 전에">
+      <ReadingShell
+        eyebrow={definition.name}
+        title="리딩 전 필수 동의를 확인해요"
+        stepLabel="시작하기 전에"
+        back={{ label: "유형 다시 고르기", onClick: () => setPhase("spread") }}
+      >
         <ConsentGate
           scope="tarot"
           onComplete={handleConsentComplete}
@@ -490,11 +621,10 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
     return (
       <ReadingShell
         eyebrow={definition.name}
-        form
         title="선택한 카드의 흐름을 읽고 있어요"
-        step={4}
-        totalSteps={4}
-        showHomeLink={false}
+        step={3}
+        totalSteps={TOTAL_STEPS}
+        back={null}
       >
         <ReadingLoading messages={LOADING_MESSAGES} />
       </ReadingShell>
@@ -503,7 +633,13 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
 
   if (phase === "error") {
     return (
-      <ReadingShell eyebrow={definition.name} title="리딩을 이어가지 못했어요" step={4} totalSteps={4}>
+      <ReadingShell
+        eyebrow={definition.name}
+        title="리딩을 이어가지 못했어요"
+        step={3}
+        totalSteps={TOTAL_STEPS}
+        back={{ label: "이전", onClick: () => setPhase("confirm") }}
+      >
         <div className="wizard-card" role="alert">
           <p>{error}</p>
           <button
@@ -525,7 +661,8 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
   return null;
 }
 
-function DrawScreen({
+function DrawPanel({
+  choiceOptions,
   definition,
   focusedSlot,
   selectedSlots,
@@ -533,6 +670,7 @@ function DrawScreen({
   onSelect,
   onKeyDown,
 }: {
+  choiceOptions: TarotChoiceOptions;
   definition: (typeof TAROT_SPREADS)[TarotSpreadType];
   focusedSlot: number | null;
   selectedSlots: readonly number[];
@@ -546,6 +684,10 @@ function DrawScreen({
   const selectedCount = selectedSlots.length;
   const isLastPosition = selectedCount === definition.cardCount - 1;
   const currentPosition = definition.positions[selectedCount];
+  // The typed option stays in memory until the reading is requested, so its card can name it here.
+  const choiceText = currentPosition.id === "option_a"
+    ? choiceOptions.a.trim()
+    : currentPosition.id === "option_b" ? choiceOptions.b.trim() : "";
   const firstCardRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -555,40 +697,39 @@ function DrawScreen({
   }, [focusedSlot, selectedCount]);
 
   return (
-    <ReadingShell eyebrow={definition.name} title={currentPosition.label} step={3} totalSteps={4}>
-      <div className="wizard-card draw-panel">
-        <p className="draw-progress" aria-live="polite">
-          {selectedCount + 1} / {definition.cardCount}
-        </p>
-        <p className="draw-instruction">{currentPosition.instruction}</p>
-        <div className="tarot-candidates" aria-label={`${currentPosition.label} 카드 선택`}>
-          {Array.from({ length: SLOT_COUNT }, (_, index) => index + 1).map((slot) => (
-            <button
-              aria-label={`숨은 카드 ${slot}`}
-              aria-pressed={slot === focusedSlot}
-              className={slot === focusedSlot
-                ? `tarot-back ${styles.selectedCard}`
-                : "tarot-back"}
-              key={slot}
-              onClick={() => onSelect(slot)}
-              onKeyDown={(event) => onKeyDown(event, slot)}
-              ref={slot === 1 ? firstCardRef : undefined}
-              type="button"
-            >
-              <TarotStone kind={stoneForSlot(slot)} />
-            </button>
-          ))}
-        </div>
-        <button
-          className="primary-button full-button narrow-button"
-          disabled={focusedSlot === null}
-          onClick={onConfirm}
-          type="button"
-        >
-          {isLastPosition ? "리딩 생성" : "다음 카드 고르러 가기"}
-        </button>
+    <div className="wizard-card draw-panel">
+      <p className="draw-progress" aria-live="polite">
+        카드 {selectedCount + 1} / {definition.cardCount}
+      </p>
+      {choiceText ? <p className="draw-choice">{choiceText}</p> : null}
+      <p className="draw-instruction">{currentPosition.instruction}</p>
+      <div className="tarot-candidates" aria-label={`${currentPosition.label} 카드 선택`}>
+        {Array.from({ length: SLOT_COUNT }, (_, index) => index + 1).map((slot) => (
+          <button
+            aria-label={`숨은 카드 ${slot}`}
+            aria-pressed={slot === focusedSlot}
+            className={slot === focusedSlot
+              ? `tarot-back ${styles.selectedCard}`
+              : "tarot-back"}
+            key={slot}
+            onClick={() => onSelect(slot)}
+            onKeyDown={(event) => onKeyDown(event, slot)}
+            ref={slot === 1 ? firstCardRef : undefined}
+            type="button"
+          >
+            <TarotStone kind={stoneForSlot(slot)} />
+          </button>
+        ))}
       </div>
-    </ReadingShell>
+      <button
+        className="primary-button full-button narrow-button"
+        disabled={focusedSlot === null}
+        onClick={onConfirm}
+        type="button"
+      >
+        {isLastPosition ? "고른 카드 확인하기" : "다음 카드 고르러 가기"}
+      </button>
+    </div>
   );
 }
 

@@ -4,13 +4,13 @@ import { describe, expect, it, vi } from "vitest";
 import { ReadingCreditAccessNotice } from "./reading-credit-access-notice";
 
 describe("ReadingCreditAccessNotice", () => {
-  it("explains the cost and current balance in user-facing order", () => {
-    render(<ReadingCreditAccessNotice
+  it("says nothing when the reading can start: the header and the button carry the numbers", () => {
+    const { container } = render(<ReadingCreditAccessNotice
       access={{ status: "allowed", required: 3, remaining: 7 }}
       onRetry={vi.fn()}
     />);
 
-    expect(screen.getByText("3크레딧 사용 · 현재 7크레딧")).toBeInTheDocument();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("offers retry when credit access cannot be checked", () => {

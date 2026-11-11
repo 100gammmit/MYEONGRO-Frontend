@@ -81,7 +81,7 @@ export function TarotReadingResult({
   const [revealedCount, setRevealedCount] = useState(record ? definition.cardCount : 0);
   const revealedPositions = definition.positions.slice(0, revealedCount);
   const allRevealed = revealedCount === definition.cardCount;
-  const progress = record ? { stepLabel: record.dateLabel } : { step: 4, totalSteps: 4 };
+  const progress = record ? { stepLabel: record.dateLabel } : {};
 
   // Fetch every drawn front up front, so a card revealed later never turns over to an empty face.
   // A <link rel="preload"> would warn in the console while a card waits for its click; an Image
@@ -101,9 +101,7 @@ export function TarotReadingResult({
     <ReadingShell
       eyebrow={definition.name}
       title="카드가 전하는 메시지"
-      backHref={record?.backHref}
-      backLabel={record?.backLabel}
-      showTrack={!record}
+      back={record ? { href: record.backHref, label: record.backLabel } : { href: "/tarot", label: "타로" }}
       {...progress}
     >
       <AiGeneratedNotice />

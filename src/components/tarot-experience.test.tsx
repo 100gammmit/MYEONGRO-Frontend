@@ -100,7 +100,7 @@ function readingResponse(spreadType: TarotSpreadType) {
 async function chooseSpreadAndStart(spreadType: TarotSpreadType) {
   const definition = TAROT_SPREADS[spreadType];
   render(<TarotExperience />);
-  fireEvent.click(await screen.findByRole("button", { name: new RegExp(definition.name) }));
+  fireEvent.click(await screen.findByRole("radio", { name: new RegExp(definition.name) }));
   fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
 
   if (definition.inputMode !== "fixed") {
@@ -118,7 +118,13 @@ async function chooseSpreadAndStart(spreadType: TarotSpreadType) {
   }
 
   fireEvent.click(screen.getByRole("button", { name: "카드 고르러 가기" }));
-  await screen.findByText(`1 / ${definition.cardCount}`);
+  await screen.findByText(`카드 1 / ${definition.cardCount}`);
+}
+
+// The last card opens the confirm step; the reading is requested from its button.
+async function confirmAndCreate() {
+  fireEvent.click(await screen.findByRole("button", { name: "고른 카드 확인하기" }));
+  fireEvent.click(await screen.findByRole("button", { name: /크레딧으로 리딩 생성/ }));
 }
 
 function selectSlots(slots: readonly number[]) {
@@ -132,7 +138,7 @@ function selectSlots(slots: readonly number[]) {
 describe("TarotExperience", () => {
   it("keeps a drafted question when opening the guide in a new tab", async () => {
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: /고민 리딩/ }));
+    fireEvent.click(await screen.findByRole("radio", { name: /고민 리딩/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
     const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
     fireEvent.change(question, { target: { value: "새 프로젝트의 흐름이 궁금합니다." } });
@@ -169,7 +175,7 @@ describe("TarotExperience", () => {
     render(<TarotExperience />);
 
     expect(screen.getByText("어떤 고민을 살펴볼까요?")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /고민 리딩/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
     expect(screen.getByText("리딩 전 필수 동의를 확인해요")).toBeInTheDocument();
     expect(screen.getByText("시작하기 전에")).toBeInTheDocument();
@@ -179,7 +185,7 @@ describe("TarotExperience", () => {
 
   it("warns about storage, external transfer, and the limited identifier check", async () => {
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: /관계 리딩/ }));
+    fireEvent.click(await screen.findByRole("radio", { name: /관계 리딩/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
 
     const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
@@ -191,7 +197,7 @@ describe("TarotExperience", () => {
   it("blocks a verifiable identifier in the browser before the draw or API request", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: /고민 리딩/ }));
+    fireEvent.click(await screen.findByRole("radio", { name: /고민 리딩/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
 
     const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
@@ -208,7 +214,7 @@ describe("TarotExperience", () => {
   it("checks both choice fields before the draw or API request", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: /선택 리딩/ }));
+    fireEvent.click(await screen.findByRole("radio", { name: /선택 리딩/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
     fireEvent.change(await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" }), {
       target: { value: "두 선택지 중 무엇이 나을까요?" },
@@ -231,7 +237,7 @@ describe("TarotExperience", () => {
     credits.state.status = "error";
     render(<TarotExperience />);
 
-    expect(screen.getByText(/카드 1장.*무료/)).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /오늘의 운세/ }).closest("label")).toHaveTextContent(/카드 1장\s*무료/);
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
 
     expect(navigation.push).toHaveBeenCalledWith("/tarot/daily");
@@ -243,7 +249,7 @@ describe("TarotExperience", () => {
     credits.state.status = "idle";
     render(<TarotExperience />);
 
-    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /고민 리딩/ }));
     const start = screen.getByRole("button", { name: "이 유형으로 시작" });
     expect(start).toBeEnabled();
     fireEvent.click(start);
@@ -263,16 +269,16 @@ describe("TarotExperience", () => {
     render(<TarotExperience />);
 
     expect(credits.requestPricing).toHaveBeenCalled();
-    expect(screen.getByText(/카드 3장.*고민의 다음 전개.*2 크레딧/)).toBeInTheDocument();
-    expect(screen.getByText(/카드 5장.*선택 A와 B 비교.*3 크레딧/)).toBeInTheDocument();
-    expect(screen.queryByText(/… 크레딧/)).not.toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /고민 리딩/ }).closest("label")).toHaveTextContent(/카드 3장\s*2크레딧/);
+    expect(screen.getByRole("radio", { name: /선택 리딩/ }).closest("label")).toHaveTextContent(/카드 5장\s*3크레딧/);
+    expect(screen.queryByText("…크레딧")).not.toBeInTheDocument();
   });
 
   it("keeps a guest's costs unknown until the price list arrives", () => {
     credits.state.status = "idle";
     render(<TarotExperience />);
 
-    expect(screen.getAllByText(/… 크레딧/)).toHaveLength(3);
+    expect(screen.getAllByText("…크레딧")).toHaveLength(3);
   });
 
   it("does not show a credit balance notice to a guest", () => {
@@ -288,7 +294,7 @@ describe("TarotExperience", () => {
     credits.state.status = "idle";
     render(<TarotExperience />);
 
-    fireEvent.click(screen.getByRole("button", { name: /관계 리딩/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /관계 리딩/ }));
     fireEvent.click(screen.getByRole("button", { name: "이 유형으로 시작" }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith(
@@ -300,31 +306,31 @@ describe("TarotExperience", () => {
     const scrollIntoView = vi.mocked(Element.prototype.scrollIntoView);
     render(<TarotExperience initialSpread="choice_five_card" />);
 
-    const chosen = screen.getByRole("button", { name: /선택 리딩/ });
-    expect(chosen).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: /오늘의 운세/ })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByText("3크레딧 사용 · 현재 10크레딧")).toBeInTheDocument();
+    const chosen = screen.getByRole("radio", { name: /선택 리딩/ });
+    expect(chosen).toBeChecked();
+    expect(screen.getByRole("radio", { name: /오늘의 운세/ })).not.toBeChecked();
+    expect(screen.queryByText(/크레딧 사용/)).not.toBeInTheDocument();
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    expect(scrollIntoView.mock.contexts[0]).toBe(chosen);
+    expect(scrollIntoView.mock.contexts[0]).toBe(chosen.closest("label"));
   });
 
   it("keeps the chosen spread in the address so other login links and reloads return to it", () => {
     render(<TarotExperience />);
 
-    fireEvent.click(screen.getByRole("button", { name: /관계 리딩/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /관계 리딩/ }));
     expect(`${window.location.pathname}${window.location.search}`)
       .toBe("/tarot?spread=relationship_three_card");
 
-    fireEvent.click(screen.getByRole("button", { name: /오늘의 운세/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /오늘의 운세/ }));
     expect(`${window.location.pathname}${window.location.search}`).toBe("/tarot");
   });
 
   it("shows configured spread costs and blocks an unaffordable spread before input", async () => {
     credits.state.data.balance = { free: 2, paid: 0, total: 2 };
     render(<TarotExperience />);
-    fireEvent.click(await screen.findByRole("button", { name: /선택 리딩/ }));
+    fireEvent.click(await screen.findByRole("radio", { name: /선택 리딩/ }));
 
-    expect(screen.getByText(/카드 5장.*3 크레딧/)).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /선택 리딩/ }).closest("label")).toHaveTextContent(/카드 5장\s*3크레딧/);
     expect(screen.getByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
     expect(screen.getByRole("alert")).toHaveTextContent("크레딧이 부족합니다. 내일 다시 시도해 주세요.");
   });
@@ -332,7 +338,7 @@ describe("TarotExperience", () => {
   it("blocks a new spread while another reading is generating", async () => {
     credits.state.data.generationInProgress = true;
     render(<TarotExperience />);
-    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /고민 리딩/ }));
 
     expect(await screen.findByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
     expect(screen.getByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
@@ -341,18 +347,17 @@ describe("TarotExperience", () => {
   it("keeps costs and spread entry available while credits refresh", () => {
     credits.state.status = "loading";
     render(<TarotExperience />);
-    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /고민 리딩/ }));
 
-    expect(screen.getByText(/카드 3장.*고민의 다음 전개.*2 크레딧/)).toBeInTheDocument();
-    expect(screen.queryByText(/… 크레딧/)).not.toBeInTheDocument();
-    expect(screen.getByText("2크레딧 사용 · 현재 10크레딧")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /고민 리딩/ }).closest("label")).toHaveTextContent(/카드 3장\s*2크레딧/);
+    expect(screen.queryByText(/…크레딧/)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "이 유형으로 시작" })).toBeEnabled();
   });
 
   it("blocks spread entry and offers retry when credit refresh fails after prior data", async () => {
     credits.state.status = "error";
     render(<TarotExperience />);
-    fireEvent.click(screen.getByRole("button", { name: /고민 리딩/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /고민 리딩/ }));
 
     expect(await screen.findByRole("button", { name: "이 유형으로 시작" })).toBeDisabled();
     expect(screen.getByRole("alert")).toHaveTextContent("크레딧을 확인하지 못했어요");
@@ -373,7 +378,7 @@ describe("TarotExperience", () => {
       expect(screen.getAllByRole("button", { name: /숨은 카드/ })).toHaveLength(5);
       selectSlots(slots);
 
-      expect(await screen.findByRole("button", { name: "리딩 생성" })).toBeEnabled();
+      expect(await screen.findByRole("button", { name: "고른 카드 확인하기" })).toBeEnabled();
       const completedCardBacks = screen.getAllByRole("button", { name: /숨은 카드/ });
       expect(completedCardBacks).toHaveLength(5);
       for (const button of completedCardBacks) {
@@ -398,7 +403,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("relationship_three_card");
     selectSlots([5, 1, 3]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(fetchMock.mock.calls[0][0]).toBe("/api/tarot/readings");
@@ -418,7 +423,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([2, 3, 4]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
 
     expect(await screen.findByRole("heading", { name: "선택한 카드의 흐름을 읽고 있어요" }))
       .toBeInTheDocument();
@@ -432,12 +437,12 @@ describe("TarotExperience", () => {
 
     selectSlots([5, 1]);
 
-    expect(screen.getByRole("button", { name: "리딩 생성" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "고른 카드 확인하기" })).toBeDisabled();
     expect(fetchMock).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole("button", { name: "숨은 카드 3" }));
 
-    const submitButton = await screen.findByRole("button", { name: "리딩 생성" });
+    const submitButton = await screen.findByRole("button", { name: "고른 카드 확인하기" });
     expect(submitButton).toBeEnabled();
     expect(screen.getByRole("button", { name: "숨은 카드 3" })).toHaveAttribute("aria-pressed", "true");
     expect(fetchMock).not.toHaveBeenCalled();
@@ -454,7 +459,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([2, 3, 4]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
     fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
@@ -478,7 +483,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([2, 3, 4]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
     expect(await screen.findByRole("alert")).toHaveTextContent("리딩 생성 시간이 초과됐어요.");
     fireEvent.click(screen.getByRole("button", { name: "같은 질문으로 다시 시도" }));
 
@@ -498,7 +503,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([2, 3, 4]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
     expect(await screen.findByRole("alert")).toHaveTextContent("오늘은 새 리딩을 더 만들 수 없어요.");
     fireEvent.click(screen.getByRole("button", { name: "같은 질문으로 다시 시도" }));
 
@@ -513,7 +518,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([2, 3, 4]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
 
     expect(await screen.findByRole("alert")).toHaveTextContent("리딩 요청을 처리하지 못했어요.");
   });
@@ -529,7 +534,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([2, 3, 4]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
 
     expect(await screen.findByRole("alert")).toHaveTextContent("크레딧이 부족");
     expect(credits.refresh).toHaveBeenCalledTimes(1);
@@ -550,7 +555,7 @@ describe("TarotExperience", () => {
       await chooseSpreadAndStart(spreadType);
       selectSlots(spreadType === "choice_five_card" ? [5, 4, 3, 2, 1] : [2, 3, 4]);
 
-      fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+      await confirmAndCreate();
 
       const editable = await screen.findByRole("textbox", { name: accessibleName });
       expect(editable).toHaveFocus();
@@ -571,7 +576,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([3, 2, 1]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
 
     expect(await screen.findByRole("alert")).toHaveTextContent("이미 생성 중인 리딩");
     expect(credits.refresh).toHaveBeenCalledTimes(1);
@@ -593,7 +598,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([3, 2, 1]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "리딩 결과를 확인하는 중 문제가 생겼어요. 같은 질문으로 다시 시도해 주세요.",
@@ -613,7 +618,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([4, 2, 5]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
     fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
     fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
 
@@ -636,7 +641,7 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([1, 2, 3]);
 
-    fireEvent.click(await screen.findByRole("button", { name: "리딩 생성" }));
+    await confirmAndCreate();
     fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
     fireEvent.click(await screen.findByRole("button", { name: "같은 질문으로 다시 시도" }));
 
@@ -661,12 +666,12 @@ describe("TarotExperience", () => {
 
     expect(focusedCard).toHaveFocus();
     expect(focusedCard).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByText("1 / 3")).toBeInTheDocument();
+    expect(screen.getByText("카드 1 / 3")).toBeInTheDocument();
     expect(nextButton).toBeEnabled();
 
     fireEvent.click(nextButton);
 
-    expect(await screen.findByText("2 / 3")).toBeInTheDocument();
+    expect(await screen.findByText("카드 2 / 3")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "다음 카드 고르러 가기" })).toBeDisabled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -685,7 +690,7 @@ describe("TarotExperience", () => {
       nextButton.focus();
       fireEvent.click(nextButton, { detail: 0 });
 
-      expect(await screen.findByText("2 / 3")).toBeInTheDocument();
+      expect(await screen.findByText("카드 2 / 3")).toBeInTheDocument();
       await waitFor(() => {
         expect(screen.getByRole("button", { name: "숨은 카드 1" })).toHaveFocus();
       });
@@ -699,9 +704,66 @@ describe("TarotExperience", () => {
     fireEvent.click(first);
     fireEvent.click(first);
 
-    expect(screen.getByText("1 / 3")).toBeInTheDocument();
+    expect(screen.getByText("카드 1 / 3")).toBeInTheDocument();
     expect(first).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "다음 카드 고르러 가기" }));
-    expect(await screen.findByText("2 / 3")).toBeInTheDocument();
+    expect(await screen.findByText("카드 2 / 3")).toBeInTheDocument();
+  });
+  it("asks for a confirm step after the last card and requests the reading only from its button", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(readingResponse("mind_three_card"));
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([1, 2, 3]);
+
+    fireEvent.click(await screen.findByRole("button", { name: "고른 카드 확인하기" }));
+
+    expect(await screen.findByRole("heading", { level: 1, name: "이대로 리딩을 만들까요?" })).toHaveFocus();
+    expect(screen.getByText("지금 제 마음에서 살펴볼 흐름이 궁금해요.")).toBeInTheDocument();
+    for (const position of TAROT_SPREADS.mind_three_card.positions) {
+      expect(screen.getByText(position.label)).toBeInTheDocument();
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    const create = screen.getByRole("button", { name: "2크레딧으로 리딩 생성" });
+    fireEvent.click(create);
+    fireEvent.click(create);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+  });
+
+  it("keeps the question when editing it from the confirm step and draws again from scratch", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([1, 2, 3]);
+    fireEvent.click(await screen.findByRole("button", { name: "고른 카드 확인하기" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "질문 고치기" }));
+
+    expect(await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" }))
+      .toHaveValue("지금 제 마음에서 살펴볼 흐름이 궁금해요.");
+    fireEvent.click(screen.getByRole("button", { name: "카드 고르러 가기" }));
+    expect(await screen.findByText("카드 1 / 3")).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("goes back from the confirm step to the last card with that card still chosen", async () => {
+    await chooseSpreadAndStart("mind_three_card");
+    selectSlots([4, 2, 5]);
+    fireEvent.click(await screen.findByRole("button", { name: "고른 카드 확인하기" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "이전" }));
+
+    expect(await screen.findByText("카드 3 / 3")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "숨은 카드 5" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "고른 카드 확인하기" })).toBeEnabled();
+  });
+
+  it("names the typed option on the cards for option A and B", async () => {
+    await chooseSpreadAndStart("choice_five_card");
+    selectSlots([1, 2, 3]);
+
+    expect(await screen.findByText("현재를 유지한다")).toBeInTheDocument();
+    selectSlots([4]);
+    expect(await screen.findByText("새로운 기회를 준비한다")).toBeInTheDocument();
   });
 });

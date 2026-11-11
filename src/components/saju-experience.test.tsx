@@ -158,8 +158,8 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "리딩 내용 고치기" }));
     expect(screen.getByRole("radio", { name: /한 해 리포트/ })).toBeChecked();
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    expect(screen.queryByRole("button", { name: "사주 리딩 생성" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "한 해 리포트 생성" }));
+    expect(screen.queryByRole("button", { name: /크레딧으로 사주 리딩 생성/ })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 한 해 리포트 생성/ }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     expect(body.reportType).toBe("annual_monthly");
@@ -179,7 +179,7 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     await screen.findByRole("heading", { name: REVIEW_HEADING });
     expect(screen.getByText(`${nextYear}년`)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     expect(body.targetYear).toBe(nextYear);
@@ -194,13 +194,13 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse(createdReading()));
     await startWithAcceptedConsent();
     await reachReview("unknown");
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     await screen.findByText(/리딩 서버에 연결하지 못했어요/);
     fireEvent.click(screen.getByRole("button", { name: "리딩 내용 고치기" }));
     fireEvent.change(screen.getByRole("combobox", { name: "살펴볼 연도" }), { target: { value: String(getSajuCurrentYear() + 1) } });
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     await screen.findByRole("heading", { name: REVIEW_HEADING });
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
@@ -270,7 +270,7 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "동의 완료하고 계속" }));
 
     expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
-    expect(screen.getByText("1 / 4")).toBeInTheDocument();
+    expect(screen.getByText("1 / 3")).toBeInTheDocument();
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
     expect(fetchMock).toHaveBeenNthCalledWith(1, "/api/consents?scope=saju", {
       credentials: "same-origin",
@@ -283,14 +283,14 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse(birthPlaces()));
     await startWithAcceptedConsent();
 
-    expect(screen.getByText("1 / 4")).toBeInTheDocument();
-    const creditLine = screen.getByText("4크레딧 사용 · 현재 10크레딧");
-    expect(creditLine.closest(".reading-actions")).not.toBeNull();
+    expect(screen.getByText("1 / 3")).toBeInTheDocument();
+    expect(screen.queryByText(/크레딧 사용/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "다음" }).closest(".reading-actions")).not.toBeNull();
     expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
 
     await reachBirth();
-    expect(screen.getByText("2 / 4")).toBeInTheDocument();
-    expect(screen.getByText(/원본 출생정보는 사주 계산과 최소 계산정보 생성에만 사용/))
+    expect(screen.getByText("2 / 3")).toBeInTheDocument();
+    expect(screen.getByText("입력한 출생정보로 명식을 계산해요. 처리 방식은 아래 안내에서 확인할 수 있어요."))
       .toBeInTheDocument();
     const privacyNotice = screen.getByRole("complementary", {
       name: "사주 출생정보 처리 안내",
@@ -308,7 +308,7 @@ describe("SajuExperience", () => {
     await fillBirth("exact");
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     expect(await screen.findByRole("heading", { name: REVIEW_HEADING })).toBeInTheDocument();
-    expect(screen.getByText("3 / 4")).toBeInTheDocument();
+    expect(screen.getByText("3 / 3")).toBeInTheDocument();
     expect(screen.getByText(/원본 출생정보와 질문 원문은 저장하지 않아요/))
       .toBeInTheDocument();
   });
@@ -346,7 +346,7 @@ describe("SajuExperience", () => {
 
     expect(await screen.findByRole("heading", { name: QUESTION_HEADING })).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(screen.getByText("4크레딧 사용 · 현재 10크레딧")).toBeInTheDocument();
+    expect(screen.queryByText(/크레딧 사용/)).not.toBeInTheDocument();
     fillQuestion();
     expect(screen.getByRole("button", { name: "다음" })).toBeEnabled();
   });
@@ -465,7 +465,7 @@ describe("SajuExperience", () => {
 
     expect(screen.getByText("시간 미상 · 시주 제외")).toBeInTheDocument();
     expect(screen.getByText("계산하지 않음")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
     expect(fetchMock.mock.calls[2]?.[0]).toBe("/api/saju/readings");
@@ -495,7 +495,7 @@ describe("SajuExperience", () => {
     await fillBirth("exact");
     fireEvent.click(screen.getByRole("radio", { name: /시간을 몰라요/ }));
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    fireEvent.click(await screen.findByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
@@ -523,7 +523,7 @@ describe("SajuExperience", () => {
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
     fireEvent.click(screen.getByRole("radio", { name: "여성 기준" }));
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    fireEvent.click(await screen.findByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
@@ -564,7 +564,7 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachReview();
 
-    const submit = screen.getByRole("button", { name: "사주 리딩 생성" });
+    const submit = screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ });
     fireEvent.click(submit);
     fireEvent.click(submit);
     expect(fetchMock).toHaveBeenCalledTimes(3);
@@ -576,7 +576,7 @@ describe("SajuExperience", () => {
     expect(failure).toHaveTextContent("잠시 후 다시 시도해 주세요.");
     // A proxy failure may hide a finished reading, so it makes no promise about credits.
     expect(failure).not.toHaveTextContent("차감");
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
@@ -600,13 +600,13 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachReview();
 
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     const failure = await screen.findByRole("alert");
     expect(failure).toHaveTextContent("리딩을 만들지 못했어요.");
     expect(failure).toHaveTextContent("리딩 생성에 실패했어요.");
     expect(failure).toHaveTextContent("크레딧은 차감되지 않았어요.");
     expect(failure).not.toHaveTextContent("입력 내용을 확인해 주세요.");
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
@@ -630,11 +630,11 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachReview();
 
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     const failure = await screen.findByRole("alert");
     expect(failure).toHaveTextContent("리딩 생성 시간이 초과됐어요.");
     expect(failure).toHaveTextContent("크레딧은 차감되지 않았어요.");
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
@@ -654,11 +654,11 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachReview();
 
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     const failure = await screen.findByRole("alert");
     expect(failure).toHaveTextContent("오늘은 새 리딩을 더 만들 수 없어요.");
     expect(failure).not.toHaveTextContent("크레딧은 차감되지 않았어요.");
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
@@ -680,7 +680,7 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachReview();
 
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     expect(await screen.findByRole("alert")).toHaveTextContent("잠시 후 다시 시도해 주세요.");
     fireEvent.click(screen.getByRole("button", { name: "이전" }));
     await screen.findByRole("heading", { name: BIRTH_HEADING });
@@ -692,7 +692,7 @@ describe("SajuExperience", () => {
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     await screen.findByRole("heading", { name: BIRTH_HEADING });
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    fireEvent.click(await screen.findByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(await screen.findByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
@@ -714,7 +714,7 @@ describe("SajuExperience", () => {
       }, { status: 400 }));
     await startWithAcceptedConsent();
     await reachReview("exact");
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     const alert = await screen.findByRole("alert");
     expect(alert).toHaveTextContent("출생 시각을 다시 확인해 주세요.");
@@ -740,7 +740,7 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachReview("exact");
 
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("크레딧이 부족");
     expect(credits.refresh).toHaveBeenCalledTimes(1);
@@ -779,7 +779,7 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse({ code: "BACKEND_UNAVAILABLE", message: "잠시 후 다시 시도해 주세요." }, { status: 502 }));
     await startWithAcceptedConsent();
     await reachReview();
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     expect(await screen.findByRole("alert")).toHaveTextContent("리딩을 만들지 못했어요.");
 
     fireEvent.click(screen.getByRole("button", { name: "출생 정보 고치기" }));
@@ -801,7 +801,7 @@ describe("SajuExperience", () => {
     await reachReview();
 
     vi.useFakeTimers();
-    fireEvent.click(screen.getByRole("button", { name: "사주 리딩 생성" }));
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     expect(screen.getByText("출생정보를 확인하고 있어요.")).toBeInTheDocument();
 
     act(() => { vi.advanceTimersByTime(12_000); });

@@ -143,7 +143,7 @@ describe("TarotReadingResult", () => {
     expect(screen.queryByRole("button", { name: "첫 카드 공개" })).not.toBeInTheDocument();
     expect(container.querySelectorAll(".card-flip-inner.flipped")).toHaveLength(3);
     expect(container.querySelectorAll(".tarot-card-caption.shown")).toHaveLength(3);
-    expect(screen.getByRole("link", { name: "← 내 기록" })).toHaveAttribute("href", "/records");
+    expect(screen.getByRole("link", { name: "내 기록" })).toHaveAttribute("href", "/records");
     expect(screen.getByText("2026. 9. 15.")).toBeInTheDocument();
     expect(screen.getByText("고민 리딩")).toBeInTheDocument();
     for (const position of definition.positions) {
