@@ -16,9 +16,33 @@ const links = [
   { id: "saju-relationship", heading: "관계의 방식", evidenceKeys: ["interactions" as const] },
 ];
 
+// The tour of terms is folded away under the chart; most checks open it first.
+function renderOpen(ui: React.ReactElement) {
+  const view = render(ui);
+  fireEvent.click(screen.getByRole("button", { name: "내 사주 탐색 열기" }));
+  return view;
+}
+
 describe("SajuCalculationExplorer", () => {
+  it("shows the chart in traditional order with the tour folded away until asked", () => {
+    const snapshot = fixture();
+    snapshot.pillars.time = { ganZhi: "병자" };
+    const { container } = render(<SajuCalculationExplorer snapshot={snapshot} links={links} />);
+
+    const labels = [...container.querySelectorAll(".saju-pillar-grid article > span")].map((node) => node.textContent);
+    expect(labels).toEqual(["시주", "일주", "월주", "연주"]);
+    const toggle = screen.getByRole("button", { name: "내 사주 탐색 열기" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("group", { name: "사주 탐색 항목" })).not.toBeInTheDocument();
+    expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
+
+    fireEvent.click(toggle);
+    expect(screen.getByRole("button", { name: "내 사주 탐색 닫기" })).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("group", { name: "사주 탐색 항목" })).toBeInTheDocument();
+  });
+
   it("selects elements, highlights actual characters and exposes only matching reading links", () => {
-    const { container } = render(<SajuCalculationExplorer snapshot={fixture()} links={links} />);
+    const { container } = renderOpen(<SajuCalculationExplorer snapshot={fixture()} links={links} />);
     expect(screen.getByRole("button", { name: "일간 · 나의 기준" })).toHaveAttribute("aria-pressed", "true");
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "토 · 흙 2개" }));
@@ -26,8 +50,8 @@ describe("SajuCalculationExplorer", () => {
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(2);
     expect(screen.getAllByText("선택")).toHaveLength(2);
     const nav = screen.getByRole("navigation", { name: "선택한 계산을 사용한 리딩" });
-    expect(within(nav).getByRole("link", { name: "일하는 방식 →" })).toHaveAttribute("href", "#saju-work");
-    expect(within(nav).queryByText("나를 움직이는 중심 →")).not.toBeInTheDocument();
+    expect(within(nav).getByRole("link", { name: "일하는 방식" })).toHaveAttribute("href", "#saju-work");
+    expect(within(nav).queryByText("나를 움직이는 중심")).not.toBeInTheDocument();
     expect(screen.getByText("오행의 개수와 상생·상극만으로 좋고 나쁨이나 강약을 판단하지 않습니다.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "금 · 쇠 0개" }));
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
@@ -38,7 +62,7 @@ describe("SajuCalculationExplorer", () => {
     const snapshot = fixture();
     snapshot.pillars.time = { ganZhi: "병자" };
     snapshot.relations.push({ type: "new_kind", members: ["갑", "기"] });
-    const { container } = render(<SajuCalculationExplorer snapshot={snapshot} links={links} />);
+    const { container } = renderOpen(<SajuCalculationExplorer snapshot={snapshot} links={links} />);
     fireEvent.click(screen.getByRole("button", { name: /지지의 충.*자·오/ }));
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
     expect(screen.getByText(/같은 글자가 여러 자리에 있어/)).toBeInTheDocument();
@@ -47,9 +71,10 @@ describe("SajuCalculationExplorer", () => {
   });
 
   it("shows confirmed relation positions and no extra pillar", () => {
-    const { container } = render(<SajuCalculationExplorer snapshot={fixture()} links={links} />);
+    const { container } = renderOpen(<SajuCalculationExplorer snapshot={fixture()} links={links} />);
     fireEvent.click(screen.getByRole("button", { name: /지지의 충.*자·오/ }));
-    expect(Array.from(container.querySelectorAll('[data-highlighted="true"]')).map((value) => value.textContent)).toEqual(["자선택", "오선택"]);
+    // Drawn hour, day, month, year: the day pillar comes before the year pillar.
+    expect(Array.from(container.querySelectorAll('[data-highlighted="true"]')).map((value) => value.textContent)).toEqual(["오선택", "자선택"]);
     expect(screen.queryByText("시주")).not.toBeInTheDocument();
   });
 
@@ -59,13 +84,13 @@ describe("SajuCalculationExplorer", () => {
     snapshot.pillars.day = null;
     snapshot.relations = [];
     snapshot.fiveElements = { wood: 1 };
-    const { container, unmount } = render(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
+    const { container, unmount } = renderOpen(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
     expect(screen.getByText(/일간이 확정되지 않아/)).toBeInTheDocument();
     expect(screen.getByText(/표시된 글자 사이에 해당하는 관계가 없습니다/)).toBeInTheDocument();
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(0);
     expect(screen.queryByRole("button", { name: /수 · 물/ })).not.toBeInTheDocument();
     unmount();
-    render(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
+    renderOpen(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
     expect(screen.getByText(/일간이 확정되지 않아/)).toBeInTheDocument();
   });
 
@@ -76,7 +101,7 @@ describe("SajuCalculationExplorer", () => {
     ["금 · 쇠 0개", "가을", "서쪽", "금은 수를 돕고, 토에게서 도움을 받습니다.", "금은 목을 조절하고, 화에게서 조절을 받습니다."],
     ["수 · 물 2개", "겨울", "북쪽", "수는 목을 돕고, 금에게서 도움을 받습니다.", "수는 화를 조절하고, 토에게서 조절을 받습니다."],
   ])("explains %s as traditional symbols and flows, separate from counts", (button, season, direction, generates, controls) => {
-    const { container } = render(<SajuCalculationExplorer snapshot={fixture()} links={[]} />);
+    const { container } = renderOpen(<SajuCalculationExplorer snapshot={fixture()} links={[]} />);
     fireEvent.click(screen.getByRole("button", { name: button }));
     expect(screen.getByText(season)).toBeInTheDocument();
     expect(screen.getByText(direction)).toBeInTheDocument();
@@ -93,7 +118,7 @@ describe("SajuCalculationExplorer", () => {
   it.each([["인", "해", "寅", "亥"], ["사", "신", "巳", "申"]])("explains simultaneous combination/break for %s·%s from either selection", (first, second, hanjaFirst, hanjaSecond) => {
     const snapshot = fixture();
     snapshot.relations = [{ type: "branch_combination", members: [first, second] }, { type: "branch_break", members: [hanjaSecond, hanjaFirst] }];
-    const { container } = render(<SajuCalculationExplorer snapshot={snapshot} links={links} />);
+    const { container } = renderOpen(<SajuCalculationExplorer snapshot={snapshot} links={links} />);
     for (const relation of ["지지의 합", "지지의 파"]) {
       fireEvent.click(screen.getByRole("button", { name: new RegExp(relation) }));
       const explanation = screen.getByText(/전통 규칙에서/);
@@ -112,7 +137,7 @@ describe("SajuCalculationExplorer", () => {
   });
 
   it("does not add paired copy for a standalone relation", () => {
-    render(<SajuCalculationExplorer snapshot={fixture()} links={links} />);
+    renderOpen(<SajuCalculationExplorer snapshot={fixture()} links={links} />);
     fireEvent.click(screen.getByRole("button", { name: /지지의 충/ }));
     expect(screen.queryByText(/전통 규칙에서/)).not.toBeInTheDocument();
     expect(screen.getByText(/변화와 움직임이 생기기 쉬운 지점/)).toBeInTheDocument();
@@ -121,7 +146,7 @@ describe("SajuCalculationExplorer", () => {
   it.each(["year", "month", "day", "time"] as const)("shows the partial-pillar notice only when %s is missing", (missing) => {
     const snapshot = fixture();
     snapshot.pillars.time = { ganZhi: "병술" };
-    const { rerender } = render(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
+    const { rerender } = renderOpen(<SajuCalculationExplorer snapshot={snapshot} links={[]} />);
     fireEvent.click(screen.getByRole("button", { name: "목 · 나무 1개" }));
     expect(screen.queryByText(/출생 시각이 확정되지 않은 기둥/)).not.toBeInTheDocument();
     snapshot.pillars[missing] = null;

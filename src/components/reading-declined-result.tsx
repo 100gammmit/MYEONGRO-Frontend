@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { DeclinedReadingView } from "@/domain/reading/declined-result";
-import { AiGeneratedNotice } from "./ai-generated-notice";
+import { ReadingResultHeader } from "./reading-result-header";
 
 export function ReadingDeclinedResult({
   view,
@@ -17,13 +17,14 @@ export function ReadingDeclinedResult({
 }) {
   return (
     <article className="simple-page page-width record-detail">
-      <Link className="back-link" href={backHref}>← {backLabel}</Link>
-      <AiGeneratedNotice />
-      <header className="record-detail-header">
-        <p className="eyebrow">{view.kind === "tarot" ? "AI 타로" : "AI 사주"}</p>
-        <h1>{view.result.title}</h1>
-        <p>{view.result.message}</p>
-      </header>
+      <ReadingResultHeader
+        backHref={backHref}
+        backLabel={backLabel}
+        meta={[view.kind === "tarot" ? "AI 타로" : "AI 사주"]}
+        title={view.result.title}
+      >
+        <p className="result-lead">{view.result.message}</p>
+      </ReadingResultHeader>
       <section className="reading-guidance">
         <h2>지금 할 수 있는 일</h2>
         <ul>

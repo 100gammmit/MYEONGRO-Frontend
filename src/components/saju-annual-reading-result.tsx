@@ -6,7 +6,7 @@ import { annualCalendar, ANNUAL_BASE_EVIDENCE, type SajuAnnualReadingView } from
 import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
 import type { SajuEvidenceKey } from "@/domain/saju/result";
 import { redirectedReadingNotice } from "@/domain/reading/reading-mode";
-import { AiGeneratedNotice } from "./ai-generated-notice";
+import { ReadingResultHeader } from "./reading-result-header";
 import { ReadingModeNotice } from "./reading-mode-notice";
 import { SajuCalculationExplorer } from "./saju-calculation-explorer";
 import { LIMITATION_COPY } from "./saju-reading-result";
@@ -69,10 +69,9 @@ export function SajuAnnualReadingResult({ view, backHref = "/saju", backLabel = 
     ...(result.questionReading ? [{ ...result.questionReading, id: "annual-question" }] : []),
   ].map((item) => ({ ...item, evidenceKeys: item.evidenceKeys.filter((key): key is SajuEvidenceKey => ANNUAL_BASE_EVIDENCE.includes(key as SajuEvidenceKey)) }));
   return <article className={`saju-result page-width ${styles.report}`}>
-    <Link className="back-link" href={backHref}>← {backLabel}</Link>
-    <AiGeneratedNotice />
-    <ReadingModeNotice notice={redirectedReadingNotice(result.readingMode, result.questionRedirected)} />
-    <header className="saju-result-hero"><p className="eyebrow">AI 사주 · {input.targetYear} 한 해 리포트</p><h1>{result.title}</h1></header>
+    <ReadingResultHeader backHref={backHref} backLabel={backLabel} meta={["AI 사주", `${input.targetYear}년 한 해 리포트`]} title={result.title}>
+      <ReadingModeNotice notice={redirectedReadingNotice(result.readingMode, result.questionRedirected)} />
+    </ReadingResultHeader>
     {result.detailLevel === "brief" ? <aside className="notice">출생 시각을 확정할 수 없어 나를 읽는 기준(일간)도 하나로 정할 수 없었어요. 그래서 간략형으로 제공합니다. 연간 개요와 월별 요약, 계산된 적용 구간을 함께 살펴보세요.</aside> : null}
     <section id="annual-overview" className={styles.section} tabIndex={-1}><h2>{result.annualOverview.heading}</h2><p>{result.annualOverview.body}</p></section>
     <section aria-labelledby="annual-months-heading" className={styles.section}>

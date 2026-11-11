@@ -14,7 +14,7 @@ import {
 } from "@/domain/reading/reading-mode";
 
 import { ReadingModeNotice } from "./reading-mode-notice";
-import { AiGeneratedNotice } from "./ai-generated-notice";
+import { ReadingResultHeader } from "./reading-result-header";
 import { SajuCalculationExplorer } from "./saju-calculation-explorer";
 
 const ELEMENT_LABELS: Record<string, string> = {
@@ -37,6 +37,8 @@ const RELATION_LABELS: Record<string, string> = {
   branch_break: "지지의 파",
   branch_punishment: "지지의 형",
 };
+
+const FLOW_COUNT_WORDS: Readonly<Record<number, string>> = { 3: "세", 4: "네", 5: "다섯", 6: "여섯" };
 
 export const LIMITATION_COPY: Record<string, { title: string; body: string }> = {
   BIRTH_TIME_UNKNOWN: {
@@ -75,9 +77,10 @@ export function SajuReadingResult({
     : "luckCycle" in snapshot ? snapshot.luckCycle?.periods.find(
       (period) => period.startYear <= snapshot.targetYear && snapshot.targetYear <= period.endYear,
     ) : undefined;
-  const resultEyebrow = view.result.readingMode === "standard"
-    ? isVersionFive ? "AI 사주" : `AI 사주 · ${sajuFocusAreaLabel(view.input.focusArea)}`
-    : `AI 사주 · ${fortuneReadingModeLabel(view.result.readingMode)}`;
+  // What kind of saju reading this is, read left to right in the header beside the year.
+  const resultMeta = view.result.readingMode === "standard"
+    ? isVersionFive ? ["AI 사주"] : ["AI 사주", sajuFocusAreaLabel(view.input.focusArea)]
+    : ["AI 사주", fortuneReadingModeLabel(view.result.readingMode)];
   const modeNotice = isVersionFive
     ? redirectedReadingNotice(view.result.readingMode, view.result.questionRedirected)
     : sajuReadingModeNotice(
@@ -86,51 +89,80 @@ export function SajuReadingResult({
         view.result.questionRedirected,
       );
 
+  const flows = [
+    ...view.result.natalSections.map((section) => ({ ...section, id: `saju-${section.id}` })),
+    { ...view.result.annualReading, id: "saju-annual" },
+  ];
+  const flowsTitle = FLOW_COUNT_WORDS[flows.length] ? `${FLOW_COUNT_WORDS[flows.length]} 가지 흐름` : "흐름 해석";
+
   return (
     <article className="saju-result page-width">
-      <Link className="back-link" href={backHref}>← {backLabel}</Link>
-      <AiGeneratedNotice />
-      <ReadingModeNotice notice={modeNotice} />
-      <header className="saju-result-hero">
-        <p className="eyebrow">{resultEyebrow}</p>
-        <h1>{view.result.title}</h1>
-      </header>
+      <ReadingResultHeader
+        backHref={backHref}
+        backLabel={backLabel}
+        meta={[...resultMeta, `${snapshot.targetYear}년`]}
+        title={view.result.title}
+      >
+        <ReadingModeNotice notice={modeNotice} />
+      </ReadingResultHeader>
 
+      <nav aria-label="사주 리딩 목차" className="saju-result-toc">
+        <a href="#saju-answer">질문 해석과 요약</a>
+        <a href="#saju-flows">{flowsTitle}</a>
+        <a href="#saju-calculation">명식과 계산 기준</a>
+        <a href="#saju-limitations">계산 제한사항</a>
+      </nav>
+
+      {/* The answer to the question and the summary come first; how they were read follows. */}
+      <section className="result-answer saju-answer" id="saju-answer" aria-label="질문 해석과 리딩 요약">
+        <div id="saju-question" tabIndex={-1}>
+          <p className="result-answer-label">질문 해석</p>
+          <h2>{view.result.questionReading.heading}</h2>
+          <p>{view.result.questionReading.body}</p>
+          <EvidenceDetails evidenceKeys={view.result.questionReading.evidenceKeys} snapshot={snapshot} />
+        </div>
+        <div className="saju-answer-summary" id="saju-summary">
+          <h2 className="result-answer-label">리딩 요약</h2>
+          <p>{view.result.summary}</p>
+        </div>
+      </section>
 
       {snapshot.limitations.length > 0 ? (
         <aside className="saju-limitation-summary">
           <div>
             <strong>확정할 수 있는 범위만 읽었어요</strong>
-            <span>{snapshot.limitations.map((code) => LIMITATION_COPY[code]?.title ?? "추가 계산 제한사항").join(" · ")}</span>
+            <span>{snapshot.limitations.map((code) => LIMITATION_COPY[code]?.title ?? "추가 계산 제한사항").join(", ")}</span>
           </div>
-          <a href="#saju-limitations">자세히 보기</a>
+          <a href="#saju-limitations">계산 제한사항</a>
         </aside>
       ) : null}
 
-      <nav aria-label="사주 리딩 목차" className="saju-result-toc">
-        <a href="#saju-calculation">명식과 계산 기준</a>
-        {view.result.natalSections.map((section) => <a href={`#saju-${section.id}`} key={section.id}>{section.heading}</a>)}
-        <a href="#saju-annual">{view.result.annualReading.heading}</a>
-        <a href="#saju-question">질문 리딩</a>
-        <a href="#saju-summary">리딩 요약</a>
-        <a href="#saju-limitations">계산 제한사항</a>
-      </nav>
+      <section className="saju-flows" id="saju-flows" aria-labelledby="saju-flows-title">
+        <h2 id="saju-flows-title">{flowsTitle}</h2>
+        <p className="saju-flows-lead">명식에서 읽은 성향과 {snapshot.targetYear}년의 흐름이에요.</p>
+        {flows.map((flow) => (
+          <section id={flow.id} key={flow.id} tabIndex={-1}>
+            <h3>{flow.heading}</h3>
+            <p>{flow.body}</p>
+            <EvidenceDetails evidenceKeys={flow.evidenceKeys} snapshot={snapshot} />
+          </section>
+        ))}
+      </section>
 
       <section className="saju-calculation" id="saju-calculation">
         <div className="saju-section-heading">
-          <h2>확정된 명식과 계산 기준</h2>
+          <h2>명식과 계산 기준</h2>
           <p>가능한 출생 시각 후보에서 공통으로 확인된 계산만 표시합니다.</p>
         </div>
         <SajuCalculationExplorer key={view.id} snapshot={snapshot} links={[
-          ...view.result.natalSections.map((section) => ({ ...section, id: `saju-${section.id}` })),
-          { ...view.result.annualReading, id: "saju-annual" },
+          ...flows,
           { ...view.result.questionReading, id: "saju-question" },
         ]} />
         <dl className="saju-calculation-facts">
           {snapshot.dayMaster ? <div><dt>일간</dt><dd>{snapshot.dayMaster}</dd></div> : null}
           <div><dt>오행 분포</dt><dd>{elementBalanceText(snapshot)}</dd></div>
           <div><dt>{snapshot.targetYear}년 세운</dt><dd>{annualFortuneText(snapshot)}</dd></div>
-          {currentLuck ? <div><dt>현재 대운</dt><dd>{currentLuck.ganZhi} · {currentLuck.startYear}-{currentLuck.endYear}</dd></div> : null}
+          {currentLuck ? <div><dt>현재 대운</dt><dd>{currentLuck.ganZhi} ({currentLuck.startYear}-{currentLuck.endYear})</dd></div> : null}
         </dl>
         <details className="saju-calculation-meta">
           <summary>계산 버전과 시간 기준 보기</summary>
@@ -142,32 +174,6 @@ export function SajuReadingResult({
             ) : null}
           </dl>
         </details>
-      </section>
-
-      <div className="saju-reading-sections">
-        {view.result.natalSections.map((section) => (
-          <section id={`saju-${section.id}`} key={section.id} tabIndex={-1}>
-            <h2>{section.heading}</h2>
-            <p>{section.body}</p>
-            <EvidenceDetails evidenceKeys={section.evidenceKeys} snapshot={snapshot} />
-          </section>
-        ))}
-        <section id="saju-annual" tabIndex={-1}>
-          <h2>{view.result.annualReading.heading}</h2>
-          <p>{view.result.annualReading.body}</p>
-          <EvidenceDetails evidenceKeys={view.result.annualReading.evidenceKeys} snapshot={snapshot} />
-        </section>
-        <section className="saju-question-reading" id="saju-question" tabIndex={-1}>
-          <p className="eyebrow">질문 해석</p>
-          <h2>{view.result.questionReading.heading}</h2>
-          <p>{view.result.questionReading.body}</p>
-          <EvidenceDetails evidenceKeys={view.result.questionReading.evidenceKeys} snapshot={snapshot} />
-        </section>
-      </div>
-
-      <section className="saju-reading-summary" id="saju-summary">
-        <h2>리딩 요약</h2>
-        <p>{view.result.summary}</p>
       </section>
 
       <section className="saju-limitations" id="saju-limitations">
@@ -204,7 +210,7 @@ function EvidenceDetails({
 }) {
   return (
     <details className="saju-evidence">
-      <summary>이 해석에 사용한 계산 근거</summary>
+      <summary>계산 근거 보기</summary>
       <ul>{evidenceKeys.map((key) => <li key={key}>{evidenceText(key, snapshot)}</li>)}</ul>
     </details>
   );

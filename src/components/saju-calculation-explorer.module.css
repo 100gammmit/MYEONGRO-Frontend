@@ -1,6 +1,7 @@
 .explorer { margin-block: 24px; }
-.intro { color: var(--text-primary); font-size: 16px; font-weight: 600; }
-.intro span { display: block; margin-top: 8px; color: var(--text-secondary); font-size: 14px; font-weight: 400; line-height: 1.7; }
+.intro { margin: 16px 0 0; color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+.toggle { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; padding: 0; border: 0; background: none; color: var(--text-accent-strong); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.toggle:focus-visible { outline: 3px solid var(--text-accent-strong); outline-offset: 4px; border-radius: var(--radius-xs); }
 .controls { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 24px; }
 .controls button { padding: 10px 14px; min-height: 44px; max-width: 100%; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-record); color: var(--text-secondary); font: inherit; font-size: 14px; text-align: left; overflow-wrap: anywhere; cursor: pointer; }
 .controls button[aria-pressed="true"] { border: 2px solid var(--text-accent-strong); padding: 9px 13px; color: var(--text-accent-strong); font-weight: 700; background: var(--surface-tint-1); }

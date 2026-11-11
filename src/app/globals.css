@@ -526,14 +526,45 @@ main:focus { outline: none; }
 .wizard-card[role="alert"] h1 { color: var(--text-danger); font-size: 20px; }
 .wizard-card[role="alert"] > p:first-of-type { color: var(--text-danger); margin: 0 0 20px; line-height: 1.7; }
 
-.result-reveal-list { display: grid; gap: 20px; }
-.result-reveal { display: grid; grid-template-columns: 190px 1fr; gap: 32px; align-items: center; padding: 28px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-tint-1); animation: reveal-in .45s ease both; }
-.result-reveal .revealed-card { width: 100%; margin: 0; }
-.result-reveal .revealed-card-label { display: block; margin-bottom: 10px; color: var(--text-accent); font-size: 11px; letter-spacing: .08em; text-align: center; }
-.result-reveal h2 { margin-top: 0; color: var(--text-accent-strong); font-size: 25px; }
-.result-reveal p { color: var(--text-secondary); line-height: 1.8; }
-.reveal-button { margin-inline: auto; }
-.result-summary { animation: reveal-in .45s ease both; }
+/* A result: header, then the answer, then each card beside its interpretation. */
+.result-header { margin-bottom: 4px; }
+.result-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; }
+.result-meta { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 16px; margin: 0; color: var(--text-muted); font-size: 13px; }
+.result-meta span:first-child { color: var(--text-accent); font-weight: 600; }
+.result-header h1 { margin: 28px 0 0; font-size: 50px; font-weight: 300; line-height: 1.25; letter-spacing: -.03em; word-break: keep-all; text-wrap: balance; }
+.result-header .reading-mode-notice { margin-top: 20px; }
+.result-lead { margin: 18px 0 0; color: var(--text-secondary); line-height: 1.8; }
+.result-answer { margin-top: 36px; padding: 32px 40px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--gradient-panel); scroll-margin-top: 20px; }
+.result-answer:focus { outline: none; }
+.result-answer:focus-visible { box-shadow: var(--focus-ring); }
+.result-answer.waiting { padding: 22px 28px; border-style: dashed; background: none; }
+.result-answer-label { margin: 0 0 12px; color: var(--text-accent); font: 600 13px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .02em; }
+.result-answer > p, .saju-answer-summary > p, .saju-answer #saju-question > p:not(.result-answer-label) { margin: 0; color: var(--text-primary); font-size: 18px; line-height: 1.9; text-wrap: pretty; }
+.result-answer.waiting > p { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+.saju-answer h2:not(.result-answer-label) { margin: 0 0 14px; font-size: 32px; font-weight: 400; letter-spacing: -.02em; }
+.saju-answer-summary { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border-hairline); }
+.tarot-result { max-width: var(--w-wide); padding-block: 40px 110px; }
+.result-group { margin-top: 56px; }
+.result-group > h2 { margin: 0 0 16px; font-size: 32px; font-weight: 400; letter-spacing: -.02em; }
+.result-panels { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.result-panels.compare { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.result-panel { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 32px; align-items: start; padding: 24px 28px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); }
+.result-panel.closed { border-color: var(--border-hairline); background: none; }
+.result-panels.compare .result-panel { grid-template-columns: 110px minmax(0, 1fr); gap: 20px; padding: 24px; }
+.result-panel-card .revealed-card { max-width: none; margin: 0; }
+.result-panel-back { display: block; width: 100%; aspect-ratio: .621; box-shadow: var(--elevation-1); }
+.result-position { margin: 4px 0 8px; color: var(--text-accent); font-size: 13px; font-weight: 600; }
+.result-panel h3 { margin: 0 0 10px; font-size: 24px; font-weight: 400; line-height: 1.35; word-break: keep-all; text-wrap: pretty; }
+.result-panels.compare .result-panel h3 { font-size: 20px; }
+.result-panel p:not(.result-position) { margin: 0; color: var(--text-secondary); font-size: 16px; line-height: 1.85; text-wrap: pretty; }
+.result-panel .result-waiting { color: var(--text-subtle); font-size: 15px; }
+.reveal-button { margin-top: 18px; min-width: 160px; }
+.result-closing { margin-top: 32px; }
+.saju-flows { margin-top: 72px; }
+.saju-flows > h2 { margin: 0 0 8px; font-size: 32px; font-weight: 400; letter-spacing: -.02em; }
+.saju-flows-lead { margin: 0; color: var(--text-muted); font-size: 14px; }
+.saju-flows section { padding: 28px 0; border-bottom: 1px solid var(--border-hairline); }
+.saju-flows h3 { margin: 0 0 10px; font-size: 22px; font-weight: 400; }
 @keyframes reveal-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 /* ── Stones: five cut stones set in the card-back well (canvas sheets 13–14) ──────────────────
@@ -606,9 +637,6 @@ main:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   .card-flip-inner, .revealed-card .tarot-card-caption { transition: none; }
 }
-.result-hero { text-align: center; padding: 52px 30px; border-block: 1px solid var(--border-default); }
-.result-hero blockquote { max-width: var(--w-read); margin: 0 auto 18px; font-size: 40px; line-height: 1.5; color: var(--text-accent-strong); }
-.result-hero > p:last-child { color: var(--text-muted); }
 .revealed-card { max-width: 190px; margin: 15px auto 22px; }
 .result-actions { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
 .wizard-nav { display: flex; gap: 10px; }
@@ -650,7 +678,7 @@ main:focus { outline: none; }
 .signup-terms-agreement { margin: 0 0 4px; }
 .signup-ai-consent-notice { margin: 0 0 4px; color: var(--text-muted); font-size: 12px; line-height: 1.65; }
 .signup-age-error { margin: 0; color: var(--text-danger); font-size: 13px; line-height: 1.7; }
-.ai-generated-notice { margin: 14px 0 22px; padding: 12px 16px; color: var(--text-accent-strong); background: var(--surface-tint-2); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; line-height: 1.6; }
+.ai-generated-notice { margin: 14px 0 0; color: var(--text-muted); font-size: 13px; line-height: 1.6; }
 .danger-zone { max-width: var(--w-read); margin-top: 60px; padding-top: 28px; border-top: 1px solid var(--border-danger); }
 .danger-zone h2 { font-size: 20px; font-weight: 300; }
 .danger-zone p { color: var(--text-muted); font-size: 13px; }
@@ -687,7 +715,6 @@ main:focus { outline: none; }
 .reading-mode-notice strong { display: block; color: var(--text-primary); font-size: 16px; font-weight: 600; line-height: 1.5; }
 .reading-mode-notice p { margin: 4px 0 0; color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
 .saju-result > .reading-mode-notice { margin-top: 32px; }
-.saju-result > .reading-mode-notice + .saju-result-hero { margin-top: 28px; }
 .record-state { margin-top: 35px; padding: 40px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); }
 .record-actions { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--border-default); }
 .record-actions > p { color: var(--text-danger); }
@@ -695,20 +722,16 @@ main:focus { outline: none; }
 .record-delete-button { padding: 14px 18px; background: transparent; border: 1px solid var(--border-danger); border-radius: var(--radius-sm); color: var(--text-danger); }
 .record-delete-button:disabled { cursor: not-allowed; border-color: var(--border-default); color: var(--text-subtle); }
 .saju-result { max-width: var(--w-wide); padding-block: 54px 90px; }
-.saju-result-hero { max-width: var(--w-read); margin: 58px auto 34px; text-align: center; }
-.saju-result-hero h1 { margin: 12px 0 22px; font-size: 64px; font-weight: 300; letter-spacing: -.035em; }
-.saju-result-hero > p, .saju-result-hero blockquote { color: var(--text-secondary); line-height: 1.85; }
-.saju-result-hero blockquote { margin: 26px 0 0; padding-inline: 34px; font-size: 16px; }
-.saju-limitation-summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0 0 22px; padding: 18px 22px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); color: var(--text-secondary); }
+.saju-limitation-summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 16px 0 0; padding: 18px 22px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); color: var(--text-secondary); }
 .saju-limitation-summary strong { display: block; color: var(--text-primary); font-size: 14px; font-weight: 600; line-height: 1.6; }
 .saju-limitation-summary span { display: block; margin-top: 2px; font-size: 13px; line-height: 1.7; }
 .saju-limitation-summary a { display: inline-flex; flex: 0 0 auto; align-items: center; min-height: 44px; color: var(--text-accent-strong); font-size: 13px; }
 /* Chips wrap by their own length, so nine sections never leave one stranded on a last row. */
-.saju-result-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 44px; }
-.saju-result-toc a { display: inline-flex; flex: 0 0 auto; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); color: var(--text-secondary); font-size: 13px; font-weight: 600; white-space: nowrap; background: var(--surface-tint-2); scroll-margin-inline: 16px; }
-.saju-result-toc a:hover { border-color: var(--border-strong); color: var(--text-primary); }
-.saju-calculation, .saju-reading-sections section, .saju-limitations { scroll-margin-top: 20px; }
-.saju-calculation { margin-bottom: 42px; padding: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); }
+.saju-result-toc { display: flex; flex-wrap: wrap; gap: 0 24px; margin: 20px 0 0; }
+.saju-result-toc a { display: inline-flex; flex: 0 0 auto; align-items: center; min-height: 44px; color: var(--text-accent-strong); font-size: 14px; text-decoration: underline; text-underline-offset: 4px; }
+.saju-result-toc a:hover { color: var(--text-primary); }
+.saju-calculation, .saju-flows section, .saju-limitations, .saju-answer, .saju-flows { scroll-margin-top: 20px; }
+.saju-calculation { margin-top: 72px; }
 .saju-section-heading { margin-bottom: 24px; }
 .saju-section-heading h2 { margin: 6px 0 0; font-size: 32px; font-weight: 300; }
 .saju-pillar-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 24px; }
@@ -723,10 +746,7 @@ main:focus { outline: none; }
 .saju-calculation-meta dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; margin-bottom: 0; }
 .saju-calculation-meta dt { color: var(--text-muted); font-size: 12px; }
 .saju-calculation-meta dd { margin: 5px 0 0; overflow-wrap: anywhere; }
-.saju-reading-sections { display: grid; gap: 16px; }
-.saju-reading-sections section { padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-tint-1); }
-.saju-reading-sections h2 { margin: 0 0 14px; font-size: 25px; font-weight: 300; }
-.saju-reading-sections p, .saju-reading-summary p, .saju-limitations p { color: var(--text-secondary); line-height: 1.85; }
+.saju-flows p, .saju-reading-summary p, .saju-limitations p { color: var(--text-secondary); line-height: 1.85; }
 .saju-evidence { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-default); }
 .saju-evidence ul { margin-bottom: 0; padding-left: 20px; color: var(--text-muted); font-size: 13px; line-height: 1.8; }
 .saju-reading-summary { margin: 36px 0 16px; padding: 30px; border: 1px solid var(--border-strong); border-radius: var(--radius-lg); }
@@ -780,6 +800,17 @@ main:focus { outline: none; }
 }
 
 @media (max-width: 760px) {
+  .tarot-result { padding-top: 28px; }
+  .result-header h1 { margin-top: 18px; font-size: 32px; line-height: 1.3; }
+  .result-answer { margin-top: 24px; padding: 22px 20px; }
+  .result-answer > p, .saju-answer-summary > p, .saju-answer #saju-question > p:not(.result-answer-label) { font-size: 16px; line-height: 1.85; }
+  .result-group, .saju-flows, .saju-calculation { margin-top: 44px; }
+  .result-group > h2, .saju-flows > h2, .saju-answer h2:not(.result-answer-label) { font-size: 25px; }
+  .result-panels.compare { grid-template-columns: 1fr; }
+  .result-panel, .result-panels.compare .result-panel { grid-template-columns: 92px minmax(0, 1fr); gap: 16px; padding: 18px; }
+  .result-panel h3, .result-panels.compare .result-panel h3 { font-size: 20px; }
+  .result-panel p:not(.result-position) { font-size: 15px; line-height: 1.8; }
+  .reveal-button { width: 100%; }
   /* The gutter is named so full-bleed rows inside the page can reach the screen edge from it. */
   .page-width { --page-gutter: max(14px, calc(50vw - 310px)); width: calc(100% - 2 * var(--page-gutter)); }
   .site-header { width: calc(100% - 28px); height: 56px; }
@@ -882,8 +913,6 @@ main:focus { outline: none; }
   .saju-choice-row.chips { grid-template-columns: repeat(3, 1fr); }
   .saju-review-list div { grid-template-columns: 1fr; gap: 6px; }
   .saju-result { padding-top: 28px; }
-  .saju-result-hero { margin-top: 42px; text-align: left; }
-  .saju-result-hero blockquote { padding-inline: 0; }
   .saju-limitation-summary { align-items: flex-start; flex-direction: column; }
   .saju-calculation-facts, .saju-calculation-meta dl { grid-template-columns: 1fr; }
   /* One swipeable row instead of nine stacked buttons; the faded edge shows there is more. */
@@ -893,13 +922,11 @@ main:focus { outline: none; }
   .saju-result-toc::-webkit-scrollbar { display: none; }
   .saju-result-toc a { scroll-snap-align: start; }
   .saju-pillar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .saju-calculation, .saju-reading-sections section, .saju-reading-summary, .saju-limitations { padding: 22px 20px; }
+  .saju-reading-summary { padding: 22px 20px; }
   .saju-result-actions { flex-direction: column; }
   .saju-result-actions a, .saju-result-actions button { width: 100%; }
   .tarot-candidates { gap: 7px; }
   .tarot-candidates .tarot-back { min-width: 0; }
-  .result-reveal { grid-template-columns: 1fr; text-align: center; padding: 22px; }
-  .result-reveal .revealed-card { max-width: 170px; margin-inline: auto; }
   .pillars { gap: 0; }
   .pillars div { padding: 18px 5px; }
   .pillars strong { font-size: 25px; }
@@ -910,14 +937,12 @@ main:focus { outline: none; }
   .wizard-heading h1 { font-size: 32px; }
   .wizard-heading p { font-size: 14px; line-height: 1.75; }
   .birth-reveal { grid-template-columns: 1fr; }
-  .result-hero blockquote { font-size: 32px; }
   .simple-page > h1 { font-size: 40px; }
   .updates-intro { margin-top: -14px; margin-bottom: 32px; font-size: 14px; }
   .updates-empty { padding: 32px 22px; }
   .update-entry { padding: 24px 20px; }
   .update-entry h2 { font-size: 20px; }
   .record-detail-header h1, .record-state h1 { font-size: 40px; }
-  .saju-result-hero h1 { font-size: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -6,7 +6,70 @@ import { MAJOR_ARCANA, TAROT_SPREADS } from "@/domain/tarot";
 import { TarotReadingResult } from "./tarot-reading-result";
 import { AI_GENERATED_NOTICE } from "./ai-generated-notice";
 
+function revealAll(count: number) {
+  for (let index = 0; index < count; index += 1) {
+    fireEvent.click(screen.getByRole("button", { name: "이 카드 공개" }));
+  }
+}
+
+function standardResult(spreadType: "mind_three_card" | "choice_five_card") {
+  return {
+    readingMode: "standard" as const,
+    questionRedirected: false,
+    title: "오늘의 리딩",
+    summary: "오늘의 흐름을 확인했어요.",
+    sections: TAROT_SPREADS[spreadType].positions.map((position) => ({
+      position: position.id,
+      heading: `${position.label} 해석`,
+      body: "천천히 살펴보세요.",
+    })),
+    disclaimer: "자기 성찰을 위한 참고 정보입니다.",
+  };
+}
+
 describe("TarotReadingResult", () => {
+  it("keeps the title and summary back until the last card, then opens the summary above the cards", () => {
+    render(
+      <TarotReadingResult
+        cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
+        result={standardResult("mind_three_card")}
+        spreadType="mind_three_card"
+      />,
+    );
+
+    expect(screen.getByRole("heading", { level: 1, name: "카드 세 장이 놓였어요" })).toBeInTheDocument();
+    expect(screen.getByText("카드를 한 장씩 공개하면, 마지막 카드 다음에 이 자리에 요약이 열려요.")).toBeInTheDocument();
+    expect(screen.getAllByText("아직 공개하지 않은 카드예요.")).toHaveLength(3);
+    expect(screen.getAllByRole("button", { name: "이 카드 공개" })).toHaveLength(1);
+
+    revealAll(3);
+
+    expect(screen.getByRole("heading", { level: 1, name: "오늘의 리딩" })).toBeInTheDocument();
+    const summary = screen.getByRole("region", { name: "리딩 요약" });
+    expect(summary).toHaveTextContent("오늘의 흐름을 확인했어요.");
+    expect(summary).toHaveFocus();
+    const cards = screen.getByRole("heading", { level: 2, name: "카드별 해석" });
+    expect(summary.compareDocumentPosition(cards) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("splits a choice reading into its criteria and the two options side by side", () => {
+    render(
+      <TarotReadingResult
+        cardIds={MAJOR_ARCANA.slice(0, 5).map((card) => card.id)}
+        record={{ backHref: "/records", backLabel: "내 기록", dateLabel: "2026. 11. 11." }}
+        result={standardResult("choice_five_card")}
+        spreadType="choice_five_card"
+      />,
+    );
+
+    const criteria = screen.getByRole("region", { name: "선택의 기준" });
+    const compare = screen.getByRole("region", { name: "두 선택 비교" });
+    expect(criteria.querySelectorAll("li")).toHaveLength(3);
+    expect(compare.querySelectorAll("li")).toHaveLength(2);
+    expect(compare).toHaveTextContent("선택 A");
+    expect(compare).toHaveTextContent("선택 B");
+  });
+
   it("reveals the persisted result and links a new reading to the tarot entry route", () => {
     const definition = TAROT_SPREADS.mind_three_card;
     render(
@@ -28,15 +91,14 @@ describe("TarotReadingResult", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "첫 카드 공개" }));
-    fireEvent.click(screen.getByRole("button", { name: "다음 카드 공개" }));
-    fireEvent.click(screen.getByRole("button", { name: "다음 카드 공개" }));
+    revealAll(3);
 
-    expect(screen.getByText("오늘의 리딩")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "오늘의 리딩" })).toBeInTheDocument();
+    expect(screen.getByText("오늘의 흐름을 확인했어요.")).toBeInTheDocument();
     expect(screen.queryByText("오늘부터 시도할 작은 행동")).not.toBeInTheDocument();
-    // Each card's reading is a section of the page, so it sits at the same level as the summary.
-    expect(screen.getAllByRole("heading", { level: 2, name: "마음의 흐름" })).toHaveLength(3);
-    expect(screen.getByRole("heading", { level: 2, name: "오늘의 리딩" })).toBeInTheDocument();
+    // Each card's reading sits under the "카드별 해석" section heading.
+    expect(screen.getByRole("heading", { level: 2, name: "카드별 해석" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 3, name: "마음의 흐름" })).toHaveLength(3);
     expect(screen.getByLabelText("생성형 AI 사용 안내")).toHaveTextContent(AI_GENERATED_NOTICE);
     expect(screen.getByRole("link", { name: "새로운 리딩 시작" }))
       .toHaveAttribute("href", "/tarot");
@@ -65,7 +127,7 @@ describe("TarotReadingResult", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "첫 카드 공개" }));
+    fireEvent.click(screen.getByRole("button", { name: "이 카드 공개" }));
 
     const card = screen.getByLabelText(`${definition.positions[0].label}: ${MAJOR_ARCANA[0].name}`);
     expect(card.querySelector(".card-flip-back")).toHaveAttribute("aria-hidden", "true");
@@ -105,7 +167,7 @@ describe("TarotReadingResult", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: "첫 카드 공개" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "이 카드 공개" })).toBeInTheDocument();
     expect(document.querySelectorAll(".card-face img")).toHaveLength(0);
     expect(requested).toEqual(
       cards.map((card) => `/images/tarot/major-arcana/${card.id}-480.webp`),
@@ -140,7 +202,7 @@ describe("TarotReadingResult", () => {
       />,
     );
 
-    expect(screen.queryByRole("button", { name: "첫 카드 공개" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "이 카드 공개" })).not.toBeInTheDocument();
     expect(container.querySelectorAll(".card-flip-inner.flipped")).toHaveLength(3);
     expect(container.querySelectorAll(".tarot-card-caption.shown")).toHaveLength(3);
     expect(screen.getByRole("link", { name: "내 기록" })).toHaveAttribute("href", "/records");
@@ -180,7 +242,7 @@ describe("TarotReadingResult", () => {
     const notice = screen.getByRole("note");
     expect(notice).toHaveTextContent("질문 대신 금전운을 읽었어요");
     expect(notice).toHaveTextContent("중대한 결정이 걸린 질문은 명로가 대신 답할 수 없어요.");
-    const reveal = screen.getByRole("button", { name: "첫 카드 공개" });
+    const reveal = screen.getByRole("button", { name: "이 카드 공개" });
     expect(notice.compareDocumentPosition(reveal) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
@@ -205,9 +267,7 @@ describe("TarotReadingResult", () => {
       />,
     );
 
-    for (let index = 0; index < 5; index += 1) {
-      fireEvent.click(screen.getByRole("button", { name: index === 0 ? "첫 카드 공개" : "다음 카드 공개" }));
-    }
+    revealAll(5);
 
     expect(screen.getByText(/명로가 대신 답할 수 없어요\./)).toBeInTheDocument();
     expect(screen.getByText("첫 번째 조건")).toBeInTheDocument();
@@ -241,9 +301,7 @@ describe("TarotReadingResult", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "첫 카드 공개" }));
-    fireEvent.click(screen.getByRole("button", { name: "다음 카드 공개" }));
-    fireEvent.click(screen.getByRole("button", { name: "다음 카드 공개" }));
+    revealAll(3);
     expect(screen.getByText(label)).toBeInTheDocument();
     expect(screen.getByText("운에 영향을 주는 요인")).toBeInTheDocument();
     expect(screen.getByText("앞으로의 운")).toBeInTheDocument();

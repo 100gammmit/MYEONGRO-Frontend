@@ -11,8 +11,9 @@ import { sajuReadingRecord } from "@/test-fixtures/saju-reading";
 describe("SajuReadingResult", () => {
   it("moves focus from calculation evidence to the corresponding reading", () => {
     render(<SajuReadingResult view={sajuReadingView()} />);
+    fireEvent.click(screen.getByRole("button", { name: "내 사주 탐색 열기" }));
     const nav = screen.getByRole("navigation", { name: "선택한 계산을 사용한 리딩" });
-    fireEvent.click(within(nav).getByRole("link", { name: "나를 움직이는 중심 →" }));
+    fireEvent.click(within(nav).getByRole("link", { name: "나를 움직이는 중심" }));
     expect(document.activeElement?.id).toBe("saju-core");
   });
 
@@ -42,6 +43,7 @@ describe("SajuReadingResult", () => {
     });
     expect(view).not.toBeNull();
     const { container, unmount } = render(<SajuReadingResult view={view!} />);
+    fireEvent.click(screen.getByRole("button", { name: "내 사주 탐색 열기" }));
     expect(screen.getByRole("group", { name: "사주 탐색 항목" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "수 · 물 2개" }));
     expect(container.querySelectorAll('[data-highlighted="true"]')).toHaveLength(3);
@@ -53,24 +55,25 @@ describe("SajuReadingResult", () => {
 
     expect(screen.getByText("AI 사주")).toBeInTheDocument();
     expect(screen.getByLabelText("생성형 AI 사용 안내")).toHaveTextContent(AI_GENERATED_NOTICE);
-    expect(screen.getByText("병오 · 2023-2032")).toBeInTheDocument();
+    expect(screen.getByText("병오 (2023-2032)")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "새 사주 리딩" })).toHaveAttribute("href", "/saju");
     expect(container).not.toHaveTextContent("출생 시각 정확도");
     expect(container).not.toHaveTextContent("후보 1,440개");
     expect(container).not.toHaveTextContent("1992-08-17");
   });
 
-  it("keeps the mobile document order from calculation through limitations", () => {
+  it("puts the question and summary first, then the flows, the chart and the limitations", () => {
     const { container } = render(<SajuReadingResult view={sajuReadingView()} />);
     const ids = Array.from(container.querySelectorAll("[id^='saju-']")).map(
       (element) => element.id,
     );
 
     expect(ids).toEqual([
-      "saju-calculation", "saju-explorer-description", "saju-core", "saju-strengths", "saju-relationship",
-      "saju-work", "saju-annual", "saju-question", "saju-summary", "saju-limitations",
+      "saju-answer", "saju-question", "saju-summary", "saju-flows", "saju-flows-title",
+      "saju-core", "saju-strengths", "saju-relationship", "saju-work", "saju-annual",
+      "saju-calculation", "saju-limitations",
     ]);
-    expect(screen.getByRole("link", { name: "리딩 요약" })).toHaveAttribute("href", "#saju-summary");
+    expect(screen.getByRole("link", { name: "질문 해석과 요약" })).toHaveAttribute("href", "#saju-answer");
     expect(container.querySelector("#saju-summary")).toHaveTextContent(sajuReadingView().result.summary);
     expect(screen.queryByText("지금 시도할 작은 행동")).not.toBeInTheDocument();
   });
@@ -82,7 +85,7 @@ describe("SajuReadingResult", () => {
     expect(pillarGrid).not.toBeNull();
     expect(within(pillarGrid as HTMLElement).getByText("연주")).toBeInTheDocument();
     expect(within(pillarGrid as HTMLElement).queryByText("시주")).not.toBeInTheDocument();
-    expect(screen.getAllByText("이 해석에 사용한 계산 근거")).toHaveLength(6);
+    expect(screen.getAllByText("계산 근거 보기")).toHaveLength(6);
     expect(screen.getAllByText("시주 불확실").length).toBeGreaterThan(0);
   });
 
