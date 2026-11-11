@@ -192,7 +192,7 @@ export function TarotReadingResult({
         backHref={record?.backHref ?? "/tarot"}
         backLabel={record?.backLabel ?? "타로"}
         meta={[definition.name, record?.dateLabel]}
-        title={allRevealed ? result.title : `카드 ${CARD_COUNT_WORDS[definition.cardCount]} 장이 놓였어요`}
+        title={allRevealed ? result.title : `카드 ${CARD_COUNT_WORDS[definition.cardCount] ?? definition.cardCount} 장이 놓였어요`}
       >
         {/* The changed focus is explained before the cards, whose position labels already reflect it. */}
         <ReadingModeNotice notice={redirectedReadingNotice(result.readingMode, result.questionRedirected)} />

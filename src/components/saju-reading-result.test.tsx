@@ -71,7 +71,7 @@ describe("SajuReadingResult", () => {
     expect(ids).toEqual([
       "saju-answer", "saju-question", "saju-summary", "saju-flows", "saju-flows-title",
       "saju-core", "saju-strengths", "saju-relationship", "saju-work", "saju-annual",
-      "saju-calculation", "saju-limitations",
+      "saju-calculation", "saju-explorer-panel", "saju-explorer-description", "saju-limitations",
     ]);
     expect(screen.getByRole("link", { name: "질문 해석과 요약" })).toHaveAttribute("href", "#saju-answer");
     expect(container.querySelector("#saju-summary")).toHaveTextContent(sajuReadingView().result.summary);
