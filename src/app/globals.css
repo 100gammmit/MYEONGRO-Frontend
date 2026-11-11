@@ -909,6 +909,8 @@ main:focus { outline: none; }
   .consent-modal-actions { padding: 14px 20px 20px; }
   .consent-modal-actions button { flex: 1; }
   .choice-list.two-columns, .choice-list.three-columns, .choice-fields, .saju-choice-row { grid-template-columns: 1fr; }
+  /* Four short focus areas stay two by two on a phone, as before. */
+  .choice-list.two-columns.keep-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .confirm-slots.count-5 { gap: 6px; }
   .saju-choice-row.chips { grid-template-columns: repeat(3, 1fr); }
   .saju-review-list div { grid-template-columns: 1fr; gap: 6px; }

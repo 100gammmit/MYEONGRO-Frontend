@@ -537,13 +537,22 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
         step={2}
         totalSteps={TOTAL_STEPS}
         back={{ label: "이전", onClick: returnToLastCard }}
+        actions={(
+          <button
+            className="primary-button full-button"
+            disabled={focusedSlot === null}
+            onClick={confirmSelection}
+            type="button"
+          >
+            {selectedSlots.length === definition.cardCount - 1 ? "고른 카드 확인하기" : "다음 카드 고르러 가기"}
+          </button>
+        )}
       >
         <DrawPanel
           choiceOptions={choiceOptions}
           definition={definition}
           focusedSlot={focusedSlot}
           selectedSlots={selectedSlots}
-          onConfirm={confirmSelection}
           onSelect={focusSelection}
           onKeyDown={handleSlotKeyDown}
         />
@@ -681,7 +690,6 @@ function DrawPanel({
   definition,
   focusedSlot,
   selectedSlots,
-  onConfirm,
   onSelect,
   onKeyDown,
 }: {
@@ -689,7 +697,6 @@ function DrawPanel({
   definition: (typeof TAROT_SPREADS)[TarotSpreadType];
   focusedSlot: number | null;
   selectedSlots: readonly number[];
-  onConfirm: () => void;
   onSelect: (slot: number) => void;
   onKeyDown: (
     event: KeyboardEvent<HTMLButtonElement>,
@@ -697,7 +704,6 @@ function DrawPanel({
   ) => void;
 }) {
   const selectedCount = selectedSlots.length;
-  const isLastPosition = selectedCount === definition.cardCount - 1;
   const currentPosition = definition.positions[selectedCount];
   // The typed option stays in memory until the reading is requested, so its card can name it here.
   const choiceText = currentPosition.id === "option_a"
@@ -736,14 +742,6 @@ function DrawPanel({
           </button>
         ))}
       </div>
-      <button
-        className="primary-button full-button narrow-button"
-        disabled={focusedSlot === null}
-        onClick={onConfirm}
-        type="button"
-      >
-        {isLastPosition ? "고른 카드 확인하기" : "다음 카드 고르러 가기"}
-      </button>
     </div>
   );
 }

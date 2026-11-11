@@ -94,12 +94,13 @@ export default async function ReadingDetailPage({
 
   return (
     <article className="simple-page page-width record-detail">
-      <Link className="back-link" href="/records">
-        ← 내 기록
-      </Link>
-      <p className="eyebrow">
-        {reading.kind === "tarot" ? "AI 타로" : "AI 사주"}
-      </p>
+      {/* The same top row as a finished result, without the AI notice: there is no result yet. */}
+      <div className="result-top">
+        <Link className="back-link" href="/records">
+          <span aria-hidden="true">←</span> 내 기록
+        </Link>
+        <p className="result-meta"><span>{reading.kind === "tarot" ? "AI 타로" : "AI 사주"}</span></p>
+      </div>
 
       {unreadableTarot || unreadableSaju ? (
         <div className="record-state" role="alert">

@@ -498,7 +498,7 @@ export function SajuExperience() {
             aria-invalid={Boolean(fieldErrors.focusArea)}
           >
             <legend>관심 분야</legend>
-            <div className="choice-list two-columns">
+            <div className="choice-list two-columns keep-columns">
               {FOCUS_OPTIONS.map((option) => (
                 <label className="choice-card" key={option.value}>
                   <input
