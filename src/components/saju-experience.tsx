@@ -516,8 +516,10 @@ export function SajuExperience() {
             <FieldError id="focus-error" message={fieldErrors.focusArea} />
           </fieldset>
           <label className="field" htmlFor="saju-question">
-            <span>{form.reportType === "annual_monthly" ? "질문 (선택)" : "질문 한 가지"}</span>
+            <span id="saju-question-label">{form.reportType === "annual_monthly" ? "질문 (선택)" : "질문 한 가지"}</span>
             <textarea
+              // The label also holds the character count, so the field is named by its title alone.
+              aria-labelledby="saju-question-label"
               id="saju-question"
               aria-describedby={fieldErrors.question
                 ? "saju-question-guidance question-error"
