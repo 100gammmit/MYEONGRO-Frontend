@@ -449,6 +449,8 @@ export function SajuExperience() {
         description={form.reportType === "annual_monthly" ? "한 해의 흐름을 월별로 읽습니다. 질문 없이도 시작할 수 있습니다." : "관심 분야를 고른 뒤, 현재 선택에 도움이 될 질문을 하나 적어주세요."}
         step={1}
         totalSteps={TOTAL_STEPS}
+        // The first step has no step before it, and a home link here would drop every answer.
+        back={null}
         actions={(
           <>
             <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
@@ -472,7 +474,7 @@ export function SajuExperience() {
               {([['birth_annual_question', '종합 사주', '나의 성향과 연간 흐름, 질문을 함께 읽습니다.'], ['annual_monthly', '한 해 리포트', '연간 개요와 12개월의 흐름을 다시 찾아 읽습니다.']] as const).map(([value, label, description]) => (
                 <label className="choice-card" key={value}>
                   <input className="sr-only" type="radio" name="report-type" checked={form.reportType === value} onChange={() => updateForm({ reportType: value })} />
-                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong></span>
+                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong><span className="choice-price">{creditCost ?? "…"}크레딧</span></span>
                   <span className="choice-desc">{description}</span>
                 </label>
               ))}

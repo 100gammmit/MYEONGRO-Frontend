@@ -731,7 +731,7 @@ describe("TarotExperience", () => {
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
   });
 
-  it("keeps the question when editing it from the confirm step and draws again from scratch", async () => {
+  it("keeps the question and the chosen cards when editing from the confirm step", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     await chooseSpreadAndStart("mind_three_card");
     selectSlots([1, 2, 3]);
@@ -739,10 +739,13 @@ describe("TarotExperience", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "질문 고치기" }));
 
-    expect(await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" }))
-      .toHaveValue("지금 제 마음에서 살펴볼 흐름이 궁금해요.");
-    fireEvent.click(screen.getByRole("button", { name: "카드 고르러 가기" }));
-    expect(await screen.findByText("카드 1 / 3")).toBeInTheDocument();
+    const question = await screen.findByRole("textbox", { name: "카드에게 묻고 싶은 질문" });
+    expect(question).toHaveValue("지금 제 마음에서 살펴볼 흐름이 궁금해요.");
+    fireEvent.change(question, { target: { value: "다음 달의 흐름이 궁금해요." } });
+    fireEvent.click(screen.getByRole("button", { name: "확인 화면으로 돌아가기" }));
+
+    expect(await screen.findByRole("heading", { level: 1, name: "이대로 리딩을 만들까요?" })).toBeInTheDocument();
+    expect(screen.getByText("다음 달의 흐름이 궁금해요.")).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 

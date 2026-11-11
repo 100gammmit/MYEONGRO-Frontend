@@ -386,6 +386,7 @@ main:focus { outline: none; }
 .mini-backs span { width: 18px; aspect-ratio: .621; border-radius: 3px; box-shadow: 0 2px 6px rgba(0, 0, 0, .45); }
 .mini-backs span + span { margin-left: -8px; }
 .choice-price { color: var(--text-secondary); }
+.choice-head .choice-price { margin-left: auto; font-size: 13px; }
 .choice-price.free { color: var(--accent-cta); }
 .privacy-notice { margin-top: 20px; padding: 16px 18px; border-radius: var(--radius-sm); background: var(--surface-tint-1); color: var(--text-muted); font-size: 13px; line-height: 1.75; }
 .privacy-notice strong { display: block; margin-bottom: 6px; color: var(--text-secondary); font-size: 14px; font-weight: 600; }

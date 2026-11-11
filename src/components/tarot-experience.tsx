@@ -116,6 +116,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
   const [requestId, setRequestId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [inputErrorField, setInputErrorField] = useState<EditableInputField | null>(null);
+  const [editingFromConfirm, setEditingFromConfirm] = useState(false);
   const inFlightRequestId = useRef<string | null>(null);
   const initialSpreadButtonRef = useRef<HTMLLabelElement>(null);
   const questionInputRef = useRef<HTMLTextAreaElement>(null);
@@ -161,6 +162,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
     // Next's patched history keeps its router state, and useSearchParams (the header login
     // link) follows the new address without a server round trip.
     window.history.replaceState(null, "", tarotPathFor(nextSpreadType));
+    setEditingFromConfirm(false);
     setSpreadType(nextSpreadType);
     setQuestion("");
     setChoiceOptions({ a: "", b: "" });
@@ -179,6 +181,16 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
       setInputErrorField(blockedField);
       return;
     }
+    // An edit made from the confirm step keeps the cards already chosen; only the request is new.
+    if (editingFromConfirm && selectedSlots.length === definition.cardCount) {
+      setEditingFromConfirm(false);
+      setRequestId(null);
+      setError(null);
+      setInputErrorField(null);
+      setPhase("confirm");
+      return;
+    }
+    setEditingFromConfirm(false);
     setSelectedSlots([]);
     setFocusedSlot(null);
     setRequestId(null);
@@ -427,7 +439,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
             onClick={beginDraw}
             type="button"
           >
-            카드 고르러 가기
+            {editingFromConfirm ? "확인 화면으로 돌아가기" : "카드 고르러 가기"}
           </button>
         )}
       >
@@ -568,7 +580,10 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
           <ReviewGroup
             disabled={false}
             id="tarot-review-question"
-            onEdit={() => setPhase("input")}
+            onEdit={() => {
+              setEditingFromConfirm(true);
+              setPhase("input");
+            }}
             title="질문"
           >
             <p className="review-text">{question.trim()}</p>
