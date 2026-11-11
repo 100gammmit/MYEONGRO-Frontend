@@ -212,7 +212,9 @@ main:focus { outline: none; }
 
 /* The hero fills the first screen under the header: one question, then the two ways to answer it. */
 .landing-page { --landing-saju-ink: color-mix(in srgb, var(--accent-secondary) 30%, var(--text-primary)); }
-.landing-page .landing-hero { display: flex; flex-direction: column; gap: 40px; min-height: calc(100svh - 68px); padding-block: 56px 64px; }
+/* Fills the first screen up to a 900px-tall window; on taller ones the panel stops growing
+   instead of stretching empty space around its content. */
+.landing-page .landing-hero { display: flex; flex-direction: column; gap: 40px; min-height: min(calc(100svh - 68px), 820px); padding-block: 56px 64px; }
 .landing-page .hero-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; }
 .landing-page .landing-hero h1 { margin: 0; font-size: 64px; line-height: 1.22; letter-spacing: -.035em; }
 .landing-page .hero-title-break { display: none; }
