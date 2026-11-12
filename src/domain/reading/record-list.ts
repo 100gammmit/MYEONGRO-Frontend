@@ -77,7 +77,9 @@ export function groupRecordsByMonth(
   const groups = new Map<string, PublicReadingRecord[]>();
   for (const reading of readings) {
     const month = RECORD_MONTH.format(new Date(reading.createdAt));
-    groups.set(month, [...(groups.get(month) ?? []), reading]);
+    const monthReadings = groups.get(month);
+    if (monthReadings) monthReadings.push(reading);
+    else groups.set(month, [reading]);
   }
   return [...groups].map(([month, monthReadings]) => ({ month, readings: monthReadings }));
 }
