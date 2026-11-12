@@ -15,9 +15,19 @@ const LOGIN_NOTICES = new Map([
   ["signup-eligibility-missing", "로그인을 완료하지 못했어요. 다시 시도해 주세요."],
 ]);
 
+function pathOf(next: string): string {
+  return next.split(/[?#]/, 1)[0];
+}
+
+// A signed-in redirect back to the login page would bounce forever, so it falls back to records.
+function signedInDestination(next: string): string {
+  const path = pathOf(next);
+  return path === "/login" || path.startsWith("/login/") ? "/records" : next;
+}
+
 // Shown only when the login interrupted a reading, so the person knows their choices wait for them.
 function resumeNotice(next: string): string | null {
-  const path = next.split(/[?#]/, 1)[0];
+  const path = pathOf(next);
   if (path === "/tarot" || path.startsWith("/tarot/")) return "로그인을 마치면 고르던 타로 리딩으로 돌아가요.";
   if (path === "/saju" || path.startsWith("/saju/")) return "로그인을 마치면 고르던 사주 리딩으로 돌아가요.";
   return null;
@@ -31,7 +41,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   // Someone already signed in has nothing to do here; send them where the login would have.
   // An unavailable session check falls through to the login screen rather than blocking it.
   const session = await getSpringSessionState(await getBackendCookieHeader());
-  if (session.status === "authenticated") redirect(next);
+  if (session.status === "authenticated") redirect(signedInDestination(next));
 
   const reason = Array.isArray(params.reason) ? params.reason[0] : params.reason;
   const notice = reason ? LOGIN_NOTICES.get(reason) : undefined;

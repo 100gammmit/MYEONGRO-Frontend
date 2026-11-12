@@ -64,6 +64,8 @@ describe("LoginPage", () => {
       .rejects.toThrow("NEXT_REDIRECT /saju");
     await expect(LoginPage({ searchParams: Promise.resolve({ next: "//evil.example" }) }))
       .rejects.toThrow("NEXT_REDIRECT /records");
+    await expect(LoginPage({ searchParams: Promise.resolve({ next: "/login?next=%2Flogin" }) }))
+      .rejects.toThrow("NEXT_REDIRECT /records");
     expect(mocks.getSessionState).toHaveBeenCalledWith("JSESSIONID=session");
   });
 
