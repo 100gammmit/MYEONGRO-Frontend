@@ -1,14 +1,15 @@
+import Link from "next/link";
+
 import { SignupAgeConfirmation } from "./signup-age-confirmation";
 
 export default function SignupAgePage() {
   return (
-    <section className="simple-page page-width auth-page signup-age-page">
-      <p className="eyebrow">회원 가입</p>
-      <h1>가입 자격을 확인해 주세요</h1>
-      <p>소셜 계정 확인이 완료되었습니다. 회원 가입을 마치기 전에 연령을 확인합니다.</p>
-      <div className="auth-card">
-        <SignupAgeConfirmation />
+    <section className="flow-page page-width signup-page">
+      <div className="step-top">
+        <Link className="back-link" href="/login"><span aria-hidden="true">←</span> 로그인</Link>
+        <p className="step-meta"><span className="step-flow">회원 가입</span></p>
       </div>
+      <SignupAgeConfirmation />
     </section>
   );
 }

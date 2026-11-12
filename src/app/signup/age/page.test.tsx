@@ -2,17 +2,17 @@ import { render, screen } from "@testing-library/react";
 import { vi } from "vitest";
 
 vi.mock("./signup-age-confirmation", () => ({
-  SignupAgeConfirmation: () => <button type="button">만 19세 이상이며 가입합니다</button>,
+  SignupAgeConfirmation: () => <h1>가입 전에 두 가지만 확인해 주세요</h1>,
 }));
 
 import SignupAgePage from "./page";
 
 describe("SignupAgePage", () => {
-  it("asks for age only as the final step of a new social signup", () => {
+  it("frames the confirmation as the sign-up step after login", () => {
     render(<SignupAgePage />);
 
-    expect(screen.getByRole("heading", { name: "가입 자격을 확인해 주세요" }))
-      .toBeInTheDocument();
-    expect(screen.getByText(/소셜 계정 확인이 완료되었습니다/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /로그인/ })).toHaveAttribute("href", "/login");
+    expect(screen.getByText("회원 가입")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "가입 전에 두 가지만 확인해 주세요" })).toBeInTheDocument();
   });
 });
