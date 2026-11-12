@@ -1,111 +1,138 @@
 import Link from "next/link";
 
 import { ProtectedPageUnavailable } from "@/components/protected-page-unavailable";
-import { formatReadingDate } from "@/domain/reading/reading-date";
-import { TAROT_SPREADS, isAiTarotSpreadType, type TarotSpreadType } from "@/domain/tarot";
 import {
-  BackendReadingRecordsClient,
-  type PublicReadingRecord,
-} from "@/infrastructure/backend/reading-records-client";
+  formatRecordDay,
+  getRecordRowMeta,
+  getRecordRowTitle,
+  groupRecordsByMonth,
+  isMutedRecord,
+  isSupportedRecord,
+  parseRecordKindFilter,
+  type RecordKindFilter,
+} from "@/domain/reading/record-list";
+import { BackendReadingRecordsClient } from "@/infrastructure/backend/reading-records-client";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionState } from "@/infrastructure/backend/session-auth";
 
-const statusLabels = {
-  generating: "생성 중",
-  completed: "완료",
-  failed: "새 질문 필요",
-} as const;
-
-const SAJU_FOCUS_LABELS: Readonly<Record<string, string>> = {
-  self: "나 자신",
-  career: "직업·생활",
-  relationship: "관계",
-  life_money: "생활·금전",
-};
-
-function getReadingTypeLabel(kind: "tarot" | "saju", spreadType?: string | null): string {
-  if (kind === "saju") return "AI 사주";
-  if (spreadType && spreadType in TAROT_SPREADS) {
-    return TAROT_SPREADS[spreadType as TarotSpreadType].name;
-  }
-  return "AI 타로";
+interface RecordsPageProps {
+  searchParams: Promise<{ kind?: string | string[] }>;
 }
 
-function getRecordTitle(reading: PublicReadingRecord): string {
-  if (reading.status === "completed") return reading.title;
-  return reading.status === "generating" ? "리딩을 생성하고 있어요" : "완료하지 못한 리딩";
-}
+const FILTER_TABS: readonly { filter: RecordKindFilter; label: string; href: string }[] = [
+  { filter: "all", label: "전체", href: "/records" },
+  { filter: "tarot", label: "타로", href: "/records?kind=tarot" },
+  { filter: "saju", label: "사주", href: "/records?kind=saju" },
+];
 
-function getRecordContext(reading: PublicReadingRecord): string {
-  if (reading.kind === "tarot" && reading.spreadType && reading.spreadType in TAROT_SPREADS) {
-    return TAROT_SPREADS[reading.spreadType as TarotSpreadType].summary;
-  }
-  const focusArea = typeof reading.input.focusArea === "string"
-    ? SAJU_FOCUS_LABELS[reading.input.focusArea]
-    : null;
-  const targetYear = typeof reading.input.targetYear === "number"
-    ? `${reading.input.targetYear}년`
-    : null;
-  return [targetYear, reading.schemaVersion === 7 && reading.input.reportType === "annual_monthly" ? "한 해 리포트" : focusArea].filter(Boolean).join(" · ") || "사주 리딩";
-}
+const START_LINKS = [
+  { href: "/tarot", label: "타로 시작" },
+  { href: "/saju", label: "사주 시작" },
+] as const;
 
-function isSupportedRecord(reading: PublicReadingRecord): boolean {
-  if (reading.kind === "saju") return true;
-  return typeof reading.spreadType === "string"
-    && reading.spreadType in TAROT_SPREADS
-    && isAiTarotSpreadType(reading.spreadType as TarotSpreadType);
-}
-
-export default async function RecordsPage() {
+export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const cookieHeader = await getBackendCookieHeader();
   const session = await getSpringSessionState(cookieHeader);
   if (session.status === "unavailable") return <ProtectedPageUnavailable />;
 
+  const filter = parseRecordKindFilter((await searchParams).kind);
   const readings = session.status === "authenticated"
-    ? await new BackendReadingRecordsClient(cookieHeader).list()
+    ? (await new BackendReadingRecordsClient(cookieHeader).list()).filter(isSupportedRecord)
     : [];
-  const supportedReadings = readings.filter(isSupportedRecord);
+
+  if (readings.length === 0) return <EmptyRecords />;
+
+  const counts: Record<RecordKindFilter, number> = {
+    all: readings.length,
+    tarot: readings.filter((reading) => reading.kind === "tarot").length,
+    saju: readings.filter((reading) => reading.kind === "saju").length,
+  };
+  const shown = filter === "all" ? readings : readings.filter((reading) => reading.kind === filter);
 
   return (
-    <section className="simple-page page-width records-page">
-      <h1>나의 리딩 기록</h1>
+    <section className="flow-page page-width records-page">
+      <h1>내 기록</h1>
+      <p className="flow-lead">완료한 리딩을 다시 볼 수 있어요. 질문 원문은 저장하지 않아서 제목과 해석만 남아요.</p>
 
-      {supportedReadings.length === 0 ? (
-        <div className="empty-state">
-          <span>◇</span>
-          <h2>아직 저장된 이야기가 없어요</h2>
-          <p>타로와 사주 리딩을 완료하면 이곳에서 다시 볼 수 있어요.</p>
-          <Link className="primary-button" href="/">
-            첫 리딩 시작하기
-          </Link>
-        </div>
-      ) : (
-        <div className="records-list">
-          {supportedReadings.map((reading) => (
+      <div className="records-bar">
+        <nav aria-label="기록 종류" className="records-tabs">
+          {FILTER_TABS.map((tab) => (
             <Link
-              className="record-card"
-              href={`/records/${reading.id}`}
-              key={reading.id}
+              aria-current={tab.filter === filter ? "page" : undefined}
+              href={tab.href}
+              key={tab.filter}
             >
-              <div>
-                <span className="record-kind">
-                  {getReadingTypeLabel(reading.kind, reading.spreadType)}
-                </span>
-                <h2>{getRecordTitle(reading)}</h2>
-                <p>{getRecordContext(reading)}</p>
-              </div>
-              <div className="record-meta">
-                <span className={`record-status ${reading.status}`}>
-                  {statusLabels[reading.status]}
-                </span>
-                <time dateTime={reading.createdAt}>
-                  {formatReadingDate(reading.createdAt)}
-                </time>
-              </div>
+              {tab.label} <span className="records-tab-count">{counts[tab.filter]}</span>
             </Link>
           ))}
+        </nav>
+        <div className="records-start">
+          {START_LINKS.map((link) => (
+            <Link className="secondary-button" href={link.href} key={link.href}>{link.label}</Link>
+          ))}
         </div>
+      </div>
+
+      {shown.length === 0 ? (
+        <p className="records-filter-empty">
+          {filter === "tarot" ? "타로" : "사주"} 리딩이 아직 없어요.{" "}
+          <Link href={filter === "tarot" ? "/tarot" : "/saju"}>{filter === "tarot" ? "타로" : "사주"} 시작하기</Link>
+        </p>
+      ) : (
+        groupRecordsByMonth(shown).map((group) => (
+          <section className="records-month" key={group.month} aria-label={group.month}>
+            <h2>{group.month}</h2>
+            <ul className="records-list">
+              {group.readings.map((reading) => {
+                const meta = getRecordRowMeta(reading);
+                return (
+                  <li className={isMutedRecord(reading) ? "muted" : undefined} key={reading.id}>
+                    <Link className="record-row" href={`/records/${reading.id}`}>
+                      <span className="record-row-meta">
+                        <span className="record-kind">{meta.kind}</span>
+                        {meta.detail ? <span>{meta.detail}</span> : null}
+                      </span>
+                      <span className="record-row-title">{getRecordRowTitle(reading)}</span>
+                      <time className="record-row-date" dateTime={reading.createdAt}>
+                        {formatRecordDay(reading.createdAt)}
+                      </time>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))
       )}
+
+      <div className="records-start records-start-bottom">
+        {START_LINKS.map((link) => (
+          <Link className="secondary-button" href={link.href} key={link.href}>{link.label}</Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function EmptyRecords() {
+  return (
+    <section className="flow-page page-width records-page">
+      <h1>내 기록</h1>
+      <h2 className="records-empty-title">아직 저장된 리딩이 없어요</h2>
+      <p className="flow-lead">AI 타로나 사주 리딩을 마치면 이곳에서 다시 볼 수 있어요.</p>
+      <div className="records-empty-starts">
+        <Link className="records-empty-start" href="/tarot">
+          <strong>AI 타로</strong>
+          <span>카드의 자리로 가까운 고민의 지금과 다음 전개를 읽어요.</span>
+          <span className="records-empty-go" aria-hidden="true">타로로 시작</span>
+        </Link>
+        <Link className="records-empty-start" href="/saju">
+          <strong>AI 사주</strong>
+          <span>명식을 먼저 계산해 타고난 성향과 한 해의 흐름을 읽어요.</span>
+          <span className="records-empty-go" aria-hidden="true">사주로 시작</span>
+        </Link>
+      </div>
+      <p className="records-empty-note">로그인 없이 보는 오늘의 운세는 기록에 남지 않아요.</p>
     </section>
   );
 }

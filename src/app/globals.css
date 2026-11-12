@@ -652,6 +652,11 @@ main:focus { outline: none; }
 .pillars strong { display: block; font-family: "Noto Serif KR Variable", Georgia, serif; font-weight: 400; font-size: 32px; margin: 15px 0 8px; color: var(--text-accent-strong); }
 
 .simple-page { padding: 104px 0 150px; min-height: 65vh; }
+/* Account, records and sign-in share the reading column so they read as the same service. */
+.flow-page { max-width: var(--w-read); padding: 56px 0 110px; min-height: 65vh; }
+.flow-page > h1 { margin: 0; font-size: 40px; font-weight: 300; line-height: 1.3; letter-spacing: -.02em; word-break: keep-all; text-wrap: pretty; }
+.flow-page > h1:focus { outline: none; }
+.flow-lead { margin: 14px 0 0; color: var(--text-secondary); font-size: 16px; line-height: 1.8; word-break: keep-all; text-wrap: pretty; }
 .simple-page > h1 { font-size: 64px; font-weight: 300; margin: 0 0 36px; letter-spacing: -.035em; }
 .empty-state, .auth-card { max-width: var(--w-read); padding: 52px; text-align: center; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--gradient-panel); box-shadow: var(--elevation-2); }
 .empty-state > span { display: block; font-size: 40px; color: var(--text-accent); }
@@ -691,16 +696,36 @@ main:focus { outline: none; }
 .account-consent-confirmation { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-hairline); }
 .danger-button { padding: 12px 16px; color: var(--text-danger); background: transparent; border: 1px solid var(--border-danger); border-radius: var(--radius-sm); font: inherit; cursor: pointer; }
 .danger-button:disabled { opacity: .55; cursor: not-allowed; }
-.records-list { display: grid; gap: 14px; max-width: var(--w-wide); }
-.record-card { display: flex; justify-content: space-between; gap: 30px; padding: 30px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--surface-record); transition: border-color .2s, transform .2s; }
-.record-card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
-.record-kind { color: var(--text-accent); font: 600 12px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .02em; }
-.record-card h2 { margin: 10px 0; font-size: 25px; }
-.record-card p { margin: 0; color: var(--text-muted); }
-.record-meta { display: flex; min-width: 120px; flex-direction: column; align-items: flex-end; justify-content: space-between; color: var(--text-subtle); font-size: 12px; }
-.record-status { padding: 6px 10px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); }
-.record-status.completed { color: var(--text-accent-strong); }
-.record-status.failed { color: var(--text-danger); border-color: var(--border-danger); }
+.records-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 32px; }
+.records-tabs { display: inline-flex; padding: 4px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); }
+.records-tabs a { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 16px; border-radius: var(--radius-pill); color: var(--text-secondary); font-size: 14px; }
+.records-tabs a:hover { color: var(--text-primary); }
+.records-tabs a[aria-current="page"] { background: var(--surface-tint-3); color: var(--text-primary); font-weight: 700; }
+.records-tab-count { color: var(--text-subtle); font-size: 13px; font-variant-numeric: tabular-nums; }
+.records-tabs a[aria-current="page"] .records-tab-count { color: var(--text-accent-strong); }
+.records-start { display: flex; gap: 8px; }
+.records-start .secondary-button { min-height: 44px; padding: 0 16px; font-size: 14px; font-weight: 600; }
+.records-start-bottom { display: none; }
+.records-month > h2 { margin: 32px 0 0; color: var(--text-muted); font-family: inherit; font-size: 13px; font-weight: 600; }
+.records-list { margin: 8px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border-hairline); }
+.records-list li { border-bottom: 1px solid var(--border-hairline); }
+.record-row { display: grid; grid-template-columns: 1fr auto; gap: 6px 20px; padding: 18px 4px; transition: background .2s; }
+.record-row:hover { background: var(--surface-tint-1); }
+.record-row-meta { display: flex; gap: 10px; color: var(--text-muted); font-size: 13px; }
+.record-kind { color: var(--text-accent); font-weight: 600; }
+.record-row-title { grid-column: 1; color: var(--text-primary); font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 20px; line-height: 1.45; word-break: keep-all; }
+.records-list .muted .record-row-title { color: var(--text-muted); }
+.record-row-date { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--text-muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.records-filter-empty { margin: 32px 0 0; color: var(--text-muted); line-height: 1.8; }
+.records-filter-empty a { color: var(--text-accent-strong); }
+.records-empty-title { margin: 32px 0 0; font-size: 24px; font-weight: 400; }
+.records-empty-starts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 28px; }
+.records-empty-start { display: flex; flex-direction: column; gap: 8px; padding: 22px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-record); transition: border-color .2s; }
+.records-empty-start:hover { border-color: var(--border-strong); }
+.records-empty-start strong { font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 20px; font-weight: 400; }
+.records-empty-start span { color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+.records-empty-start .records-empty-go { margin-top: auto; padding-top: 8px; color: var(--text-accent-strong); font-weight: 600; }
+.records-empty-note { margin: 20px 0 0; color: var(--text-muted); font-size: 14px; }
 .record-detail { max-width: var(--w-wide); }
 .record-detail > .eyebrow { margin-top: 55px; }
 .record-detail-header { padding-bottom: 34px; border-bottom: 1px solid var(--border-default); }
@@ -936,8 +961,18 @@ main:focus { outline: none; }
   .pillars strong { font-size: 25px; }
   .simple-page { padding-top: 72px; }
   .empty-state, .auth-card { padding: 34px 22px; }
-  .record-card { flex-direction: column; padding: 22px; }
-  .record-meta { min-width: 0; flex-direction: row; align-items: center; }
+  .flow-page { padding-top: 32px; }
+  .flow-page > h1 { font-size: 32px; }
+  .flow-lead { font-size: 15px; line-height: 1.75; }
+  .records-bar .records-start { display: none; }
+  .records-start-bottom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; }
+  .records-tabs { display: flex; width: 100%; }
+  .records-tabs a { flex: 1; justify-content: center; padding: 0 8px; }
+  .record-row { grid-template-columns: 1fr; padding: 16px 2px; }
+  .record-row-meta { grid-column: 1; grid-row: 1; }
+  .record-row-date { grid-column: 1; grid-row: 1; justify-self: end; align-self: start; }
+  .record-row-title { grid-row: 2; font-size: 18px; }
+  .records-empty-starts { grid-template-columns: 1fr; }
   .wizard-heading h1 { font-size: 32px; }
   .wizard-heading p { font-size: 14px; line-height: 1.75; }
   .birth-reveal { grid-template-columns: 1fr; }
@@ -952,5 +987,5 @@ main:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
-  .record-card:hover, .primary-button:hover, .primary-button:active:not(:disabled), .tarot-back:hover:not(:disabled), .tarot-back:focus-visible { transform: none; }
+  .primary-button:hover, .primary-button:active:not(:disabled), .tarot-back:hover:not(:disabled), .tarot-back:focus-visible { transform: none; }
 }
