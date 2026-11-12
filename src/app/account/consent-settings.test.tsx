@@ -51,4 +51,13 @@ describe("ConsentSettings", () => {
       screen.getByRole("button", { name: "AI 국외이전 동의 철회" }),
     ).toBeEnabled());
   });
+  it("does not claim a consent status it could not load", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 502 }));
+
+    render(<ConsentSettings />);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("동의 상태를 불러오지 못했어요");
+    expect(screen.queryByText("동의하지 않음")).not.toBeInTheDocument();
+    expect(screen.queryByText("동의함")).not.toBeInTheDocument();
+  });
 });

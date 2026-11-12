@@ -9,6 +9,7 @@ type ConsentStatus = {
 
 export function ConsentSettings() {
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [accepted, setAccepted] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -28,7 +29,10 @@ export function ConsentSettings() {
           setAccepted(payload.status.acceptedDocumentTypes.includes("ai-overseas-transfer"));
         }
       } catch {
-        if (active) setError("동의 상태를 불러오지 못했어요. 페이지를 새로고침해 주세요.");
+        if (active) {
+          setLoadFailed(true);
+          setError("동의 상태를 불러오지 못했어요. 페이지를 새로고침해 주세요.");
+        }
       } finally {
         if (active) setLoading(false);
       }
@@ -62,10 +66,12 @@ export function ConsentSettings() {
   return (
     <section className="account-group" aria-labelledby="ai-consent-heading">
       <h2 id="ai-consent-heading">AI 리딩 정보 국외이전</h2>
-      <p className="account-value">
-        {loading ? "동의 상태를 확인하고 있어요." : accepted ? "동의함" : "동의하지 않음"}
-      </p>
-      {loading ? null : (
+      {loadFailed ? null : (
+        <p className="account-value">
+          {loading ? "동의 상태를 확인하고 있어요." : accepted ? "동의함" : "동의하지 않음"}
+        </p>
+      )}
+      {loading || loadFailed ? null : (
         <p className="account-sub">
           {accepted
             ? "AI 타로·사주 리딩을 만들 수 있어요."
