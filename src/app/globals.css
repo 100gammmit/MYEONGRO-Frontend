@@ -705,7 +705,6 @@ main:focus { outline: none; }
 .records-tabs a[aria-current="page"] .records-tab-count { color: var(--text-accent-strong); }
 .records-start { display: flex; gap: 8px; }
 .records-start .secondary-button { min-height: 44px; padding: 0 16px; font-size: 14px; font-weight: 600; }
-.records-start-bottom { display: none; }
 .records-month > h2 { margin: 32px 0 0; color: var(--text-muted); font-family: inherit; font-size: 13px; font-weight: 600; }
 .records-list { margin: 8px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--border-hairline); }
 .records-list li { border-bottom: 1px solid var(--border-hairline); }
@@ -964,8 +963,8 @@ main:focus { outline: none; }
   .flow-page { padding-top: 32px; }
   .flow-page > h1 { font-size: 32px; }
   .flow-lead { font-size: 15px; line-height: 1.75; }
-  .records-bar .records-start { display: none; }
-  .records-start-bottom { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 28px; }
+  .records-bar { flex-direction: column; align-items: stretch; }
+  .records-start { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .records-tabs { display: flex; width: 100%; }
   .records-tabs a { flex: 1; justify-content: center; padding: 0 8px; }
   .record-row { grid-template-columns: 1fr; padding: 16px 2px; }

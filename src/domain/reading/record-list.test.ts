@@ -5,9 +5,8 @@ import type { PublicReadingRecord } from "@/infrastructure/backend/reading-recor
 import {
   formatRecordDay,
   getRecordRowMeta,
-  getRecordRowTitle,
+  getRecordRowState,
   groupRecordsByMonth,
-  isMutedRecord,
   isSupportedRecord,
   parseRecordKindFilter,
 } from "./record-list";
@@ -37,24 +36,18 @@ const declinedResult = {
 };
 
 describe("record list rules", () => {
-  it("names what happened to a record that did not become a reading", () => {
-    expect(getRecordRowTitle(record())).toBe("꾸준함보다 리듬을 찾는 달");
-    expect(getRecordRowTitle(record({ status: "generating" }))).toBe("생성 중");
-    expect(getRecordRowTitle(record({ status: "failed", errorCode: "GENERATION_TIMEOUT" })))
-      .toBe("생성 실패 - 시간 초과");
-    expect(getRecordRowTitle(record({ status: "failed", errorCode: "OPENAI_READING_GENERATION_FAILED" })))
+  it("names what happened to a record that did not become a reading and mutes the failures", () => {
+    expect(getRecordRowState(record())).toEqual({ title: "꾸준함보다 리듬을 찾는 달", muted: false });
+    expect(getRecordRowState(record({ status: "generating" }))).toEqual({ title: "생성 중", muted: false });
+    expect(getRecordRowState(record({ status: "failed", errorCode: "GENERATION_TIMEOUT" })))
+      .toEqual({ title: "생성 실패 - 시간 초과", muted: true });
+    expect(getRecordRowState(record({ status: "failed", errorCode: "OPENAI_READING_GENERATION_FAILED" })).title)
       .toBe("생성 실패 - AI 응답 오류");
-    expect(getRecordRowTitle(record({ status: "failed", errorCode: "READING_GENERATION_FAILED" })))
-      .toBe("생성 실패 - 일시적 오류");
-    expect(getRecordRowTitle(record({ status: "failed" }))).toBe("생성 실패 - 일시적 오류");
-    expect(getRecordRowTitle(record({ result: declinedResult }))).toBe("리딩 불가 - 민감 질문");
-  });
-
-  it("mutes failed and declined records only", () => {
-    expect(isMutedRecord(record())).toBe(false);
-    expect(isMutedRecord(record({ status: "generating" }))).toBe(false);
-    expect(isMutedRecord(record({ status: "failed" }))).toBe(true);
-    expect(isMutedRecord(record({ result: declinedResult }))).toBe(true);
+    for (const errorCode of ["READING_GENERATION_FAILED", "", "constructor", undefined]) {
+      expect(getRecordRowState(record({ status: "failed", errorCode })).title).toBe("생성 실패 - 일시적 오류");
+    }
+    expect(getRecordRowState(record({ result: declinedResult })))
+      .toEqual({ title: "리딩 불가 - 민감 질문", muted: true });
   });
 
   it("describes each record by its reading type and size", () => {
@@ -91,9 +84,10 @@ describe("record list rules", () => {
       record({ id: "a", createdAt: "2026-11-12T03:00:00.000Z" }),
       record({ id: "b", createdAt: "2026-10-31T20:00:00.000Z" }),
       record({ id: "c", createdAt: "2026-10-30T03:00:00.000Z" }),
+      record({ id: "d", createdAt: "2026-11-02T03:00:00.000Z" }),
     ]);
     expect(groups.map((group) => [group.month, group.readings.map((reading) => reading.id)])).toEqual([
-      ["2026년 11월", ["a", "b"]],
+      ["2026년 11월", ["a", "b", "d"]],
       ["2026년 10월", ["c"]],
     ]);
     expect(formatRecordDay("2026-10-31T20:00:00.000Z")).toBe("11. 1.");

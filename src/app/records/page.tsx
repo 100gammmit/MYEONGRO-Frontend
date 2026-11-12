@@ -4,9 +4,8 @@ import { ProtectedPageUnavailable } from "@/components/protected-page-unavailabl
 import {
   formatRecordDay,
   getRecordRowMeta,
-  getRecordRowTitle,
+  getRecordRowState,
   groupRecordsByMonth,
-  isMutedRecord,
   isSupportedRecord,
   parseRecordKindFilter,
   type RecordKindFilter,
@@ -24,11 +23,6 @@ const FILTER_TABS: readonly { filter: RecordKindFilter; label: string; href: str
   { filter: "tarot", label: "타로", href: "/records?kind=tarot" },
   { filter: "saju", label: "사주", href: "/records?kind=saju" },
 ];
-
-const START_LINKS = [
-  { href: "/tarot", label: "타로 시작" },
-  { href: "/saju", label: "사주 시작" },
-] as const;
 
 export default async function RecordsPage({ searchParams }: RecordsPageProps) {
   const cookieHeader = await getBackendCookieHeader();
@@ -67,9 +61,8 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           ))}
         </nav>
         <div className="records-start">
-          {START_LINKS.map((link) => (
-            <Link className="secondary-button" href={link.href} key={link.href}>{link.label}</Link>
-          ))}
+          <Link className="secondary-button" href="/tarot">타로 시작</Link>
+          <Link className="secondary-button" href="/saju">사주 시작</Link>
         </div>
       </div>
 
@@ -79,20 +72,21 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           <Link href={filter === "tarot" ? "/tarot" : "/saju"}>{filter === "tarot" ? "타로" : "사주"} 시작하기</Link>
         </p>
       ) : (
-        groupRecordsByMonth(shown).map((group) => (
-          <section className="records-month" key={group.month} aria-label={group.month}>
-            <h2>{group.month}</h2>
+        groupRecordsByMonth(shown).map((group, index) => (
+          <section className="records-month" key={group.month} aria-labelledby={`records-month-${index}`}>
+            <h2 id={`records-month-${index}`}>{group.month}</h2>
             <ul className="records-list">
               {group.readings.map((reading) => {
                 const meta = getRecordRowMeta(reading);
+                const state = getRecordRowState(reading);
                 return (
-                  <li className={isMutedRecord(reading) ? "muted" : undefined} key={reading.id}>
+                  <li className={state.muted ? "muted" : undefined} key={reading.id}>
                     <Link className="record-row" href={`/records/${reading.id}`}>
                       <span className="record-row-meta">
                         <span className="record-kind">{meta.kind}</span>
                         {meta.detail ? <span>{meta.detail}</span> : null}
                       </span>
-                      <span className="record-row-title">{getRecordRowTitle(reading)}</span>
+                      <span className="record-row-title">{state.title}</span>
                       <time className="record-row-date" dateTime={reading.createdAt}>
                         {formatRecordDay(reading.createdAt)}
                       </time>
@@ -104,12 +98,6 @@ export default async function RecordsPage({ searchParams }: RecordsPageProps) {
           </section>
         ))
       )}
-
-      <div className="records-start records-start-bottom">
-        {START_LINKS.map((link) => (
-          <Link className="secondary-button" href={link.href} key={link.href}>{link.label}</Link>
-        ))}
-      </div>
     </section>
   );
 }

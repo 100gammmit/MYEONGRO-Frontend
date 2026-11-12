@@ -8,10 +8,10 @@ export type RecordKindFilter = "all" | ReadingKind;
 const RECORD_KIND_FILTERS: readonly RecordKindFilter[] = ["all", "tarot", "saju"];
 
 // Failure codes the backend stores on a generation record; anything else reads as a passing error.
-const FAILURE_REASONS: Readonly<Record<string, string>> = {
-  GENERATION_TIMEOUT: "시간 초과",
-  OPENAI_READING_GENERATION_FAILED: "AI 응답 오류",
-};
+const FAILURE_REASONS: ReadonlyMap<string, string> = new Map([
+  ["GENERATION_TIMEOUT", "시간 초과"],
+  ["OPENAI_READING_GENERATION_FAILED", "AI 응답 오류"],
+]);
 const DEFAULT_FAILURE_REASON = "일시적 오류";
 
 // Records are stored as UTC instants but read in Korea, the same rule as formatReadingDate.
@@ -50,23 +50,15 @@ export function parseRecordKindFilter(value: string | string[] | undefined): Rec
   return RECORD_KIND_FILTERS.find((filter) => filter === raw) ?? "all";
 }
 
-function isDeclinedRecord(reading: PublicReadingRecord): boolean {
-  return reading.status === "completed" && parseDeclinedReadingView(reading) !== null;
-}
-
 // A record that did not become a reading says why in its own title, so the row needs no extra tag.
-export function getRecordRowTitle(reading: PublicReadingRecord): string {
-  if (reading.status === "generating") return "생성 중";
+export function getRecordRowState(reading: PublicReadingRecord): { title: string; muted: boolean } {
+  if (reading.status === "generating") return { title: "생성 중", muted: false };
   if (reading.status === "failed") {
-    const reason = (reading.errorCode && FAILURE_REASONS[reading.errorCode]) ?? DEFAULT_FAILURE_REASON;
-    return `생성 실패 - ${reason}`;
+    const reason = FAILURE_REASONS.get(reading.errorCode ?? "") ?? DEFAULT_FAILURE_REASON;
+    return { title: `생성 실패 - ${reason}`, muted: true };
   }
-  if (isDeclinedRecord(reading)) return "리딩 불가 - 민감 질문";
-  return reading.title;
-}
-
-export function isMutedRecord(reading: PublicReadingRecord): boolean {
-  return reading.status === "failed" || isDeclinedRecord(reading);
+  if (parseDeclinedReadingView(reading) !== null) return { title: "리딩 불가 - 민감 질문", muted: true };
+  return { title: reading.title, muted: false };
 }
 
 export function getRecordRowMeta(reading: PublicReadingRecord): { kind: string; detail: string | null } {
@@ -82,12 +74,10 @@ export function getRecordRowMeta(reading: PublicReadingRecord): { kind: string; 
 export function groupRecordsByMonth(
   readings: readonly PublicReadingRecord[],
 ): { month: string; readings: PublicReadingRecord[] }[] {
-  const groups: { month: string; readings: PublicReadingRecord[] }[] = [];
+  const groups = new Map<string, PublicReadingRecord[]>();
   for (const reading of readings) {
     const month = RECORD_MONTH.format(new Date(reading.createdAt));
-    const last = groups.at(-1);
-    if (last?.month === month) last.readings.push(reading);
-    else groups.push({ month, readings: [reading] });
+    groups.set(month, [...(groups.get(month) ?? []), reading]);
   }
-  return groups;
+  return [...groups].map(([month, monthReadings]) => ({ month, readings: monthReadings }));
 }
