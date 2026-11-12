@@ -686,14 +686,22 @@ main:focus { outline: none; }
 .signup-ai-consent-notice { margin: 0 0 4px; color: var(--text-muted); font-size: 12px; line-height: 1.65; }
 .signup-age-error { margin: 0; color: var(--text-danger); font-size: 13px; line-height: 1.7; }
 .ai-generated-notice { margin: 14px 0 0; color: var(--text-muted); font-size: 13px; line-height: 1.6; }
-.danger-zone { max-width: var(--w-read); margin-top: 60px; padding-top: 28px; border-top: 1px solid var(--border-danger); }
-.danger-zone h2 { font-size: 20px; font-weight: 300; }
-.danger-zone p { color: var(--text-muted); font-size: 13px; }
-.danger-zone button { background: transparent; border: 1px solid var(--border-danger); border-radius: var(--radius-sm); color: var(--text-danger); padding: 11px 16px; }
-.account-setting-section { max-width: var(--w-read); margin-top: 42px; padding: 24px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-record); }
-.account-setting-section h2 { margin: 6px 0 8px; font-size: 20px; font-weight: 400; }
-.account-setting-section p { color: var(--text-muted); font-size: 13px; line-height: 1.7; }
-.account-consent-confirmation { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border-hairline); }
+.danger-zone { margin-top: 24px; padding: 22px 24px; border: 1px solid var(--border-danger); border-radius: var(--radius-md); }
+.danger-zone h2 { margin: 0; font-family: inherit; font-size: 15px; font-weight: 600; color: var(--text-danger); }
+.danger-zone p { margin: 8px 0 16px; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
+.account-summary { margin-top: 32px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-record); }
+.account-group { padding: 22px 24px; }
+.account-group + .account-group { border-top: 1px solid var(--border-hairline); }
+.account-group h2 { margin: 0; color: var(--text-muted); font-family: inherit; font-size: 13px; font-weight: 600; }
+.account-value { margin: 8px 0 0; color: var(--text-primary); font-size: 17px; line-height: 1.6; }
+.account-value strong { color: var(--text-accent-strong); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.account-sub { margin: 4px 0 0; color: var(--text-muted); font-size: 14px; line-height: 1.7; }
+.account-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 14px; }
+.account-actions .secondary-button, .account-actions .danger-button { min-height: 44px; padding: 0 16px; font-size: 14px; font-weight: 600; }
+.account-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-accent-strong); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.account-guest-action { margin-top: 28px; }
+.account-consent-confirmation { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border-hairline); }
+.account-consent-confirmation p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
 .danger-button { padding: 12px 16px; color: var(--text-danger); background: transparent; border: 1px solid var(--border-danger); border-radius: var(--radius-sm); font: inherit; cursor: pointer; }
 .danger-button:disabled { opacity: .55; cursor: not-allowed; }
 .records-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 32px; }
