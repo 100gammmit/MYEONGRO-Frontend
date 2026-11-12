@@ -48,7 +48,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resume = resumeNotice(next);
 
   return (
-    <section className="flow-page page-width auth-page">
+    <section className="flow-page page-width">
       <h1>로그인</h1>
       <p className="flow-lead">로그인하면 리딩이 기록에 저장되고, 다른 기기에서도 이어서 볼 수 있어요.</p>
       {resume ? <p className="auth-resume">{resume}</p> : null}
