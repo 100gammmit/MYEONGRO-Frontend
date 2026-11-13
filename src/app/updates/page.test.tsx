@@ -111,4 +111,26 @@ describe("UpdatesPage", () => {
     expect(container.querySelector<HTMLDetailsElement>("#target details")!.open).toBe(true);
     window.location.hash = "";
   });
+
+  it("names an emergency notice once and keeps its reason visible", () => {
+    const updates = defineServiceUpdates([
+      {
+        id: "emergency",
+        category: "emergency",
+        noticeLevel: "emergency",
+        title: "긴급 점검",
+        summary: "리딩 생성을 잠시 멈춥니다.",
+        changes: ["생성 요청을 받지 않습니다."],
+        publishedDate: "2026-09-20",
+        effectiveDate: "2026-09-20",
+        emergencyReason: "외부 서비스 장애",
+      },
+    ]);
+
+    const { container } = render(<ServiceUpdatesPageContent updates={updates} today="2026-09-28" />);
+
+    const entry = container.querySelector<HTMLElement>(".update-entry")!;
+    expect(within(entry).getAllByText("긴급 안내")).toHaveLength(1);
+    expect(within(entry).getByText("외부 서비스 장애")).toBeVisible();
+  });
 });

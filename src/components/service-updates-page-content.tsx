@@ -21,11 +21,10 @@ function getServiceUpdateMarks(
 ): { label: string; tone: "accent" | "danger" }[] {
   const marks: { label: string; tone: "accent" | "danger" }[] = [];
   if (getServiceUpdateStatus(update, today) === "upcoming") marks.push({ label: "시행 예정", tone: "accent" });
-  if (update.noticeLevel !== "routine") {
-    marks.push({
-      label: SERVICE_UPDATE_NOTICE_LABELS[update.noticeLevel],
-      tone: update.noticeLevel === "general" ? "accent" : "danger",
-    });
+  const noticeLabel = SERVICE_UPDATE_NOTICE_LABELS[update.noticeLevel];
+  // An emergency notice already says 긴급 안내 as its category, so the level would only repeat it.
+  if (update.noticeLevel !== "routine" && noticeLabel !== SERVICE_UPDATE_CATEGORY_LABELS[update.category]) {
+    marks.push({ label: noticeLabel, tone: update.noticeLevel === "general" ? "accent" : "danger" });
   }
   if (update.correctionOf) marks.push({ label: "정정", tone: "accent" });
   return marks;
