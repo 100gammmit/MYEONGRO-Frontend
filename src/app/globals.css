@@ -797,6 +797,8 @@ label.signup-check-label { cursor: pointer; }
    card: the row header on top, then each cell named from its data-label. The modal keeps its table. */
 .legal .consent-table-wrapper { overflow: visible; }
 .legal .consent-processing-table { min-width: 0; border-collapse: separate; border-spacing: 0; }
+/* A table-caption inside a block table shrinks to its narrowest word, so it becomes a plain block too. */
+.legal .consent-processing-table caption:not(.sr-only) { display: block; margin-bottom: 10px; font-size: 15px; }
 .legal .consent-processing-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 .legal .consent-processing-table, .legal .consent-processing-table tbody, .legal .consent-processing-table tr, .legal .consent-processing-table th { display: block; width: auto; }
 /* The label sits in a fixed left gutter so a cell mixing a link and text still flows as one run. */
