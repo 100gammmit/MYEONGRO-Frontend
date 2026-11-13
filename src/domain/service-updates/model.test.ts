@@ -1,8 +1,11 @@
 import {
   defineServiceUpdates,
   findServiceUpdateCorrection,
+  formatServiceUpdateDay,
   getActiveImportantServiceUpdates,
   getPublishedServiceUpdates,
+  getServiceUpdateDateLabel,
+  groupServiceUpdatesByMonth,
   koreaDateFromInstant,
   millisecondsUntilNextKoreaDate,
   type ServiceUpdate,
@@ -146,5 +149,37 @@ describe("service update registry", () => {
       .toBe("2027-01-01");
     expect(millisecondsUntilNextKoreaDate(new Date("2026-12-31T14:59:59.500Z")))
       .toBe(500);
+  });
+});
+
+describe("service update list helpers", () => {
+  const base = {
+    category: "release",
+    noticeLevel: "routine",
+    title: "제목",
+    summary: "요약",
+    changes: ["변경"],
+  } as const;
+
+  it("groups notices by posting month in order", () => {
+    const groups = groupServiceUpdatesByMonth([
+      { ...base, id: "a", publishedDate: "2026-11-07", effectiveDate: "2026-11-07" },
+      { ...base, id: "b", publishedDate: "2026-10-30", effectiveDate: "2026-10-30" },
+      { ...base, id: "c", publishedDate: "2026-11-01", effectiveDate: "2026-11-01" },
+    ]);
+    expect(groups.map((group) => [group.month, group.updates.map((update) => update.id)])).toEqual([
+      ["2026년 11월", ["a", "c"]],
+      ["2026년 10월", ["b"]],
+    ]);
+  });
+
+  it("shows one date when a notice took effect on posting, otherwise both", () => {
+    expect(getServiceUpdateDateLabel({ ...base, id: "a", publishedDate: "2026-11-07", effectiveDate: "2026-11-07" }))
+      .toBe("11. 7.");
+    expect(getServiceUpdateDateLabel({ ...base, id: "b", publishedDate: "2026-11-07", effectiveDate: "2026-11-14" }))
+      .toBe("11. 7. 게시 · 11. 14. 시행");
+    expect(getServiceUpdateDateLabel({ ...base, id: "c", publishedDate: "2026-12-28", effectiveDate: "2027-01-05" }))
+      .toBe("12. 28. 게시 · 2027. 1. 5. 시행");
+    expect(formatServiceUpdateDay("2026-03-09")).toBe("3. 9.");
   });
 });

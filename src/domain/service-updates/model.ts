@@ -209,6 +209,38 @@ export function findServiceUpdateCorrection(
   return updates.find((update) => update.correctionOf === originalId);
 }
 
+/** Groups notices by the month they were published, keeping their order. Dates are already KST calendar dates. */
+export function groupServiceUpdatesByMonth(
+  updates: readonly ServiceUpdate[],
+): { month: string; updates: ServiceUpdate[] }[] {
+  const groups = new Map<string, ServiceUpdate[]>();
+  for (const update of updates) {
+    parseKoreaDate(update.publishedDate);
+    const [year, month] = update.publishedDate.split("-");
+    const key = `${year}년 ${Number(month)}월`;
+    const monthUpdates = groups.get(key);
+    if (monthUpdates) monthUpdates.push(update);
+    else groups.set(key, [update]);
+  }
+  return [...groups].map(([month, monthUpdates]) => ({ month, updates: monthUpdates }));
+}
+
+/** Month and day ("11. 7."), adding the year only when it differs from `contextYear`. */
+export function formatServiceUpdateDay(date: string, contextYear?: string): string {
+  parseKoreaDate(date);
+  const [year, month, day] = date.split("-");
+  const monthDay = `${Number(month)}. ${Number(day)}.`;
+  return contextYear && contextYear !== year ? `${year}. ${monthDay}` : monthDay;
+}
+
+/** One date when a notice took effect the day it was posted, otherwise both, under the posting month. */
+export function getServiceUpdateDateLabel(update: ServiceUpdate): string {
+  const published = formatServiceUpdateDay(update.publishedDate);
+  if (update.effectiveDate === update.publishedDate) return published;
+  const publishedYear = update.publishedDate.slice(0, 4);
+  return `${published} 게시 · ${formatServiceUpdateDay(update.effectiveDate, publishedYear)} 시행`;
+}
+
 export function formatKoreaDate(date: string): string {
   parseKoreaDate(date);
   const [year, month, day] = date.split("-");
