@@ -20,6 +20,7 @@ describe("legal document tables", () => {
     (documentType) => {
       const { container } = render(<ConsentDocumentContent documentType={documentType} />);
       const tables = [...container.querySelectorAll("table")];
+      expect(tables.length).toBeGreaterThan(0);
       for (const table of tables) {
         const columns = [...table.querySelectorAll("thead th")].map((th) => th.textContent);
         for (const row of table.querySelectorAll("tbody tr")) {

@@ -420,7 +420,10 @@ function AiOverseasTransferDetails({
                 <tr key={`${group.id}-${processor.name}`}>
                   {processorIndex === 0 ? (
                     <th scope="rowgroup" rowSpan={group.processors.length}>{group.label}</th>
-                  ) : null}
+                  ) : (
+                    // Hidden beside the rowSpan header on wide screens; heads the card once rows stack on phones.
+                    <th aria-hidden="true" className="consent-rowgroup-repeat">{group.label}</th>
+                  )}
                   <td data-label="처리자">{processor.name}</td>
                   <td data-label="처리 가능 국가">{processor.countries.join(", ")}</td>
                   <td data-label="목적·적용 조건">
