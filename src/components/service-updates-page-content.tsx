@@ -40,7 +40,7 @@ export function ServiceUpdatesPageContent({
   const publishedUpdates = getPublishedServiceUpdates(updates, today);
 
   return (
-    <article className="flow-page page-width updates-page">
+    <article className="flow-page page-width">
       <h1>업데이트 소식</h1>
       <p className="flow-lead">명로의 기능, 정책, 크레딧과 서비스 변경을 알려 드립니다.</p>
       {publishedUpdates.length === 0 ? (

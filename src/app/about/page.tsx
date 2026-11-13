@@ -60,7 +60,7 @@ const readingPaths = [
 
 export default function AboutPage() {
   return (
-    <article className="flow-page page-width about-page">
+    <article className="flow-page page-width">
       <h1>명로 소개</h1>
       <p className="flow-lead">
         명로는 사주의 명(命)과 타로가 비추는 길(路)을 결합한 이름입니다. 지금 마음에 머무는 질문을 카드와 사주로 살펴보고, 자신의 상황과 생각을 차분히 돌아볼 수 있는 콘텐츠를 제공합니다.
