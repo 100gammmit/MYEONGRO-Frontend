@@ -11,171 +11,144 @@ export const metadata = publicPageMetadata(
 const comparisonRows = [
   {
     label: "시작 방식",
-    myeongro: "리딩 목적과 배열, 또는 관심 분야를 먼저 고른 뒤 질문을 이어요.",
-    chatbot: "사용자가 질문과 요청을 직접 구성해요.",
+    myeongro: "리딩 목적과 배열, 또는 관심 분야를 먼저 고른 뒤 질문을 잇습니다.",
+    chatbot: "사용자가 질문과 요청을 직접 구성합니다.",
   },
   {
     label: "타로",
-    myeongro: "사용자가 카드를 고르고, AI가 정해진 자리의 의미에 맞춰 해석해요.",
-    chatbot: "카드 선택과 배열까지 AI에게 맡길 수 있어요.",
+    myeongro: "사용자가 카드를 고르고, AI가 정해진 자리의 의미에 맞춰 해석합니다.",
+    chatbot: "카드 선택과 배열까지 AI에게 맡길 수 있습니다.",
   },
   {
     label: "사주",
-    myeongro: "서버가 정해진 규칙으로 명식을 계산하고, AI는 확정된 계산 결과를 해설해요.",
-    chatbot: "대화 안에서 AI가 명식 계산과 해설을 함께 만들 수 있어요.",
+    myeongro: "서버가 정해진 규칙으로 명식을 계산하고, AI는 확정된 계산 결과를 해설합니다.",
+    chatbot: "대화 안에서 AI가 명식 계산과 해설을 함께 만들 수 있습니다.",
   },
   {
     label: "질문과 결과",
-    myeongro: "정해진 결과 구조 안에서 질문과 선택한 리딩 초점을 함께 살펴요.",
-    chatbot: "묻는 방식과 대화 흐름에 따라 답의 형식이 달라져요.",
+    myeongro: "정해진 결과 구조 안에서 질문과 선택한 리딩 초점을 함께 살핍니다.",
+    chatbot: "묻는 방식과 대화 흐름에 따라 답의 형식이 달라집니다.",
   },
 ] as const;
 
-const tarotSteps = [
-  ["01", "리딩 목적 선택", "상황과 다음 전개를 보는 고민 리딩, 두 사람의 흐름을 보는 관계 리딩, 두 선택을 비교하는 선택 리딩 중 골라요."],
-  ["02", "질문과 카드 선택", "질문을 남기고, 각 자리를 떠올리며 직접 카드를 골라요."],
-  ["03", "자리별 해석", "AI가 카드마다 정해진 역할과 전체 흐름을 함께 해석해요."],
-] as const;
-
-const sajuSteps = [
-  ["01", "출생정보 입력", "생년월일시와 출생 지역, 알고 있는 정보의 정확도를 입력해요."],
-  ["02", "서버 명식 계산", "절기와 간지 같은 정해진 계산 규칙으로 명식과 해석 기준을 만들어요."],
-  ["03", "질문과 해설 연결", "AI가 계산된 정보와 관심 분야를 바탕으로 질문에 맞는 해설을 구성해요."],
+const readingPaths = [
+  {
+    id: "tarot",
+    kind: "타로",
+    title: "카드의 자리를 먼저 정합니다",
+    href: "/tarot",
+    linkLabel: "타로 리딩 살펴보기",
+    steps: [
+      ["리딩 목적 선택", "상황과 다음 전개를 보는 고민 리딩, 두 사람의 흐름을 보는 관계 리딩, 두 선택을 비교하는 선택 리딩 중 고릅니다."],
+      ["질문과 카드 선택", "질문을 남기고, 각 자리를 떠올리며 직접 카드를 고릅니다."],
+      ["자리별 해석", "AI가 카드마다 정해진 역할과 전체 흐름을 함께 해석합니다."],
+    ],
+  },
+  {
+    id: "saju",
+    kind: "사주",
+    title: "계산한 뒤 해석합니다",
+    href: "/saju",
+    linkLabel: "사주 리딩 살펴보기",
+    steps: [
+      ["출생정보 입력", "생년월일시와 출생 지역, 알고 있는 정보의 정확도를 입력합니다."],
+      ["서버 명식 계산", "절기와 간지 같은 정해진 계산 규칙으로 명식과 해석 기준을 만듭니다."],
+      ["질문과 해설 연결", "AI가 계산된 정보와 관심 분야를 바탕으로 질문에 맞는 해설을 구성합니다."],
+    ],
+  },
 ] as const;
 
 export default function AboutPage() {
   return (
-    <article className="reading-method-page">
-      <header className="reading-method-hero page-width">
-        <h1>명로 소개</h1>
-        <p>명로는 사주의 명(命)과 타로가 비추는 길(路)을 결합한 이름입니다.</p>
-        <p>지금 마음에 머무는 질문을 카드와 사주로 살펴보고, 자신의 상황과 생각을 차분히 돌아볼 수 있는 콘텐츠를 제공합니다.</p>
-      </header>
+    <article className="flow-page page-width about-page">
+      <h1>명로 소개</h1>
+      <p className="flow-lead">
+        명로는 사주의 명(命)과 타로가 비추는 길(路)을 결합한 이름입니다. 지금 마음에 머무는 질문을 카드와 사주로 살펴보고, 자신의 상황과 생각을 차분히 돌아볼 수 있는 콘텐츠를 제공합니다.
+      </p>
 
-      <section id="reading-method" className="reading-method-section page-width" aria-labelledby="reading-method-title">
-        <div className="reading-method-heading">
-          <p className="eyebrow">리딩 방식</p>
-          <h2 id="reading-method-title">그냥 AI에게 물어보는 것과 무엇이 다를까요?</h2>
-          <p>명로는 질문을 곧바로 AI에 맡기지 않아요. 먼저 계산하고, 리딩의 구조를 정하고, 해석이 넘지 말아야 할 경계를 세운 뒤 결과를 만들어요.</p>
-        </div>
-      </section>
-
-      <section className="reading-method-section page-width" aria-labelledby="comparison-title">
-        <div className="reading-method-heading">
-          <p className="eyebrow">구조의 차이</p>
-          <h2 id="comparison-title">같은 AI라도 쓰는 방식이 달라요</h2>
-          <p>어느 쪽이 낫다는 비교가 아니라, 질문을 받아 결과를 만드는 구조의 차이를 정리했어요.</p>
-        </div>
-        <p className="method-comparison-hint">표를 좌우로 움직여 AI 챗봇 대화와 비교할 수 있어요.</p>
-        <div
-          aria-label="명로와 AI 챗봇 대화 비교"
-          className="method-comparison-scroll"
-          role="region"
-          tabIndex={0}
-        >
-          <table className="method-comparison">
-            <caption className="sr-only">리딩을 만드는 방식 비교</caption>
-            <thead>
-              <tr>
-                <th scope="col">구분</th>
-                <th className="myeongro-column" scope="col">명로</th>
-                <th scope="col">AI 챗봇 대화</th>
-              </tr>
-            </thead>
-            <tbody>
-              {comparisonRows.map((row) => (
-                <tr key={row.label}>
-                  <th scope="row">{row.label}</th>
-                  <td className="myeongro-column">{row.myeongro}</td>
-                  <td>{row.chatbot}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="reading-method-section method-paths page-width" aria-labelledby="paths-title">
-        <div className="reading-method-heading">
-          <p className="eyebrow">리딩 과정</p>
-          <h2 id="paths-title">타로와 사주는 서로 다른 과정을 거쳐요</h2>
-        </div>
-        <div className="method-path-grid">
-          <article className="method-path-card tarot-path">
-            <p className="method-path-kicker">타로</p>
-            <h3>카드의 자리를 먼저 정해요</h3>
-            <ol>
-              {tarotSteps.map(([number, title, copy]) => (
-                <li key={number}>
-                  <span aria-hidden="true">{number}</span>
-                  <div>
-                    <strong>{title}</strong>
-                    <p>{copy}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <Link href="/tarot">타로 리딩 살펴보기 <span aria-hidden="true">→</span></Link>
-          </article>
-          <article className="method-path-card saju-path">
-            <p className="method-path-kicker">사주</p>
-            <h3>계산한 뒤 해석해요</h3>
-            <ol>
-              {sajuSteps.map(([number, title, copy]) => (
-                <li key={number}>
-                  <span aria-hidden="true">{number}</span>
-                  <div>
-                    <strong>{title}</strong>
-                    <p>{copy}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <Link href="/saju">사주 리딩 살펴보기 <span aria-hidden="true">→</span></Link>
-          </article>
-        </div>
-      </section>
-
-      <section className="reading-method-section method-boundaries page-width" aria-labelledby="boundaries-title">
-        <div className="reading-method-heading">
-          <p className="eyebrow">리딩의 경계</p>
-          <h2 id="boundaries-title">리딩이 하지 않는 일도 분명히 해요</h2>
-        </div>
-        <ul className="method-boundary-list">
-          <li>미래의 사건이나 다른 사람의 마음을 사실처럼 단정하지 않아요.</li>
-          <li>의료·법률·금융 같은 전문적인 판단과 중요한 결정을 대신하지 않아요.</li>
-          <li>질문에 따라 특정 운세로 바꿔 읽은 이유를 안내하고, 안전상 다룰 수 없는 질문은 따로 알려드려요.</li>
+      <section className="about-section" id="reading-method" aria-labelledby="reading-method-title">
+        <h2 id="reading-method-title">그냥 AI에게 물어보는 것과 무엇이 다를까요?</h2>
+        <p>명로는 질문을 곧바로 AI에 맡기지 않습니다. 먼저 계산하고, 리딩의 구조를 정하고, 해석이 넘지 말아야 할 경계를 세운 뒤 결과를 만듭니다. 어느 쪽이 낫다는 비교가 아니라 결과를 만드는 구조의 차이입니다.</p>
+        <ul className="about-compare" aria-label="명로와 AI 챗봇 대화 비교">
+          {comparisonRows.map((row) => (
+            <li key={row.label}>
+              <h3>{row.label}</h3>
+              <dl>
+                <div>
+                  <dt>명로</dt>
+                  <dd>{row.myeongro}</dd>
+                </div>
+                <div>
+                  <dt className="other">AI 챗봇 대화</dt>
+                  <dd>{row.chatbot}</dd>
+                </div>
+              </dl>
+            </li>
+          ))}
         </ul>
       </section>
 
-      <section className="reading-method-section page-width" aria-labelledby="content-method-title">
-        <div className="reading-method-heading">
-          <h2 id="content-method-title">콘텐츠를 만드는 방식</h2>
-          <p>공개 안내 글과 무료 오늘의 카드 콘텐츠는 AI로 초안을 작성하고, 운영자가 내용을 확인하고 다듬어 게시합니다. 오늘의 카드는 이렇게 준비한 고정 콘텐츠를 보여주며 이용할 때마다 AI를 호출하지 않습니다.</p>
-          <p>질문을 입력해 생성하는 AI 타로·사주는 요청할 때 만들어지는 해석입니다. 공개 글과 오늘의 카드, AI 리딩은 모두 오락과 자기 성찰을 위한 콘텐츠이며 중요한 결정이나 전문적인 판단을 대신하지 않습니다.</p>
+      <section className="about-section" aria-labelledby="paths-title">
+        <h2 id="paths-title">타로와 사주는 서로 다른 과정을 거칩니다</h2>
+        <div className="about-paths">
+          {readingPaths.map((path) => (
+            <article className="about-path" key={path.id} aria-labelledby={`about-path-${path.id}`}>
+              <h3 id={`about-path-${path.id}`}><small>{path.kind}</small>{path.title}</h3>
+              <ol>
+                {path.steps.map(([title, copy], index) => (
+                  <li key={title}>
+                    <span aria-hidden="true">{index + 1}</span>
+                    <div>
+                      <strong>{title}</strong>
+                      <p>{copy}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <Link href={path.href}>{path.linkLabel}</Link>
+            </article>
+          ))}
         </div>
       </section>
 
-      <section className="reading-method-section page-width" aria-labelledby="operation-contact-title">
-        <div className="reading-method-heading">
-          <h2 id="operation-contact-title">운영과 문의</h2>
-          <p>명로는 개인이 운영하는 서비스입니다. 이용 중 궁금한 점이나 서비스에 대한 의견은 일반 문의 창구로 보내 주세요.</p>
-          <p>일반 문의: <a href={`mailto:${LEGAL_METADATA.contactEmail}`}>{LEGAL_METADATA.contactEmail}</a></p>
-          <p>개인정보 열람·정정·삭제·처리정지 등 권리행사: <a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a></p>
-          <p>개인정보의 처리와 권리행사 절차는 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다. 문의에는 비밀번호나 불필요한 개인정보를 넣지 마세요.</p>
-        </div>
+      <section className="about-section" aria-labelledby="boundaries-title">
+        <h2 id="boundaries-title">리딩이 하지 않는 일</h2>
+        <ul className="about-boundaries">
+          <li>미래의 사건이나 다른 사람의 마음을 사실처럼 단정하지 않습니다.</li>
+          <li>의료·법률·금융 같은 전문적인 판단과 중요한 결정을 대신하지 않습니다.</li>
+          <li>질문에 따라 특정 운세로 바꿔 읽은 이유를 안내하고, 안전상 다룰 수 없는 질문은 따로 알려드립니다.</li>
+        </ul>
       </section>
 
-      <section className="method-closing" aria-labelledby="method-closing-title">
-        <div className="page-width">
-          <p className="eyebrow">리딩 시작</p>
-          <h2 id="method-closing-title">어떤 방식이 지금의 질문에 더 가까운가요?</h2>
+      <section className="about-section" aria-labelledby="content-method-title">
+        <h2 id="content-method-title">콘텐츠를 만드는 방식</h2>
+        <p>공개 안내 글과 무료 오늘의 카드 콘텐츠는 AI로 초안을 작성하고, 운영자가 내용을 확인하고 다듬어 게시합니다. 오늘의 카드는 이렇게 준비한 고정 콘텐츠를 보여주며 이용할 때마다 AI를 호출하지 않습니다.</p>
+        <p>질문을 입력해 생성하는 AI 타로·사주는 요청할 때 만들어지는 해석입니다. 공개 글과 오늘의 카드, AI 리딩은 모두 오락과 자기 성찰을 위한 콘텐츠이며 중요한 결정이나 전문적인 판단을 대신하지 않습니다.</p>
+      </section>
+
+      <section className="about-section" aria-labelledby="operation-contact-title">
+        <h2 id="operation-contact-title">운영과 문의</h2>
+        <p>명로는 개인이 운영하는 서비스입니다. 이용 중 궁금한 점이나 서비스에 대한 의견은 일반 문의 창구로 보내 주세요. 문의에는 비밀번호나 불필요한 개인정보를 넣지 마세요.</p>
+        <dl className="about-contact">
           <div>
-            <Link className="primary-button" href="/tarot">타로로 시작</Link>
-            <Link className="secondary-button" href="/saju">사주로 시작</Link>
+            <dt>일반 문의</dt>
+            <dd><a href={`mailto:${LEGAL_METADATA.contactEmail}`}>{LEGAL_METADATA.contactEmail}</a></dd>
           </div>
-          <Link className="method-daily-link" href="/tarot/daily">로그인 없이 오늘의 운세 보기</Link>
+          <div>
+            <dt>개인정보 권리행사</dt>
+            <dd><a href={`mailto:${LEGAL_METADATA.privacyEmail}`}>{LEGAL_METADATA.privacyEmail}</a></dd>
+          </div>
+        </dl>
+        <p>개인정보의 처리와 권리행사 절차는 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다.</p>
+      </section>
+
+      <section className="about-closing" aria-labelledby="method-closing-title">
+        <h2 id="method-closing-title">어떤 방식이 지금의 질문에 더 가까운가요?</h2>
+        <div className="about-closing-actions">
+          <Link className="primary-button" href="/tarot">타로로 시작</Link>
+          <Link className="secondary-button" href="/saju">사주로 시작</Link>
         </div>
+        <Link className="about-daily-link" href="/tarot/daily">로그인 없이 오늘의 운세 보기</Link>
       </section>
     </article>
   );
