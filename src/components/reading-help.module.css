@@ -35,7 +35,8 @@
 .inline { margin: 16px 0 24px; font-size: 14px; }
 .hero .editorialNote { margin-top: 20px; padding: 16px; border-left: 2px solid var(--accent-primary); font-size: 14px; }
 @media (max-width: 760px) {
-  .page { width: calc(100% - 32px); padding-block: 32px 60px; }
+  /* Same gutter as .page-width on phones, so guides start at the same left edge as the other pages. */
+  .page { width: calc(100% - 2 * max(14px, calc(50vw - 310px))); padding-block: 32px 60px; }
   .summary, .example { padding: 20px; }
   .hero h1 { font-size: 32px; }
   .section h2, .group h2, .entry h2 { font-size: 20px; }

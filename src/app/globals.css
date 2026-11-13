@@ -984,6 +984,8 @@ label.signup-check-label { cursor: pointer; }
   .record-row-title { grid-row: 2; font-size: 18px; }
   .records-empty-starts { grid-template-columns: 1fr; }
   .auth-options { max-width: none; }
+  /* Label-and-value lists stack too: a 110px label column leaves too little room for 16px text. */
+  .legal .consent-document-content dl div { grid-template-columns: 1fr; gap: 2px; }
   .legal .consent-processing-table th, .legal .consent-processing-table td { padding: 10px 14px; font-size: 14px; }
   .legal .consent-processing-table td::before { position: static; display: block; width: auto; margin-bottom: 2px; font-size: 12px; }
   .signup-check { flex-direction: column; align-items: stretch; gap: 4px; padding: 16px 18px; }
