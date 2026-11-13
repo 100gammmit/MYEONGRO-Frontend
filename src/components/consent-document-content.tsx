@@ -88,87 +88,87 @@ export function ConsentDocumentContent({
           <tbody>
             <tr>
               <th scope="row">소셜 로그인과 계정 식별</th>
-              <td>명로 사용자 식별자, OAuth 제공자와 제공자 사용자 식별자, 계정 생성·변경 시각</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
+              <td data-label="처리 항목">명로 사용자 식별자, OAuth 제공자와 제공자 사용자 식별자, 계정 생성·변경 시각</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
             </tr>
             <tr>
               <th scope="row">리딩 크레딧과 서비스 상태 관리</th>
-              <td>무료·유료 크레딧 잔액, 무료 크레딧 기준일, 리딩 생성 상태와 사용 크레딧</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
+              <td data-label="처리 항목">무료·유료 크레딧 잔액, 무료 크레딧 기준일, 리딩 생성 상태와 사용 크레딧</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
             </tr>
             <tr>
               <th scope="row">만 19세 이상 이용자격 확인</th>
-              <td>만 19세 이상 확인 여부, 정책 버전, 확인 시각·방법, 가입 시도 세대 식별자</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제. 생년월일과 신분증 정보는 수집하지 않음</td>
+              <td data-label="처리 항목">만 19세 이상 확인 여부, 정책 버전, 확인 시각·방법, 가입 시도 세대 식별자</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제. 생년월일과 신분증 정보는 수집하지 않음</td>
             </tr>
             <tr>
               <th scope="row">약관과 AI 국외이전 동의 이력 관리</th>
-              <td>문서 종류·버전, 동의 또는 철회 동작, 발생 시각·방법</td>
-              <td>이용자 동의 이행과 철회 상태 관리</td>
-              <td>계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
+              <td data-label="처리 항목">문서 종류·버전, 동의 또는 철회 동작, 발생 시각·방법</td>
+              <td data-label="처리 근거">이용자 동의 이행과 철회 상태 관리</td>
+              <td data-label="보유기간·삭제 기준">계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
             </tr>
             <tr>
               <th scope="row">타로 리딩 생성·저장·조회</th>
-              <td>리딩·요청 식별자, 리딩 종류·스프레드·버전, 카드 식별자·위치·방향, 원문 미포함 입력 식별값, 제목·결과·상태·오류 코드·크레딧 비용, 모델·프롬프트 등 생성 정보</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>개별 리딩 삭제 또는 계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
+              <td data-label="처리 항목">리딩·요청 식별자, 리딩 종류·스프레드·버전, 카드 식별자·위치·방향, 원문 미포함 입력 식별값, 제목·결과·상태·오류 코드·크레딧 비용, 모델·프롬프트 등 생성 정보</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">개별 리딩 삭제 또는 계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
             </tr>
             <tr>
               <th scope="row">사주 리딩 생성·저장·조회</th>
-              <td>대상 연도, 확정 기둥·일간·오행·십성·합충·대운·세운·불확실성 등 최소 계산정보, HMAC 방식 원문 미포함 입력 식별값, 리딩 결과·상태·생성 정보</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>개별 리딩 삭제 또는 계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
+              <td data-label="처리 항목">대상 연도, 확정 기둥·일간·오행·십성·합충·대운·세운·불확실성 등 최소 계산정보, HMAC 방식 원문 미포함 입력 식별값, 리딩 결과·상태·생성 정보</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">개별 리딩 삭제 또는 계정 삭제 시 명로 운영 데이터베이스에서 즉시 삭제</td>
             </tr>
             <tr>
               <th scope="row">AI 리딩 요청 처리</th>
-              <td>이용자가 작성한 질문·선택지·관심 분야</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>요청 처리 완료 시 명로 서버에서 폐기. 명로 데이터베이스와 운영 로그에는 저장하지 않음. OpenAI의 보유기간은 아래 OpenAI AI 리딩 국외이전 항목을 따름</td>
+              <td data-label="처리 항목">이용자가 작성한 질문·선택지·관심 분야</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">요청 처리 완료 시 명로 서버에서 폐기. 명로 데이터베이스와 운영 로그에는 저장하지 않음. OpenAI의 보유기간은 아래 OpenAI AI 리딩 국외이전 항목을 따름</td>
             </tr>
             <tr>
               <th scope="row">사주 계산</th>
-              <td>양력 생년월일, 출생시각 또는 출생시각 정확도, 출생 시·도, 대운 계산 기준</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>사주 계산 요청 처리 완료 시 폐기. 명로 데이터베이스에 저장하지 않고 OpenAI에도 전송하지 않음</td>
+              <td data-label="처리 항목">양력 생년월일, 출생시각 또는 출생시각 정확도, 출생 시·도, 대운 계산 기준</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">사주 계산 요청 처리 완료 시 폐기. 명로 데이터베이스에 저장하지 않고 OpenAI에도 전송하지 않음</td>
             </tr>
             <tr>
               <th scope="row">로그인과 가입 대기 세션</th>
-              <td>로그인 세션의 명로 사용자 식별자와 권한, 가입 대기 중 OAuth 제공자·제공자 사용자 식별자·access token·가입 시도 식별자</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>30분 미사용 시 만료. 로그아웃·가입 완료·취소·계정 삭제 또는 비영속 Redis 재시작 시 삭제</td>
+              <td data-label="처리 항목">로그인 세션의 명로 사용자 식별자와 권한, 가입 대기 중 OAuth 제공자·제공자 사용자 식별자·access token·가입 시도 식별자</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">30분 미사용 시 만료. 로그아웃·가입 완료·취소·계정 삭제 또는 비영속 Redis 재시작 시 삭제</td>
             </tr>
             <tr>
               <th scope="row">무료 오늘의 운세 이어보기</th>
-              <td>한국 날짜, SHA-256 계정 범위값 또는 비회원 구분, 뽑기 식별자, 카드·콘텐츠 식별자와 버전</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>명로 서버에는 저장하지 않고 현재 브라우저에만 저장. 날짜가 지난 뒤 다음 페이지 방문 시 삭제하며, 계정 삭제 성공 시 현재 브라우저의 해당 계정 값 삭제</td>
+              <td data-label="처리 항목">한국 날짜, SHA-256 계정 범위값 또는 비회원 구분, 뽑기 식별자, 카드·콘텐츠 식별자와 버전</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">명로 서버에는 저장하지 않고 현재 브라우저에만 저장. 날짜가 지난 뒤 다음 페이지 방문 시 삭제하며, 계정 삭제 성공 시 현재 브라우저의 해당 계정 값 삭제</td>
             </tr>
             <tr>
               <th scope="row">일반 문의와 개인정보 권리행사 처리</th>
-              <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.items}</td>
-              <td><ContractPerformanceBasis /></td>
-              <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention}. 외부 사업자의 삭제 절차는 아래 문의 이메일(일반 문의·개인정보 권리행사) 국외 처리 항목을 따름</td>
+              <td data-label="처리 항목">{PRIVACY_INQUIRY_EMAIL_PROCESSING.items}</td>
+              <td data-label="처리 근거"><ContractPerformanceBasis /></td>
+              <td data-label="보유기간·삭제 기준">{PRIVACY_INQUIRY_EMAIL_PROCESSING.operatorRetention}. 외부 사업자의 삭제 절차는 아래 문의 이메일(일반 문의·개인정보 권리행사) 국외 처리 항목을 따름</td>
             </tr>
             <tr>
               <th scope="row">서비스 보안과 오류·장애 대응</th>
-              <td>오류가 발생한 경우의 리딩 식별자, 모델·리딩 종류·종료 사유·응답 크기·토큰 사용량 등 진단정보</td>
-              <td>개인정보 보호법 제15조 제1항 제6호에 따른 서비스의 안정적 운영과 정당한 이익</td>
-              <td>명로는 로그 event 시각부터 최대 30일 동안만 운영 조회·이용. 30일 경과 시 CloudWatch 보유 정책에 따라 만료·삭제 대상으로 표시되며, 공급자 시스템의 물리적 삭제는 통상 추가 72시간 이내에 처리되나 드물게 더 오래 걸릴 수 있음</td>
+              <td data-label="처리 항목">오류가 발생한 경우의 리딩 식별자, 모델·리딩 종류·종료 사유·응답 크기·토큰 사용량 등 진단정보</td>
+              <td data-label="처리 근거">개인정보 보호법 제15조 제1항 제6호에 따른 서비스의 안정적 운영과 정당한 이익</td>
+              <td data-label="보유기간·삭제 기준">명로는 로그 event 시각부터 최대 30일 동안만 운영 조회·이용. 30일 경과 시 CloudWatch 보유 정책에 따라 만료·삭제 대상으로 표시되며, 공급자 시스템의 물리적 삭제는 통상 추가 72시간 이내에 처리되나 드물게 더 오래 걸릴 수 있음</td>
             </tr>
             <tr>
               <th scope="row">로그인 요청 남용 방지</th>
-              <td>접속 IP 주소를 비밀키로 변환한 해시값과 요청 횟수. IP 주소 자체는 저장하지 않음</td>
-              <td>개인정보 보호법 제15조 제1항 제6호에 따른 서비스의 안정적 운영과 정당한 이익</td>
-              <td>1분 후 자동 삭제. 비영속 Redis 재시작 시 삭제</td>
+              <td data-label="처리 항목">접속 IP 주소를 비밀키로 변환한 해시값과 요청 횟수. IP 주소 자체는 저장하지 않음</td>
+              <td data-label="처리 근거">개인정보 보호법 제15조 제1항 제6호에 따른 서비스의 안정적 운영과 정당한 이익</td>
+              <td data-label="보유기간·삭제 기준">1분 후 자동 삭제. 비영속 Redis 재시작 시 삭제</td>
             </tr>
             <tr>
               <th scope="row">OpenAI를 통한 AI 리딩 생성</th>
-              <td>질문·선택지·관심 분야, 카드 선택정보, 최소 사주 계산정보</td>
-              <td><OverseasTransferConsentBasis /></td>
-              <td>오남용 감시 로그 최대 30일, 적용되는 프롬프트 캐시 최대 24시간. 법적 의무가 있거나 서비스 또는 제3자를 위해로부터 보호하기 위해 합리적으로 필요한 경우 더 오래 보관될 수 있음</td>
+              <td data-label="처리 항목">질문·선택지·관심 분야, 카드 선택정보, 최소 사주 계산정보</td>
+              <td data-label="처리 근거"><OverseasTransferConsentBasis /></td>
+              <td data-label="보유기간·삭제 기준">오남용 감시 로그 최대 30일, 적용되는 프롬프트 캐시 최대 24시간. 법적 의무가 있거나 서비스 또는 제3자를 위해로부터 보호하기 위해 합리적으로 필요한 경우 더 오래 보관될 수 있음</td>
             </tr>
           </tbody>
         </table>
@@ -190,18 +190,18 @@ export function ConsentDocumentContent({
           <tbody>
             <tr>
               <th scope="row">{AWS_PROCESSING_DISCLOSURE.processor.name}</th>
-              <td>{AWS_PROCESSING_DISCLOSURE.outsourcedTasks}</td>
-              <td>요청 중계 정보는 요청 처리에 필요한 동안, 저장 정보는 위 처리 항목별 보유기간 동안</td>
+              <td data-label="위탁업무">{AWS_PROCESSING_DISCLOSURE.outsourcedTasks}</td>
+              <td data-label="보유·이용기간">요청 중계 정보는 요청 처리에 필요한 동안, 저장 정보는 위 처리 항목별 보유기간 동안</td>
             </tr>
             <tr>
               <th scope="row">{OPENAI_TRANSFER_SNAPSHOT.directRecipient.name}</th>
-              <td>이용자가 요청한 AI 타로·사주 리딩 생성</td>
-              <td>아래 OpenAI 국외이전 세부 내용의 보유·이용 기간에 따름</td>
+              <td data-label="위탁업무">이용자가 요청한 AI 타로·사주 리딩 생성</td>
+              <td data-label="보유·이용기간">아래 OpenAI 국외이전 세부 내용의 보유·이용 기간에 따름</td>
             </tr>
             <tr>
               <th scope="row">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.name}</th>
-              <td>{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.purpose}</td>
-              <td>아래 문의 이메일(일반 문의·개인정보 권리행사) 국외 처리 항목의 명로 보유기간과 Google 복구·삭제 기준에 따름</td>
+              <td data-label="위탁업무">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.purpose}</td>
+              <td data-label="보유·이용기간">아래 문의 이메일(일반 문의·개인정보 권리행사) 국외 처리 항목의 명로 보유기간과 Google 복구·삭제 기준에 따름</td>
             </tr>
           </tbody>
         </table>
@@ -348,9 +348,9 @@ function PrivacyInquiryEmailOverseasDetails({
             {PRIVACY_INQUIRY_EMAIL_PROCESSING.processingRoles.map((entry) => (
               <tr key={entry.id}>
                 <th scope="row">{entry.role}<br />{entry.processors}</th>
-                <td>{entry.countries.filter((country) => country !== "대한민국").join(", ")}</td>
-                <td>{entry.countries.some((country) => country === "대한민국") ? "대한민국" : "해당 역할의 공개 위치 없음"}</td>
-                <td>{entry.purpose}. {entry.condition}</td>
+                <td data-label="국외 처리 가능 국가">{entry.countries.filter((country) => country !== "대한민국").join(", ")}</td>
+                <td data-label="국내 처리 가능 위치">{entry.countries.some((country) => country === "대한민국") ? "대한민국" : "해당 역할의 공개 위치 없음"}</td>
+                <td data-label="목적·적용 조건">{entry.purpose}. {entry.condition}</td>
               </tr>
             ))}
           </tbody>
@@ -411,9 +411,9 @@ function AiOverseasTransferDetails({
           <tbody>
             <tr>
               <th scope="row">직접 이전받는 자</th>
-              <td>{directRecipient.name}</td>
-              <td>{directRecipient.country}</td>
-              <td>{directRecipient.purpose}</td>
+              <td data-label="처리자">{directRecipient.name}</td>
+              <td data-label="처리 가능 국가">{directRecipient.country}</td>
+              <td data-label="목적·적용 조건">{directRecipient.purpose}</td>
             </tr>
             {processorGroups.flatMap((group) =>
               group.processors.map((processor, processorIndex) => (
@@ -421,9 +421,9 @@ function AiOverseasTransferDetails({
                   {processorIndex === 0 ? (
                     <th scope="rowgroup" rowSpan={group.processors.length}>{group.label}</th>
                   ) : null}
-                  <td>{processor.name}</td>
-                  <td>{processor.countries.join(", ")}</td>
-                  <td>
+                  <td data-label="처리자">{processor.name}</td>
+                  <td data-label="처리 가능 국가">{processor.countries.join(", ")}</td>
+                  <td data-label="목적·적용 조건">
                     {processor.purpose}
                     {"condition" in processor ? ` · ${processor.condition}` : ""}
                   </td>
@@ -432,9 +432,9 @@ function AiOverseasTransferDetails({
             )}
             <tr>
               <th scope="row">동적 네트워크 처리</th>
-              <td>{dynamicProcessor.name}</td>
-              <td>{dynamicProcessor.location}</td>
-              <td>{dynamicProcessor.purpose}</td>
+              <td data-label="처리자">{dynamicProcessor.name}</td>
+              <td data-label="처리 가능 국가">{dynamicProcessor.location}</td>
+              <td data-label="목적·적용 조건">{dynamicProcessor.purpose}</td>
             </tr>
           </tbody>
         </table>

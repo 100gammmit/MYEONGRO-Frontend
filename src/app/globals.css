@@ -805,6 +805,9 @@ label.signup-check-label { cursor: pointer; }
 .google { background: var(--brand-google-background); color: var(--brand-google-text); }
 .legal { max-width: var(--w-read); }
 .legal h2 { margin-top: 40px; color: var(--text-accent-strong); }
+/* The public pages read the same document as the consent modal, at a reading size instead of the modal's 14px. */
+.legal .consent-document-content p, .legal .consent-document-content ul, .legal .consent-document-content dd { font-size: 16px; line-height: 1.85; }
+.legal .consent-document-content h2 { font-size: 20px; }
 
 .updates-page { max-width: var(--w-wide); }
 .updates-intro { max-width: var(--w-read); margin: -12px 0 46px; color: var(--text-secondary); font-size: 16px; line-height: 1.8; }
@@ -990,6 +993,16 @@ label.signup-check-label { cursor: pointer; }
   .record-row-title { grid-row: 2; font-size: 18px; }
   .records-empty-starts { grid-template-columns: 1fr; }
   .auth-options { max-width: none; }
+  /* Wide legal tables become one card per row on phones; each cell names its column from data-label. */
+  .legal .consent-table-wrapper { overflow: visible; }
+  .legal .consent-processing-table { min-width: 0; border-collapse: separate; border-spacing: 0; }
+  .legal .consent-processing-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .legal .consent-processing-table, .legal .consent-processing-table tbody, .legal .consent-processing-table tr, .legal .consent-processing-table th, .legal .consent-processing-table td { display: block; width: auto; }
+  .legal .consent-processing-table tr { margin-bottom: 12px; border: 1px solid var(--border-default); border-radius: var(--radius-md); overflow: hidden; }
+  .legal .consent-processing-table th, .legal .consent-processing-table td { border: 0; padding: 10px 14px; font-size: 14px; line-height: 1.7; }
+  .legal .consent-processing-table tbody th { background: var(--surface-tint-1); color: var(--text-primary); }
+  .legal .consent-processing-table td + td { border-top: 1px solid var(--border-hairline); }
+  .legal .consent-processing-table td::before { content: attr(data-label); display: block; margin-bottom: 2px; color: var(--text-muted); font-size: 12px; font-weight: 600; }
   .signup-check { flex-direction: column; align-items: stretch; gap: 4px; padding: 16px 18px; }
   .signup-check-label { align-items: flex-start; }
   .signup-view { align-self: flex-start; margin-left: 36px; }

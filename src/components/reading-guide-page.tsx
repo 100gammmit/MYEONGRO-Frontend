@@ -6,7 +6,6 @@ export function ReadingGuidePage({ guide }: { guide: ReadingGuide }) {
   return (
     <article className={styles.page}>
       <header className={styles.hero}>
-        <p className="eyebrow">사용 가이드</p>
         <h1>{guide.title}</h1>
         <p>{guide.description}</p>
         {guide.editorialNote && <p className={styles.editorialNote}>{guide.editorialNote}</p>}

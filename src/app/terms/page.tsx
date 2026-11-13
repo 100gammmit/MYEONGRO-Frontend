@@ -9,7 +9,7 @@ export const metadata = publicPageMetadata(
 
 export default function TermsPage() {
   return (
-    <article className="simple-page legal page-width">
+    <article className="flow-page page-width legal">
       <h1>서비스 이용약관</h1>
       <ConsentDocumentContent documentType="terms" />
     </article>
