@@ -16,8 +16,7 @@ concurrency:
 
 jobs:
   public-content:
-    # ubuntu-latest moved to Ubuntu 26, where `playwright install --with-deps` fails; pin until Playwright supports it.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       # This job never receives production credentials or calls the real Backend.
