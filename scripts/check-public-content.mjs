@@ -114,7 +114,7 @@ try {
   await authenticated.addCookies([{ name: "MYEONGRO_SESSION", value: "public-content-synthetic", url: base }]);
   const recordsPage = await authenticated.newPage();
   await recordsPage.goto(`${base}/records`);
-  await recordsPage.getByRole("heading", { level: 1, name: "나의 리딩 기록" }).waitFor();
+  await recordsPage.getByRole("heading", { level: 1, name: "내 기록" }).waitFor();
   assert.equal(new URL(recordsPage.url()).pathname, "/records");
   assert.equal(await recordsPage.locator('meta[name="robots"]').getAttribute("content"), "noindex, nofollow");
   await recordsPage.getByRole("link", { name: new RegExp(record.title) }).click();
@@ -142,7 +142,7 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `About overflow: ${width}`);
     assert.equal(await page.locator('footer a[href="/about"]').textContent(), "명로 소개");
     assert.equal(await page.locator('footer a[href="mailto:contact@myeongro.com"]').count(), 1);
-    assert.equal(await page.locator("article > section").last().getAttribute("class"), "method-closing");
+    assert.equal(await page.locator("article > section").last().getAttribute("class"), "about-closing");
     await page.screenshot({ path: `${output}/about-${width}.png`, fullPage: true });
     for (const path of ["/", "/faq", "/guide/tarot", "/guide/saju", articles[0]]) {
       await page.goto(`${base}${path}`);

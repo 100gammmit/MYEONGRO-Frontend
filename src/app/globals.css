@@ -299,7 +299,7 @@ main:focus { outline: none; }
 .site-footer a { display: inline-flex; align-items: center; min-height: 44px; }
 
 /* About: the reading column with plain section headings, like the guides. */
-.about-section { margin-top: 72px; }
+.about-section { margin-top: 72px; scroll-margin-top: 96px; }
 .about-section > h2, .about-closing > h2 { margin: 0; font-size: 26px; font-weight: 400; line-height: 1.4; letter-spacing: -.01em; word-break: keep-all; }
 .about-section > p { margin: 12px 0 0; color: var(--text-secondary); font-size: 16px; line-height: 1.85; word-break: keep-all; }
 .about-section a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
