@@ -43,7 +43,10 @@ describe("TarotReadingResult", () => {
     expect(screen.getAllByText("아직 공개하지 않은 카드예요.")).toHaveLength(3);
     expect(screen.getAllByRole("button", { name: "이 카드 공개" })).toHaveLength(1);
 
-    revealAll(3);
+    fireEvent.click(screen.getByRole("button", { name: "이 카드 공개" }));
+    // The button leaves with its click; focus lands on the interpretation it opened.
+    expect(document.activeElement?.tagName).toBe("H3");
+    revealAll(2);
 
     expect(screen.queryByText("아직 공개하지 않은 카드예요.")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "이 카드 공개" })).not.toBeInTheDocument();

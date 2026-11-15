@@ -92,6 +92,15 @@ function ResultPanel({
   instant: boolean;
   onReveal: () => void;
 }) {
+  // The reveal button disappears with its click, so focus moves to the interpretation it opened
+  // instead of falling back to the page. A record opens already revealed and moves nothing.
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const wasRevealed = useRef(revealed);
+  useEffect(() => {
+    if (revealed && !wasRevealed.current && !instant) headingRef.current?.focus();
+    wasRevealed.current = revealed;
+  }, [instant, revealed]);
+
   return (
     <li className={revealed ? "result-panel" : "result-panel closed"}>
       <div className="result-panel-card">
@@ -105,7 +114,7 @@ function ResultPanel({
         <p className="result-position">{panel.label}</p>
         {revealed ? (
           <>
-            <h3>{panel.heading}</h3>
+            <h3 ref={headingRef} tabIndex={-1}>{panel.heading}</h3>
             <p>{panel.body}</p>
           </>
         ) : (

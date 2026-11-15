@@ -541,6 +541,7 @@ main:focus { outline: none; }
 .result-position { margin: 4px 0 8px; color: var(--text-accent); font-size: 13px; font-weight: 600; }
 .result-panel h3 { margin: 0 0 10px; font-size: 24px; font-weight: 400; line-height: 1.35; word-break: keep-all; text-wrap: pretty; }
 .result-panels.compare .result-panel h3 { font-size: 20px; }
+.result-panel h3:focus { outline: none; }
 .result-panel p:not(.result-position) { margin: 0; color: var(--text-secondary); font-size: 16px; line-height: 1.85; text-wrap: pretty; }
 .result-panel .result-waiting { color: var(--text-subtle); font-size: 15px; }
 .reveal-button { margin-top: 18px; min-width: 160px; }
