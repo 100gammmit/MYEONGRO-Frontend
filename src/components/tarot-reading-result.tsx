@@ -26,7 +26,6 @@ const CARD_INDEX = new Map<string, (typeof MAJOR_ARCANA)[number]>(
   MAJOR_ARCANA.map((card) => [card.id, card]),
 );
 
-const CARD_COUNT_WORDS: Readonly<Record<number, string>> = { 1: "한", 3: "세", 5: "다섯" };
 
 // A choice reading weighs its last two cards against each other; the rest are the criteria.
 const OPTION_POSITIONS = new Set(["option_a", "option_b"]);
@@ -136,9 +135,6 @@ export function TarotReadingResult({
   const definition = TAROT_SPREADS[spreadType];
   // The one-by-one reveal is for the first reading; a reopened record shows every card at once.
   const [revealedCount, setRevealedCount] = useState(record ? definition.cardCount : 0);
-  const allRevealed = revealedCount === definition.cardCount;
-  const summaryRef = useRef<HTMLElement>(null);
-  const revealedOnScreen = useRef(false);
 
   // Fetch every drawn front up front, so a card revealed later never turns over to an empty face.
   // A <link rel="preload"> would warn in the console while a card waits for its click; an Image
@@ -154,13 +150,7 @@ export function TarotReadingResult({
     });
   }, [cardIds]);
 
-  // The summary opens above the cards once the last one turns, so the reader is taken up to it.
-  useEffect(() => {
-    if (allRevealed && revealedOnScreen.current) summaryRef.current?.focus();
-  }, [allRevealed]);
-
   function revealNext() {
-    revealedOnScreen.current = true;
     setRevealedCount((count) => Math.min(count + 1, definition.cardCount));
   }
 
@@ -192,23 +182,17 @@ export function TarotReadingResult({
         backHref={record?.backHref ?? "/tarot"}
         backLabel={record?.backLabel ?? "타로"}
         meta={[definition.name, record?.dateLabel]}
-        title={allRevealed ? result.title : `카드 ${CARD_COUNT_WORDS[definition.cardCount] ?? definition.cardCount} 장이 놓였어요`}
+        title={result.title}
       >
         {/* The changed focus is explained before the cards, whose position labels already reflect it. */}
         <ReadingModeNotice notice={redirectedReadingNotice(result.readingMode, result.questionRedirected)} />
       </ReadingResultHeader>
 
-      {allRevealed ? (
-        <section className="result-answer" aria-labelledby="tarot-summary-label" ref={summaryRef} tabIndex={-1}>
-          <h2 className="result-answer-label" id="tarot-summary-label">리딩 요약</h2>
-          <p>{result.summary}</p>
-        </section>
-      ) : (
-        <section className="result-answer waiting" aria-labelledby="tarot-summary-label">
-          <h2 className="result-answer-label" id="tarot-summary-label">리딩 요약</h2>
-          <p>카드를 한 장씩 공개하면, 마지막 카드 다음에 이 자리에 요약이 열려요.</p>
-        </section>
-      )}
+      {/* The answer comes first; the cards below are then turned one by one for the detail. */}
+      <section className="result-answer" aria-labelledby="tarot-summary-label">
+        <h2 className="result-answer-label" id="tarot-summary-label">리딩 요약</h2>
+        <p>{result.summary}</p>
+      </section>
 
       {groups.map((group) => (
         <section className="result-group" aria-labelledby={group.id} key={group.id}>
@@ -228,17 +212,15 @@ export function TarotReadingResult({
         </section>
       ))}
 
-      {allRevealed ? (
-        <div className="result-closing">
-          <p className="reading-disclaimer">{result.disclaimer}</p>
-          {record ? record.footer : (
-            <div className="result-actions">
-              <Link className="primary-button" href="/tarot">새로운 리딩 시작</Link>
-              <Link className="secondary-button" href="/records">내 기록 보기</Link>
-            </div>
-          )}
-        </div>
-      ) : null}
+      <div className="result-closing">
+        <p className="reading-disclaimer">{result.disclaimer}</p>
+        {record ? record.footer : (
+          <div className="result-actions">
+            <Link className="primary-button" href="/tarot">새로운 리딩 시작</Link>
+            <Link className="secondary-button" href="/records">내 기록 보기</Link>
+          </div>
+        )}
+      </div>
     </article>
   );
 }

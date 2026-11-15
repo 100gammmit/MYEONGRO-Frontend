@@ -524,10 +524,8 @@ main:focus { outline: none; }
 .result-answer { margin-top: 36px; padding: 32px 40px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--gradient-panel); scroll-margin-top: 20px; }
 .result-answer:focus { outline: none; }
 .result-answer:focus-visible { box-shadow: var(--focus-ring); }
-.result-answer.waiting { padding: 22px 28px; border-style: dashed; background: none; }
 .result-answer-label { margin: 0 0 12px; color: var(--text-accent); font: 600 13px/1.4 "Pretendard Variable", Pretendard, sans-serif; letter-spacing: .02em; }
 .result-answer > p, .saju-answer-summary > p, .saju-answer #saju-question > p:not(.result-answer-label) { margin: 0; color: var(--text-primary); font-size: 18px; line-height: 1.9; text-wrap: pretty; }
-.result-answer.waiting > p { color: var(--text-muted); font-size: 15px; line-height: 1.7; }
 .saju-answer h2:not(.result-answer-label) { margin: 0 0 14px; font-size: 32px; font-weight: 400; letter-spacing: -.02em; }
 .saju-answer-summary { margin-top: 28px; padding-top: 28px; border-top: 1px solid var(--border-hairline); }
 .tarot-result { max-width: var(--w-wide); padding-block: 40px 110px; }

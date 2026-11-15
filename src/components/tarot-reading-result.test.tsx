@@ -28,7 +28,7 @@ function standardResult(spreadType: "mind_three_card" | "choice_five_card") {
 }
 
 describe("TarotReadingResult", () => {
-  it("keeps the title and summary back until the last card, then opens the summary above the cards", () => {
+  it("opens with the title and summary above the cards, which are then turned one by one", () => {
     render(
       <TarotReadingResult
         cardIds={MAJOR_ARCANA.slice(0, 3).map((card) => card.id)}
@@ -37,19 +37,16 @@ describe("TarotReadingResult", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { level: 1, name: "카드 세 장이 놓였어요" })).toBeInTheDocument();
-    expect(screen.getByText("카드를 한 장씩 공개하면, 마지막 카드 다음에 이 자리에 요약이 열려요.")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "오늘의 리딩" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "리딩 요약" })).toHaveTextContent("오늘의 흐름을 확인했어요.");
+    expect(screen.getByText("자기 성찰을 위한 참고 정보입니다.")).toBeInTheDocument();
     expect(screen.getAllByText("아직 공개하지 않은 카드예요.")).toHaveLength(3);
     expect(screen.getAllByRole("button", { name: "이 카드 공개" })).toHaveLength(1);
 
     revealAll(3);
 
-    expect(screen.getByRole("heading", { level: 1, name: "오늘의 리딩" })).toBeInTheDocument();
-    const summary = screen.getByRole("region", { name: "리딩 요약" });
-    expect(summary).toHaveTextContent("오늘의 흐름을 확인했어요.");
-    expect(summary).toHaveFocus();
-    const cards = screen.getByRole("heading", { level: 2, name: "카드별 해석" });
-    expect(summary.compareDocumentPosition(cards) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByText("아직 공개하지 않은 카드예요.")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "이 카드 공개" })).not.toBeInTheDocument();
   });
 
   it("splits a choice reading into its criteria and the two options side by side", () => {
