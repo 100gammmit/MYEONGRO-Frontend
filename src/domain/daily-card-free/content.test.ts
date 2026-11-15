@@ -36,8 +36,9 @@ describe.each(entries.map((entry) => [`${entry.cardId}#${entry.variantIndex}`, e
     const guidance = entry.guidance[0];
     const userText = [entry.title, entry.today.heading, entry.today.body, guidance].join(" ");
 
-    it("names the card exactly once in the body", () => {
-      expect(cardNameMentions(entry.today.body, entry.cardName)).toBe(1);
+    // The result screen already shows the card name, so the body may omit it but never repeats it.
+    it("mentions the card name at most once in the body", () => {
+      expect(cardNameMentions(entry.today.body, entry.cardName)).toBeLessThanOrEqual(1);
     });
 
     it("uses the canonical disclaimer", () => {
