@@ -30,7 +30,10 @@ export function ZodiacFinder({ signNames, lead }: { signNames: Record<ZodiacSlug
       >
         <label htmlFor={`${id}-year`}>태어난 해</label>
         <div className={styles.finderRow}>
-          <select id={`${id}-year`} onChange={(event) => setYear(event.target.value)} value={year}>
+          <select id={`${id}-year`} onChange={(event) => {
+              setYear(event.target.value);
+              setAnswer(null);
+            }} value={year}>
             <option value="">태어난 해 선택</option>
             {YEARS.map((value) => <option key={value} value={value}>{value}년</option>)}
           </select>

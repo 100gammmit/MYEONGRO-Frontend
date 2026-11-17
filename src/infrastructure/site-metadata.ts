@@ -20,6 +20,13 @@ export const SHARE_TWITTER = {
 
 type ShareImage = typeof SHARE_IMAGE;
 
+export const SHARE_IMAGE_SIZE = { width: SHARE_IMAGE.width, height: SHARE_IMAGE.height };
+
+/** The image an opengraph-image.tsx file beside `path` draws, named explicitly for publicPageMetadata. */
+export function generatedShareImage(path: string, alt: string): ShareImage {
+  return { url: `${path}/opengraph-image`, ...SHARE_IMAGE_SIZE, alt };
+}
+
 // A page may name its own generated share image; explicit images win over the file convention.
 export function publicPageMetadata(path: string, title: string, description: string, image: ShareImage = SHARE_IMAGE): Metadata {
   if (!routes.publicPages.includes(path)) {

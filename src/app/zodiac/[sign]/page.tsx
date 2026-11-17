@@ -5,13 +5,13 @@ import { Chevron, ZodiacNav, ZodiacYears } from "@/components/zodiac/zodiac-part
 import { ZodiacWheel } from "@/components/zodiac/zodiac-wheel";
 import styles from "@/components/zodiac/zodiac.module.css";
 import {
-  ZODIAC_SIGNS,
   ZODIAC_SLUGS,
+  ZODIAC_YEAR_ANIMAL_NAME as YEAR_NAME,
   ZODIAC_YEAR_CONTENT as YEAR,
   getZodiacSign,
   type ZodiacSign,
 } from "@/domain/zodiac-fortune";
-import { publicPageMetadata } from "@/infrastructure/site-metadata";
+import { generatedShareImage, publicPageMetadata } from "@/infrastructure/site-metadata";
 
 export const dynamicParams = false;
 
@@ -22,8 +22,6 @@ export function generateStaticParams() {
 interface ZodiacSignPageProps {
   params: Promise<{ sign: string }>;
 }
-
-const YEAR_NAME = ZODIAC_SIGNS.find((sign) => sign.slug === YEAR.yearAnimal)?.shortName ?? "";
 
 // The page title reuses the one-line summary without its sentence ending ("…해예요." → "…해").
 function headline(sign: ZodiacSign): string {
@@ -40,12 +38,7 @@ export async function generateMetadata({ params }: ZodiacSignPageProps) {
   if (!sign) return {};
   const path = `/zodiac/${sign.slug}`;
   const title = `${YEAR.year} ${sign.name} 신년운세`;
-  return publicPageMetadata(path, `${title} | 명로`, description(sign), {
-    url: `${path}/opengraph-image`,
-    width: 1200,
-    height: 630,
-    alt: title,
-  });
+  return publicPageMetadata(path, `${title} | 명로`, description(sign), generatedShareImage(path, title));
 }
 
 export default async function ZodiacSignPage({ params }: ZodiacSignPageProps) {
@@ -85,7 +78,7 @@ export default async function ZodiacSignPage({ params }: ZodiacSignPageProps) {
       <section aria-labelledby="sign-basis" className={styles.section}>
         <h2 id="sign-basis">올해의 근거</h2>
         <div className={styles.signWheel}>
-          <ZodiacWheel focus={sign.slug} yearAnimal={YEAR.yearAnimal} yearLabel={`${YEAR_NAME}의 해`} yearNumber={YEAR.year} />
+          <ZodiacWheel focus={sign.slug} yearAnimal={YEAR.yearAnimal} yearNumber={YEAR.year} />
         </div>
         <p>{sign.basis}</p>
       </section>

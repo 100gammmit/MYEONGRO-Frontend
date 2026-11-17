@@ -23,6 +23,16 @@ describe("ZodiacFinder", () => {
     expect(screen.getByText("2월 4일에 태어났다면 태어난 시각에 따라 달라질 수 있어요.")).toBeInTheDocument();
   });
 
+  it("clears the answer when another year is picked", () => {
+    render(<ZodiacFinder lead="안내" signNames={NAMES} />);
+
+    fireEvent.change(screen.getByLabelText("태어난 해"), { target: { value: "1996" } });
+    fireEvent.click(screen.getByRole("button", { name: "띠 찾기" }));
+    fireEvent.change(screen.getByLabelText("태어난 해"), { target: { value: "1990" } });
+
+    expect(screen.queryByRole("list", { name: "1996년생의 띠" })).not.toBeInTheDocument();
+  });
+
   it("keeps the birth year out of the address and browser storage", () => {
     const before = window.location.href;
     render(<ZodiacFinder lead="안내" signNames={NAMES} />);

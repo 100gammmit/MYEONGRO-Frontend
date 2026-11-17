@@ -1,6 +1,7 @@
 export {
   ZODIAC_SIGNS,
   ZODIAC_SLUGS,
+  ZODIAC_YEAR_ANIMAL_NAME,
   ZODIAC_YEAR_CONTENT,
   getZodiacSign,
   isZodiacSlug,

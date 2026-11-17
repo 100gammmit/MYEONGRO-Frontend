@@ -3,7 +3,9 @@ import path from "node:path";
 
 import { ImageResponse } from "next/og";
 
-export const SHARE_IMAGE_SIZE = { width: 1200, height: 630 };
+import { SHARE_IMAGE_SIZE } from "@/infrastructure/site-metadata";
+
+export { SHARE_IMAGE_SIZE };
 
 const FONT_DIR = path.join(process.cwd(), "node_modules/pretendard/dist/public/static");
 

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { existsSync, readdirSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import path from "node:path";
 import sitemap from "./sitemap";
 import robots from "./robots";
@@ -14,20 +14,23 @@ import { metadata as tarotMetadata } from "./tarot/results/layout";
 import { metadata as sajuMetadata } from "./saju/results/layout";
 import { metadata as drawMetadata } from "./tarot/draw/layout";
 
+// Every routable page under src/app, each pre-rendered dynamic segment expanded to its slugs.
+const appRoot = path.join(process.cwd(), "src/app");
+const dynamicValues: Record<string, readonly string[]> = { "/zodiac/[sign]": ZODIAC_SLUGS };
+function walk(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const name = path.join(directory, entry.name);
+    if (entry.isDirectory()) return walk(name);
+    if (!/^page\.(tsx|ts|jsx|js|mdx)$/.test(entry.name)) return [];
+    const segments = path.relative(appRoot, directory).split(path.sep).filter((segment) => segment && !/^\(.+\)$/.test(segment));
+    return ["/" + segments.join("/")];
+  });
+}
+const actualPages = walk(appRoot).flatMap((route) =>
+  dynamicValues[route] ? dynamicValues[route].map((value) => route.replace(/\[[^\]]+\]/, value)) : [route]);
+
 describe("search discovery boundaries", () => {
   it("classifies every routable page so new public pages cannot silently miss the sitemap", () => {
-    const appRoot = path.join(process.cwd(), "src/app");
-    const walk = (directory: string): string[] => readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-      const name = path.join(directory, entry.name);
-      if (entry.isDirectory()) return walk(name);
-      if (!/^page\.(tsx|ts|jsx|js|mdx)$/.test(entry.name)) return [];
-      const segments = path.relative(appRoot, directory).split(path.sep).filter((segment) => segment && !/^\(.+\)$/.test(segment));
-      return ["/" + segments.join("/")];
-    });
-    // Dynamic segments expand to the slugs their page pre-renders.
-    const dynamicValues: Record<string, readonly string[]> = { "/zodiac/[sign]": ZODIAC_SLUGS };
-    const actualPages = walk(appRoot).flatMap((route) =>
-      dynamicValues[route] ? dynamicValues[route].map((value) => route.replace(/\[[^\]]+\]/, value)) : [route]);
     const isPrivate = (route: string) => routes.privateRoutePrefixes.some((prefix) => route === prefix || route.startsWith(`${prefix}/`));
     expect(actualPages.filter((route) => !isPrivate(route)).sort()).toEqual([...routes.publicPages].sort());
     expect(actualPages.filter((route) => !isPrivate(route) && route.includes("["))).toEqual([]);
@@ -63,10 +66,7 @@ describe("search discovery boundaries", () => {
       expect(url.origin).toBe(SITE_ORIGIN);
       expect(url.search).toBe("");
       expect(url.pathname).not.toMatch(/^\/(?:api|auth|account|records|login|signup)(?:\/|$)|\/results(?:\/|$)|\/draw(?:\/|$)/);
-      // A pre-rendered dynamic page such as /zodiac/rat lives in its [segment] folder.
-      const staticPage = path.join(process.cwd(), "src/app", url.pathname, "page.tsx");
-      const dynamicPage = path.join(process.cwd(), "src/app", path.dirname(url.pathname), "[sign]", "page.tsx");
-      expect(existsSync(staticPage) || (url.pathname.startsWith("/zodiac/") && existsSync(dynamicPage))).toBe(true);
+      expect(actualPages).toContain(url.pathname);
     }
     expect(entries.map((entry) => new URL(entry.url).pathname).sort()).toEqual([...routes.publicPages].sort());
   });

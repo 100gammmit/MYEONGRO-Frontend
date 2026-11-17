@@ -58,3 +58,6 @@ export const ZODIAC_SIGNS: readonly ZodiacSign[] = ZODIAC_YEAR_CONTENT.signs;
 export function getZodiacSign(slug: string): ZodiacSign | null {
   return isZodiacSlug(slug) ? ZODIAC_SIGNS[ZODIAC_SLUGS.indexOf(slug)] : null;
 }
+
+/** The year's animal by its short name, e.g. "양" for 2027. */
+export const ZODIAC_YEAR_ANIMAL_NAME: string = ZODIAC_SIGNS[ZODIAC_SLUGS.indexOf(ZODIAC_YEAR_CONTENT.yearAnimal)].shortName;

@@ -1,6 +1,7 @@
 import {
   ZODIAC_SIGNS,
   ZODIAC_SLUGS,
+  getZodiacSign,
   groupWithYear,
   relationTag,
   relationsWithYear,
@@ -81,19 +82,18 @@ function Polygon({ members, style }: { members: ZodiacSlug[]; style: { fill: str
 }
 
 /** Twelve signs on a circle, 자 at the top, with their relations to the year's animal drawn in. */
-export function ZodiacWheel({ yearAnimal, focus, yearLabel, yearNumber }: {
+export function ZodiacWheel({ yearAnimal, focus, yearNumber }: {
   yearAnimal: ZodiacSlug;
   /** A sign page shows only that sign's line; the hub shows every relation. */
   focus?: ZodiacSlug;
-  yearLabel: string;
   yearNumber: number;
 }) {
-  const yearName = ZODIAC_SIGNS[ZODIAC_SLUGS.indexOf(yearAnimal)].shortName;
+  const nameOf = (slug: ZodiacSlug) => getZodiacSign(slug)?.shortName ?? "";
+  const yearName = nameOf(yearAnimal);
   const others = ZODIAC_SLUGS.filter((slug) => slug !== yearAnimal);
   const described = (focus ? [focus] : others)
     .map((slug) => ({ slug, kinds: relationsWithYear(slug, yearAnimal) }))
     .filter(({ slug, kinds }) => kinds.length > 0 && slug !== yearAnimal);
-  const nameOf = (slug: ZodiacSlug) => ZODIAC_SIGNS[ZODIAC_SLUGS.indexOf(slug)].shortName;
   const label = !focus
     ? `열두 띠를 원으로 놓고 올해의 띠인 ${yearName}${withAnd(yearName)}의 관계를 선으로 이은 그림. ${described
       .map(({ slug, kinds }) => `${nameOf(slug)}: ${relationTag(kinds)}`)
@@ -129,14 +129,14 @@ export function ZodiacWheel({ yearAnimal, focus, yearLabel, yearNumber }: {
             return stroke ? <Line from={yearAnimal} key={slug} stroke={stroke} to={slug} /> : null;
           })}
           <circle cx={CENTER} cy={CENTER} fill="#0d0e13" r={38} />
-          <text className={styles.wheelYear} dominantBaseline="middle" textAnchor="middle" x={CENTER} y={194}>{yearLabel}</text>
+          <text className={styles.wheelYear} dominantBaseline="middle" textAnchor="middle" x={CENTER} y={194}>{yearName}의 해</text>
           <text className={styles.wheelYearNumber} dominantBaseline="middle" textAnchor="middle" x={CENTER} y={218}>{yearNumber}</text>
         </>
       )}
       {focusLine && focusStroke ? (
         <>
           <Line from={yearAnimal} stroke={focusStroke} to={focusLine.slug} />
-          <FocusBadge from={yearAnimal} text={relationTag(focusLine.kinds).replace("·", " · ")} to={focusLine.slug} />
+          <FocusBadge color={focusStroke.color} from={yearAnimal} text={relationTag(focusLine.kinds).replaceAll("·", " · ")} to={focusLine.slug} />
         </>
       ) : null}
       {ZODIAC_SIGNS.map((sign) => {
@@ -171,7 +171,8 @@ export function ZodiacWheel({ yearAnimal, focus, yearLabel, yearNumber }: {
   );
 }
 
-function FocusBadge({ from, to, text }: { from: ZodiacSlug; to: ZodiacSlug; text: string }) {
+// The badge takes its line's colour so a harmonious relation never reads as a warning.
+function FocusBadge({ from, to, text, color }: { from: ZodiacSlug; to: ZodiacSlug; text: string; color: string }) {
   const [x1, y1] = point(from);
   const [x2, y2] = point(to);
   const x = round((x1 + x2) / 2);
@@ -179,8 +180,8 @@ function FocusBadge({ from, to, text }: { from: ZodiacSlug; to: ZodiacSlug; text
   const width = Math.max(64, text.length * 13 + 24);
   return (
     <g>
-      <rect fill="#0d0e13" height={30} rx={15} stroke="rgba(239,138,122,.6)" width={width} x={x - width / 2} y={y - 15} />
-      <text className={styles.wheelBadge} dominantBaseline="middle" textAnchor="middle" x={x} y={y + 1}>{text}</text>
+      <rect fill="#0d0e13" height={30} rx={15} stroke={color} strokeOpacity={0.7} width={width} x={x - width / 2} y={y - 15} />
+      <text className={styles.wheelBadge} dominantBaseline="middle" fill={color} textAnchor="middle" x={x} y={y + 1}>{text}</text>
     </g>
   );
 }

@@ -4,18 +4,17 @@ import { ZodiacFinder } from "@/components/zodiac/zodiac-finder";
 import { ZodiacCards, ZodiacLegend } from "@/components/zodiac/zodiac-parts";
 import { ZodiacWheel } from "@/components/zodiac/zodiac-wheel";
 import styles from "@/components/zodiac/zodiac.module.css";
-import { ZODIAC_SIGNS, ZODIAC_YEAR_CONTENT as YEAR, type ZodiacSlug } from "@/domain/zodiac-fortune";
-import { publicPageMetadata } from "@/infrastructure/site-metadata";
+import { ZODIAC_SIGNS, ZODIAC_YEAR_ANIMAL_NAME as YEAR_NAME, ZODIAC_YEAR_CONTENT as YEAR, type ZodiacSlug } from "@/domain/zodiac-fortune";
+import { generatedShareImage, publicPageMetadata } from "@/infrastructure/site-metadata";
 
 export const metadata = publicPageMetadata(
   "/zodiac",
   `${YEAR.year} 띠별 신년운세: 열두 띠와 ${YEAR.yearName} | 명로`,
   YEAR.hub.description,
-  { url: "/zodiac/opengraph-image", width: 1200, height: 630, alt: `${YEAR.year} 띠별 신년운세` },
+  generatedShareImage("/zodiac", `${YEAR.year} 띠별 신년운세`),
 );
 
 const SIGN_NAMES = Object.fromEntries(ZODIAC_SIGNS.map((sign) => [sign.slug, sign.name])) as Record<ZodiacSlug, string>;
-const YEAR_NAME = ZODIAC_SIGNS.find((sign) => sign.slug === YEAR.yearAnimal)?.shortName ?? "";
 
 export default function ZodiacHubPage() {
   return (
@@ -42,7 +41,7 @@ export default function ZodiacHubPage() {
         <p>{YEAR.hub.signsLead}</p>
         <div className={styles.signsBody}>
           <div className={styles.wheelWrap}>
-            <ZodiacWheel yearAnimal={YEAR.yearAnimal} yearLabel={`${YEAR_NAME}의 해`} yearNumber={YEAR.year} />
+            <ZodiacWheel yearAnimal={YEAR.yearAnimal} yearNumber={YEAR.year} />
             <ZodiacLegend />
           </div>
           <ZodiacCards year={YEAR.year} yearAnimal={YEAR.yearAnimal} />
