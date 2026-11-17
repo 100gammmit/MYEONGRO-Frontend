@@ -5,6 +5,7 @@ import sitemap from "./sitemap";
 import robots from "./robots";
 import { PRIVATE_PAGE_METADATA, SHARE_IMAGE, SITE_ORIGIN, publicPageMetadata } from "@/infrastructure/site-metadata";
 import routes from "@/infrastructure/site-routes.json";
+import { ZODIAC_SLUGS } from "@/domain/zodiac-fortune";
 import { metadata as accountMetadata } from "./account/layout";
 import { metadata as recordsMetadata } from "./records/layout";
 import { metadata as loginMetadata } from "./login/layout";
@@ -23,9 +24,13 @@ describe("search discovery boundaries", () => {
       const segments = path.relative(appRoot, directory).split(path.sep).filter((segment) => segment && !/^\(.+\)$/.test(segment));
       return ["/" + segments.join("/")];
     });
-    const actualPages = walk(appRoot);
+    // Dynamic segments expand to the slugs their page pre-renders.
+    const dynamicValues: Record<string, readonly string[]> = { "/zodiac/[sign]": ZODIAC_SLUGS };
+    const actualPages = walk(appRoot).flatMap((route) =>
+      dynamicValues[route] ? dynamicValues[route].map((value) => route.replace(/\[[^\]]+\]/, value)) : [route]);
     const isPrivate = (route: string) => routes.privateRoutePrefixes.some((prefix) => route === prefix || route.startsWith(`${prefix}/`));
     expect(actualPages.filter((route) => !isPrivate(route)).sort()).toEqual([...routes.publicPages].sort());
+    expect(actualPages.filter((route) => !isPrivate(route) && route.includes("["))).toEqual([]);
     expect(routes.publicPages.some(isPrivate)).toBe(false);
     for (const prefix of routes.privateRoutePrefixes) {
       expect(actualPages.some((route) => route === prefix || route.startsWith(`${prefix}/`))).toBe(true);
@@ -58,7 +63,10 @@ describe("search discovery boundaries", () => {
       expect(url.origin).toBe(SITE_ORIGIN);
       expect(url.search).toBe("");
       expect(url.pathname).not.toMatch(/^\/(?:api|auth|account|records|login|signup)(?:\/|$)|\/results(?:\/|$)|\/draw(?:\/|$)/);
-      expect(existsSync(path.join(process.cwd(), "src/app", url.pathname, "page.tsx"))).toBe(true);
+      // A pre-rendered dynamic page such as /zodiac/rat lives in its [segment] folder.
+      const staticPage = path.join(process.cwd(), "src/app", url.pathname, "page.tsx");
+      const dynamicPage = path.join(process.cwd(), "src/app", path.dirname(url.pathname), "[sign]", "page.tsx");
+      expect(existsSync(staticPage) || (url.pathname.startsWith("/zodiac/") && existsSync(dynamicPage))).toBe(true);
     }
     expect(entries.map((entry) => new URL(entry.url).pathname).sort()).toEqual([...routes.publicPages].sort());
   });

@@ -18,7 +18,10 @@ export const SHARE_TWITTER = {
   images: [SHARE_IMAGE],
 } satisfies NonNullable<Metadata["twitter"]>;
 
-export function publicPageMetadata(path: string, title: string, description: string): Metadata {
+type ShareImage = typeof SHARE_IMAGE;
+
+// A page may name its own generated share image; explicit images win over the file convention.
+export function publicPageMetadata(path: string, title: string, description: string, image: ShareImage = SHARE_IMAGE): Metadata {
   if (!routes.publicPages.includes(path)) {
     throw new Error(`Register public page in site-routes.json before adding metadata: ${path}`);
   }
@@ -34,9 +37,9 @@ export function publicPageMetadata(path: string, title: string, description: str
       siteName: "명로",
       locale: "ko_KR",
       type: "website",
-      images: [SHARE_IMAGE],
+      images: [image],
     },
-    twitter: { ...SHARE_TWITTER, title, description },
+    twitter: { ...SHARE_TWITTER, images: [image], title, description },
   };
 }
 

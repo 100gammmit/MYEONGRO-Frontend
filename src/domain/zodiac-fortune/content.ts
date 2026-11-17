@@ -1,14 +1,9 @@
 import { z } from "zod";
 
 import rawContent from "./content/2027.json";
+import { ZODIAC_SLUGS, isZodiacSlug } from "./slugs";
 
-// The twelve signs in branch order, 자 (rat) first. The order also drives the wheel and the nav.
-export const ZODIAC_SLUGS = [
-  "rat", "ox", "tiger", "rabbit", "dragon", "snake",
-  "horse", "sheep", "monkey", "rooster", "dog", "pig",
-] as const;
-
-export type ZodiacSlug = (typeof ZODIAC_SLUGS)[number];
+export { ZODIAC_SLUGS, isZodiacSlug, zodiacSlugOfYear, type ZodiacSlug } from "./slugs";
 
 const text = z.string().trim().min(1);
 
@@ -34,6 +29,15 @@ const yearSchema = z.object({
   commonNote: text,
   disclaimer: text,
   editorialNote: text,
+  hub: z.object({
+    title: text,
+    description: text,
+    summary: z.array(text).length(3),
+    finderLead: text,
+    yearNote: text,
+    signsLead: text,
+    limits: z.array(text).min(1),
+  }).strict(),
   signs: z.array(signSchema).length(ZODIAC_SLUGS.length),
 }).strict();
 
@@ -51,15 +55,6 @@ ZODIAC_YEAR_CONTENT.signs.forEach((sign, index) => {
 
 export const ZODIAC_SIGNS: readonly ZodiacSign[] = ZODIAC_YEAR_CONTENT.signs;
 
-export function isZodiacSlug(value: string): value is ZodiacSlug {
-  return (ZODIAC_SLUGS as readonly string[]).includes(value);
-}
-
 export function getZodiacSign(slug: string): ZodiacSign | null {
   return isZodiacSlug(slug) ? ZODIAC_SIGNS[ZODIAC_SLUGS.indexOf(slug)] : null;
-}
-
-/** The sign of a calendar year counted from 입춘, e.g. 1996 → rat. */
-export function zodiacSlugOfYear(year: number): ZodiacSlug {
-  return ZODIAC_SLUGS[(((year - 4) % 12) + 12) % 12];
 }

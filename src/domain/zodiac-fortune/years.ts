@@ -1,4 +1,4 @@
-import { zodiacSlugOfYear, type ZodiacSlug } from "./content";
+import { zodiacSlugOfYear, type ZodiacSlug } from "./slugs";
 import rawIpchun from "./ipchun.json";
 
 export const FINDER_FIRST_YEAR = 1900;

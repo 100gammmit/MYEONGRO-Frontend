@@ -174,6 +174,21 @@ try {
       await page.locator(`a[href="${article}"]`).click();
       await page.waitForURL(`${base}${article}`);
     }
+    for (const path of ["/zodiac", "/zodiac/rat"]) {
+      assert.equal((await page.goto(`${base}${path}`)).status(), 200);
+      await page.locator("h1").waitFor();
+      assert.equal(await page.locator("h1").count(), 1);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Overflow: ${path}/${width}`);
+      await page.screenshot({ path: `${output}/zodiac-${path.split("/").at(-1)}-${width}.png`, fullPage: true });
+    }
+    await page.goto(`${base}/zodiac`);
+    await page.getByLabel("태어난 해").selectOption("1996");
+    await page.getByRole("button", { name: "띠 찾기" }).click();
+    await page.getByRole("list", { name: "1996년생의 띠" }).getByRole("link", { name: "쥐띠" }).click();
+    await page.waitForURL(`${base}/zodiac/rat`);
+    await page.getByRole("navigation", { name: "띠별 운세" }).getByRole("link", { name: "양띠" }).click();
+    await page.waitForURL(`${base}/zodiac/sheep`);
+    assert.equal(await page.locator('a[href="/saju?report=annual"]').count(), 1);
     await context.close();
   }
   const noJs = await browser.newContext({ javaScriptEnabled: false });
@@ -186,7 +201,7 @@ try {
   }
   await noJs.close();
   assert.deepEqual(errors, []);
-  console.log(`PASS: ${urls.length} registered public canonicals, robots/sitemap without auth, guest redirect + authenticated records/results noindex, 375/1280px, article links/anchors and no-JS content`);
+  console.log(`PASS: ${urls.length} registered public canonicals, robots/sitemap without auth, guest redirect + authenticated records/results noindex, 375/1280px, article links/anchors, zodiac finder/nav and no-JS content`);
 } finally {
   await browser?.close();
   if (app && app.exitCode === null) {

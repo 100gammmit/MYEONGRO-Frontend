@@ -1,4 +1,4 @@
-import { ZODIAC_SLUGS, type ZodiacSlug } from "./content";
+import { ZODIAC_SLUGS, type ZodiacSlug } from "./slugs";
 
 export type ZodiacRelationKind =
   | "sixHarmony" | "threeHarmony" | "seasonGroup"

@@ -41,6 +41,16 @@ describe("zodiac fortune content", () => {
     expect(ifThen.length).toBeLessThanOrEqual(1);
   });
 
+  it("keeps the hub copy to the same rules, with hanja only in the year name", () => {
+    const { hub, yearNameWithHanja } = ZODIAC_YEAR_CONTENT;
+    const texts = [hub.title, hub.description, ...hub.summary, hub.finderLead, hub.yearNote, hub.signsLead, ...hub.limits];
+    for (const value of texts) {
+      expect(value).not.toMatch(FORBIDDEN);
+      expect(value.replaceAll(yearNameWithHanja, "")).not.toMatch(HANJA);
+    }
+    expect(yearNameWithHanja).toBe("정미년(丁未年)");
+  });
+
   it.each(SECTIONS)("opens %s differently for every sign", (key) => {
     const openings = ZODIAC_SIGNS.map((sign) => sign[key].split(/(?<=[.!?])\s/)[0]);
     expect(new Set(openings).size).toBe(ZODIAC_SIGNS.length);

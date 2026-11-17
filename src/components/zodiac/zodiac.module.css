@@ -1,0 +1,108 @@
+/* Free zodiac fortune pages: the 640px reading column from .flow-page, with their own parts. */
+.page { padding-bottom: 110px; }
+.page p { word-break: keep-all; }
+
+.editorial { margin: 18px 0 0; padding: 4px 0 4px 16px; border-left: 2px solid var(--accent-primary); color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+
+.box { margin-top: 32px; padding: 22px 24px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); }
+.box h2 { margin: 0 0 10px; font-size: 19px; font-weight: 400; }
+.box ul { margin: 0; padding-left: 22px; color: var(--text-secondary); font-size: 16px; line-height: 1.8; }
+.box li + li { margin-top: 8px; }
+.boxLead { margin: 0; color: var(--text-primary); font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 21px; line-height: 1.6; }
+.boxSub { margin: 14px 0 0; padding-top: 14px; border-top: 1px solid var(--border-hairline); color: var(--text-secondary); font-size: 15px; line-height: 1.8; }
+.boxSub strong { display: block; margin-bottom: 2px; color: var(--text-accent-strong); font-size: 13px; font-weight: 600; }
+
+.section { padding: 30px 0; border-bottom: 1px solid var(--border-hairline); scroll-margin-top: 96px; }
+.section > h2 { margin: 0 0 18px; font-size: 25px; font-weight: 400; line-height: 1.5; word-break: keep-all; }
+.section > p { margin: 0; color: var(--text-secondary); font-size: 16px; line-height: 1.85; }
+.section > p + p { margin-top: 14px; }
+
+.inlineLink { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; margin-top: 8px; color: var(--text-accent-strong); font-size: 15px; font-weight: 600; }
+
+.back { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-bottom: 6px; color: var(--text-secondary); font-size: 14px; }
+.back:hover { color: var(--text-primary); }
+
+.nav { display: flex; gap: 6px; margin: 0 0 22px; overflow-x: auto; scrollbar-width: none; }
+.nav::-webkit-scrollbar { display: none; }
+.nav a { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); color: var(--text-secondary); font-size: 14px; }
+.nav a:hover { color: var(--text-primary); border-color: var(--border-strong); }
+.nav a[aria-current="page"] { border-color: var(--accent-cta); background: color-mix(in srgb, var(--accent-cta) 10%, transparent); color: var(--text-primary); font-weight: 700; }
+
+.years { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; padding: 0; list-style: none; }
+.years li { display: flex; flex-direction: column; gap: 2px; padding: 12px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
+.years strong { color: var(--text-primary); font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.years span { color: var(--text-muted); font-size: 13px; }
+
+.wheel { display: block; width: 100%; height: auto; }
+.wheelName { font-size: 14px; font-weight: 600; }
+.wheelNameLong { font-size: 12px; font-weight: 600; }
+.wheelYear { fill: var(--text-primary); font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 20px; font-weight: 300; }
+.wheelYearNumber { fill: var(--text-muted); font-size: 12px; }
+.wheelBadge { fill: #f2b3a8; font-size: 13px; font-weight: 600; }
+.signWheel { width: 330px; max-width: 100%; margin: 0 0 22px; }
+
+.signsBody { display: flex; flex-direction: column; gap: 28px; margin-top: 22px; }
+.wheelWrap { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 26px; align-items: center; }
+.legendWrap { min-width: 0; }
+.legend { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; color: var(--text-secondary); font-size: 14px; }
+.legend li { display: flex; align-items: center; gap: 10px; }
+.legendMinor { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0 0; color: var(--text-muted); font-size: 13px; }
+
+.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.cards a { display: flex; flex-direction: column; gap: 8px; height: 100%; box-sizing: border-box; padding: 16px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); color: var(--text-primary); transition: border-color .2s ease, transform .2s ease; }
+.cards a:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+.cardHead { display: flex; align-items: center; justify-content: space-between; color: var(--text-accent-strong); }
+.cardName { color: var(--text-primary); font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 18px; }
+.yearCard .cardName { color: var(--accent-cta); }
+.cardSummary { color: var(--text-secondary); font-size: 14px; line-height: 1.65; word-break: keep-all; }
+.cardTag { align-self: flex-start; margin-top: auto; padding: 1px 8px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); color: var(--text-muted); font-size: 12px; }
+
+.finder { margin-top: 20px; padding: 22px 24px; border: 1px solid color-mix(in srgb, var(--accent-cta) 40%, transparent); border-radius: var(--radius-md); background: color-mix(in srgb, var(--accent-cta) 5%, transparent); scroll-margin-top: 96px; }
+.finder h2 { margin: 0 0 8px; font-size: 19px; font-weight: 400; }
+.finderLead { margin: 0 0 14px; color: var(--text-secondary); font-size: 14px; line-height: 1.7; }
+.finderForm label { display: block; margin-bottom: 6px; color: var(--text-secondary); font-size: 14px; }
+.finderRow { display: flex; gap: 8px; }
+.finderRow select { flex: 1; min-width: 0; min-height: 48px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-input); color: var(--text-primary); font: inherit; font-size: 16px; color-scheme: dark; }
+.finderRow button { min-height: 48px; padding: 0 20px; border: 0; border-radius: var(--radius-sm); background: var(--accent-cta); color: var(--text-inverse); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+.finderRow button:disabled { opacity: .5; cursor: not-allowed; }
+.finderResult { display: grid; gap: 8px; margin: 16px 0 0; padding: 16px 0 0; border-top: 1px solid var(--border-hairline); list-style: none; }
+.finderResult li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 6px 6px 14px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
+.finderResult span { color: var(--text-secondary); font-size: 14px; }
+.finderResult a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 10px; color: var(--text-primary); }
+.finderResult strong { font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 19px; font-weight: 400; }
+.finderNote { margin: 10px 0 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+
+.related { margin-top: 34px; }
+.related h2 { margin: 0; font-size: 19px; font-weight: 400; }
+.links { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-top: 12px; }
+.links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-accent-strong); font-size: 16px; text-decoration: underline; text-underline-offset: 4px; }
+.start { margin-top: 30px; }
+.disclaimer { margin: 30px 0 0; padding-top: 20px; border-top: 1px solid var(--border-hairline); color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+
+@media (max-width: 760px) {
+  .box { padding: 18px; }
+  .boxLead { font-size: 19px; }
+  .section { padding: 26px 0; }
+  .section > h2 { font-size: 20px; }
+  .section > p { font-size: 15px; }
+  .years { gap: 6px; }
+  .years li { padding: 10px 8px; }
+  .years strong { font-size: 15px; }
+  .years span { font-size: 12px; }
+  /* On a phone the reader's own card comes before the wheel. */
+  .signsBody { flex-direction: column-reverse; }
+  .wheelWrap { display: flex; flex-direction: column; gap: 16px; }
+  .legend { font-size: 13px; }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .cards a { padding: 14px 12px; }
+  .cardName { font-size: 17px; }
+  .cardSummary { font-size: 13px; }
+  .finder { padding: 18px; }
+  .finderRow { flex-direction: column; }
+  .start { display: flex; width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards a { transition: none; }
+  .cards a:hover { transform: none; }
+}
