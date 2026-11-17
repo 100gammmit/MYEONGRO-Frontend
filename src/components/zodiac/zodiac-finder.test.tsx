@@ -11,6 +11,8 @@ describe("ZodiacFinder", () => {
     render(<ZodiacFinder lead="안내" signNames={NAMES} />);
 
     expect(screen.getByRole("button", { name: "띠 찾기" })).toBeDisabled();
+    const options = within(screen.getByLabelText("태어난 해")).getAllByRole("option").map((option) => option.textContent);
+    expect([options[1], options.at(-1)]).toEqual(["1900년", "2099년"]);
     fireEvent.change(screen.getByLabelText("태어난 해"), { target: { value: "1996" } });
     fireEvent.click(screen.getByRole("button", { name: "띠 찾기" }));
 

@@ -8,7 +8,7 @@ import type { ZodiacSlug } from "@/domain/zodiac-fortune/slugs";
 
 import styles from "./zodiac.module.css";
 
-const YEARS = Array.from({ length: FINDER_LAST_YEAR - FINDER_FIRST_YEAR + 1 }, (_, index) => FINDER_LAST_YEAR - index);
+const YEARS = Array.from({ length: FINDER_LAST_YEAR - FINDER_FIRST_YEAR + 1 }, (_, index) => FINDER_FIRST_YEAR + index);
 
 // Only the birth year is asked for, and it stays in this component's memory: nothing is sent,
 // stored, logged or written into the address, and the result links carry no birth data.
