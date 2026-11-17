@@ -5,7 +5,6 @@ import { relationTag, relationsWithYear } from "./relations";
 import { ganjiName, pageBirthYears } from "./years";
 
 const SECTIONS = ["basis", "work", "relationship", "money", "body"] as const;
-const BODY_SECTIONS = ["work", "relationship", "money", "body"] as const;
 // Words the writing runbook keeps out of the body: vague abstractions, excluded topics and commands.
 const FORBIDDEN = /흐름|기운|에너지|삼재|행운|점수|투자|수익|하세요|해야 해요/;
 const HANJA = /[㐀-鿿豈-﫿]/;
@@ -42,8 +41,8 @@ describe("zodiac fortune content", () => {
     expect(ifThen.length).toBeLessThanOrEqual(1);
   });
 
-  it.each(BODY_SECTIONS.concat("basis" as never))("opens %s differently for every sign", (key) => {
-    const openings = ZODIAC_SIGNS.map((sign) => sign[key as (typeof SECTIONS)[number]].split(/(?<=[.!?])\s/)[0]);
+  it.each(SECTIONS)("opens %s differently for every sign", (key) => {
+    const openings = ZODIAC_SIGNS.map((sign) => sign[key].split(/(?<=[.!?])\s/)[0]);
     expect(new Set(openings).size).toBe(ZODIAC_SIGNS.length);
   });
 
