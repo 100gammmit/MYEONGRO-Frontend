@@ -5,6 +5,9 @@ import { HomeSajuChart } from "@/components/home-saju-chart";
 import { ReadingHelpEntry } from "@/components/reading-help-links";
 import { TarotCardCaption, tarotCardImageSrc } from "@/components/tarot-card-face";
 import { TarotStone } from "@/components/tarot-stone";
+import { ZodiacMiniWheel } from "@/components/zodiac/zodiac-mini-wheel";
+import { withAnd } from "@/components/zodiac/zodiac-wheel";
+import { ZODIAC_YEAR_ANIMAL_NAME, ZODIAC_YEAR_CONTENT } from "@/domain/zodiac-fortune";
 
 export const metadata = publicPageMetadata(
   "/",
@@ -131,18 +134,36 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="daily-band" aria-labelledby="daily-band-title">
+      {/* Two free entries side by side: today's card and the year's zodiac pages. */}
+      <section className="daily-band" aria-label="무료로 바로 보는 운세">
         <div className="daily-band-row page-width">
-          <span className="daily-band-card tarot-back-art" aria-hidden="true">
-            <TarotStone kind="pearl" />
-          </span>
-          <div>
-            <h2 id="daily-band-title">오늘의 운세는 로그인 없이 무료예요</h2>
-            <p>카드 한 장으로 오늘의 흐름을 살펴보세요.</p>
-          </div>
-          <Link href="/tarot/daily" className="outline-cta">
-            오늘의 운세 보기
-          </Link>
+          <article className="daily-band-item">
+            <span className="daily-band-visual daily-band-card tarot-back-art" aria-hidden="true">
+              <TarotStone kind="pearl" />
+            </span>
+            <div>
+              <h2>오늘의 운세</h2>
+              <p>로그인 없이, 카드 한 장으로 오늘을 살펴봐요.</p>
+            </div>
+            <Link href="/tarot/daily" className="outline-cta">
+              오늘의 운세 보기
+            </Link>
+          </article>
+          <article className="daily-band-item">
+            <ZodiacMiniWheel
+              className="daily-band-visual daily-band-wheel"
+              year={ZODIAC_YEAR_CONTENT.year}
+              yearAnimal={ZODIAC_YEAR_CONTENT.yearAnimal}
+              yearName={ZODIAC_YEAR_ANIMAL_NAME}
+            />
+            <div>
+              <h2>{ZODIAC_YEAR_CONTENT.year} 띠별 신년운세</h2>
+              <p>열두 띠가 올해의 {ZODIAC_YEAR_ANIMAL_NAME}{withAnd(ZODIAC_YEAR_ANIMAL_NAME)} 어떤 사이인지 풀어 봤어요.</p>
+            </div>
+            <Link href="/zodiac" className="outline-cta">
+              띠별 운세 보기
+            </Link>
+          </article>
         </div>
       </section>
 

@@ -48,8 +48,10 @@ type WizardStep = "question" | "birth" | "review";
 type CatalogStatus = "idle" | "loading" | "ready" | "error";
 type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request" | "targetYear";
 
+export type SajuReportType = "birth_annual_question" | "annual_monthly";
+
 interface SajuFormState {
-  reportType: "birth_annual_question" | "annual_monthly";
+  reportType: SajuReportType;
   targetYear: number;
   birthDate: string;
   birthTimePrecision: BirthTimePrecision | "";
@@ -173,12 +175,13 @@ function ensureRequestId(requestIdRef: MutableRefObject<string | null>): string 
   return requestIdRef.current;
 }
 
-export function SajuExperience() {
+/** `initialReportType` lets an entry link (e.g. the zodiac pages) open with the annual report chosen. */
+export function SajuExperience({ initialReportType = "birth_annual_question" }: { initialReportType?: SajuReportType } = {}) {
   const currentYear = getSajuCurrentYear();
   const router = useRouter();
   const credits = useReadingCredits();
   const [phase, setPhase] = useState<Phase>("consent");
-  const [form, setForm] = useState<SajuFormState>(() => ({ ...initialForm, targetYear: getSajuCurrentYear() }));
+  const [form, setForm] = useState<SajuFormState>(() => ({ ...initialForm, reportType: initialReportType, targetYear: getSajuCurrentYear() }));
   const [catalog, setCatalog] = useState<SajuBirthPlacesResponse | null>(null);
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatus>("idle");
   const [catalogError, setCatalogError] = useState<string | null>(null);

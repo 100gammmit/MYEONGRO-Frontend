@@ -254,11 +254,16 @@ main:focus { outline: none; }
 .landing-page .outline-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border: 1px solid color-mix(in srgb, var(--accent-cta) 60%, transparent); border-radius: var(--radius-sm); color: var(--accent-cta); font-size: 14px; font-weight: 600; }
 .landing-page .outline-cta:hover { background: color-mix(in srgb, var(--accent-cta) 12%, transparent); }
 .daily-band { border-block: 1px solid var(--border-hairline); background: color-mix(in srgb, var(--accent-cta) 3.5%, transparent); }
-.daily-band-row { display: flex; align-items: center; gap: 28px; padding-block: 28px; }
-.daily-band-card { position: relative; flex: none; width: 74px; aspect-ratio: .621; border-radius: var(--radius-xs); }
-.daily-band-row > div { flex: 1; }
-.daily-band h2 { margin: 0 0 6px; font-size: 25px; font-weight: 400; }
-.daily-band p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; }
+.daily-band-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.daily-band-item { display: flex; align-items: center; gap: 22px; padding-block: 28px; }
+.daily-band-item:first-child { padding-right: 40px; }
+.daily-band-item + .daily-band-item { padding-left: 40px; border-left: 1px solid var(--border-hairline); }
+.daily-band-item > div { flex: 1; min-width: 0; }
+.daily-band-visual { flex: none; }
+.daily-band-card { position: relative; width: 46px; margin-inline: 14px; aspect-ratio: .621; border-radius: var(--radius-xs); }
+.daily-band-wheel { width: 74px; height: 74px; }
+.daily-band h2 { margin: 0 0 6px; font-size: 22px; font-weight: 400; word-break: keep-all; }
+.daily-band p { margin: 0; color: var(--text-muted); font-size: 14px; line-height: 1.75; word-break: keep-all; }
 .daily-band .outline-cta { flex: none; }
 /* Card and its name on the left; the label, quote and source sit centered beside them. */
 .landing-page .reading-peek { display: grid; grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: 1fr auto auto auto 1fr auto; grid-template-areas: "card ." "card label" "card quote" "card from" "card ." "name ."; column-gap: 72px; padding-top: 120px; }
@@ -898,9 +903,13 @@ label.signup-check-label { cursor: pointer; }
   .landing-page .home-saju-chart { gap: 12px; width: 100%; max-width: 308px; }
   .landing-page .home-saju-cell { height: 104px; gap: 12px; font-size: 20px; }
   .landing-page .home-saju-result { padding-top: 0; border-top: 0; font-size: 15px; }
-  .daily-band-row { flex-wrap: wrap; gap: 16px; padding-block: 24px; }
-  .daily-band-card { width: 56px; }
-  .daily-band h2 { font-size: 20px; line-height: 1.4; }
+  .daily-band-row { grid-template-columns: 1fr; }
+  .daily-band-item { flex-wrap: wrap; gap: 14px; padding-block: 22px; }
+  .daily-band-item:first-child { padding-right: 0; }
+  .daily-band-item + .daily-band-item { padding-left: 0; border-left: 0; border-top: 1px solid var(--border-hairline); }
+  .daily-band-card { width: 36px; margin-inline: 10px; }
+  .daily-band-wheel { width: 56px; height: 56px; }
+  .daily-band h2 { font-size: 19px; line-height: 1.4; }
   .daily-band p { font-size: 13px; }
   .daily-band .outline-cta { flex: 1 0 100%; }
   .landing-page .reading-peek { grid-template-columns: 96px minmax(0, 1fr); grid-template-rows: auto auto 1fr 1fr; grid-template-areas: "label label" "quote quote" "card name" "card from"; column-gap: 16px; padding-top: 72px; }

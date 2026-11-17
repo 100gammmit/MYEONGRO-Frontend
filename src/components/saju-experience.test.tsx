@@ -140,6 +140,15 @@ async function reachReview(precision: "exact" | "approximate" | "unknown" = "exa
 }
 
 describe("SajuExperience", () => {
+  it("opens with the annual report chosen when an entry link asks for it", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+    render(<SajuExperience initialReportType="annual_monthly" />);
+    await screen.findByRole("heading", { name: QUESTION_HEADING });
+
+    expect(screen.getByRole("radio", { name: /한 해 리포트/ })).toBeChecked();
+    expect(screen.getByText(/출생 시각을 모르면 나를 읽는 기준\(일간\)을 확정하지 못해/)).toBeInTheDocument();
+  });
+
   it("creates an annual report without inventing a question and keeps the choice when editing", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { ZODIAC_SIGNS, ZODIAC_SLUGS, ZODIAC_YEAR_CONTENT, getZodiacSign, zodiacSlugOfYear, type ZodiacSign } from "./content";
+import { SAJU_GUIDE } from "@/content/reading-help";
+
 import { relationTag, relationsWithYear } from "./relations";
 import { ganjiName, pageBirthYears } from "./years";
 
@@ -49,6 +51,12 @@ describe("zodiac fortune content", () => {
       expect(value.replaceAll(yearNameWithHanja, "")).not.toMatch(HANJA);
     }
     expect(yearNameWithHanja).toBe("정미년(丁未年)");
+  });
+
+  it("names the current content year in the saju guide link", () => {
+    // reading-help is bundled into a client component, so it spells the year instead of importing this content.
+    const link = SAJU_GUIDE.related.find((item) => item.href === "/zodiac");
+    expect(link?.label).toBe(`${ZODIAC_YEAR_CONTENT.year}년 띠별 신년운세`);
   });
 
   it.each(SECTIONS)("opens %s differently for every sign", (key) => {

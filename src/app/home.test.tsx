@@ -40,13 +40,15 @@ describe("HomePage", () => {
     expect(container.querySelector(".home-saju-mini")?.closest("[aria-hidden='true']")).not.toBeNull();
   });
 
-  it("opens a free daily fortune entry right under the hero", () => {
+  it("opens the free daily fortune and the zodiac pages right under the hero", () => {
     render(<HomePage />);
 
-    const band = screen.getByRole("region", { name: "오늘의 운세는 로그인 없이 무료예요" });
-    expect(within(band).getByText("카드 한 장으로 오늘의 흐름을 살펴보세요.")).toBeInTheDocument();
+    const band = screen.getByRole("region", { name: "무료로 바로 보는 운세" });
+    expect(within(band).getByText("로그인 없이, 카드 한 장으로 오늘을 살펴봐요.")).toBeInTheDocument();
     expect(within(band).getByRole("link", { name: "오늘의 운세 보기" }))
       .toHaveAttribute("href", "/tarot/daily");
+    expect(within(band).getByText("열두 띠가 올해의 양과 어떤 사이인지 풀어 봤어요.")).toBeInTheDocument();
+    expect(within(band).getByRole("link", { name: "띠별 운세 보기" })).toHaveAttribute("href", "/zodiac");
   });
 
   it("quotes a reading line next to the card it came from", () => {
@@ -65,7 +67,8 @@ describe("HomePage", () => {
       .toEqual([
         "AI 타로",
         "AI 사주",
-        "오늘의 운세는 로그인 없이 무료예요",
+        "오늘의 운세",
+        "2027 띠별 신년운세",
         "리딩 예시",
         "세 단계로 만나는 나의 리딩",
         "그냥 AI에게 물어보는 것과 무엇이 다를까요?",
