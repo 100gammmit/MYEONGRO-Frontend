@@ -10,6 +10,7 @@ export {
   type ZodiacSlug,
   type ZodiacYearContent,
 } from "./content";
+export { withAnd } from "./korean";
 export {
   RELATION_LABELS,
   groupWithYear,

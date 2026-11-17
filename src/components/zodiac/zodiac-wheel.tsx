@@ -7,7 +7,10 @@ import {
   relationsWithYear,
   type ZodiacRelationKind,
   type ZodiacSlug,
+  withAnd,
 } from "@/domain/zodiac-fortune";
+
+import { roundTenth as round, wheelPoint } from "./wheel-geometry";
 
 import styles from "./zodiac.module.css";
 
@@ -28,19 +31,9 @@ export const GROUP_STYLES = {
 } as const;
 
 function point(slug: ZodiacSlug): [number, number] {
-  const angle = ((-90 + 30 * ZODIAC_SLUGS.indexOf(slug)) * Math.PI) / 180;
-  return [round(CENTER + RADIUS * Math.cos(angle)), round(CENTER + RADIUS * Math.sin(angle))];
+  return wheelPoint(slug, CENTER, RADIUS);
 }
 
-/** "와" after a vowel, "과" after a final consonant. */
-export function withAnd(word: string): string {
-  const code = word.charCodeAt(word.length - 1) - 0xac00;
-  return code >= 0 && code < 11172 && code % 28 !== 0 ? "과" : "와";
-}
-
-function round(value: number): number {
-  return Math.round(value * 10) / 10;
-}
 
 function strokeFor(kinds: readonly ZodiacRelationKind[]) {
   if (kinds.includes("sixHarmony")) return RELATION_STROKES.sixHarmony;

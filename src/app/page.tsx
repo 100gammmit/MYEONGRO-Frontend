@@ -6,8 +6,7 @@ import { ReadingHelpEntry } from "@/components/reading-help-links";
 import { TarotCardCaption, tarotCardImageSrc } from "@/components/tarot-card-face";
 import { TarotStone } from "@/components/tarot-stone";
 import { ZodiacMiniWheel } from "@/components/zodiac/zodiac-mini-wheel";
-import { withAnd } from "@/components/zodiac/zodiac-wheel";
-import { ZODIAC_YEAR_ANIMAL_NAME, ZODIAC_YEAR_CONTENT } from "@/domain/zodiac-fortune";
+import { ZODIAC_YEAR_ANIMAL_NAME, ZODIAC_YEAR_CONTENT, withAnd } from "@/domain/zodiac-fortune";
 
 export const metadata = publicPageMetadata(
   "/",

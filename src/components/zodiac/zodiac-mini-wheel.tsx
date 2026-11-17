@@ -1,5 +1,7 @@
 import { ZODIAC_SLUGS, type ZodiacSlug } from "@/domain/zodiac-fortune";
 
+import { wheelPoint } from "./wheel-geometry";
+
 /** A small decorative wheel for the home band: twelve dots with the year's sign in gold. */
 export function ZodiacMiniWheel({ yearAnimal, yearName, year, className }: {
   yearAnimal: ZodiacSlug;
@@ -10,13 +12,13 @@ export function ZodiacMiniWheel({ yearAnimal, yearName, year, className }: {
   return (
     <svg aria-hidden="true" className={className} viewBox="0 0 100 100">
       <circle cx="50" cy="50" fill="none" r="38" stroke="rgba(230,235,247,.14)" />
-      {ZODIAC_SLUGS.map((slug, index) => {
-        const angle = ((-90 + 30 * index) * Math.PI) / 180;
+      {ZODIAC_SLUGS.map((slug) => {
+        const [cx, cy] = wheelPoint(slug, 50, 38);
         const isYear = slug === yearAnimal;
         return (
           <circle
-            cx={Math.round((50 + 38 * Math.cos(angle)) * 10) / 10}
-            cy={Math.round((50 + 38 * Math.sin(angle)) * 10) / 10}
+            cx={cx}
+            cy={cy}
             fill={isYear ? "#e8b54a" : "#3a3f52"}
             key={slug}
             r={isYear ? 6 : 4}
