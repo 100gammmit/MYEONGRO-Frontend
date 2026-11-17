@@ -28,7 +28,7 @@ export default function ZodiacHubPage() {
         <ul>{YEAR.hub.summary.map((line) => <li key={line}>{line}</li>)}</ul>
       </section>
 
-      <ZodiacFinder lead={YEAR.hub.finderLead} signNames={SIGN_NAMES} />
+      <ZodiacFinder lastYear={YEAR.year} lead={YEAR.hub.finderLead} signNames={SIGN_NAMES} />
 
       <section aria-labelledby="zodiac-year" className={styles.section}>
         <h2 id="zodiac-year">{YEAR.yearName}은 어떤 해인가요</h2>

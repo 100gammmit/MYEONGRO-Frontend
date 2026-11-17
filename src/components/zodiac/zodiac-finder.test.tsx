@@ -8,11 +8,11 @@ const NAMES = Object.fromEntries(ZODIAC_SIGNS.map((sign) => [sign.slug, sign.nam
 
 describe("ZodiacFinder", () => {
   it("shows both signs of a birth year split at its 입춘, linking each page", () => {
-    render(<ZodiacFinder lead="안내" signNames={NAMES} />);
+    render(<ZodiacFinder lastYear={2027} lead="안내" signNames={NAMES} />);
 
     expect(screen.getByRole("button", { name: "띠 찾기" })).toBeDisabled();
     const options = within(screen.getByLabelText("태어난 해")).getAllByRole("option").map((option) => option.textContent);
-    expect([options[1], options.at(-1)]).toEqual(["1900년", "2099년"]);
+    expect([options[1], options.at(-1)]).toEqual(["2027년", "1900년"]);
     fireEvent.change(screen.getByLabelText("태어난 해"), { target: { value: "1996" } });
     fireEvent.click(screen.getByRole("button", { name: "띠 찾기" }));
 
@@ -26,7 +26,7 @@ describe("ZodiacFinder", () => {
   });
 
   it("clears the answer when another year is picked", () => {
-    render(<ZodiacFinder lead="안내" signNames={NAMES} />);
+    render(<ZodiacFinder lastYear={2027} lead="안내" signNames={NAMES} />);
 
     fireEvent.change(screen.getByLabelText("태어난 해"), { target: { value: "1996" } });
     fireEvent.click(screen.getByRole("button", { name: "띠 찾기" }));
@@ -37,7 +37,7 @@ describe("ZodiacFinder", () => {
 
   it("keeps the birth year out of the address and browser storage", () => {
     const before = window.location.href;
-    render(<ZodiacFinder lead="안내" signNames={NAMES} />);
+    render(<ZodiacFinder lastYear={2027} lead="안내" signNames={NAMES} />);
 
     fireEvent.change(screen.getByLabelText("태어난 해"), { target: { value: "1990" } });
     fireEvent.click(screen.getByRole("button", { name: "띠 찾기" }));

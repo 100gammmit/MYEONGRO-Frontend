@@ -3,16 +3,16 @@
 import Link from "next/link";
 import { useId, useState } from "react";
 
-import { FINDER_FIRST_YEAR, FINDER_LAST_YEAR, findZodiacByYear, type YearZodiacAnswer } from "@/domain/zodiac-fortune/years";
+import { FINDER_FIRST_YEAR, findZodiacByYear, type YearZodiacAnswer } from "@/domain/zodiac-fortune/years";
 import type { ZodiacSlug } from "@/domain/zodiac-fortune/slugs";
 
 import styles from "./zodiac.module.css";
 
-const YEARS = Array.from({ length: FINDER_LAST_YEAR - FINDER_FIRST_YEAR + 1 }, (_, index) => FINDER_FIRST_YEAR + index);
-
 // Only the birth year is asked for, and it stays in this component's memory: nothing is sent,
 // stored, logged or written into the address, and the result links carry no birth data.
-export function ZodiacFinder({ signNames, lead }: { signNames: Record<ZodiacSlug, string>; lead: string }) {
+// Years run newest first, from the content year down to 1900.
+export function ZodiacFinder({ signNames, lead, lastYear }: { signNames: Record<ZodiacSlug, string>; lead: string; lastYear: number }) {
+  const years = Array.from({ length: lastYear - FINDER_FIRST_YEAR + 1 }, (_, index) => lastYear - index);
   const id = useId();
   const [year, setYear] = useState("");
   const [answer, setAnswer] = useState<YearZodiacAnswer | null>(null);
@@ -35,7 +35,7 @@ export function ZodiacFinder({ signNames, lead }: { signNames: Record<ZodiacSlug
               setAnswer(null);
             }} value={year}>
             <option value="">태어난 해 선택</option>
-            {YEARS.map((value) => <option key={value} value={value}>{value}년</option>)}
+            {years.map((value) => <option key={value} value={value}>{value}년</option>)}
           </select>
           <button disabled={!year} type="submit">띠 찾기</button>
         </div>
