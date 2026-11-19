@@ -10,6 +10,13 @@ describe("annual report contract", () => {
     expect(parseSajuAnnualReadingView(fullPreview)?.result.detailLevel).toBe("full");
     expect(parseSajuAnnualReadingView(briefPreview)?.result.detailLevel).toBe("brief");
   });
+  it("accepts the saved calculation basis on annual records", () => {
+    const record = structuredClone(annualFixture());
+    Object.assign(record.input.calculationSnapshot, {
+      calculationBasis: { dayBoundary: "MIDNIGHT", equationOfTime: true, coordinateSource: "province" },
+    });
+    expect(parseSajuAnnualReadingView(record)?.input.calculationSnapshot.calculationBasis?.coordinateSource).toBe("province");
+  });
   it("restores full and brief reports without birth input", () => {
     expect(annualView().result.periods).toHaveLength(13);
     expect(annualView(true).result.periods).toHaveLength(0);

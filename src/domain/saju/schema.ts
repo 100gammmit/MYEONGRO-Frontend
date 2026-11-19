@@ -9,9 +9,16 @@ import type {
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
+const citySchema = z.object({
+  cityCode: z.string().regex(/^\d{5}$/),
+  cityName: z.string().min(1),
+}).strict();
+
 const provinceSchema = z.object({
   provinceCode: z.string().regex(/^\d{2}$/),
   provinceName: z.string().min(1),
+  // Sent by the backend once AI readings accept a city; optional until then.
+  cities: z.array(citySchema).optional(),
 }).strict();
 
 const birthPlacesSchema = z.object({

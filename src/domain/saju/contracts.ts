@@ -2,9 +2,15 @@ export type BirthTimePrecision = "exact" | "approximate" | "unknown";
 export type LuckDirectionBasis = "male" | "female" | "unspecified";
 export type SajuFocusArea = "self" | "career" | "relationship" | "life_money";
 
+export interface SajuBirthPlaceCity {
+  readonly cityCode: string;
+  readonly cityName: string;
+}
+
 export interface SajuBirthPlaceProvince {
   readonly provinceCode: string;
   readonly provinceName: string;
+  readonly cities?: readonly SajuBirthPlaceCity[];
 }
 
 export interface SajuBirthPlacesResponse {

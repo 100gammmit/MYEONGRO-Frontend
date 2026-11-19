@@ -105,6 +105,27 @@ describe("parseSajuReadingView", () => {
 		expect(parseSajuReadingView(forbiddenPrecision)).toBeNull();
 	});
 
+  it("accepts the saved calculation basis from saju-ko-v5 and records without it", () => {
+    const withBasis = structuredClone(sajuReadingRecord());
+    Object.assign(withBasis.input.calculationSnapshot, {
+      calculationBasis: { dayBoundary: "HOUR_23", equationOfTime: false, coordinateSource: "city" },
+    });
+    expect(parseSajuReadingView(withBasis)?.input.calculationSnapshot.calculationBasis).toEqual({
+      dayBoundary: "HOUR_23", equationOfTime: false, coordinateSource: "city",
+    });
+    expect(parseSajuReadingView(sajuReadingRecord())?.input.calculationSnapshot.calculationBasis).toBeUndefined();
+
+    for (const bad of [
+      { dayBoundary: "NOON", equationOfTime: true, coordinateSource: "province" },
+      { dayBoundary: "MIDNIGHT", equationOfTime: true, coordinateSource: "street" },
+      { dayBoundary: "MIDNIGHT", equationOfTime: true, coordinateSource: "city", cityCode: "11110" },
+    ]) {
+      const record = structuredClone(sajuReadingRecord());
+      Object.assign(record.input.calculationSnapshot, { calculationBasis: bad });
+      expect(parseSajuReadingView(record)).toBeNull();
+    }
+  });
+
   it("decodes a completed saju v2 record while preserving an absent time pillar", () => {
     const parsed = parseSajuReadingView(completedSajuRecord());
 

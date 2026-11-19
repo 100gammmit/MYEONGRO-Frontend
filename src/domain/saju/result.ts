@@ -3,6 +3,14 @@ import { readingModeSchema } from "@/domain/reading/reading-mode";
 import { monthlyCalendarSchema } from "./monthly-calendar";
 
 const textSchema = z.string().trim().min(1);
+
+// Saved from saju-ko-v5 on: which day boundary, equation-of-time and longitude unit the chart used.
+// Older records have none. Birth codes and longitude never come back with it.
+export const calculationBasisSchema = z.object({
+  dayBoundary: z.enum(["MIDNIGHT", "HOUR_23"]),
+  equationOfTime: z.boolean(),
+  coordinateSource: z.enum(["reference", "province", "city"]),
+}).strict();
 const focusAreaSchema = z.enum(["self", "career", "relationship", "life_money"]);
 const evidenceKeySchema = z.enum([
   "pillars",
@@ -101,6 +109,7 @@ const calculationSnapshotSchema = z.object({
   engineVersion: textSchema,
   cityCatalogVersion: textSchema,
   targetYear: z.number().int(),
+  calculationBasis: calculationBasisSchema.optional(),
   timeCorrection: z.object({
     civilTime: textSchema,
     trueSolarTime: textSchema,
@@ -144,6 +153,7 @@ export const minimalCalculationSnapshotSchema = z.object({
   engineVersion: textSchema,
   cityCatalogVersion: textSchema,
   targetYear: z.number().int(),
+  calculationBasis: calculationBasisSchema.optional(),
   pillars: z.object({
     year: minimalPillarSchema.nullable(),
     month: minimalPillarSchema.nullable(),

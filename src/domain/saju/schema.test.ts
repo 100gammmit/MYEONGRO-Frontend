@@ -26,6 +26,25 @@ describe("saju v3 schemas", () => {
     })).toThrow();
   });
 
+  it("accepts the optional city list and keeps it free of coordinates", () => {
+    const parsed = parseSajuBirthPlaces({
+      version: "kr-admin-v1",
+      provinces: [{
+        provinceCode: "11",
+        provinceName: "서울특별시",
+        cities: [{ cityCode: "11110", cityName: "종로구" }],
+      }],
+    });
+    expect(parsed.provinces[0]?.cities).toEqual([{ cityCode: "11110", cityName: "종로구" }]);
+
+    for (const city of [{ cityCode: "111", cityName: "종로구" }, { cityCode: "11110", cityName: "종로구", longitude: 126.98 }]) {
+      expect(() => parseSajuBirthPlaces({
+        version: "kr-admin-v1",
+        provinces: [{ provinceCode: "11", provinceName: "서울특별시", cities: [city] }],
+      })).toThrow();
+    }
+  });
+
   it("requires time for exact/approximate and omits it for unknown", () => {
     const base = {
       requestId: "11111111-1111-4111-8111-111111111111",
