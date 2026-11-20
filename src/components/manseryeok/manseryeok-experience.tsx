@@ -29,7 +29,7 @@ import styles from "./manseryeok.module.css";
 const ID_PREFIX = "manseryeok";
 const RATE_LIMIT_MS = 60_000;
 
-type Phase = "input" | "result" | "unavailable";
+type Phase = "input" | "result";
 type Notice = null | "retrying" | "busy" | "rateLimited" | "failed";
 
 export interface ManseryeokExperienceProps {
@@ -76,10 +76,6 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
   const loadPlaces = useCallback(async () => {
     setCatalogStatus("loading");
     const outcome = await fetchPublicBirthPlaces(birthPlacesEndpoint);
-    if (outcome.kind === "unavailable") {
-      setPhase("unavailable");
-      return;
-    }
     if (outcome.kind === "ok") {
       setCatalog(outcome.places);
       setCatalogStatus("ready");
@@ -154,7 +150,6 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
       setPhase("result");
       return;
     }
-    if (outcome.kind === "unavailable") { setPhase("unavailable"); return; }
     if (outcome.kind === "rateLimited") {
       setNotice("rateLimited");
       setLockedUntil(Date.now() + RATE_LIMIT_MS);
@@ -240,19 +235,6 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
     chartGenerationRef.current += 1;
     setChart(null);
     editInput();
-  }
-
-  if (phase === "unavailable") {
-    return (
-      <article className={`flow-page page-width ${styles.page}`}>
-        <h1>무료 만세력을 준비하고 있어요</h1>
-        <p className="flow-lead">곧 로그인 없이 명식을 계산해 볼 수 있게 열어 둘게요. 그동안 AI 사주 리딩이나 띠별 신년운세를 둘러보세요.</p>
-        <div className={styles.links}>
-          <Link href="/saju">AI 사주 리딩 알아보기</Link>
-          <Link href="/zodiac">2027 띠별 신년운세</Link>
-        </div>
-      </article>
-    );
   }
 
   if (phase === "result" && chart) {

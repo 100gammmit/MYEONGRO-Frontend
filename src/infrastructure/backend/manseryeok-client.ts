@@ -18,7 +18,6 @@ export type ManseryeokOutcome =
   | { readonly kind: "invalid"; readonly code: string; readonly field?: string; readonly message: string }
   | { readonly kind: "rateLimited" }
   | { readonly kind: "busy" }
-  | { readonly kind: "unavailable" }
   | { readonly kind: "failed" };
 
 const RETRIED_CODES = new Set(["SAJU_CALCULATION_BUSY", "SAJU_CALCULATION_DEADLINE", "SAJU_CALCULATION_RATE_LIMIT_UNAVAILABLE"]);
@@ -61,7 +60,6 @@ export async function calculateManseryeok(
       const chart = parseManseryeokChart(await response.json().catch(() => null));
       return chart ? { kind: "ok", chart } : { kind: "failed" };
     }
-    if (response.status === 404) return { kind: "unavailable" };
     if (response.status === 429) return { kind: "rateLimited" };
     const error = await readError(response);
     if (response.status === 400) {
@@ -80,14 +78,11 @@ export async function calculateManseryeok(
 
 export type BirthPlacesOutcome =
   | { readonly kind: "ok"; readonly places: SajuBirthPlacesResponse }
-  | { readonly kind: "unavailable" }
   | { readonly kind: "failed" };
 
-/** A 404 means the public calculator is switched off, which the page shows as "coming soon". */
 export async function fetchPublicBirthPlaces(endpoint: string, fetcher: typeof fetch = fetch): Promise<BirthPlacesOutcome> {
   try {
     const response = await fetcher(endpoint, { credentials: "omit", cache: "no-store" });
-    if (response.status === 404) return { kind: "unavailable" };
     return response.ok ? { kind: "ok", places: parseSajuBirthPlaces(await response.json()) } : { kind: "failed" };
   } catch {
     return { kind: "failed" };

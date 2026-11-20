@@ -213,10 +213,17 @@ describe("ManseryeokExperience", () => {
     window.sessionStorage.clear();
   });
 
-  it("shows the coming-soon page when the public calculator is switched off", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 404 }));
+  it("treats a missing API like any other failure and keeps the input", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(new Response(null, { status: 404 }));
     renderPage();
-    expect(await screen.findByRole("heading", { level: 1, name: "무료 만세력을 준비하고 있어요" })).toBeInTheDocument();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("계산하지 못했어요");
+    expect(screen.getByRole("heading", { level: 1, name: "무료 만세력" })).toBeInTheDocument();
+    expect(screen.getByLabelText("양력 생년월일")).toHaveValue("1992-08-17");
   });
 
   it("locks the button for a minute after a rate limit and keeps the input", async () => {

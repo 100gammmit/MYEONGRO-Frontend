@@ -43,10 +43,10 @@ describe("calculateManseryeok", () => {
     expect(outcome.kind).toBe("ok");
   });
 
-  it("maps rate limits, a switched-off feature, field errors and broken replies", async () => {
+  it("maps rate limits, field errors and broken replies", async () => {
     const call = (response: Response) => calculateManseryeok(ENDPOINT, { birthProfile: profile }, { fetcher: vi.fn().mockResolvedValue(response) });
     expect(await call(json({ code: "SAJU_CALCULATION_RATE_LIMITED" }, 429))).toEqual({ kind: "rateLimited" });
-    expect(await call(new Response(null, { status: 404 }))).toEqual({ kind: "unavailable" });
+    expect(await call(new Response(null, { status: 404 }))).toEqual({ kind: "failed" });
     expect(await call(json({ code: "INVALID_BIRTH_DATE", field: "birthProfile.birthDate", error: "날짜를 확인해 주세요." }, 400)))
       .toEqual({ kind: "invalid", code: "INVALID_BIRTH_DATE", field: "birthProfile.birthDate", message: "날짜를 확인해 주세요." });
     expect(await call(json({ ...fixture, schemaVersion: 9 }))).toEqual({ kind: "failed" });
@@ -56,10 +56,10 @@ describe("calculateManseryeok", () => {
 });
 
 describe("fetchPublicBirthPlaces", () => {
-  it("reads the list and tells a switched-off feature apart from a failure", async () => {
+  it("reads the list and treats any other reply as a failure", async () => {
     const places = { version: "kr-admin-v1", provinces: [{ provinceCode: "11", provinceName: "서울특별시", cities: [] }] };
     expect((await fetchPublicBirthPlaces(ENDPOINT, vi.fn().mockResolvedValue(json(places)))).kind).toBe("ok");
-    expect(await fetchPublicBirthPlaces(ENDPOINT, vi.fn().mockResolvedValue(new Response(null, { status: 404 })))).toEqual({ kind: "unavailable" });
+    expect(await fetchPublicBirthPlaces(ENDPOINT, vi.fn().mockResolvedValue(new Response(null, { status: 404 })))).toEqual({ kind: "failed" });
     expect(await fetchPublicBirthPlaces(ENDPOINT, vi.fn().mockResolvedValue(json({}, 500)))).toEqual({ kind: "failed" });
   });
 });
