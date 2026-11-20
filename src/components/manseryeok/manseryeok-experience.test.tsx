@@ -97,6 +97,32 @@ describe("ManseryeokExperience", () => {
     expect(JSON.parse(String((fetchMock.mock.calls[2] as [string, RequestInit])[1].body)).referenceYear).toBe(2027);
   });
 
+  it("drops a late next-year answer that belongs to an earlier calculation", async () => {
+    let answerStale: (response: Response) => void = () => {};
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json(fixture))
+      .mockImplementationOnce(() => new Promise<Response>((resolve) => { answerStale = resolve; }))
+      .mockResolvedValueOnce(json(fixture))
+      .mockImplementationOnce(() => new Promise<Response>(() => {}));
+    renderPage();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+    await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
+    fireEvent.click(screen.getByRole("button", { name: /2027년 · 내년/ }));
+
+    fireEvent.click(screen.getByRole("button", { name: "입력 바꾸기" }));
+    fireEvent.popState(window, { state: null });
+    fireEvent.click(await screen.findByRole("button", { name: "만세력 계산하기" }));
+    await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
+    answerStale(json({ ...fixture, referenceYear: 2027 }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    fireEvent.click(screen.getByRole("button", { name: /2027년 · 내년/ }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5));
+  });
+
   it("goes back to the filled form and starts over with only the calculation settings kept", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(json(places))

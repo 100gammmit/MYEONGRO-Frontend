@@ -61,6 +61,8 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
   const focusRef = useRef<string | null>(null);
   const phaseRef = useRef<Phase>("input");
   const pendingFocusRef = useRef<string | null>(null);
+  // Bumped whenever the shown chart changes, so a late next-year answer for an older chart is dropped.
+  const chartGenerationRef = useRef(0);
 
   // After returning to the form, move focus where the result asked (e.g. the gender choice).
   const focusPending = useCallback(() => {
@@ -143,6 +145,7 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
 
   function applyOutcome(outcome: ManseryeokOutcome) {
     if (outcome.kind === "ok") {
+      chartGenerationRef.current += 1;
       setNotice(null);
       setChart(outcome.chart);
       setNextYearChart(null);
@@ -198,6 +201,7 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
     if (choice === "current" || !chart || nextYearChart || nextYearState === "loading") return;
     if (lockedUntil) { setNextYearState("limited"); return; }
     setNextYearState("loading");
+    const generation = chartGenerationRef.current;
     const options = calculationOptionsOf(birth);
     // Only next year is sent as a number; "this year" stays the server's default.
     const outcome = await calculateManseryeok(calculateEndpoint, {
@@ -205,6 +209,7 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
       ...(options ? { options } : {}),
       referenceYear: chart.referenceYear + 1,
     });
+    if (generation !== chartGenerationRef.current) return;
     if (outcome.kind === "ok") {
       setNextYearChart(outcome.chart);
       setNextYearState("idle");
@@ -232,6 +237,7 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
   function startOver() {
     setBirth((current) => ({ ...EMPTY_BIRTH_VALUES, dayBoundary: current.dayBoundary, equationOfTime: current.equationOfTime }));
     setConfirmed(false);
+    chartGenerationRef.current += 1;
     setChart(null);
     editInput();
   }
