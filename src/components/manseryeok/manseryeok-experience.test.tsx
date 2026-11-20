@@ -139,7 +139,7 @@ describe("ManseryeokExperience", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "다른 생년월일 계산하기" }));
     fireEvent.popState(window, { state: null });
-    expect(await screen.findByRole("heading", { level: 1, name: "무료 만세력" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "만세력 계산" })).toBeInTheDocument();
     expect(screen.getByLabelText("양력 생년월일")).toHaveValue("");
     expect(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ })).not.toBeChecked();
   });
@@ -183,7 +183,7 @@ describe("ManseryeokExperience", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "성별 고르고 다시 계산하기" }));
     fireEvent.popState(window, { state: null });
-    await screen.findByRole("heading", { level: 1, name: "무료 만세력" });
+    await screen.findByRole("heading", { level: 1, name: "만세력 계산" });
     await waitFor(() => expect(screen.getByRole("radio", { name: "남성" })).toHaveFocus());
   });
 
@@ -191,7 +191,7 @@ describe("ManseryeokExperience", () => {
     window.history.replaceState(null, "", "/manseryeok?step=result");
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(json(places));
     renderPage();
-    expect(screen.getByRole("heading", { level: 1, name: "무료 만세력" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "만세력 계산" })).toBeInTheDocument();
     expect(window.location.search).toBe("");
   });
 
@@ -222,7 +222,7 @@ describe("ManseryeokExperience", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("계산하지 못했어요");
-    expect(screen.getByRole("heading", { level: 1, name: "무료 만세력" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: "만세력 계산" })).toBeInTheDocument();
     expect(screen.getByLabelText("양력 생년월일")).toHaveValue("1992-08-17");
   });
 

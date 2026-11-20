@@ -258,7 +258,7 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
   const locked = calculating || Boolean(lockedUntil);
   return (
     <article className={`flow-page page-width ${styles.page}`}>
-      <h1>무료 만세력</h1>
+      <h1>만세력 계산</h1>
       <p className="flow-lead">생년월일과 태어난 시각으로 사주 명식을 계산해요.</p>
       <ul className={styles.chips} aria-label="계산 결과에 담기는 것">
         <li>명식표</li><li>오행·관계·공망</li><li>대운</li><li>세운 10년</li><li>올해 월운</li>
