@@ -65,7 +65,7 @@ function HeroFeatures({ features }: { features: readonly HeroFeature[] }) {
         {features.map((feature) => (
           <li key={feature.href}>
             <Link href={feature.href}>
-              <strong>{feature.name}</strong>
+              <strong>{feature.name}</strong>{" "}
               <span className="hero-feature-description">{feature.description}</span>
               <span aria-hidden="true" className="hero-feature-arrow">→</span>
             </Link>

@@ -20,14 +20,15 @@ describe("HomePage", () => {
       throw new Error("hero paths missing");
     }
     const links = (path: HTMLElement) => within(path).getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")]);
+    // The name and its description read as two phrases, not one run-on word.
     expect(links(tarot)).toEqual([
-      ["오늘의 운세카드 한 장으로 보는 오늘→", "/tarot/daily"],
-      ["AI 타로 리딩질문과 함께 3장·5장→", "/tarot"],
+      ["오늘의 운세 카드 한 장으로 보는 오늘→", "/tarot/daily"],
+      ["AI 타로 리딩 질문과 함께 3장·5장→", "/tarot"],
     ]);
     expect(links(saju)).toEqual([
-      ["만세력 계산생년월일로 내 명식 보기→", "/manseryeok"],
-      ["2027 띠별 신년운세태어난 해로 보는 내 띠→", "/zodiac"],
-      ["AI 사주 리딩종합 사주 · 한 해 리포트→", "/saju"],
+      ["만세력 계산 생년월일로 내 명식 보기→", "/manseryeok"],
+      ["2027 띠별 신년운세 태어난 해로 보는 내 띠→", "/zodiac"],
+      ["AI 사주 리딩 종합 사주 · 한 해 리포트→", "/saju"],
     ]);
     expect(within(tarot).getByText("AI 리딩은 로그인이 필요해요")).toBeInTheDocument();
     expect(within(saju).getByText("AI 리딩은 로그인이 필요해요")).toBeInTheDocument();
