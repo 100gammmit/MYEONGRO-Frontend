@@ -79,7 +79,13 @@ describe("ManseryeokExperience", () => {
     // The luck strip reads the display periods: hanja glyphs plus the stem ten god.
     const luck = within(screen.getByRole("list", { name: "대운 흐름" })).getAllByRole("listitem");
     expect(luck).toHaveLength(fixture.luckCycle.periods.length);
-    expect(luck[2]).toHaveTextContent(/27세.*2019.*정관.*辛.*亥/);
+    expect(luck[2]).toHaveTextContent(/2019–2028.*27.*정관.*辛.*亥/);
+    const firstPeriod = fixture.luckCycle.periods[0];
+    expect(luck[0]).toHaveTextContent(`${firstPeriod.startYear}–${firstPeriod.endYear}${fixture.luckCycle.integerStartAge}${firstPeriod.stemTenGod}`);
+    expect(screen.getByRole("list", { name: "대운 흐름" })).not.toHaveTextContent("세");
+    // Both sideways strips take keyboard focus so they can be scrolled without a pointer.
+    expect(screen.getByRole("list", { name: "대운 흐름" })).toHaveAttribute("tabindex", "0");
+    expect(screen.getByRole("list", { name: "세운" })).toHaveAttribute("tabindex", "0");
   });
 
   it("asks for next year's monthly flow by number and marks a relation in the chart", async () => {

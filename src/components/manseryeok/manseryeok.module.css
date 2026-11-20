@@ -118,6 +118,8 @@
 .age { color: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 .strip li.now .age { color: var(--accent-cta); font-weight: 700; }
 .year { color: var(--text-subtle, var(--text-muted)); font-size: 11px; }
+.range { white-space: nowrap; }
+.strip:focus-visible { outline-offset: 2px; }
 .why { padding: 14px 16px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-cta) 8%, transparent); }
 .why p { margin: 0 0 10px; font-size: 14px; line-height: 1.75; }
 .why strong { color: var(--accent-cta); }
@@ -164,6 +166,7 @@
   .cards { grid-template-columns: 1fr; }
   .strip { display: flex; overflow-x: auto; margin-inline: calc(-1 * var(--page-gutter, 16px)); padding: 0 var(--page-gutter, 16px) 4px; scrollbar-width: none; }
   .strip li { flex: none; width: 68px; }
+  .range { font-size: 10.5px; letter-spacing: -.02em; }
   .months { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .basis { grid-template-columns: 104px minmax(0, 1fr); }
   .glossary dl { grid-template-columns: 1fr; gap: 2px; }

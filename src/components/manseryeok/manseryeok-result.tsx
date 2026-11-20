@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 
 import { birthPlaceName, birthTimeSummary, formatBirthDate, isBirthTimeKnown, luckBasisSummary, type SajuBirthValues } from "@/domain/saju/birth-input";
 import type { SajuBirthPlacesResponse } from "@/domain/saju/contracts";
@@ -60,6 +60,8 @@ export function ManseryeokResult({
   const highlighted = new Set(selected?.items.flatMap((relation) => relation.members.map((member) => `${member.position}-${selected.type.startsWith("stem_") ? "stem" : "branch"}`)) ?? []);
   const time = correctedTime(chart);
   const today = getSajuCurrentYear();
+  const annualStripRef = useRef<HTMLOListElement>(null);
+  useShowCurrent(annualStripRef, chart.annualFlows.findIndex((flow) => flow.year === today));
   const dayMaster = chart.chart.dayMaster;
   // A place kept from an earlier entry is not used when the time is unknown, so it is not shown.
   const place = isBirthTimeKnown(birth.birthTimePrecision) ? birthPlaceName(catalog, birth) : "";
@@ -143,7 +145,7 @@ export function ManseryeokResult({
       </Section>
 
       <Section id="annual" index={4} title="세운 10년" note="입춘부터 다음 입춘 전까지">
-        <ol className={styles.strip} aria-label="세운">
+        <ol className={styles.strip} aria-label="세운" ref={annualStripRef} tabIndex={0}>
           {chart.annualFlows.map((flow) => {
             const [stem, branch] = [glyph(flow.ganZhi.hanja[0] ?? "", "stem"), glyph(flow.ganZhi.hanja[1] ?? "", "branch")];
             return (
@@ -202,6 +204,19 @@ function Section({ id, index, title, note, children }: { id: string; index: numb
       {children}
     </section>
   );
+}
+
+/**
+ * On a phone the luck and year strips scroll sideways; start each with its current cell in view.
+ * Only the strip scrolls, never the page, and a strip that fits does nothing.
+ */
+function useShowCurrent(ref: RefObject<HTMLOListElement | null>, index: number) {
+  useLayoutEffect(() => {
+    const strip = ref.current;
+    const cell = index >= 0 ? strip?.children[index] : undefined;
+    if (!strip || !(cell instanceof HTMLElement) || strip.scrollWidth <= strip.clientWidth) return;
+    strip.scrollLeft = Math.max(0, cell.offsetLeft - strip.offsetLeft - (strip.clientWidth - cell.offsetWidth) / 2);
+  }, [ref, index]);
 }
 
 function GlyphChar({ glyph: value, large = false }: { glyph: Glyph; large?: boolean }) {
@@ -331,23 +346,32 @@ function LuckSection({ chart, birth, today, onEdit }: { chart: ManseryeokChart; 
   }
   const now = currentLuckIndex(chart, today);
   return (
+    <LuckStrip luck={luck} now={now} />
+  );
+}
+
+function LuckStrip({ luck, now }: { luck: NonNullable<ManseryeokChart["luckCycle"]>; now: number }) {
+  const stripRef = useRef<HTMLOListElement>(null);
+  useShowCurrent(stripRef, now);
+  return (
     <>
       <dl className={styles.start}>
         <div><dt>대운수</dt><dd>{luck.integerStartAge}</dd></div>
         <div><dt>정밀 시작 시점</dt><dd>{formatMonth(luck.precise.startDate)} 무렵 · 만 {luck.precise.startAgeYears}세 {luck.precise.startAgeMonths}개월</dd></div>
         <div><dt>방향</dt><dd>{luck.precise.direction === "forward" ? "순행" : "역행"}</dd></div>
       </dl>
-      <ol className={styles.strip} aria-label="대운 흐름">
+      {/* The years match how the AI saju names a luck period; the small number follows 대운수, not a counted age. */}
+      <ol className={styles.strip} aria-label="대운 흐름" ref={stripRef} tabIndex={0}>
         {luck.periods.map((period, index) => (
           <li className={index === now ? styles.now : undefined} key={period.startYear}>
-            <span className={styles.age}>{period.startAge}세{index === now ? " · 지금" : ""}</span>
-            <span className={styles.year}>{period.startYear}</span>
+            <span className={`${styles.age} ${styles.range}`}>{period.startYear}–{period.endYear}</span>
+            <span className={styles.year}>{luck.integerStartAge + index * 10}{index === now ? " · 지금" : ""}</span>
             {period.stemTenGod ? <span className={styles.tenGod}>{period.stemTenGod}</span> : null}
             <GlyphChar glyph={glyph(period.ganZhi.hanja[0] ?? "", "stem")} /><GlyphChar glyph={glyph(period.ganZhi.hanja[1] ?? "", "branch")} />
           </li>
         ))}
       </ol>
-      <p className={styles.muted}>대운수는 관례대로 반올림한 값이고, 정밀 시작 시점은 태어난 시각부터 절입까지의 시간으로 계산해요.</p>
+      <p className={styles.muted}>칸의 큰 숫자는 대운이 이어지는 해, 작은 숫자는 대운수 기준 나이예요. 대운수는 정밀 시작 시점(만 {luck.precise.startAgeYears}세 {luck.precise.startAgeMonths}개월)을 반올림한 값이에요.</p>
     </>
   );
 }
