@@ -53,7 +53,7 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
   const [chart, setChart] = useState<ManseryeokChart | null>(null);
   const [yearChoice, setYearChoice] = useState<MonthlyYearChoice>("current");
   const [nextYearChart, setNextYearChart] = useState<ManseryeokChart | null>(null);
-  const [nextYearState, setNextYearState] = useState<"idle" | "loading" | "failed">("idle");
+  const [nextYearState, setNextYearState] = useState<"idle" | "loading" | "failed" | "limited">("idle");
   const summaryRef = useRef<HTMLDivElement>(null);
   const focusRef = useRef<string | null>(null);
   const phaseRef = useRef<Phase>("input");
@@ -84,6 +84,11 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
   }, [birthPlacesEndpoint]);
 
   useEffect(() => { void loadPlaces(); }, [loadPlaces]);
+
+  // A reload starts at the form (nothing is stored), so drop a step left in the address.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("step")) window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
   // A 429 locks the button for the minute the server asked for, then opens it again.
   useEffect(() => {
@@ -188,6 +193,7 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
   async function chooseYear(choice: MonthlyYearChoice) {
     setYearChoice(choice);
     if (choice === "current" || !chart || nextYearChart || nextYearState === "loading") return;
+    if (lockedUntil) { setNextYearState("limited"); return; }
     setNextYearState("loading");
     const options = calculationOptionsOf(birth);
     // Only next year is sent as a number; "this year" stays the server's default.
@@ -199,6 +205,9 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
     if (outcome.kind === "ok") {
       setNextYearChart(outcome.chart);
       setNextYearState("idle");
+    } else if (outcome.kind === "rateLimited") {
+      setLockedUntil(Date.now() + RATE_LIMIT_MS);
+      setNextYearState("limited");
     } else {
       setNextYearState("failed");
     }

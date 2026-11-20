@@ -123,6 +123,12 @@ export function birthPlaceName(catalog: SajuBirthPlacesResponse | null, values: 
   return city ? `${province.provinceName} ${city.cityName}` : province.provinceName;
 }
 
+/** "1992-08-17" → "1992년 8월 17일". */
+export function formatBirthDate(value: string): string {
+  const [year, month, day] = value.split("-").map(Number);
+  return year && month && day ? `${year}년 ${month}월 ${day}일` : value;
+}
+
 export function birthTimeSummary(values: SajuBirthValues): string {
   if (values.birthTimePrecision === "unknown") return "모름 · 시주 제외";
   if (values.birthTimePrecision === "approximate") return `${Number(values.birthHour)}시쯤 · 앞뒤 60분`;

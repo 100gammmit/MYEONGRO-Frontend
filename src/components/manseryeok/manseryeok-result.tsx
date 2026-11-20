@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 
-import { birthPlaceName, birthTimeSummary, isBirthTimeKnown, luckBasisSummary, type SajuBirthValues } from "@/domain/saju/birth-input";
+import { birthPlaceName, birthTimeSummary, formatBirthDate, isBirthTimeKnown, luckBasisSummary, type SajuBirthValues } from "@/domain/saju/birth-input";
 import type { SajuBirthPlacesResponse } from "@/domain/saju/contracts";
 import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
 import {
@@ -32,7 +32,7 @@ export interface ManseryeokResultProps {
   readonly chart: ManseryeokChart;
   /** The chart whose monthly calendar is shown; null while next year is still loading. */
   readonly monthlyChart: ManseryeokChart | null;
-  readonly monthlyState: "idle" | "loading" | "failed";
+  readonly monthlyState: "idle" | "loading" | "failed" | "limited";
   readonly yearChoice: MonthlyYearChoice;
   readonly onChooseYear: (choice: MonthlyYearChoice) => void;
   readonly birth: SajuBirthValues;
@@ -71,7 +71,7 @@ export function ManseryeokResult({
 
       <section className={styles.who} aria-label="입력한 정보와 보정한 시각">
         <dl>
-          <div><dt>양력 생년월일</dt><dd>{formatDate(birth.birthDate)}</dd></div>
+          <div><dt>양력 생년월일</dt><dd>{formatBirthDate(birth.birthDate)}</dd></div>
           <div><dt>출생 시각</dt><dd>{birthTimeSummary(birth)}</dd></div>
           {place ? <div><dt>출생 지역</dt><dd>{place}</dd></div> : null}
           <div><dt>성별</dt><dd>{luckBasisSummary(birth.luckDirectionBasis)}</dd></div>
@@ -310,7 +310,7 @@ function VoidLine({ chart }: { chart: ManseryeokChart }) {
         {day && year ? <br /> : null}
         {year ? (day && year.hanja === day.hanja ? "연주 기준도 같아요." : `연주 기준 · ${Array.from(year.korean).join(" · ")}`) : null}
         <br />
-        {inChart.length ? `원국의 지지에 ${inChart.join("·")}가 있어요.` : "원국의 네 지지에는 없어요."}
+        {inChart.length ? `원국의 지지에 ${inChart.join("·")} 글자가 있어요.` : "원국의 네 지지에는 없어요."}
       </p>
     </div>
   );
@@ -354,7 +354,8 @@ function LuckSection({ chart, birth, today, onEdit }: { chart: ManseryeokChart; 
   );
 }
 
-function MonthlyCards({ chart, state, today }: { chart: ManseryeokChart | null; state: "idle" | "loading" | "failed"; today: number }) {
+function MonthlyCards({ chart, state, today }: { chart: ManseryeokChart | null; state: ManseryeokResultProps["monthlyState"]; today: number }) {
+  if (state === "limited") return <p className={styles.muted} role="alert">1분 뒤에 다시 시도해 주세요.</p>;
   if (state === "failed") return <p className={styles.muted} role="alert">내년 월운을 불러오지 못했어요. 잠시 뒤에 다시 눌러 주세요.</p>;
   if (!chart) return <p className={styles.muted} aria-live="polite">내년 월운을 계산하고 있어요.</p>;
   const calendar = chart.monthlyCalendar;
@@ -404,11 +405,6 @@ function BasisList({ chart, time, place }: { chart: ManseryeokChart; time: Retur
       {chart.uncertainty.precision === "approximate" ? <><dt>시각 후보</dt><dd>앞뒤 60분 안 {chart.uncertainty.candidateCount}개 후보에서 공통된 값만 보여 드려요.</dd></> : null}
     </dl>
   );
-}
-
-function formatDate(value: string): string {
-  const [year, month, day] = value.split("-").map(Number);
-  return year && month && day ? `${year}년 ${month}월 ${day}일` : value;
 }
 
 function formatMonth(value: string): string {

@@ -32,6 +32,7 @@ import {
   calculationOptionsOf,
   calculationOptionsSummary,
   findMissingBirthFields,
+  formatBirthDate,
   isBirthTimeKnown,
   luckBasisSummary,
   type SajuBirthFieldKey,
@@ -626,10 +627,6 @@ async function readApiError(response: Response): Promise<SajuApiError> {
   }
 }
 
-function formatBirthDate(value: string): string {
-  const [year, month, day] = value.split("-").map(Number);
-  return year && month && day ? `${year}년 ${month}월 ${day}일` : value;
-}
 
 
 

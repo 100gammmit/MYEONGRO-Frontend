@@ -109,6 +109,57 @@ describe("ManseryeokExperience", () => {
     expect(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ })).not.toBeChecked();
   });
 
+  it("says it is retrying when the server is busy and shows the result once it frees up", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json({ code: "SAJU_CALCULATION_BUSY" }, 503))
+      .mockResolvedValueOnce(json(fixture));
+    renderPage();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+
+    expect(await screen.findByText("요청이 몰려 잠깐 기다리고 있어요")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "다시 시도하는 중이에요" })).toBeDisabled();
+    expect(await screen.findByRole("heading", { level: 1, name: "만세력 결과" }, { timeout: 4000 })).toBeInTheDocument();
+  });
+
+  it("leaves the hour pillar and luck cycle empty with their reasons when the time and gender are not given", async () => {
+    const unknown = structuredClone(fixture);
+    Object.assign(unknown.chart.pillars, { time: null });
+    Object.assign(unknown.hiddenStems, { time: null });
+    Object.assign(unknown.twelveStages, { time: null });
+    Object.assign(unknown, { luckCycle: null, timeCorrection: null });
+    Object.assign(unknown.uncertainty, { precision: "unknown", candidateCount: 12 });
+    Object.assign(unknown.appliedOptions, { coordinateSource: "reference", longitude: 127.5, birthTimeKnown: false });
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json(unknown));
+    renderPage();
+    fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
+    fireEvent.click(screen.getByRole("radio", { name: /몰라요/ }));
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+
+    await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
+    expect(screen.getByText("시각을 몰라 비워 뒀어요")).toBeInTheDocument();
+    expect(screen.getByText("보정할 시각이 없어서 보정 시각은 못 보여 드려요.")).toBeInTheDocument();
+    expect(screen.getByText("성별을 고르지 않아 대운은 계산하지 않았어요.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "성별 고르고 다시 계산하기" }));
+    fireEvent.popState(window, { state: null });
+    await screen.findByRole("heading", { level: 1, name: "무료 만세력" });
+    await waitFor(() => expect(screen.getByRole("radio", { name: "남성" })).toHaveFocus());
+  });
+
+  it("starts at the form with a clean address after a reload on the result step", async () => {
+    window.history.replaceState(null, "", "/manseryeok?step=result");
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(json(places));
+    renderPage();
+    expect(screen.getByRole("heading", { level: 1, name: "무료 만세력" })).toBeInTheDocument();
+    expect(window.location.search).toBe("");
+  });
+
   it("shows the coming-soon page when the public calculator is switched off", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 404 }));
     renderPage();
