@@ -100,6 +100,7 @@ export default async function ZodiacSignPage({ params }: ZodiacSignPageProps) {
         <div className={styles.links}>
           <Link href="/zodiac">{YEAR.year}년 띠별 신년운세 전체</Link>
           <Link href="/guide/saju/annual-report">한 해 사주 리포트 읽는 법</Link>
+          <Link href="/manseryeok">무료 만세력으로 내 명식 보기</Link>
         </div>
       </section>
       <Link className={`primary-button ${styles.start}`} href="/saju?report=annual">사주 한 해 리포트 보기</Link>

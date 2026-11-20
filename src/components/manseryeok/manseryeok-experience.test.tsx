@@ -3,7 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import fixture from "@/test-fixtures/manseryeok-chart.json";
 
+import { BIRTH_HANDOFF_KEY } from "@/domain/saju/birth-handoff";
+
 import { ManseryeokExperience } from "./manseryeok-experience";
+
+const router = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
 const CALCULATE = "https://api.example.test/api/saju/calculations";
 const PLACES = "https://api.example.test/api/saju/calculations/birth-places";
@@ -158,6 +163,24 @@ describe("ManseryeokExperience", () => {
     renderPage();
     expect(screen.getByRole("heading", { level: 1, name: "무료 만세력" })).toBeInTheDocument();
     expect(window.location.search).toBe("");
+  });
+
+  it("hands the input to the AI saju form through this tab only", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json(fixture));
+    renderPage();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+    await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
+
+    fireEvent.click(screen.getByRole("button", { name: "이 명식으로 AI 풀이 받기" }));
+    expect(router.push).toHaveBeenCalledWith("/saju");
+    const saved = JSON.parse(window.sessionStorage.getItem(BIRTH_HANDOFF_KEY) ?? "{}");
+    expect(saved.values).toMatchObject({ birthDate: "1992-08-17", birthHour: "14", birthMinute: "30", provinceCode: "11" });
+    expect(window.localStorage.length).toBe(0);
+    window.sessionStorage.clear();
   });
 
   it("shows the coming-soon page when the public calculator is switched off", async () => {

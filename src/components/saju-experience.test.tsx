@@ -160,6 +160,43 @@ describe("SajuExperience", () => {
     expect(screen.getByText(/출생 시각을 모르면 나를 읽는 기준\(일간\)을 확정하지 못해/)).toBeInTheDocument();
   });
 
+  it("fills the birth step from a manseryeok hand-off and marks what it brought", async () => {
+    window.sessionStorage.setItem("myeongro.saju.birthHandoff", JSON.stringify({
+      savedAt: Date.now(),
+      values: {
+        birthDate: "1992-08-17", birthTimePrecision: "approximate", birthHour: "14", birthMinute: "",
+        provinceCode: "11", cityCode: "11110", luckDirectionBasis: "male", dayBoundary: "HOUR_23", equationOfTime: true,
+      },
+    }));
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlacesWithCities()))
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    expect(window.sessionStorage.getItem("myeongro.saju.birthHandoff")).toBeNull();
+    expect(screen.getByRole("status")).toHaveTextContent("만세력에서 입력한 출생정보를 채워 뒀어요");
+
+    await reachBirth();
+    expect(screen.getByLabelText(/양력 생년월일/)).toHaveValue("1992-08-17");
+    expect(screen.getByLabelText("태어난 시")).toHaveValue("14");
+    await waitFor(() => expect(screen.getByLabelText("출생 시·군·구 (선택)")).toHaveValue("11110"));
+    expect(screen.getAllByText("가져옴").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    fireEvent.click(await screen.findByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalled());
+    const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    expect(body.birthProfile).toMatchObject({ birthTimePrecision: "approximate", birthTime: "14:00", provinceCode: "11", cityCode: "11110", luckDirectionBasis: "male" });
+    expect(body.calculationOptions).toEqual({ dayBoundary: "HOUR_23" });
+  });
+
+  it("starts with an empty form and no notice when nothing was handed over", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+    await startWithAcceptedConsent();
+    expect(screen.queryByText(/만세력에서 입력한/)).not.toBeInTheDocument();
+  });
+
   it("creates an annual report without inventing a question and keeps the choice when editing", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))

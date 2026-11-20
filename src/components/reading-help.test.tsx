@@ -84,7 +84,7 @@ describe("public reading help", () => {
 
   it("connects the home entry to all three public pages and provides metadata", () => {
     render(<ReadingHelpEntry />);
-    expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(["/guide/tarot", "/guide/saju", "/faq", "/guide/tarot/example", "/guide/saju/annual-report"]);
+    expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(["/guide/tarot", "/guide/saju", "/manseryeok", "/faq", "/guide/tarot/example", "/guide/saju/annual-report"]);
     for (const metadata of [faqMetadata, tarotMetadata, sajuMetadata]) {
       expect(metadata.title).toMatch(/명로/);
       expect(metadata.description).toBeTruthy();

@@ -58,6 +58,7 @@ export default function ZodiacHubPage() {
         <div className={styles.links}>
           <Link href="/saju?report=annual">AI 사주 한 해 리포트</Link>
           <Link href="/guide/saju/annual-report">한 해 사주 리포트 읽는 법</Link>
+          <Link href="/manseryeok">무료 만세력으로 내 명식 보기</Link>
         </div>
       </section>
       <Link className={`primary-button ${styles.start}`} href="/saju">사주 리딩 시작하기</Link>

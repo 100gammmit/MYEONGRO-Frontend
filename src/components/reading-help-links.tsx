@@ -9,6 +9,7 @@ export function ReadingHelpEntry() {
       <nav className={styles.links} aria-label="리딩 이용 안내">
         <Link href="/guide/tarot">타로 사용 가이드</Link>
         <Link href="/guide/saju">사주 사용 가이드</Link>
+        <Link href="/manseryeok">무료 만세력</Link>
         <Link href="/faq">자주 묻는 질문</Link>
       </nav>
       <nav className={styles.links} aria-label="리딩 예시와 해설">

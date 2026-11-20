@@ -21,15 +21,15 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
       .toBeInTheDocument();
-    expect(screen.getByText("문서 버전 2026-11-07 · 시행일 2026-11-07")).toBeInTheDocument();
+    expect(screen.getByText("문서 버전 2026-11-20 · 시행일 2026-11-20")).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
     const table = screen.getByRole("table", { name: "명로 개인정보 처리 항목과 보유기간" });
     expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent))
       .toEqual(["처리 목적", "처리 항목", "처리 근거", "보유기간·삭제 기준"]);
-    expect(within(table).getAllByRole("rowheader")).toHaveLength(14);
-    const abuseLimitRow = within(table).getByRole("row", { name: /로그인 요청 남용 방지/ });
+    expect(within(table).getAllByRole("rowheader")).toHaveLength(16);
+    const abuseLimitRow = within(table).getByRole("row", { name: /로그인과 무료 만세력 요청 남용 방지/ });
     expect(abuseLimitRow).toHaveTextContent("IP 주소 자체는 저장하지 않음");
     expect(abuseLimitRow).toHaveTextContent("1분 후 자동 삭제");
     const socialLoginRow = within(table).getByRole("row", { name: /소셜 로그인과 계정 식별/ });
@@ -39,6 +39,10 @@ describe("PrivacyPage", () => {
     expect(sessionRow).toHaveTextContent("명로 사용자 식별자와 권한");
     expect(sessionRow).not.toHaveTextContent("이메일");
     expect(within(table).getByRole("row", { name: /사주 계산.*양력 생년월일.*처리 완료 시 폐기/ }))
+      .toBeInTheDocument();
+    expect(within(table).getByRole("row", { name: /무료 만세력 계산\(비회원 포함\).*출생 시·군·구.*계정과 연결하지 않으며/ }))
+      .toBeInTheDocument();
+    expect(within(table).getByRole("row", { name: /만세력 입력을 AI 사주로 이어가기.*현재 브라우저 탭에만 보관.*30분/ }))
       .toBeInTheDocument();
     expect(within(table).getByRole("row", { name: /AI 리딩 요청 처리.*명로 데이터베이스와 운영 로그에는 저장하지 않음/ }))
       .toBeInTheDocument();
@@ -139,7 +143,7 @@ describe("PrivacyPage", () => {
     expect(screen.getByText(/OpenAI 원문 갱신일 2026-07-09 · 명로 최종 확인일 2026-09-25/))
       .toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "개인정보 보호법 제15조 제1항 제4호" }))
-      .toHaveLength(10);
+      .toHaveLength(12);
     expect(screen.getByRole("link", { name: "개인정보 보호법 제28조의8 제1항 제1호" }))
       .toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 파기 절차와 방법" }))

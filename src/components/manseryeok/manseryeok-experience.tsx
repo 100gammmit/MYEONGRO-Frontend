@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -12,6 +13,7 @@ import {
   type SajuBirthFieldKey,
   type SajuBirthValues,
 } from "@/domain/saju/birth-input";
+import { saveBirthHandoff } from "@/domain/saju/birth-handoff";
 import type { SajuBirthPlacesResponse } from "@/domain/saju/contracts";
 import type { ManseryeokChart } from "@/domain/manseryeok/schema";
 import {
@@ -40,6 +42,7 @@ export interface ManseryeokExperienceProps {
  * it, and a reload starts over because nothing is stored. Only the step goes into the address.
  */
 export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }: ManseryeokExperienceProps) {
+  const router = useRouter();
   const [phase, setPhase] = useState<Phase>("input");
   const [birth, setBirth] = useState<SajuBirthValues>(EMPTY_BIRTH_VALUES);
   const [confirmed, setConfirmed] = useState(false);
@@ -220,9 +223,10 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
     else setPhase("input");
   }
 
-  // FM3 fills this with the hand-off to the AI saju form.
+  // The input rides to the AI saju form in this tab's sessionStorage, never in the address.
   function askAi() {
-    window.location.assign("/saju");
+    saveBirthHandoff(birth);
+    router.push("/saju");
   }
 
   function startOver() {

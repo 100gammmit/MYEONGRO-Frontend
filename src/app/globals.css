@@ -465,6 +465,10 @@ main:focus { outline: none; }
 .saju-choice:has(input:checked) { border-color: var(--accent-primary); background: var(--surface-tint-3); }
 .saju-error-summary { margin-bottom: 20px; padding: 15px; border: 1px solid var(--border-danger); border-radius: var(--radius-md); background: var(--surface-danger-subtle); color: var(--text-danger); outline: none; }
 .saju-error-summary p { margin: 6px 0 0; font-size: 13px; }
+/* Shown when the birth input was carried over from the free manseryeok page. */
+.saju-carried-notice { margin-bottom: 20px; padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--accent-primary) 45%, transparent); border-radius: var(--radius-md); background: color-mix(in srgb, var(--accent-primary) 10%, transparent); }
+.saju-carried-notice strong { display: block; color: var(--text-primary); font-size: 14px; }
+.saju-carried-notice p { margin: 4px 0 0; color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
 .saju-review-list { display: grid; gap: 0; margin: 0 0 28px; }
 .saju-review-list div { display: grid; grid-template-columns: minmax(90px, .35fr) 1fr; gap: 18px; padding: 15px 0; border-bottom: 1px solid var(--border-hairline); }
 .saju-review-list dt { color: var(--text-muted); }

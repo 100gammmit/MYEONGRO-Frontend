@@ -38,6 +38,7 @@ import {
   type SajuBirthFieldKey,
   type SajuBirthValues,
 } from "@/domain/saju/birth-input";
+import { takeBirthHandoff } from "@/domain/saju/birth-handoff";
 import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
 import {
   containsDirectIdentifier,
@@ -100,6 +101,16 @@ const LOADING_MESSAGES = [
 ] as const;
 
 const BIRTH_ID_PREFIX = "saju";
+const CARRIED_FIELDS: ReadonlySet<SajuBirthFieldKey> = new Set(["birthDate", "birthTimePrecision", "provinceCode", "luckDirectionBasis", "dayBoundary"]);
+
+function CarriedNotice({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="saju-carried-notice" role="status">
+      <strong>{title}</strong>
+      <p>{body}</p>
+    </div>
+  );
+}
 
 const QUESTION_FIELDS: Partial<Record<string, FieldKey>> = {
   targetYear: "targetYear",
@@ -152,6 +163,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [creditUntouched, setCreditUntouched] = useState(false);
+  const [carried, setCarried] = useState(false);
   const requestIdRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
   const editingFromReviewRef = useRef(false);
@@ -195,6 +207,15 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   useEffect(() => {
     formRef.current = form;
   }, [form]);
+
+  // A birth input carried from the manseryeok page is read once, on the first render (even behind
+  // the consent step), and removed from the tab at once.
+  useEffect(() => {
+    const birth = takeBirthHandoff();
+    if (!birth) return;
+    setForm((current) => ({ ...current, birth }));
+    setCarried(true);
+  }, []);
 
   const handleConsentComplete = useCallback(() => {
     setPhase("question");
@@ -425,6 +446,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
       >
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
+          {carried ? <CarriedNotice title="만세력에서 입력한 출생정보를 채워 뒀어요" body="질문을 고른 뒤 다음 단계에서 출생정보를 확인할 수 있어요." /> : null}
           <ReadingGuideLink kind="saju" />
           <fieldset className="field">
             <legend>리포트 종류</legend>
@@ -512,6 +534,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
       >
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
+          {carried ? <CarriedNotice title="만세력에서 입력한 정보를 채워 뒀어요" body="계산 방식 설정까지 그대로 가져와서, 만세력에서 본 명식으로 풀이해요. 바꾸고 싶은 칸이 있으면 고친 뒤 다음으로 넘어가세요." /> : null}
           <aside aria-label="사주 출생정보 처리 안내" className="notice">
             생년월일, 출생시각·정확도, 출생 시·도·시·군·구, 성별과 계산 방식 설정은 사주 계산 중에만 사용합니다. 원본 출생정보는 데이터베이스에 저장하거나 OpenAI에 전송하지 않으며, 요청 처리가 끝나면 별도로 보유하지 않습니다. 계산 기준과 계산된 최소 정보, 리딩 결과는 내 기록에 저장되며 언제든 삭제할 수 있습니다. 자세한 내용은 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다.
           </aside>
@@ -519,6 +542,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
           <SajuBirthFields
             catalog={catalog}
             catalogError={catalogError}
+            carriedFields={carried ? CARRIED_FIELDS : undefined}
             catalogStatus={catalogStatus}
             errors={fieldErrors}
             idPrefix={BIRTH_ID_PREFIX}
