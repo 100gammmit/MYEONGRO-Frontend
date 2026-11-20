@@ -17,6 +17,11 @@ const backend = createServer((request, response) => {
   response.setHeader("content-type", "application/json");
   const authenticated = request.headers.cookie === sessionCookie;
   const json = (value) => response.end(JSON.stringify(value));
+  // The public manseryeok list is fetched by the browser straight from the API domain, without cookies.
+  if (request.url === "/api/saju/calculations/birth-places") {
+    response.setHeader("access-control-allow-origin", "*");
+    return json({ version: "kr-admin-v1", provinces: [{ provinceCode: "11", provinceName: "서울특별시", cities: [{ cityCode: "11110", cityName: "종로구" }] }] });
+  }
   if (request.url === "/api/auth/me") return json(authenticated
     ? { authenticated: true, user: { id: "synthetic-public-content-user" } }
     : { authenticated: false });
@@ -174,13 +179,19 @@ try {
       await page.locator(`a[href="${article}"]`).click();
       await page.waitForURL(`${base}${article}`);
     }
-    for (const path of ["/zodiac", "/zodiac/rat"]) {
+    for (const path of ["/zodiac", "/zodiac/rat", "/manseryeok"]) {
       assert.equal((await page.goto(`${base}${path}`)).status(), 200);
       await page.locator("h1").waitFor();
       assert.equal(await page.locator("h1").count(), 1);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `Overflow: ${path}/${width}`);
       await page.screenshot({ path: `${output}/zodiac-${path.split("/").at(-1)}-${width}.png`, fullPage: true });
     }
+    await page.goto(`${base}/manseryeok`);
+    await page.getByLabel("출생 시·도").waitFor();
+    await page.getByRole("radio", { name: /정확히 알아요/ }).check({ force: true });
+    await page.getByLabel("출생 시·도").selectOption("11");
+    assert.equal(await page.getByLabel("출생 시·군·구 (선택)").isEnabled(), true);
+    assert.equal(await page.getByRole("button", { name: "만세력 계산하기" }).isDisabled(), true);
     await page.goto(`${base}/zodiac`);
     await page.getByLabel("태어난 해").selectOption("1996");
     await page.getByRole("button", { name: "띠 찾기" }).click();
@@ -201,7 +212,7 @@ try {
   }
   await noJs.close();
   assert.deepEqual(errors, []);
-  console.log(`PASS: ${urls.length} registered public canonicals, robots/sitemap without auth, guest redirect + authenticated records/results noindex, 375/1280px, article links/anchors, zodiac finder/nav and no-JS content`);
+  console.log(`PASS: ${urls.length} registered public canonicals, robots/sitemap without auth, guest redirect + authenticated records/results noindex, 375/1280px, article links/anchors, zodiac finder/nav, manseryeok input and no-JS content`);
 } finally {
   await browser?.close();
   if (app && app.exitCode === null) {

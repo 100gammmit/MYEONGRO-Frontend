@@ -1,0 +1,724 @@
+{
+  "schemaVersion": 1,
+  "calculationVersion": "manseryeok-ko-v1",
+  "engine": "lunar-java",
+  "engineVersion": "1.7.7",
+  "timeCorrectionVersion": "meeus-noaa-v1",
+  "timeZoneRulesVersion": "2025b",
+  "cityCatalogVersion": "kr-admin-v1",
+  "referenceYear": 2026,
+  "appliedOptions": {
+    "dayBoundary": "MIDNIGHT",
+    "equationOfTime": true,
+    "coordinateSource": "province",
+    "longitude": 126.98,
+    "birthTimeKnown": true
+  },
+  "chart": {
+    "pillars": {
+      "year": {
+        "ganZhi": {
+          "hanja": "壬申",
+          "korean": "임신"
+        },
+        "stem": {
+          "hanja": "壬",
+          "korean": "임"
+        },
+        "branch": {
+          "hanja": "申",
+          "korean": "신"
+        },
+        "stemTenGod": "편인"
+      },
+      "month": {
+        "ganZhi": {
+          "hanja": "戊申",
+          "korean": "무신"
+        },
+        "stem": {
+          "hanja": "戊",
+          "korean": "무"
+        },
+        "branch": {
+          "hanja": "申",
+          "korean": "신"
+        },
+        "stemTenGod": "편재"
+      },
+      "day": {
+        "ganZhi": {
+          "hanja": "甲子",
+          "korean": "갑자"
+        },
+        "stem": {
+          "hanja": "甲",
+          "korean": "갑"
+        },
+        "branch": {
+          "hanja": "子",
+          "korean": "자"
+        },
+        "stemTenGod": "비견"
+      },
+      "time": {
+        "ganZhi": {
+          "hanja": "辛未",
+          "korean": "신미"
+        },
+        "stem": {
+          "hanja": "辛",
+          "korean": "신"
+        },
+        "branch": {
+          "hanja": "未",
+          "korean": "미"
+        },
+        "stemTenGod": "정관"
+      }
+    },
+    "dayMaster": {
+      "hanja": "甲",
+      "korean": "갑"
+    }
+  },
+  "fiveElements": {
+    "wood": 1,
+    "fire": 0,
+    "earth": 2,
+    "metal": 3,
+    "water": 2
+  },
+  "relations": {
+    "status": "available",
+    "reasonCodes": [],
+    "values": [
+      {
+        "type": "branch_harm",
+        "members": [
+          {
+            "position": "day",
+            "symbol": {
+              "hanja": "子",
+              "korean": "자"
+            }
+          },
+          {
+            "position": "time",
+            "symbol": {
+              "hanja": "未",
+              "korean": "미"
+            }
+          }
+        ]
+      },
+      {
+        "type": "branch_half_combination",
+        "members": [
+          {
+            "position": "year",
+            "symbol": {
+              "hanja": "申",
+              "korean": "신"
+            }
+          },
+          {
+            "position": "day",
+            "symbol": {
+              "hanja": "子",
+              "korean": "자"
+            }
+          }
+        ]
+      },
+      {
+        "type": "branch_half_combination",
+        "members": [
+          {
+            "position": "month",
+            "symbol": {
+              "hanja": "申",
+              "korean": "신"
+            }
+          },
+          {
+            "position": "day",
+            "symbol": {
+              "hanja": "子",
+              "korean": "자"
+            }
+          }
+        ]
+      },
+      {
+        "type": "branch_wonjin",
+        "members": [
+          {
+            "position": "day",
+            "symbol": {
+              "hanja": "子",
+              "korean": "자"
+            }
+          },
+          {
+            "position": "time",
+            "symbol": {
+              "hanja": "未",
+              "korean": "미"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "hiddenStems": {
+    "year": [
+      {
+        "stem": {
+          "hanja": "庚",
+          "korean": "경"
+        },
+        "tenGod": "편관"
+      },
+      {
+        "stem": {
+          "hanja": "壬",
+          "korean": "임"
+        },
+        "tenGod": "편인"
+      },
+      {
+        "stem": {
+          "hanja": "戊",
+          "korean": "무"
+        },
+        "tenGod": "편재"
+      }
+    ],
+    "month": [
+      {
+        "stem": {
+          "hanja": "庚",
+          "korean": "경"
+        },
+        "tenGod": "편관"
+      },
+      {
+        "stem": {
+          "hanja": "壬",
+          "korean": "임"
+        },
+        "tenGod": "편인"
+      },
+      {
+        "stem": {
+          "hanja": "戊",
+          "korean": "무"
+        },
+        "tenGod": "편재"
+      }
+    ],
+    "day": [
+      {
+        "stem": {
+          "hanja": "癸",
+          "korean": "계"
+        },
+        "tenGod": "정인"
+      }
+    ],
+    "time": [
+      {
+        "stem": {
+          "hanja": "己",
+          "korean": "기"
+        },
+        "tenGod": "정재"
+      },
+      {
+        "stem": {
+          "hanja": "丁",
+          "korean": "정"
+        },
+        "tenGod": "상관"
+      },
+      {
+        "stem": {
+          "hanja": "乙",
+          "korean": "을"
+        },
+        "tenGod": "겁재"
+      }
+    ]
+  },
+  "twelveStages": {
+    "year": {
+      "hanja": "绝",
+      "korean": "절"
+    },
+    "month": {
+      "hanja": "绝",
+      "korean": "절"
+    },
+    "day": {
+      "hanja": "沐浴",
+      "korean": "목욕"
+    },
+    "time": {
+      "hanja": "墓",
+      "korean": "묘"
+    }
+  },
+  "voids": {
+    "day": {
+      "hanja": "戌亥",
+      "korean": "술해"
+    },
+    "year": {
+      "hanja": "戌亥",
+      "korean": "술해"
+    }
+  },
+  "luckCycle": {
+    "precise": {
+      "direction": "forward",
+      "startDate": "1999-10-12",
+      "startAgeYears": 7,
+      "startAgeMonths": 2,
+      "periods": [
+        {
+          "startYear": 1999,
+          "endYear": 2008,
+          "startAge": 7,
+          "endAge": 16,
+          "ganZhi": "기유"
+        },
+        {
+          "startYear": 2009,
+          "endYear": 2018,
+          "startAge": 17,
+          "endAge": 26,
+          "ganZhi": "경술"
+        },
+        {
+          "startYear": 2019,
+          "endYear": 2028,
+          "startAge": 27,
+          "endAge": 36,
+          "ganZhi": "신해"
+        },
+        {
+          "startYear": 2029,
+          "endYear": 2038,
+          "startAge": 37,
+          "endAge": 46,
+          "ganZhi": "임자"
+        },
+        {
+          "startYear": 2039,
+          "endYear": 2048,
+          "startAge": 47,
+          "endAge": 56,
+          "ganZhi": "계축"
+        },
+        {
+          "startYear": 2049,
+          "endYear": 2058,
+          "startAge": 57,
+          "endAge": 66,
+          "ganZhi": "갑인"
+        },
+        {
+          "startYear": 2059,
+          "endYear": 2068,
+          "startAge": 67,
+          "endAge": 76,
+          "ganZhi": "을묘"
+        },
+        {
+          "startYear": 2069,
+          "endYear": 2078,
+          "startAge": 77,
+          "endAge": 86,
+          "ganZhi": "병진"
+        }
+      ]
+    },
+    "integerStartAge": 7,
+    "integerMethod": "nearest-year-three-days-v1"
+  },
+  "annualFlows": [
+    {
+      "year": 2026,
+      "ganZhi": {
+        "hanja": "丙午",
+        "korean": "병오"
+      },
+      "stemTenGod": "식신"
+    },
+    {
+      "year": 2027,
+      "ganZhi": {
+        "hanja": "丁未",
+        "korean": "정미"
+      },
+      "stemTenGod": "상관"
+    },
+    {
+      "year": 2028,
+      "ganZhi": {
+        "hanja": "戊申",
+        "korean": "무신"
+      },
+      "stemTenGod": "편재"
+    },
+    {
+      "year": 2029,
+      "ganZhi": {
+        "hanja": "己酉",
+        "korean": "기유"
+      },
+      "stemTenGod": "정재"
+    },
+    {
+      "year": 2030,
+      "ganZhi": {
+        "hanja": "庚戌",
+        "korean": "경술"
+      },
+      "stemTenGod": "편관"
+    },
+    {
+      "year": 2031,
+      "ganZhi": {
+        "hanja": "辛亥",
+        "korean": "신해"
+      },
+      "stemTenGod": "정관"
+    },
+    {
+      "year": 2032,
+      "ganZhi": {
+        "hanja": "壬子",
+        "korean": "임자"
+      },
+      "stemTenGod": "편인"
+    },
+    {
+      "year": 2033,
+      "ganZhi": {
+        "hanja": "癸丑",
+        "korean": "계축"
+      },
+      "stemTenGod": "정인"
+    },
+    {
+      "year": 2034,
+      "ganZhi": {
+        "hanja": "甲寅",
+        "korean": "갑인"
+      },
+      "stemTenGod": "비견"
+    },
+    {
+      "year": 2035,
+      "ganZhi": {
+        "hanja": "乙卯",
+        "korean": "을묘"
+      },
+      "stemTenGod": "겁재"
+    }
+  ],
+  "monthlyCalendar": {
+    "calculationVersion": "saju-monthly-ko-v1",
+    "timeZone": "Asia/Seoul",
+    "targetYear": 2026,
+    "months": [
+      {
+        "month": 1,
+        "periods": [
+          {
+            "startInclusive": "2026-01-01T00:00:00+09:00",
+            "endExclusive": "2026-01-05T17:23:00+09:00",
+            "yearGanZhi": "을사",
+            "monthGanZhi": "무자",
+            "stemTenGod": "편재"
+          },
+          {
+            "startInclusive": "2026-01-05T17:23:00+09:00",
+            "endExclusive": "2026-02-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "기축",
+            "stemTenGod": "정재"
+          }
+        ]
+      },
+      {
+        "month": 2,
+        "periods": [
+          {
+            "startInclusive": "2026-02-01T00:00:00+09:00",
+            "endExclusive": "2026-02-04T05:02:00+09:00",
+            "yearGanZhi": "을사",
+            "monthGanZhi": "기축",
+            "stemTenGod": "정재"
+          },
+          {
+            "startInclusive": "2026-02-04T05:02:00+09:00",
+            "endExclusive": "2026-03-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "경인",
+            "stemTenGod": "편관"
+          }
+        ]
+      },
+      {
+        "month": 3,
+        "periods": [
+          {
+            "startInclusive": "2026-03-01T00:00:00+09:00",
+            "endExclusive": "2026-03-05T22:59:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "경인",
+            "stemTenGod": "편관"
+          },
+          {
+            "startInclusive": "2026-03-05T22:59:00+09:00",
+            "endExclusive": "2026-04-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "신묘",
+            "stemTenGod": "정관"
+          }
+        ]
+      },
+      {
+        "month": 4,
+        "periods": [
+          {
+            "startInclusive": "2026-04-01T00:00:00+09:00",
+            "endExclusive": "2026-04-05T03:40:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "신묘",
+            "stemTenGod": "정관"
+          },
+          {
+            "startInclusive": "2026-04-05T03:40:00+09:00",
+            "endExclusive": "2026-05-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "임진",
+            "stemTenGod": "편인"
+          }
+        ]
+      },
+      {
+        "month": 5,
+        "periods": [
+          {
+            "startInclusive": "2026-05-01T00:00:00+09:00",
+            "endExclusive": "2026-05-05T20:49:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "임진",
+            "stemTenGod": "편인"
+          },
+          {
+            "startInclusive": "2026-05-05T20:49:00+09:00",
+            "endExclusive": "2026-06-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "계사",
+            "stemTenGod": "정인"
+          }
+        ]
+      },
+      {
+        "month": 6,
+        "periods": [
+          {
+            "startInclusive": "2026-06-01T00:00:00+09:00",
+            "endExclusive": "2026-06-06T00:48:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "계사",
+            "stemTenGod": "정인"
+          },
+          {
+            "startInclusive": "2026-06-06T00:48:00+09:00",
+            "endExclusive": "2026-07-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "갑오",
+            "stemTenGod": "비견"
+          }
+        ]
+      },
+      {
+        "month": 7,
+        "periods": [
+          {
+            "startInclusive": "2026-07-01T00:00:00+09:00",
+            "endExclusive": "2026-07-07T10:57:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "갑오",
+            "stemTenGod": "비견"
+          },
+          {
+            "startInclusive": "2026-07-07T10:57:00+09:00",
+            "endExclusive": "2026-08-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "을미",
+            "stemTenGod": "겁재"
+          }
+        ]
+      },
+      {
+        "month": 8,
+        "periods": [
+          {
+            "startInclusive": "2026-08-01T00:00:00+09:00",
+            "endExclusive": "2026-08-07T20:43:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "을미",
+            "stemTenGod": "겁재"
+          },
+          {
+            "startInclusive": "2026-08-07T20:43:00+09:00",
+            "endExclusive": "2026-09-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "병신",
+            "stemTenGod": "식신"
+          }
+        ]
+      },
+      {
+        "month": 9,
+        "periods": [
+          {
+            "startInclusive": "2026-09-01T00:00:00+09:00",
+            "endExclusive": "2026-09-07T23:41:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "병신",
+            "stemTenGod": "식신"
+          },
+          {
+            "startInclusive": "2026-09-07T23:41:00+09:00",
+            "endExclusive": "2026-10-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "정유",
+            "stemTenGod": "상관"
+          }
+        ]
+      },
+      {
+        "month": 10,
+        "periods": [
+          {
+            "startInclusive": "2026-10-01T00:00:00+09:00",
+            "endExclusive": "2026-10-08T15:29:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "정유",
+            "stemTenGod": "상관"
+          },
+          {
+            "startInclusive": "2026-10-08T15:29:00+09:00",
+            "endExclusive": "2026-11-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "무술",
+            "stemTenGod": "편재"
+          }
+        ]
+      },
+      {
+        "month": 11,
+        "periods": [
+          {
+            "startInclusive": "2026-11-01T00:00:00+09:00",
+            "endExclusive": "2026-11-07T18:52:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "무술",
+            "stemTenGod": "편재"
+          },
+          {
+            "startInclusive": "2026-11-07T18:52:00+09:00",
+            "endExclusive": "2026-12-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "기해",
+            "stemTenGod": "정재"
+          }
+        ]
+      },
+      {
+        "month": 12,
+        "periods": [
+          {
+            "startInclusive": "2026-12-01T00:00:00+09:00",
+            "endExclusive": "2026-12-07T11:52:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "기해",
+            "stemTenGod": "정재"
+          },
+          {
+            "startInclusive": "2026-12-07T11:52:00+09:00",
+            "endExclusive": "2027-01-01T00:00:00+09:00",
+            "yearGanZhi": "병오",
+            "monthGanZhi": "경자",
+            "stemTenGod": "편관"
+          }
+        ]
+      }
+    ]
+  },
+  "timeCorrection": {
+    "civilTime": "1992-08-17T14:30",
+    "trueSolarTime": "1992-08-17T13:54",
+    "engineCivilTime": "1992-08-17T13:54",
+    "zoneOffset": "+09:00",
+    "longitudeCorrectionMinutes": -32.08,
+    "equationOfTimeMinutes": -4.1
+  },
+  "limitations": [],
+  "uncertainty": {
+    "precision": "exact",
+    "candidateCount": 1,
+    "rangeStart": "1992-08-17T14:30",
+    "rangeEnd": "1992-08-17T14:30",
+    "varyingFields": [],
+    "candidateZoneOffsets": [
+      "+09:00"
+    ]
+  },
+  "interpretationCapabilities": {
+    "natal_personal": {
+      "status": "available",
+      "fields": [
+        "chart.dayMaster"
+      ],
+      "reasonCodes": []
+    },
+    "time_pillar": {
+      "status": "available",
+      "fields": [
+        "chart.pillars.time"
+      ],
+      "reasonCodes": []
+    },
+    "major_luck": {
+      "status": "available",
+      "fields": [
+        "luckCycle"
+      ],
+      "reasonCodes": []
+    },
+    "annual_personal": {
+      "status": "available",
+      "fields": [
+        "annualFlows"
+      ],
+      "reasonCodes": []
+    },
+    "monthly_personal": {
+      "status": "available",
+      "fields": [
+        "monthlyCalendar"
+      ],
+      "reasonCodes": []
+    }
+  },
+  "calculationFingerprint": "synthetic-fixture"
+}

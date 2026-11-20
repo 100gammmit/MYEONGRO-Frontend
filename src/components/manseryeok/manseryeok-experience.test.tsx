@@ -1,0 +1,146 @@
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import fixture from "@/test-fixtures/manseryeok-chart.json";
+
+import { ManseryeokExperience } from "./manseryeok-experience";
+
+const CALCULATE = "https://api.example.test/api/saju/calculations";
+const PLACES = "https://api.example.test/api/saju/calculations/birth-places";
+const places = {
+  version: "kr-admin-v1",
+  provinces: [{ provinceCode: "11", provinceName: "서울특별시", cities: [{ cityCode: "11110", cityName: "종로구" }] }],
+};
+
+function json(body: unknown, status = 200) {
+  return new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+}
+
+function renderPage() {
+  return render(<ManseryeokExperience birthPlacesEndpoint={PLACES} calculateEndpoint={CALCULATE} />);
+}
+
+async function fillExact() {
+  fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
+  fireEvent.click(screen.getByRole("radio", { name: /정확히 알아요/ }));
+  fireEvent.change(screen.getByLabelText("태어난 시"), { target: { value: "14" } });
+  fireEvent.change(screen.getByLabelText("태어난 분"), { target: { value: "30" } });
+  await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
+  fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "11" } });
+  fireEvent.click(screen.getByRole("radio", { name: "남성" }));
+}
+
+beforeEach(() => {
+  vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  window.history.replaceState(null, "", "/");
+});
+
+describe("ManseryeokExperience", () => {
+  it("opens the calculate button only after the age and consent check", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(json(places));
+    renderPage();
+    await fillExact();
+    const button = screen.getByRole("button", { name: "만세력 계산하기" });
+    expect(button).toBeDisabled();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    expect(button).toBeEnabled();
+  });
+
+  it("calculates this year without a reference year and shows the result without birth data in the address", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json(fixture));
+    renderPage();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+
+    expect(await screen.findByRole("heading", { level: 1, name: "만세력 결과" })).toBeInTheDocument();
+    const [url, init] = fetchMock.mock.calls[1] as [string, RequestInit];
+    expect(url).toBe(CALCULATE);
+    expect(init.credentials).toBe("omit");
+    const body = JSON.parse(String(init.body));
+    expect(body).not.toHaveProperty("referenceYear");
+    expect(body.birthProfile).toMatchObject({ birthTime: "14:30", provinceCode: "11", luckDirectionBasis: "male" });
+    expect(window.history.state).toMatchObject({ manseryeokStep: "result" });
+    expect(window.location.search).toBe("?step=result");
+    expect(window.location.href).not.toMatch(/1992|14:30/);
+    expect(within(screen.getByRole("region", { name: "입력한 정보와 보정한 시각" })).getByText("13:54")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "결과 목차" })).toBeInTheDocument();
+  });
+
+  it("asks for next year's monthly flow by number and marks a relation in the chart", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json(fixture))
+      .mockResolvedValueOnce(json({ ...fixture, referenceYear: 2027, monthlyCalendar: { ...fixture.monthlyCalendar, targetYear: 2027, months: fixture.monthlyCalendar.months.map((month) => ({ ...month, periods: month.periods.map((period) => ({ ...period, startInclusive: period.startInclusive.replace(/^2026|^2027/, (y) => String(Number(y) + 1)), endExclusive: period.endExclusive.replace(/^2026|^2027/, (y) => String(Number(y) + 1)) })) })) } }));
+    renderPage();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+    await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
+
+    fireEvent.click(screen.getByRole("button", { name: /원진/ }));
+    expect(screen.getByRole("status")).toHaveTextContent("원진");
+
+    fireEvent.click(screen.getByRole("button", { name: /2027년 · 내년/ }));
+    expect(await screen.findByRole("list", { name: "2027년 월운" })).toBeInTheDocument();
+    expect(JSON.parse(String((fetchMock.mock.calls[2] as [string, RequestInit])[1].body)).referenceYear).toBe(2027);
+  });
+
+  it("goes back to the filled form and starts over with only the calculation settings kept", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json(fixture));
+    renderPage();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+    await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
+
+    fireEvent.click(screen.getByRole("button", { name: "다른 생년월일 계산하기" }));
+    fireEvent.popState(window, { state: null });
+    expect(await screen.findByRole("heading", { level: 1, name: "무료 만세력" })).toBeInTheDocument();
+    expect(screen.getByLabelText("양력 생년월일")).toHaveValue("");
+    expect(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ })).not.toBeChecked();
+  });
+
+  it("shows the coming-soon page when the public calculator is switched off", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(null, { status: 404 }));
+    renderPage();
+    expect(await screen.findByRole("heading", { level: 1, name: "무료 만세력을 준비하고 있어요" })).toBeInTheDocument();
+  });
+
+  it("locks the button for a minute after a rate limit and keeps the input", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json({ code: "SAJU_CALCULATION_RATE_LIMITED" }, 429));
+    renderPage();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent("1분 뒤에 다시 시도해 주세요.");
+    expect(screen.getByRole("button", { name: "만세력 계산하기" })).toBeDisabled();
+    expect(screen.getByLabelText("양력 생년월일")).toHaveValue("1992-08-17");
+  });
+
+  it("returns a field error to its input", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(json(places))
+      .mockResolvedValueOnce(json({ code: "INVALID_BIRTH_DATE", field: "birthProfile.birthDate", error: "1900년부터 2099년 사이의 날짜만 계산할 수 있어요." }, 400));
+    renderPage();
+    await fillExact();
+    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+
+    const summary = await screen.findByRole("alert");
+    expect(within(summary).getByText("1900년부터 2099년 사이의 날짜만 계산할 수 있어요.")).toBeInTheDocument();
+    expect(screen.getByLabelText("양력 생년월일")).toHaveAttribute("aria-invalid", "true");
+  });
+});

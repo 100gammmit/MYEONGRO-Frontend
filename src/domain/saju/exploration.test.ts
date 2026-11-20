@@ -55,7 +55,7 @@ describe("saju exploration dictionary", () => {
       ["branch", branches, "자축인묘진사오미신유술해", ["water", "earth", "wood", "wood", "earth", "fire", "fire", "earth", "metal", "metal", "earth", "water"]],
     ] as const) {
       Array.from(hanja).forEach((symbol, index) => {
-        expect(symbolInfo(symbol, lane)).toEqual({ korean: korean[index], element: elements[index] });
+        expect(symbolInfo(symbol, lane)).toEqual({ korean: korean[index], hanja: symbol, element: elements[index], yang: index % 2 === 0 });
         expect(symbolInfo(korean[index], lane)).toEqual(symbolInfo(symbol, lane));
       });
     }

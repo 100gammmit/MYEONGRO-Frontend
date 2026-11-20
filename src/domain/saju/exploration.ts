@@ -23,9 +23,10 @@ export type Character = { id: string; pillar: PillarKey; lane: "stem" | "branch"
 const STEMS = ["갑甲wood", "을乙wood", "병丙fire", "정丁fire", "무戊earth", "기己earth", "경庚metal", "신辛metal", "임壬water", "계癸water"];
 const BRANCHES = ["자子water", "축丑earth", "인寅wood", "묘卯wood", "진辰earth", "사巳fire", "오午fire", "미未earth", "신申metal", "유酉metal", "술戌earth", "해亥water"];
 function dictionary(entries: string[]) {
-  return Object.fromEntries(entries.flatMap((entry) => {
+  return Object.fromEntries(entries.flatMap((entry, index) => {
     const [korean, hanja] = Array.from(entry);
-    const value = { korean, element: entry.slice(2) as Element };
+    // Yang on the even positions of each cycle (甲丙戊庚壬, 子寅辰午申戌).
+    const value = { korean, hanja, element: entry.slice(2) as Element, yang: index % 2 === 0 };
     return [[korean, value], [hanja, value]];
   }));
 }
