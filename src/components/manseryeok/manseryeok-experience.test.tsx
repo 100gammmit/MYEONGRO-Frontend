@@ -76,6 +76,10 @@ describe("ManseryeokExperience", () => {
     expect(window.location.href).not.toMatch(/1992|14:30/);
     expect(within(screen.getByRole("region", { name: "입력한 정보와 보정한 시각" })).getByText("13:54")).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "결과 목차" })).toBeInTheDocument();
+    // The luck strip reads the display periods: hanja glyphs plus the stem ten god.
+    const luck = within(screen.getByRole("list", { name: "대운 흐름" })).getAllByRole("listitem");
+    expect(luck).toHaveLength(fixture.luckCycle.periods.length);
+    expect(luck[2]).toHaveTextContent(/27세.*2019.*정관.*辛.*亥/);
   });
 
   it("asks for next year's monthly flow by number and marks a relation in the chart", async () => {

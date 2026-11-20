@@ -345,7 +345,97 @@
       ]
     },
     "integerStartAge": 7,
-    "integerMethod": "nearest-year-three-days-v1"
+    "integerMethod": "nearest-year-three-days-v1",
+    "periods": [
+      {
+        "startYear": 1999,
+        "endYear": 2008,
+        "startAge": 7,
+        "endAge": 16,
+        "ganZhi": {
+          "hanja": "己酉",
+          "korean": "기유"
+        },
+        "stemTenGod": "정재"
+      },
+      {
+        "startYear": 2009,
+        "endYear": 2018,
+        "startAge": 17,
+        "endAge": 26,
+        "ganZhi": {
+          "hanja": "庚戌",
+          "korean": "경술"
+        },
+        "stemTenGod": "편관"
+      },
+      {
+        "startYear": 2019,
+        "endYear": 2028,
+        "startAge": 27,
+        "endAge": 36,
+        "ganZhi": {
+          "hanja": "辛亥",
+          "korean": "신해"
+        },
+        "stemTenGod": "정관"
+      },
+      {
+        "startYear": 2029,
+        "endYear": 2038,
+        "startAge": 37,
+        "endAge": 46,
+        "ganZhi": {
+          "hanja": "壬子",
+          "korean": "임자"
+        },
+        "stemTenGod": "편인"
+      },
+      {
+        "startYear": 2039,
+        "endYear": 2048,
+        "startAge": 47,
+        "endAge": 56,
+        "ganZhi": {
+          "hanja": "癸丑",
+          "korean": "계축"
+        },
+        "stemTenGod": "정인"
+      },
+      {
+        "startYear": 2049,
+        "endYear": 2058,
+        "startAge": 57,
+        "endAge": 66,
+        "ganZhi": {
+          "hanja": "甲寅",
+          "korean": "갑인"
+        },
+        "stemTenGod": "비견"
+      },
+      {
+        "startYear": 2059,
+        "endYear": 2068,
+        "startAge": 67,
+        "endAge": 76,
+        "ganZhi": {
+          "hanja": "乙卯",
+          "korean": "을묘"
+        },
+        "stemTenGod": "겁재"
+      },
+      {
+        "startYear": 2069,
+        "endYear": 2078,
+        "startAge": 77,
+        "endAge": 86,
+        "ganZhi": {
+          "hanja": "丙辰",
+          "korean": "병진"
+        },
+        "stemTenGod": "식신"
+      }
+    ]
   },
   "annualFlows": [
     {

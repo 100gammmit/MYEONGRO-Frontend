@@ -110,7 +110,7 @@ export function signedMinutes(value: number): string {
 
 /** The period of the luck cycle that contains `year`, or -1. */
 export function currentLuckIndex(chart: ManseryeokChart, year: number): number {
-  return chart.luckCycle?.precise.periods.findIndex((period) => period.startYear <= year && year <= period.endYear) ?? -1;
+  return chart.luckCycle?.periods.findIndex((period) => period.startYear <= year && year <= period.endYear) ?? -1;
 }
 
 /** "2026-01-05T17:23:00+09:00" → { day: 5, clock: "17:23" } in Korea time, as the calendar is. */

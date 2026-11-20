@@ -83,6 +83,15 @@ export const manseryeokChartSchema = z.object({
     }).strict(),
     integerStartAge: z.number().int().nonnegative(),
     integerMethod: z.string().min(1),
+    // The display strip; precise only feeds the start-point line.
+    periods: z.array(z.object({
+      startYear: z.number().int(),
+      endYear: z.number().int(),
+      startAge: z.number().int(),
+      endAge: z.number().int(),
+      ganZhi: symbolSchema,
+      stemTenGod: z.string().min(1).nullable(),
+    }).strict()).min(1),
   }).strict().nullable(),
   annualFlows: z.array(z.object({
     year: z.number().int(),

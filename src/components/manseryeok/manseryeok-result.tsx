@@ -338,16 +338,14 @@ function LuckSection({ chart, birth, today, onEdit }: { chart: ManseryeokChart; 
         <div><dt>방향</dt><dd>{luck.precise.direction === "forward" ? "순행" : "역행"}</dd></div>
       </dl>
       <ol className={styles.strip} aria-label="대운 흐름">
-        {luck.precise.periods.map((period, index) => {
-          const glyphs = ganZhiGlyphs(period.ganZhi);
-          return (
-            <li className={index === now ? styles.now : undefined} key={period.startYear}>
-              <span className={styles.age}>{period.startAge}세{index === now ? " · 지금" : ""}</span>
-              <span className={styles.year}>{period.startYear}</span>
-              {glyphs ? <><GlyphChar glyph={glyphs[0]} /><GlyphChar glyph={glyphs[1]} /></> : <span>{period.ganZhi}</span>}
-            </li>
-          );
-        })}
+        {luck.periods.map((period, index) => (
+          <li className={index === now ? styles.now : undefined} key={period.startYear}>
+            <span className={styles.age}>{period.startAge}세{index === now ? " · 지금" : ""}</span>
+            <span className={styles.year}>{period.startYear}</span>
+            {period.stemTenGod ? <span className={styles.tenGod}>{period.stemTenGod}</span> : null}
+            <GlyphChar glyph={glyph(period.ganZhi.hanja[0] ?? "", "stem")} /><GlyphChar glyph={glyph(period.ganZhi.hanja[1] ?? "", "branch")} />
+          </li>
+        ))}
       </ol>
       <p className={styles.muted}>대운수는 관례대로 반올림한 값이고, 정밀 시작 시점은 태어난 시각부터 절입까지의 시간으로 계산해요.</p>
     </>
