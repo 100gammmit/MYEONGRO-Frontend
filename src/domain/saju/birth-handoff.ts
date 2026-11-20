@@ -79,10 +79,3 @@ export function peekBirthHandoff(now = Date.now()): SajuBirthValues | null {
   if (!values) clearBirthHandoff();
   return values;
 }
-
-/** Peeks and removes in one go. */
-export function takeBirthHandoff(now = Date.now()): SajuBirthValues | null {
-  const values = peekBirthHandoff(now);
-  clearBirthHandoff();
-  return values;
-}
