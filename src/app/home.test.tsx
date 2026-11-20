@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import HomePage from "./page";
 
 describe("HomePage", () => {
-  it("opens on one question split into a tarot path and a saju path with equal gold starts", () => {
+  it("opens on one question split into a tarot path and a saju path, each listing its own features", () => {
     render(<HomePage />);
 
     expect(
@@ -19,17 +19,18 @@ describe("HomePage", () => {
     if (!(tarot instanceof HTMLElement) || !(saju instanceof HTMLElement)) {
       throw new Error("hero paths missing");
     }
-    expect(within(tarot).getByText("로그인 없이 보는 무료 오늘의 운세")).toBeInTheDocument();
-    expect(within(tarot).getByText("질문과 함께 진행하는 AI 3장·5장 리딩")).toBeInTheDocument();
-    expect(within(saju).getByText("현재 양력 생일만 지원")).toBeInTheDocument();
-    expect(within(saju).getByText("출생 시각의 정확도에 맞춘 해석")).toBeInTheDocument();
-
-    const tarotStart = within(tarot).getByRole("link", { name: "타로로 시작" });
-    const sajuStart = within(saju).getByRole("link", { name: "사주로 시작" });
-    expect(tarotStart).toHaveAttribute("href", "/tarot");
-    expect(sajuStart).toHaveAttribute("href", "/saju");
-    expect(tarotStart).toHaveClass("primary-button");
-    expect(sajuStart).toHaveClass("primary-button");
+    const links = (path: HTMLElement) => within(path).getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")]);
+    expect(links(tarot)).toEqual([
+      ["오늘의 운세카드 한 장으로 보는 오늘→", "/tarot/daily"],
+      ["AI 타로 리딩질문과 함께 3장·5장→", "/tarot"],
+    ]);
+    expect(links(saju)).toEqual([
+      ["만세력 계산생년월일로 내 명식 보기→", "/manseryeok"],
+      ["2027 띠별 신년운세태어난 해로 보는 내 띠→", "/zodiac"],
+      ["AI 사주 리딩종합 사주 · 한 해 리포트→", "/saju"],
+    ]);
+    expect(within(tarot).getByText("AI 리딩은 로그인이 필요해요")).toBeInTheDocument();
+    expect(within(saju).getByText("AI 리딩은 로그인이 필요해요")).toBeInTheDocument();
   });
 
   it("keeps the card fan and the sample chart away from assistive technology", () => {
@@ -38,17 +39,6 @@ describe("HomePage", () => {
     expect(container.querySelector(".hero-fan")).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelector(".home-saju-chart")).toHaveAttribute("aria-hidden", "true");
     expect(container.querySelector(".home-saju-mini")?.closest("[aria-hidden='true']")).not.toBeNull();
-  });
-
-  it("opens the free daily fortune and the zodiac pages right under the hero", () => {
-    render(<HomePage />);
-
-    const band = screen.getByRole("region", { name: "무료로 바로 보는 운세" });
-    expect(within(band).getByText("로그인 없이, 카드 한 장으로 오늘을 살펴봐요.")).toBeInTheDocument();
-    expect(within(band).getByRole("link", { name: "오늘의 운세 보기" }))
-      .toHaveAttribute("href", "/tarot/daily");
-    expect(within(band).getByText("열두 띠가 올해의 양과 어떤 사이인지 풀어 봤어요.")).toBeInTheDocument();
-    expect(within(band).getByRole("link", { name: "띠별 운세 보기" })).toHaveAttribute("href", "/zodiac");
   });
 
   it("quotes a reading line next to the card it came from", () => {
@@ -67,8 +57,6 @@ describe("HomePage", () => {
       .toEqual([
         "AI 타로",
         "AI 사주",
-        "오늘의 운세",
-        "2027 띠별 신년운세",
         "리딩 예시",
         "세 단계로 만나는 나의 리딩",
         "그냥 AI에게 물어보는 것과 무엇이 다를까요?",

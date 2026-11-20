@@ -4,9 +4,7 @@ import Link from "next/link";
 import { HomeSajuChart } from "@/components/home-saju-chart";
 import { ReadingHelpEntry } from "@/components/reading-help-links";
 import { TarotCardCaption, tarotCardImageSrc } from "@/components/tarot-card-face";
-import { TarotStone } from "@/components/tarot-stone";
-import { ZodiacMiniWheel } from "@/components/zodiac/zodiac-mini-wheel";
-import { ZODIAC_YEAR_ANIMAL_NAME, ZODIAC_YEAR_CONTENT, withAnd } from "@/domain/zodiac-fortune";
+import { ZODIAC_YEAR_CONTENT } from "@/domain/zodiac-fortune";
 
 export const metadata = publicPageMetadata(
   "/",
@@ -40,6 +38,44 @@ const features = [
     copy: "해석을 읽고, 완료한 리딩은 기록에서 다시 확인합니다.",
   },
 ] as const;
+
+interface HeroFeature {
+  readonly href: string;
+  readonly name: string;
+  readonly description: string;
+}
+
+const TAROT_FEATURES: readonly HeroFeature[] = [
+  { href: "/tarot/daily", name: "오늘의 운세", description: "카드 한 장으로 보는 오늘" },
+  { href: "/tarot", name: "AI 타로 리딩", description: "질문과 함께 3장·5장" },
+];
+
+const SAJU_FEATURES: readonly HeroFeature[] = [
+  { href: "/manseryeok", name: "만세력 계산", description: "생년월일로 내 명식 보기" },
+  { href: "/zodiac", name: `${ZODIAC_YEAR_CONTENT.year} 띠별 신년운세`, description: "태어난 해로 보는 내 띠" },
+  { href: "/saju", name: "AI 사주 리딩", description: "종합 사주 · 한 해 리포트" },
+];
+
+// Each path lists its own features; every row is the link, so there is no separate start button.
+function HeroFeatures({ features }: { features: readonly HeroFeature[] }) {
+  return (
+    <>
+      {/* list-style: none drops list semantics in Safari, so the role is stated. */}
+      <ul className="hero-features" role="list">
+        {features.map((feature) => (
+          <li key={feature.href}>
+            <Link href={feature.href}>
+              <strong>{feature.name}</strong>
+              <span className="hero-feature-description">{feature.description}</span>
+              <span aria-hidden="true" className="hero-feature-arrow">→</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <p className="hero-note">AI 리딩은 로그인이 필요해요</p>
+    </>
+  );
+}
 
 function FeatureVisual({ number }: { number: (typeof features)[number]["number"] }) {
   if (number === "01") {
@@ -89,16 +125,12 @@ export default function HomePage() {
             AI 타로와 사주로 마음에 머무는 질문을 풀어요. 오늘의 운세는 로그인 없이 무료예요.
           </p>
         </div>
-        {/* Both starts share one gold fill; filling only one would crown it the main path. */}
+        {/* Both paths carry the same feature list, so neither reads as the main one. */}
         <div className="hero-split">
           <div className="hero-path tarot-path">
             <div className="hero-path-copy">
               <h2>AI 타로</h2>
               <p>카드의 자리로 가까운 고민의 지금과 다음 전개를 읽어요.</p>
-              <ul>
-                <li>로그인 없이 보는 무료 오늘의 운세</li>
-                <li>질문과 함께 진행하는 AI 3장·5장 리딩</li>
-              </ul>
             </div>
             <span aria-hidden="true" className="hero-fan">
               <span className="hero-fan-back tarot-back-art" />
@@ -112,57 +144,16 @@ export default function HomePage() {
                 width={480}
               />
             </span>
-            <Link href="/tarot" className="primary-button">
-              타로로 시작
-            </Link>
+            <HeroFeatures features={TAROT_FEATURES} />
           </div>
           <div className="hero-path saju-path">
             <div className="hero-path-copy">
               <h2>AI 사주</h2>
               <p>명식을 먼저 계산해 타고난 성향과 한 해의 흐름을 읽어요.</p>
-              <ul>
-                <li>현재 양력 생일만 지원</li>
-                <li>출생 시각의 정확도에 맞춘 해석</li>
-              </ul>
             </div>
             <HomeSajuChart size="hero" />
-            <Link href="/saju" className="primary-button">
-              사주로 시작
-            </Link>
+            <HeroFeatures features={SAJU_FEATURES} />
           </div>
-        </div>
-      </section>
-
-      {/* Two free entries side by side: today's card and the year's zodiac pages. */}
-      <section className="daily-band" aria-label="무료로 바로 보는 운세">
-        <div className="daily-band-row page-width">
-          <article className="daily-band-item">
-            <span className="daily-band-visual daily-band-card tarot-back-art" aria-hidden="true">
-              <TarotStone kind="pearl" />
-            </span>
-            <div>
-              <h2>오늘의 운세</h2>
-              <p>로그인 없이, 카드 한 장으로 오늘을 살펴봐요.</p>
-            </div>
-            <Link href="/tarot/daily" className="outline-cta">
-              오늘의 운세 보기
-            </Link>
-          </article>
-          <article className="daily-band-item">
-            <ZodiacMiniWheel
-              className="daily-band-visual daily-band-wheel"
-              year={ZODIAC_YEAR_CONTENT.year}
-              yearAnimal={ZODIAC_YEAR_CONTENT.yearAnimal}
-              yearName={ZODIAC_YEAR_ANIMAL_NAME}
-            />
-            <div>
-              <h2>{ZODIAC_YEAR_CONTENT.year} 띠별 신년운세</h2>
-              <p>열두 띠가 올해의 {ZODIAC_YEAR_ANIMAL_NAME}{withAnd(ZODIAC_YEAR_ANIMAL_NAME)} 어떤 사이인지 풀어 봤어요.</p>
-            </div>
-            <Link href="/zodiac" className="outline-cta">
-              띠별 운세 보기
-            </Link>
-          </article>
         </div>
       </section>
 
