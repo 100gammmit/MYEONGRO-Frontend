@@ -11,6 +11,7 @@ import {
   type SajuBirthValues,
 } from "@/domain/saju/birth-input";
 
+import { FieldError } from "./field-error";
 import styles from "./saju-birth-fields.module.css";
 
 export type BirthPlaceCatalogStatus = "idle" | "loading" | "ready" | "error";
@@ -298,6 +299,3 @@ export function SajuBirthFields({
   );
 }
 
-function FieldError({ id, message }: { id: string; message?: string }) {
-  return message ? <p className="form-error" id={id}>{message}</p> : null;
-}

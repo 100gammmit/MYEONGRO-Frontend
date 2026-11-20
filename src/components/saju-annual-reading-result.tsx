@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { calculationBasisText } from "@/domain/saju/birth-input";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { annualCalendar, ANNUAL_BASE_EVIDENCE, type SajuAnnualReadingView } from "@/domain/saju/annual-result";
 import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
-import type { SajuEvidenceKey } from "@/domain/saju/result";
+import { calculationBasisText, type SajuEvidenceKey } from "@/domain/saju/result";
 import { redirectedReadingNotice } from "@/domain/reading/reading-mode";
 import { ReadingResultHeader } from "./reading-result-header";
 import { ReadingModeNotice } from "./reading-mode-notice";

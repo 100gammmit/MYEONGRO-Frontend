@@ -53,6 +53,7 @@ import { ReadingCreditAccessNotice, readingCreationErrorMessage } from "./readin
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 import { PrivacyNotice } from "./privacy-notice";
+import { FieldError } from "./field-error";
 import { ReviewGroup } from "./review-group";
 import { SajuBirthFields, birthFieldInputId } from "./saju-birth-fields";
 
@@ -632,9 +633,6 @@ function formatBirthDate(value: string): string {
 
 
 
-function FieldError({ id, message }: { id: string; message?: string }) {
-  return message ? <p className="form-error" id={id}>{message}</p> : null;
-}
 
 const ErrorSummary = ({
   errors,

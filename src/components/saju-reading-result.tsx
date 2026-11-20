@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { calculationBasisText } from "@/domain/saju/birth-input";
 import type { ReactNode } from "react";
 
-import type {
-  SajuCalculationSnapshot,
-  SajuEvidenceKey,
-  SajuReadingView,
+import {
+  calculationBasisText,
+  type SajuCalculationSnapshot,
+  type SajuEvidenceKey,
+  type SajuReadingView,
 } from "@/domain/saju/result";
 import {
   fortuneReadingModeLabel,

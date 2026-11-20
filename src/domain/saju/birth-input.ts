@@ -135,19 +135,3 @@ export function luckBasisSummary(value: LuckDirectionBasis): string {
   return "선택하지 않음 · 대운 제외";
 }
 
-/**
- * One line naming the saved calculation basis of a reading (saju-ko-v5 on), or null for older
- * records, which show nothing rather than a guess.
- */
-export function calculationBasisText(basis: {
-  readonly dayBoundary: SajuDayBoundary;
-  readonly equationOfTime: boolean;
-  readonly coordinateSource: "reference" | "province" | "city";
-} | undefined): string | null {
-  if (!basis) return null;
-  const parts: string[] = [];
-  if (basis.dayBoundary === "HOUR_23") parts.push("하루 경계 23시");
-  if (!basis.equationOfTime) parts.push("균시차 제외");
-  if (basis.coordinateSource === "city") parts.push("시·군·구 경도 기준");
-  return parts.length ? parts.join(" · ") : "명로 기본 계산 기준";
-}

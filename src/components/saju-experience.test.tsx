@@ -795,6 +795,30 @@ describe("SajuExperience", () => {
     expect(screen.getByLabelText("태어난 시")).toHaveAttribute("aria-describedby", "saju-birth-hour-error");
   });
 
+  it.each([
+    ["birthProfile.cityCode", "INVALID_BIRTH_PLACE", "출생 시·군·구를 다시 선택해 주세요.", "출생 시·군·구 (선택)"],
+    ["calculationOptions.dayBoundary", "INVALID_CALCULATION_OPTIONS", "계산 방식을 다시 골라 주세요.", null],
+  ])("returns a %s error to the birth step", async (field, code, message, label) => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(jsonResponse({ code, field, message }, { status: 400 }));
+    await startWithAcceptedConsent();
+    await reachReview("exact");
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(message);
+    expect(screen.getByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
+    if (label) {
+      expect(screen.getByLabelText(label)).toHaveAttribute("aria-invalid", "true");
+    } else {
+      // An option error opens the folded settings so its message is visible next to the choice.
+      expect(screen.getByRole("button", { name: /계산 방식 설정/ })).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByRole("radio", { name: "23시(자시 시작)" })).toBeInTheDocument();
+    }
+  });
+
   it("shows the stable credit error and refreshes shared status after a 429", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
     vi.spyOn(globalThis, "fetch")

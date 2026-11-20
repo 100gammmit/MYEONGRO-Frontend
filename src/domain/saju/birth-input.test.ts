@@ -4,12 +4,12 @@ import {
   EMPTY_BIRTH_VALUES,
   birthProfileOf,
   birthTimeOf,
-  calculationBasisText,
   calculationOptionsOf,
   findMissingBirthFields,
   withProvince,
   type SajuBirthValues,
 } from "./birth-input";
+import { calculationBasisText } from "./result";
 import { parseSajuReadingCreateRequest } from "./schema";
 
 const exact: SajuBirthValues = {
