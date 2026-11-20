@@ -74,6 +74,16 @@ function birthPlaces() {
   };
 }
 
+function birthPlacesWithCities() {
+  return {
+    version: "kr-admin-v1",
+    provinces: [
+      { provinceCode: "11", provinceName: "서울특별시", cities: [{ cityCode: "11110", cityName: "종로구" }] },
+      { provinceCode: "36", provinceName: "세종특별자치시", cities: [{ cityCode: "36110", cityName: "세종특별자치시" }] },
+    ],
+  };
+}
+
 function createdReading() {
   return {
     reading: {
@@ -122,11 +132,12 @@ async function fillBirth(precision: "exact" | "approximate" | "unknown") {
   fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
   fireEvent.click(screen.getByRole("radio", {
     name: precision === "exact" ? /정확히 알아요/
-      : precision === "approximate" ? /대략적으로 알아요/
-        : /시간을 몰라요/,
+      : precision === "approximate" ? /대략 알아요/
+        : /몰라요/,
   }));
   if (precision !== "unknown") {
-    fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
+    fireEvent.change(screen.getByLabelText("태어난 시"), { target: { value: "14" } });
+    if (precision === "exact") fireEvent.change(screen.getByLabelText("태어난 분"), { target: { value: "30" } });
     await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
   }
@@ -235,7 +246,8 @@ describe("SajuExperience", () => {
     expect(birthHelp).toHaveAttribute("href", "/guide/saju");
     fireEvent.click(birthHelp);
     expect(screen.getByLabelText("양력 생년월일")).toHaveValue("1992-08-17");
-    expect(screen.getByLabelText("태어난 시각")).toHaveValue("14:30");
+    expect(screen.getByLabelText("태어난 시")).toHaveValue("14");
+    expect(screen.getByLabelText("태어난 분")).toHaveValue("30");
     expect(screen.getByLabelText("출생 시·도")).toHaveValue("36");
   });
 
@@ -382,7 +394,8 @@ describe("SajuExperience", () => {
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     expect(fetchMock.mock.calls[1]?.[0]).toBe("/api/saju/birth-places");
-    expect(screen.queryByLabelText("출생 시·도")).not.toBeInTheDocument();
+    // Time and place stay locked until a known precision is chosen.
+    expect(screen.getByLabelText("출생 시·도")).toBeDisabled();
     fireEvent.click(screen.getByRole("radio", { name: /정확히 알아요/ }));
     await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
   });
@@ -405,9 +418,14 @@ describe("SajuExperience", () => {
     fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
     fireEvent.click(screen.getByRole("radio", { name: /정확히 알아요/ }));
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("태어난 시각을 입력해 주세요.");
-    expect(screen.getByRole("alert")).toHaveTextContent("출생 시·도를 선택해 주세요.");
-    expect(screen.getByLabelText("태어난 시각")).toHaveFocus();
+    expect(screen.getByRole("alert")).toHaveTextContent("태어난 시를 골라 주세요.");
+    expect(screen.getByRole("alert")).toHaveTextContent("출생 시·도를 골라 주세요.");
+    expect(screen.getByLabelText("태어난 시")).toHaveFocus();
+
+    fireEvent.change(screen.getByLabelText("태어난 시"), { target: { value: "14" } });
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("태어난 분을 골라 주세요.");
+    expect(screen.getByLabelText("태어난 분")).toHaveFocus();
   });
 
   it("keeps the entered time and province when precision toggles to unknown and back", async () => {
@@ -418,28 +436,38 @@ describe("SajuExperience", () => {
     await reachBirth();
     await fillBirth("exact");
 
-    fireEvent.click(screen.getByRole("radio", { name: /시간을 몰라요/ }));
-    expect(screen.queryByLabelText("태어난 시각")).not.toBeInTheDocument();
-    expect(screen.getByText("출생 시각을 모르면 출생지는 입력하지 않아도 돼요.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: /몰라요/ }));
+    for (const label of ["태어난 시", "태어난 분", "출생 시·도", "출생 시·군·구 (선택)"]) {
+      expect(screen.getByLabelText(label)).toBeDisabled();
+    }
+    expect(screen.getByText(/시각과 지역 칸을 잠가요/)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("radio", { name: /정확히 알아요/ }));
-    expect(screen.getByLabelText("태어난 시각")).toHaveValue("14:30");
+    expect(screen.getByLabelText("태어난 시")).toHaveValue("14");
+    expect(screen.getByLabelText("태어난 분")).toHaveValue("30");
     expect(screen.getByLabelText("출생 시·도")).toHaveValue("36");
   });
 
-  it("announces the time and province fields and shows only the chosen option's detail", async () => {
+  it("opens only the hour for an approximate time and the city list for the chosen province", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
-      .mockResolvedValueOnce(jsonResponse(birthPlaces()));
+      .mockResolvedValueOnce(jsonResponse(birthPlacesWithCities()));
     await startWithAcceptedConsent();
     await reachBirth();
 
-    expect(screen.queryByText("기록된 시각을 입력할게요.")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("radio", { name: /정확히 알아요/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /대략 알아요/ }));
+    expect(screen.getByLabelText("태어난 시")).toBeEnabled();
+    expect(screen.getByLabelText("태어난 분")).toBeDisabled();
+    expect(screen.getByText(/고른 시의 정각을 기준으로 앞뒤 60분/)).toBeInTheDocument();
 
-    expect(screen.getByText("태어난 시각과 출생 시·도 칸이 열렸어요.")).toBeInTheDocument();
-    expect(screen.getByText("기록된 시각을 입력할게요.")).toBeInTheDocument();
-    expect(screen.queryByText("입력 시각의 앞뒤 60분을 함께 살펴봐요.")).not.toBeInTheDocument();
+    await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
+    expect(screen.getByLabelText("출생 시·군·구 (선택)")).toBeDisabled();
+    fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "11" } });
+    fireEvent.change(screen.getByLabelText("출생 시·군·구 (선택)"), { target: { value: "11110" } });
+    expect(screen.getByLabelText("출생 시·군·구 (선택)")).toHaveValue("11110");
+    // Another province drops a city that belonged to the old one.
+    fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
+    expect(screen.getByLabelText("출생 시·군·구 (선택)")).toHaveValue("");
   });
 
   it("reports a birth place loading failure inside the province field and retries there", async () => {
@@ -458,7 +486,7 @@ describe("SajuExperience", () => {
     const failure = await screen.findByRole("alert");
     expect(failure).toHaveTextContent("출생지 목록을 불러오지 못했어요.");
     expect(screen.getByLabelText("양력 생년월일")).toBeEnabled();
-    expect(screen.getByLabelText("태어난 시각")).toBeEnabled();
+    expect(screen.getByLabelText("태어난 시")).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: "다시 불러오기" }));
     await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
   });
@@ -472,8 +500,9 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachReview("unknown");
 
-    expect(screen.getByText("시간 미상 · 시주 제외")).toBeInTheDocument();
-    expect(screen.getByText("계산하지 않음")).toBeInTheDocument();
+    expect(screen.getByText("모름 · 시주 제외")).toBeInTheDocument();
+    expect(screen.getByText("선택하지 않음 · 대운 제외")).toBeInTheDocument();
+    expect(screen.getByText("자정 기준 · 균시차 적용")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
@@ -502,7 +531,7 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachBirth();
     await fillBirth("exact");
-    fireEvent.click(screen.getByRole("radio", { name: /시간을 몰라요/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /몰라요/ }));
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     fireEvent.click(await screen.findByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
@@ -525,22 +554,53 @@ describe("SajuExperience", () => {
     await startWithAcceptedConsent();
     await reachBirth("질문");
     fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
-    fireEvent.click(screen.getByRole("radio", { name: /대략적으로 알아요/ }));
-    expect(screen.getByText(/전후 60분을 함께 계산/)).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
+    fireEvent.click(screen.getByRole("radio", { name: /대략 알아요/ }));
+    expect(screen.getByText(/고른 시의 정각을 기준으로 앞뒤 60분/)).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("태어난 시"), { target: { value: "14" } });
     await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "36" } });
-    fireEvent.click(screen.getByRole("radio", { name: "여성 기준" }));
+    fireEvent.click(screen.getByRole("radio", { name: "여성" }));
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     fireEvent.click(await screen.findByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
 
     await waitFor(() => expect(navigation.push).toHaveBeenCalled());
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    // An approximate time goes out on the hour; the backend looks 60 minutes either side.
     expect(body.birthProfile).toMatchObject({
       birthTimePrecision: "approximate",
-      birthTime: "14:30",
+      birthTime: "14:00",
       luckDirectionBasis: "female",
     });
+    expect(body).not.toHaveProperty("calculationOptions");
+  });
+
+  it("sends the chosen city and non-default calculation options and shows them on review", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(REQUEST_ID);
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlacesWithCities()))
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    await reachBirth();
+    fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
+    fireEvent.click(screen.getByRole("radio", { name: /정확히 알아요/ }));
+    fireEvent.change(screen.getByLabelText("태어난 시"), { target: { value: "23" } });
+    fireEvent.change(screen.getByLabelText("태어난 분"), { target: { value: "20" } });
+    await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
+    fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "11" } });
+    fireEvent.change(screen.getByLabelText("출생 시·군·구 (선택)"), { target: { value: "11110" } });
+    fireEvent.click(screen.getByRole("button", { name: /계산 방식 설정/ }));
+    fireEvent.click(screen.getByRole("radio", { name: "23시(자시 시작)" }));
+    fireEvent.click(screen.getByRole("button", { name: "다음" }));
+    await screen.findByRole("heading", { name: REVIEW_HEADING });
+    expect(screen.getByText("서울특별시 종로구")).toBeInTheDocument();
+    expect(screen.getByText("23시 기준 · 균시차 적용")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalled());
+    const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    expect(body.birthProfile).toMatchObject({ birthTime: "23:20", provinceCode: "11", cityCode: "11110" });
+    expect(body.calculationOptions).toEqual({ dayBoundary: "HOUR_23" });
   });
 
   it("requires only a province when birth time is known", async () => {
@@ -551,7 +611,8 @@ describe("SajuExperience", () => {
     await reachBirth();
     fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
     fireEvent.click(screen.getByRole("radio", { name: /정확히 알아요/ }));
-    fireEvent.change(screen.getByLabelText("태어난 시각"), { target: { value: "14:30" } });
+    fireEvent.change(screen.getByLabelText("태어난 시"), { target: { value: "14" } });
+    fireEvent.change(screen.getByLabelText("태어난 분"), { target: { value: "30" } });
     await waitFor(() => expect(screen.getByLabelText("출생 시·도")).toBeEnabled());
 
     fireEvent.change(screen.getByLabelText("출생 시·도"), { target: { value: "11" } });
@@ -730,8 +791,8 @@ describe("SajuExperience", () => {
     // The response settles outside act, so the focus effect can land a tick after the alert renders.
     await waitFor(() => expect(alert).toHaveFocus());
     expect(screen.getByRole("heading", { name: BIRTH_HEADING })).toBeInTheDocument();
-    expect(screen.getByLabelText(/태어난 시각/)).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByLabelText(/태어난 시각/)).toHaveAttribute("aria-describedby", "birth-time-error");
+    expect(screen.getByLabelText("태어난 시")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText("태어난 시")).toHaveAttribute("aria-describedby", "saju-birth-hour-error");
   });
 
   it("shows the stable credit error and refreshes shared status after a 429", async () => {

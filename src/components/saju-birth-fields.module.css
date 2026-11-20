@@ -1,0 +1,27 @@
+/* Shared birth input for the AI saju wizard and the free manseryeok page. Inputs keep the global .field look. */
+.fields { display: block; }
+
+.lunar { margin: 8px 0 0; padding: 10px 12px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-primary) 10%, transparent); color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
+.lunar a { color: var(--text-accent-strong); font-weight: 600; }
+
+/* Hour and minute share the first column; the two place selects take the rest. */
+.timePlace { display: grid; grid-template-columns: 176px minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.timePair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.timePair select { padding-inline: 10px; }
+.timePlace select:disabled { opacity: .45; cursor: not-allowed; }
+
+.carried { display: inline-flex; align-items: center; margin-left: 6px; padding: 0 7px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent-primary) 18%, transparent); color: var(--text-accent-strong); font-size: 11px; font-weight: 500; vertical-align: 1px; }
+
+.advanced { margin: 22px 0; border: 1px solid var(--border-default); border-radius: var(--radius-md); }
+.advancedToggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 52px; padding: 0 16px; border: 0; background: transparent; color: var(--text-primary); font: inherit; font-size: 15px; font-weight: 600; text-align: left; cursor: pointer; }
+.advancedToggle:focus-visible { outline: 2px solid var(--focus-outline); outline-offset: 2px; }
+.advancedSummary { color: var(--text-muted); font-size: 13px; font-weight: 400; }
+.advancedBody { padding: 0 16px 16px; border-top: 1px solid var(--border-hairline); }
+.advancedBody :global(.field) { margin: 16px 0 12px; }
+.check { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--text-primary); font-size: 14px; cursor: pointer; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent-strong); }
+.muted { color: var(--text-muted); font-size: 13px; }
+
+@media (max-width: 760px) {
+  .timePlace { grid-template-columns: 1fr; }
+}

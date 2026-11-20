@@ -32,8 +32,16 @@ const birthProfileSchema = z.object({
   birthTimePrecision: z.enum(["exact", "approximate", "unknown"]),
   birthTime: timeSchema.optional(),
   provinceCode: z.string().regex(/^\d{2}$/).optional(),
+  cityCode: z.string().regex(/^\d{5}$/).optional(),
   luckDirectionBasis: z.enum(["male", "female", "unspecified"]),
 }).strict().superRefine((profile, context) => {
+  if (profile.cityCode !== undefined && (profile.birthTimePrecision === "unknown" || !profile.provinceCode || !profile.cityCode.startsWith(profile.provinceCode))) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["cityCode"],
+      message: "시·군·구는 출생 시각과 그 시·도가 있을 때만 보냅니다.",
+    });
+  }
   if (profile.birthTimePrecision === "unknown" && profile.birthTime !== undefined) {
     context.addIssue({
       code: z.ZodIssueCode.custom,
@@ -71,6 +79,10 @@ const readingCreateRequestSchema = z.object({
   question: z.string().trim().max(300).optional(),
   focusArea: z.enum(["self", "career", "relationship", "life_money"]),
   birthProfile: birthProfileSchema,
+  calculationOptions: z.object({
+    dayBoundary: z.enum(["MIDNIGHT", "HOUR_23"]).optional(),
+    equationOfTime: z.boolean().optional(),
+  }).strict().optional(),
 }).strict().superRefine((request, context) => {
   if (request.reportType !== "annual_monthly" && !request.question) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["question"], message: "질문을 입력해 주세요." });

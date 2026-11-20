@@ -9,6 +9,19 @@ import { parseSajuReadingView } from "@/domain/saju/result";
 import { sajuReadingRecord } from "@/test-fixtures/saju-reading";
 
 describe("SajuReadingResult", () => {
+  it("names the saved calculation basis only when the record carries one", () => {
+    const record = structuredClone(sajuReadingRecord());
+    Object.assign(record.input.calculationSnapshot, {
+      calculationBasis: { dayBoundary: "HOUR_23", equationOfTime: true, coordinateSource: "city" },
+    });
+    const { unmount } = render(<SajuReadingResult view={parseSajuReadingView(record)!} />);
+    expect(screen.getByText("하루 경계 23시 · 시·군·구 경도 기준")).toBeInTheDocument();
+    unmount();
+
+    render(<SajuReadingResult view={sajuReadingView()} />);
+    expect(screen.queryByText("계산 기준")).not.toBeInTheDocument();
+  });
+
   it("moves focus from calculation evidence to the corresponding reading", () => {
     render(<SajuReadingResult view={sajuReadingView()} />);
     fireEvent.click(screen.getByRole("button", { name: "내 사주 탐색 열기" }));

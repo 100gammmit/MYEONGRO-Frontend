@@ -14,8 +14,6 @@ import {
 } from "react";
 
 import type {
-  BirthTimePrecision,
-  LuckDirectionBasis,
   SajuApiError,
   SajuBirthPlacesResponse,
   SajuFocusArea,
@@ -25,6 +23,20 @@ import {
   parseSajuReadingCreatedResponse,
   parseSajuReadingCreateRequest,
 } from "@/domain/saju/schema";
+import {
+  BIRTH_FIELD_BY_REQUEST_PATH,
+  EMPTY_BIRTH_VALUES,
+  birthPlaceName,
+  birthProfileOf,
+  birthTimeSummary,
+  calculationOptionsOf,
+  calculationOptionsSummary,
+  findMissingBirthFields,
+  isBirthTimeKnown,
+  luckBasisSummary,
+  type SajuBirthFieldKey,
+  type SajuBirthValues,
+} from "@/domain/saju/birth-input";
 import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
 import {
   containsDirectIdentifier,
@@ -42,22 +54,19 @@ import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 import { PrivacyNotice } from "./privacy-notice";
 import { ReviewGroup } from "./review-group";
+import { SajuBirthFields, birthFieldInputId } from "./saju-birth-fields";
 
 type Phase = "consent" | "question" | "birth" | "review" | "loading";
 type WizardStep = "question" | "birth" | "review";
 type CatalogStatus = "idle" | "loading" | "ready" | "error";
-type FieldKey = "birthDate" | "birthTimePrecision" | "birthTime" | "provinceCode" | "luckDirectionBasis" | "focusArea" | "question" | "request" | "targetYear";
+type FieldKey = SajuBirthFieldKey | "focusArea" | "question" | "request" | "targetYear";
 
 export type SajuReportType = "birth_annual_question" | "annual_monthly";
 
 interface SajuFormState {
   reportType: SajuReportType;
   targetYear: number;
-  birthDate: string;
-  birthTimePrecision: BirthTimePrecision | "";
-  birthTime: string;
-  provinceCode: string;
-  luckDirectionBasis: LuckDirectionBasis;
+  birth: SajuBirthValues;
   focusArea: SajuFocusArea | "";
   question: string;
 }
@@ -68,26 +77,10 @@ const MAX_QUESTION_LENGTH = 300;
 const initialForm: SajuFormState = {
   reportType: "birth_annual_question",
   targetYear: 0,
-  birthDate: "",
-  birthTimePrecision: "",
-  birthTime: "",
-  provinceCode: "",
-  luckDirectionBasis: "unspecified",
+  birth: EMPTY_BIRTH_VALUES,
   focusArea: "",
   question: "",
 };
-
-const TIME_OPTIONS: ReadonlyArray<{ value: BirthTimePrecision; label: string; detail: string }> = [
-  { value: "exact", label: "정확히 알아요", detail: "기록된 시각을 입력할게요." },
-  { value: "approximate", label: "대략적으로 알아요", detail: "입력 시각의 앞뒤 60분을 함께 살펴봐요." },
-  { value: "unknown", label: "시간을 몰라요", detail: "시주를 제외하고 공통 흐름만 읽어요." },
-];
-
-const LUCK_OPTIONS: ReadonlyArray<{ value: LuckDirectionBasis; label: string }> = [
-  { value: "male", label: "남성 기준" },
-  { value: "female", label: "여성 기준" },
-  { value: "unspecified", label: "선택하지 않음" },
-];
 
 const FOCUS_OPTIONS: ReadonlyArray<{ value: SajuFocusArea; label: string; example: string }> = [
   { value: "self", label: "나의 성향", example: "지금 제 강점을 어떻게 활용하면 좋을까요?" },
@@ -104,52 +97,20 @@ const LOADING_MESSAGES = [
   "질문에 맞는 리딩을 구성하고 있어요.",
 ] as const;
 
-const FIELD_PHASE: Partial<Record<string, Phase>> = {
-  targetYear: "question",
-  "birthProfile.birthDate": "birth",
-  "birthProfile.birthTimePrecision": "birth",
-  "birthProfile.birthTime": "birth",
-  "birthProfile.provinceCode": "birth",
-  "birthProfile.luckDirectionBasis": "birth",
-  focusArea: "question",
-  question: "question",
-};
+const BIRTH_ID_PREFIX = "saju";
 
-const FIELD_KEY: Partial<Record<string, FieldKey>> = {
+const QUESTION_FIELDS: Partial<Record<string, FieldKey>> = {
   targetYear: "targetYear",
-  "birthProfile.birthDate": "birthDate",
-  "birthProfile.birthTimePrecision": "birthTimePrecision",
-  "birthProfile.birthTime": "birthTime",
-  "birthProfile.provinceCode": "provinceCode",
-  "birthProfile.luckDirectionBasis": "luckDirectionBasis",
   focusArea: "focusArea",
   question: "question",
 };
 
-// Where focus goes when the birth step finds an empty required field.
-const FIELD_INPUT_ID: Partial<Record<FieldKey, string>> = {
-  birthDate: "saju-birth-date",
-  birthTimePrecision: "saju-precision-exact",
-  birthTime: "saju-birth-time",
-  provinceCode: "saju-province",
-};
-
-const REVEAL_ANNOUNCEMENT = "태어난 시각과 출생 시·도 칸이 열렸어요.";
-
-function isTimeKnown(precision: SajuFormState["birthTimePrecision"]): boolean {
-  return precision === "exact" || precision === "approximate";
-}
-
-function findMissingBirthFields(form: SajuFormState): Partial<Record<FieldKey, string>> {
-  const missing: Partial<Record<FieldKey, string>> = {};
-  if (!form.birthDate) missing.birthDate = "양력 생년월일을 입력해 주세요.";
-  if (!form.birthTimePrecision) {
-    missing.birthTimePrecision = "출생 시각의 정확도를 골라 주세요.";
-  } else if (isTimeKnown(form.birthTimePrecision)) {
-    if (!form.birthTime) missing.birthTime = "태어난 시각을 입력해 주세요.";
-    if (!form.provinceCode) missing.provinceCode = "출생 시·도를 선택해 주세요.";
-  }
-  return missing;
+// Server field errors point at a request path; birth paths reuse the shared map.
+function fieldForPath(path: string): { key: FieldKey; phase: Phase } | undefined {
+  const question = QUESTION_FIELDS[path];
+  if (question) return { key: question, phase: "question" };
+  const birth = BIRTH_FIELD_BY_REQUEST_PATH[path];
+  return birth ? { key: birth, phase: "birth" } : undefined;
 }
 
 function isQuestionReady(form: SajuFormState): boolean {
@@ -163,7 +124,7 @@ function canEnterStep(step: WizardStep, form: SajuFormState): boolean {
   if (step === "question") return true;
   const questionPasses = isQuestionReady(form) && !containsDirectIdentifier(form.question);
   if (step === "birth") return questionPasses;
-  return questionPasses && Object.keys(findMissingBirthFields(form)).length === 0;
+  return questionPasses && Object.keys(findMissingBirthFields(form.birth)).length === 0;
 }
 
 function isWizardStep(value: unknown): value is WizardStep {
@@ -189,7 +150,6 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [creditUntouched, setCreditUntouched] = useState(false);
-  const [revealAnnouncement, setRevealAnnouncement] = useState("");
   const requestIdRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
   const editingFromReviewRef = useRef(false);
@@ -241,10 +201,10 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   // Load the province list as soon as the birth step opens, so choosing a known time never waits on it.
   useEffect(() => {
     if (catalogStatus !== "idle") return;
-    if (phase === "birth" || (phase !== "consent" && isTimeKnown(form.birthTimePrecision))) {
+    if (phase === "birth" || (phase !== "consent" && isBirthTimeKnown(form.birth.birthTimePrecision))) {
       void loadBirthPlaces();
     }
-  }, [catalogStatus, form.birthTimePrecision, loadBirthPlaces, phase]);
+  }, [catalogStatus, form.birth.birthTimePrecision, loadBirthPlaces, phase]);
 
   const shownPhaseRef = useRef<Phase>("consent");
   useEffect(() => {
@@ -311,15 +271,9 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
     setForm((current) => ({ ...current, ...patch }));
   }
 
-  function selectPrecision(value: BirthTimePrecision) {
-    // Keep any time and province already entered; buildRequest leaves them out when the time is unknown.
-    const opening = isTimeKnown(value) && !isTimeKnown(form.birthTimePrecision);
-    setRevealAnnouncement(opening ? REVEAL_ANNOUNCEMENT : "");
-    updateForm({ birthTimePrecision: value });
-  }
-
-  function selectProvince(provinceCode: string) {
-    updateForm({ provinceCode });
+  // Locked time and place values are kept; buildRequest leaves them out when the time is unknown.
+  function updateBirth(birth: SajuBirthValues) {
+    updateForm({ birth });
   }
 
   // A generation failure belongs to review; carrying it back would read as an input mistake.
@@ -342,10 +296,10 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   }
 
   function submitBirth() {
-    const missing = findMissingBirthFields(form);
-    const first = (Object.keys(missing) as FieldKey[])[0];
+    const missing = findMissingBirthFields(form.birth);
+    const first = (Object.keys(missing) as SajuBirthFieldKey[])[0];
     if (first) {
-      focusFieldRef.current = FIELD_INPUT_ID[first] ?? null;
+      focusFieldRef.current = birthFieldInputId(BIRTH_ID_PREFIX, first);
       setGeneralError(null);
       setFieldErrors(missing);
       return;
@@ -408,11 +362,10 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
     if (attemptFailed) {
       requestIdRef.current = null;
     }
-    const errorPhase = error.field ? FIELD_PHASE[error.field] : undefined;
-    const key = error.field ? FIELD_KEY[error.field] : undefined;
-    if (errorPhase && key) {
-      setFieldErrors({ [key]: error.message });
-      setPhase(errorPhase);
+    const target = error.field ? fieldForPath(error.field) : undefined;
+    if (target) {
+      setFieldErrors({ [target.key]: error.message });
+      setPhase(target.phase);
       return;
     }
     // Credits are charged only when a reading completes, so a confirmed generation failure charged nothing.
@@ -545,7 +498,6 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   }
 
   if (phase === "birth") {
-    const timeKnown = isTimeKnown(form.birthTimePrecision);
     return (
       <ReadingShell
         eyebrow="AI 사주"
@@ -558,123 +510,20 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
       >
         <div className="wizard-card">
           <ErrorSummary summaryRef={errorSummaryRef} errors={fieldErrors} generalError={generalError} />
-          <p className="sr-only" aria-live="polite">{revealAnnouncement}</p>
           <aside aria-label="사주 출생정보 처리 안내" className="notice">
-            생년월일, 출생시각·정확도, 출생 시·도와 대운 계산 기준은 사주 계산 중에만 사용합니다. 원본 출생정보는 데이터베이스에 저장하거나 OpenAI에 전송하지 않으며, 요청 처리가 끝나면 별도로 보유하지 않습니다. 계산된 최소 정보와 리딩 결과는 내 기록에 저장되며 언제든 삭제할 수 있습니다. 자세한 내용은 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다.
+            생년월일, 출생시각·정확도, 출생 시·도·시·군·구, 성별과 계산 방식 설정은 사주 계산 중에만 사용합니다. 원본 출생정보는 데이터베이스에 저장하거나 OpenAI에 전송하지 않으며, 요청 처리가 끝나면 별도로 보유하지 않습니다. 계산 기준과 계산된 최소 정보, 리딩 결과는 내 기록에 저장되며 언제든 삭제할 수 있습니다. 자세한 내용은 <Link href="/privacy">개인정보 처리방침</Link>에서 확인할 수 있습니다.
           </aside>
           <ReadingGuideLink kind="saju" />
-          <div className="field">
-            <label htmlFor="saju-birth-date">양력 생년월일</label>
-            <input
-              id="saju-birth-date"
-              aria-describedby={fieldErrors.birthDate ? "birth-date-hint birth-date-error" : "birth-date-hint"}
-              aria-invalid={Boolean(fieldErrors.birthDate)}
-              type="date"
-              value={form.birthDate}
-              onChange={(event) => updateForm({ birthDate: event.target.value })}
-            />
-            <p className="field-guidance" id="birth-date-hint">음력 생일은 아직 지원하지 않아요. 양력 날짜로 입력해 주세요.</p>
-            <FieldError id="birth-date-error" message={fieldErrors.birthDate} />
-          </div>
-          <fieldset
-            className="field"
-            aria-describedby={fieldErrors.birthTimePrecision
-              ? "birth-time-help birth-time-precision-error"
-              : "birth-time-help"}
-            aria-invalid={Boolean(fieldErrors.birthTimePrecision)}
-          >
-            <legend>출생 시각 정확도</legend>
-            <div className="choice-list three-columns">
-              {TIME_OPTIONS.map((option) => (
-                <label className="choice-card" key={option.value}>
-                  <input
-                    className="sr-only"
-                    id={`saju-precision-${option.value}`}
-                    checked={form.birthTimePrecision === option.value}
-                    name="birth-time-precision"
-                    onChange={() => selectPrecision(option.value)}
-                    type="radio"
-                    value={option.value}
-                  />
-                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{option.label}</strong></span>
-                  {form.birthTimePrecision === option.value ? <span className="choice-desc">{option.detail}</span> : null}
-                </label>
-              ))}
-            </div>
-            {form.birthTimePrecision === "unknown" ? (
-              <p className="field-guidance">출생 시각을 모르면 출생지는 입력하지 않아도 돼요.</p>
-            ) : null}
-            <p className="field-guidance" id="birth-time-help">
-              {form.birthTimePrecision === "approximate"
-                ? "입력한 시각 전후 60분을 함께 계산해 공통되는 내용만 보여줘요."
-                : "태어난 시각이 확실하지 않다면 ‘시간을 몰라요’를 선택해 주세요."}
-            </p>
-            <FieldError id="birth-time-precision-error" message={fieldErrors.birthTimePrecision} />
-          </fieldset>
-          {timeKnown ? (
-            <div className="birth-reveal">
-              <div className="field">
-                <label htmlFor="saju-birth-time">태어난 시각</label>
-                <input
-                  id="saju-birth-time"
-                  aria-describedby={fieldErrors.birthTime ? "birth-time-error" : "birth-time-help"}
-                  aria-invalid={Boolean(fieldErrors.birthTime)}
-                  type="time"
-                  value={form.birthTime}
-                  onChange={(event) => updateForm({ birthTime: event.target.value })}
-                />
-                <FieldError id="birth-time-error" message={fieldErrors.birthTime} />
-              </div>
-              <div className="field">
-                <label htmlFor="saju-province">출생 시·도</label>
-                <select
-                  id="saju-province"
-                  aria-describedby={fieldErrors.provinceCode ? "province-hint province-error" : "province-hint"}
-                  aria-invalid={Boolean(fieldErrors.provinceCode)}
-                  disabled={catalogStatus !== "ready"}
-                  onChange={(event) => selectProvince(event.target.value)}
-                  value={form.provinceCode}
-                >
-                  <option value="">시·도 선택</option>
-                  {catalog?.provinces.map((item) => <option key={item.provinceCode} value={item.provinceCode}>{item.provinceName}</option>)}
-                </select>
-                {catalogStatus === "idle" || catalogStatus === "loading" ? (
-                  <p className="field-guidance" aria-live="polite">출생지 목록을 불러오고 있어요.</p>
-                ) : null}
-                {catalogStatus === "error" ? (
-                  <div className="field-inline-error" role="alert">
-                    <p className="form-error">{catalogError}</p>
-                    <button className="secondary-button" onClick={() => void loadBirthPlaces()} type="button">다시 불러오기</button>
-                  </div>
-                ) : null}
-                <p className="field-guidance" id="province-hint">출생 시·도는 태어난 시각을 보정하는 데 사용됩니다.</p>
-                <FieldError id="province-error" message={fieldErrors.provinceCode} />
-              </div>
-            </div>
-          ) : null}
-          <fieldset
-            className="field"
-            aria-describedby={fieldErrors.luckDirectionBasis ? "luck-help luck-error" : "luck-help"}
-            aria-invalid={Boolean(fieldErrors.luckDirectionBasis)}
-          >
-            <legend>대운 계산 기준</legend>
-            <p className="muted" id="luck-help">전통 명리학에서 대운의 순행·역행을 계산할 때만 사용합니다. 성격이나 역할을 성별에 따라 다르게 해석하지 않습니다.</p>
-            <div className="saju-choice-row chips">
-              {LUCK_OPTIONS.map((option) => (
-                <label className="saju-choice" key={option.value}>
-                  <input
-                    checked={form.luckDirectionBasis === option.value}
-                    name="luck-direction-basis"
-                    onChange={() => updateForm({ luckDirectionBasis: option.value })}
-                    type="radio"
-                  />
-                  <span>{option.label}</span>
-                </label>
-              ))}
-            </div>
-            {form.luckDirectionBasis === "unspecified" ? <p className="notice">원국과 선택한 연도의 흐름은 제공하지만 대운 계산과 해석은 제외합니다.</p> : null}
-            <FieldError id="luck-error" message={fieldErrors.luckDirectionBasis} />
-          </fieldset>
+          <SajuBirthFields
+            catalog={catalog}
+            catalogError={catalogError}
+            catalogStatus={catalogStatus}
+            errors={fieldErrors}
+            idPrefix={BIRTH_ID_PREFIX}
+            onChange={updateBirth}
+            onRetryCatalog={() => void loadBirthPlaces()}
+            values={form.birth}
+          />
         </div>
       </ReadingShell>
     );
@@ -694,7 +543,6 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
     );
   }
 
-  const province = catalog?.provinces.find((item) => item.provinceCode === form.provinceCode);
   const focus = FOCUS_OPTIONS.find((item) => item.value === form.focusArea);
   return (
     <ReadingShell
@@ -735,10 +583,11 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
         </ReviewGroup>
         <ReviewGroup id="review-birth" title="출생 정보" onEdit={() => leaveReview("birth", true)} disabled={submitting}>
           <dl className="saju-review-list">
-          <div><dt>생년월일</dt><dd>{formatBirthDate(form.birthDate)} · 양력</dd></div>
-          <div><dt>출생 시각</dt><dd>{timeSummary(form)}</dd></div>
-          {form.birthTimePrecision !== "unknown" ? <div><dt>출생지</dt><dd>{province?.provinceName}</dd></div> : null}
-          <div><dt>대운</dt><dd>{luckSummary(form.luckDirectionBasis)}</dd></div>
+          <div><dt>생년월일</dt><dd>{formatBirthDate(form.birth.birthDate)} · 양력</dd></div>
+          <div><dt>출생 시각</dt><dd>{birthTimeSummary(form.birth)}</dd></div>
+          {isBirthTimeKnown(form.birth.birthTimePrecision) ? <div><dt>출생지</dt><dd>{birthPlaceName(catalog, form.birth)}</dd></div> : null}
+          <div><dt>성별</dt><dd>{luckBasisSummary(form.birth.luckDirectionBasis)}</dd></div>
+          <div><dt>계산 방식</dt><dd>{calculationOptionsSummary(form.birth)}</dd></div>
           </dl>
         </ReviewGroup>
       </div>
@@ -753,16 +602,10 @@ function buildRequest(form: SajuFormState, requestId: string): SajuReadingCreate
     requestId,
     question: form.question.trim(),
     focusArea: form.focusArea,
-    birthProfile: {
-      calendarType: "solar",
-      birthDate: form.birthDate,
-      birthTimePrecision: form.birthTimePrecision,
-      ...(form.birthTimePrecision === "unknown" ? {} : { birthTime: form.birthTime }),
-      ...(form.birthTimePrecision === "unknown" ? {} : { provinceCode: form.provinceCode }),
-      luckDirectionBasis: form.luckDirectionBasis,
-    },
+    birthProfile: birthProfileOf(form.birth),
   };
-  return parseSajuReadingCreateRequest(request);
+  const options = calculationOptionsOf(form.birth);
+  return parseSajuReadingCreateRequest(options ? { ...request, calculationOptions: options } : request);
 }
 
 async function readApiError(response: Response): Promise<SajuApiError> {
@@ -787,17 +630,7 @@ function formatBirthDate(value: string): string {
   return year && month && day ? `${year}년 ${month}월 ${day}일` : value;
 }
 
-function timeSummary(form: SajuFormState): string {
-  if (form.birthTimePrecision === "unknown") return "시간 미상 · 시주 제외";
-  if (form.birthTimePrecision === "approximate") return `${form.birthTime} 전후 60분`;
-  return `${form.birthTime} · 정확한 시각`;
-}
 
-function luckSummary(value: LuckDirectionBasis): string {
-  if (value === "male") return "남성 기준으로 계산";
-  if (value === "female") return "여성 기준으로 계산";
-  return "계산하지 않음";
-}
 
 function FieldError({ id, message }: { id: string; message?: string }) {
   return message ? <p className="form-error" id={id}>{message}</p> : null;

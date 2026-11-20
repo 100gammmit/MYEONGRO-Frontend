@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { calculationBasisText } from "@/domain/saju/birth-input";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { annualCalendar, ANNUAL_BASE_EVIDENCE, type SajuAnnualReadingView } from "@/domain/saju/annual-result";
 import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
@@ -37,6 +38,7 @@ export function SajuAnnualReadingResult({ view, backHref = "/saju", backLabel = 
 }) {
   const { result, input } = view;
   const snapshot = input.calculationSnapshot;
+  const basisText = calculationBasisText(snapshot.calculationBasis);
   const calendar = annualCalendar(snapshot.monthlyCalendar);
   const [month, setMonth] = useState(1);
   const detailRef = useRef<HTMLElement>(null);
@@ -109,6 +111,7 @@ export function SajuAnnualReadingResult({ view, backHref = "/saju", backLabel = 
     <details className={`saju-calculation ${styles.calculation}`}><summary>내 사주 탐색 · 명식과 계산 기준 보기</summary>
       <SajuCalculationExplorer snapshot={snapshot} links={links} />
       <p>{snapshot.targetYear}년 세운 {snapshot.annualFortune.ganZhi} · 월운은 절입 기준으로 계산했습니다.</p>
+      {basisText ? <p>계산 기준: {basisText}</p> : null}
       <p className={styles.valuesTitle}>{month}월의 계산값</p>
       <dl className={styles.monthValues}>
         {slices.map((slice, index) => <div key={index}>

@@ -24,7 +24,16 @@ export interface SajuBirthProfile {
   readonly birthTimePrecision: BirthTimePrecision;
   readonly birthTime?: string;
   readonly provinceCode?: string;
+  readonly cityCode?: string;
   readonly luckDirectionBasis: LuckDirectionBasis;
+}
+
+export type SajuDayBoundary = "MIDNIGHT" | "HOUR_23";
+
+/** Omitted fields fall back to the backend defaults: day boundary at midnight, equation of time on. */
+export interface SajuCalculationOptions {
+  readonly dayBoundary?: SajuDayBoundary;
+  readonly equationOfTime?: boolean;
 }
 
 export interface SajuReadingCreateRequest {
@@ -34,6 +43,7 @@ export interface SajuReadingCreateRequest {
   readonly question?: string;
   readonly focusArea: SajuFocusArea;
   readonly birthProfile: SajuBirthProfile;
+  readonly calculationOptions?: SajuCalculationOptions;
 }
 
 export interface SajuReadingCreatedResponse {

@@ -28,6 +28,15 @@ function stubScreen(matches: boolean) {
 }
 
 describe("annual month navigation", () => {
+  it("names the saved calculation basis on annual reports that carry one", () => {
+    const view = annualView();
+    Object.assign(view.input.calculationSnapshot, {
+      calculationBasis: { dayBoundary: "MIDNIGHT", equationOfTime: true, coordinateSource: "province" },
+    });
+    render(<SajuAnnualReadingResult view={view} />);
+    expect(screen.getByText("계산 기준: 명로 기본 계산 기준")).toBeInTheDocument();
+  });
+
   it("restores a month and shares the previous month's period without a request", () => {
     window.history.replaceState(null, "", "/saju/results/synthetic?month=2");
     render(<SajuAnnualReadingResult view={annualView()} />);

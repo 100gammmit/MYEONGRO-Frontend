@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { calculationBasisText } from "@/domain/saju/birth-input";
 import type { ReactNode } from "react";
 
 import type {
@@ -71,6 +72,7 @@ export function SajuReadingResult({
   footer?: ReactNode;
 }) {
   const snapshot = view.input.calculationSnapshot;
+  const basisText = calculationBasisText(snapshot.calculationBasis);
   const isVersionFive = view.schemaVersion === 5 || view.schemaVersion === 6;
   const currentLuck = "currentLuckCycle" in snapshot
     ? snapshot.currentLuckCycle
@@ -167,6 +169,7 @@ export function SajuReadingResult({
         <details className="saju-calculation-meta">
           <summary>계산 버전과 시간 기준 보기</summary>
           <dl>
+            {basisText ? <div><dt>계산 기준</dt><dd>{basisText}</dd></div> : null}
             <div><dt>계산 규칙</dt><dd>{snapshot.calculationVersion}</dd></div>
             <div><dt>계산 엔진</dt><dd>{snapshot.engine} {snapshot.engineVersion}</dd></div>
             {!isVersionFive && "precision" in snapshot.uncertainty ? (
