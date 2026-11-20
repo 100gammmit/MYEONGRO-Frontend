@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import { EMPTY_BIRTH_VALUES, type SajuBirthValues } from "./birth-input";
-import { BIRTH_HANDOFF_KEY, BIRTH_HANDOFF_TTL_MS, saveBirthHandoff, takeBirthHandoff } from "./birth-handoff";
+import { BIRTH_HANDOFF_KEY, BIRTH_HANDOFF_TTL_MS, peekBirthHandoff, saveBirthHandoff, takeBirthHandoff } from "./birth-handoff";
 
 const values: SajuBirthValues = {
   ...EMPTY_BIRTH_VALUES,
@@ -26,6 +26,14 @@ describe("birth hand-off", () => {
     expect(takeBirthHandoff(2_000)).toEqual(values);
     expect(window.sessionStorage.getItem(BIRTH_HANDOFF_KEY)).toBeNull();
     expect(takeBirthHandoff(3_000)).toBeNull();
+  });
+
+  it("peeking keeps a valid value for a later mount but drops an expired one", () => {
+    saveBirthHandoff(values, 0);
+    expect(peekBirthHandoff(1_000)).toEqual(values);
+    expect(peekBirthHandoff(2_000)).toEqual(values);
+    expect(peekBirthHandoff(BIRTH_HANDOFF_TTL_MS + 1)).toBeNull();
+    expect(window.sessionStorage.getItem(BIRTH_HANDOFF_KEY)).toBeNull();
   });
 
   it("still holds after a 29-minute sign-up and is dropped after 30 minutes", () => {

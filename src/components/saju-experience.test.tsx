@@ -191,6 +191,23 @@ describe("SajuExperience", () => {
     expect(body.calculationOptions).toEqual({ dayBoundary: "HOUR_23" });
   });
 
+  it("keeps a manseryeok hand-off through the login redirect of a logged-out visitor", async () => {
+    const record = JSON.stringify({
+      savedAt: Date.now(),
+      values: {
+        birthDate: "1992-08-17", birthTimePrecision: "exact", birthHour: "14", birthMinute: "30",
+        provinceCode: "11", cityCode: "", luckDirectionBasis: "female", dayBoundary: "MIDNIGHT", equationOfTime: true,
+      },
+    });
+    window.sessionStorage.setItem("myeongro.saju.birthHandoff", record);
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse({ error: "login required" }, { status: 401 }));
+    render(<SajuExperience />);
+
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/login?next=%2Fsaju"));
+    expect(window.sessionStorage.getItem("myeongro.saju.birthHandoff")).toBe(record);
+    window.sessionStorage.clear();
+  });
+
   it("starts with an empty form and no notice when nothing was handed over", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
     await startWithAcceptedConsent();

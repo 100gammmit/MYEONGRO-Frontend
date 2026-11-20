@@ -38,7 +38,7 @@ import {
   type SajuBirthFieldKey,
   type SajuBirthValues,
 } from "@/domain/saju/birth-input";
-import { takeBirthHandoff } from "@/domain/saju/birth-handoff";
+import { clearBirthHandoff, peekBirthHandoff } from "@/domain/saju/birth-handoff";
 import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
 import {
   containsDirectIdentifier,
@@ -208,16 +208,18 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
     formRef.current = form;
   }, [form]);
 
-  // A birth input carried from the manseryeok page is read once, on the first render (even behind
-  // the consent step), and removed from the tab at once.
+  // A birth input carried from the manseryeok page fills the form on the first render, even behind
+  // the consent step. It stays in the tab until consent passes, because a logged-out visitor is sent
+  // to /login from that step and comes back to a fresh mount.
   useEffect(() => {
-    const birth = takeBirthHandoff();
+    const birth = peekBirthHandoff();
     if (!birth) return;
     setForm((current) => ({ ...current, birth }));
     setCarried(true);
   }, []);
 
   const handleConsentComplete = useCallback(() => {
+    clearBirthHandoff();
     setPhase("question");
   }, []);
 

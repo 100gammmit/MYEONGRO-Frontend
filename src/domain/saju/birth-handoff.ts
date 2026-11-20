@@ -4,8 +4,9 @@ import type { SajuBirthValues } from "./birth-input";
 
 /**
  * Carries a manseryeok input into the AI saju form in the same tab. It lives in sessionStorage only
- * (never the address, never localStorage), is read once and removed at once, and expires after
- * 30 minutes so a sign-up and consent on the way still find it.
+ * (never the address, never localStorage) and expires after 30 minutes, so a login, sign-up and
+ * consent on the way still find it. The form peeks at it on mount and clears it once the user is
+ * signed in and past consent; a login redirect in between must not lose it.
  */
 export const BIRTH_HANDOFF_KEY = "myeongro.saju.birthHandoff";
 export const BIRTH_HANDOFF_TTL_MS = 30 * 60 * 1000;
@@ -43,24 +44,45 @@ export function saveBirthHandoff(values: SajuBirthValues, now = Date.now()): boo
   }
 }
 
-/** The carried input, or null when there is none, it is broken or it is older than 30 minutes. Always removes it. */
-export function takeBirthHandoff(now = Date.now()): SajuBirthValues | null {
+export function clearBirthHandoff(): void {
+  try {
+    storage()?.removeItem(BIRTH_HANDOFF_KEY);
+  } catch {
+    // Storage blocked: nothing was kept either.
+  }
+}
+
+/**
+ * The carried input, or null when there is none, it is broken or it is older than 30 minutes.
+ * A valid value stays in place; a broken or expired one is removed.
+ */
+export function peekBirthHandoff(now = Date.now()): SajuBirthValues | null {
   const store = storage();
   if (!store) return null;
-  let raw: string | null = null;
+  let raw: string | null;
   try {
     raw = store.getItem(BIRTH_HANDOFF_KEY);
-    store.removeItem(BIRTH_HANDOFF_KEY);
   } catch {
     return null;
   }
   if (!raw) return null;
+  let values: SajuBirthValues | null = null;
   try {
     const parsed = recordSchema.safeParse(JSON.parse(raw));
-    if (!parsed.success) return null;
-    const age = now - parsed.data.savedAt;
-    return age >= 0 && age <= BIRTH_HANDOFF_TTL_MS ? parsed.data.values : null;
+    if (parsed.success) {
+      const age = now - parsed.data.savedAt;
+      if (age >= 0 && age <= BIRTH_HANDOFF_TTL_MS) values = parsed.data.values;
+    }
   } catch {
-    return null;
+    values = null;
   }
+  if (!values) clearBirthHandoff();
+  return values;
+}
+
+/** Peeks and removes in one go. */
+export function takeBirthHandoff(now = Date.now()): SajuBirthValues | null {
+  const values = peekBirthHandoff(now);
+  clearBirthHandoff();
+  return values;
 }
