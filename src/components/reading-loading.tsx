@@ -11,7 +11,8 @@ export type ReadingLoadingMessages = readonly [string, string, string, string];
 
 // One message per stroke of the brand mark; after the fourth the centre card breathes until the response arrives.
 // Progress lives here, so every wait starts again from the first stroke.
-export function ReadingLoading({ messages }: { messages: ReadingLoadingMessages }) {
+// A note replaces the slow-wait line, e.g. while a lost answer is being checked again.
+export function ReadingLoading({ messages, note }: { messages: ReadingLoadingMessages; note?: string }) {
   const [index, setIndex] = useState(0);
   const [slow, setSlow] = useState(false);
 
@@ -31,7 +32,8 @@ export function ReadingLoading({ messages }: { messages: ReadingLoadingMessages 
       <BrandMark breathing={index === messages.length - 1} lit={index + 1} size={104} />
       <div aria-live="polite">
         <p>{messages[index]}</p>
-        {slow ? <p className="muted">조금 더 걸리고 있어요. 잠시만 기다려 주세요.</p> : null}
+        {note ? <p className="muted">{note}</p>
+          : slow ? <p className="muted">조금 더 걸리고 있어요. 잠시만 기다려 주세요.</p> : null}
       </div>
     </div>
   );

@@ -523,6 +523,24 @@ describe("TarotExperience", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("리딩 요청을 처리하지 못했어요.");
   });
 
+  it("checks again with the same request id when the edge times out, then opens the finished reading", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response("<html>504 Gateway Timeout</html>", { status: 504 }))
+      .mockResolvedValueOnce(Response.json({ code: "READING_GENERATION_IN_PROGRESS", message: "생성 중" }, { status: 409 }))
+      .mockResolvedValueOnce(readingResponse("relationship_three_card"));
+    await chooseSpreadAndStart("relationship_three_card");
+    selectSlots([5, 1, 3]);
+
+    await confirmAndCreate();
+
+    expect(await screen.findByText(/생성이 평소보다 오래 걸려 결과를 확인하고 있어요/)).toBeInTheDocument();
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1"), { timeout: 8_000 });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    const bodies = fetchMock.mock.calls.map((call) => String(call[1]?.body));
+    expect(new Set(bodies).size).toBe(1);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  }, 12_000);
+
   it("shows the stable credit error and refreshes shared status after a 429", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
       code: "INSUFFICIENT_READING_CREDITS",

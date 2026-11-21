@@ -4,6 +4,11 @@ import type { ReadingCreditAccess } from "@/domain/reading-credit";
 
 export const INSUFFICIENT_CREDITS_MESSAGE = "크레딧이 부족합니다. 내일 다시 시도해 주세요.";
 
+// While a lost answer is checked again, and when the check ran out of time. The request id is kept,
+// so pressing again replays the finished reading instead of charging a new one.
+export const READING_RECOVERY_NOTE = "생성이 평소보다 오래 걸려 결과를 확인하고 있어요. 이 화면을 닫지 말고 기다려 주세요.";
+export const READING_UNRESOLVED_MESSAGE = "생성 결과를 아직 확인하지 못했어요. 잠시 후 내 기록에서 확인해 주세요. 같은 내용으로 다시 누르면 추가 차감 없이 결과를 이어서 확인해요.";
+
 export function readingCreationErrorMessage(code: string): string | undefined {
   switch (code) {
     case "READING_GENERATION_IN_PROGRESS":

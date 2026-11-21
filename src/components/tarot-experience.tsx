@@ -22,9 +22,15 @@ import {
   DIRECT_IDENTIFIER_INPUT_MESSAGE,
 } from "@/domain/reading/direct-identifier";
 import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
+import { postReadingRequest } from "@/infrastructure/reading-creation-request";
 import { ConsentGate } from "./consent-gate";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
-import { ReadingCreditAccessNotice, readingCreationErrorMessage } from "./reading-credit-access-notice";
+import {
+  READING_RECOVERY_NOTE,
+  READING_UNRESOLVED_MESSAGE,
+  ReadingCreditAccessNotice,
+  readingCreationErrorMessage,
+} from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingLoading, type ReadingLoadingMessages } from "./reading-loading";
 import { ReadingShell } from "./reading-shell";
@@ -115,6 +121,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
   const [focusedSlot, setFocusedSlot] = useState<number | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [recovering, setRecovering] = useState(false);
   const [inputErrorField, setInputErrorField] = useState<EditableInputField | null>(null);
   const [editingFromConfirm, setEditingFromConfirm] = useState(false);
   const inFlightRequestId = useRef<string | null>(null);
@@ -245,15 +252,18 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
     inFlightRequestId.current = nextRequestId;
     setRequestId(nextRequestId);
     setError(null);
+    setRecovering(false);
     setPhase("loading");
 
     try {
-      const response = await fetch("/api/tarot/readings", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const outcome = await postReadingRequest("/api/tarot/readings", body, { onRecovering: () => setRecovering(true) });
+      if (outcome.kind === "unresolved") {
+        // The request id stays, so pressing again replays the reading if it finished meanwhile.
+        setError(READING_UNRESOLVED_MESSAGE);
+        setPhase("error");
+        return;
+      }
+      const { response } = outcome;
       if (response.status === 401) {
         redirectToLogin();
         setSelectedSlots(slots.slice(0, -1));
@@ -650,7 +660,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
         totalSteps={TOTAL_STEPS}
         back={null}
       >
-        <ReadingLoading messages={LOADING_MESSAGES} />
+        <ReadingLoading messages={LOADING_MESSAGES} note={recovering ? READING_RECOVERY_NOTE : undefined} />
       </ReadingShell>
     );
   }
