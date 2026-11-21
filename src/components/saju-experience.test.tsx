@@ -282,6 +282,51 @@ describe("SajuExperience", () => {
     expect(second.requestId).toBe(SECOND_REQUEST_ID);
     expect(second.targetYear).toBe(first.targetYear + 1);
   });
+  it("checks again with the same request id when the edge times out, then opens the finished reading", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValueOnce(REQUEST_ID);
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockResolvedValueOnce(new Response("<html>504 Gateway Timeout</html>", { status: 504 }))
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    await reachReview("unknown");
+    vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ["setTimeout"] });
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
+    expect(await screen.findByText(/생성이 평소보다 오래 걸려 결과를 확인하고 있어요/)).toBeInTheDocument();
+    await act(async () => { await vi.advanceTimersByTimeAsync(3_000); });
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
+    vi.useRealTimers();
+    expect(screen.queryByText(/리딩 요청을 처리하지 못했어요/)).not.toBeInTheDocument();
+    const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
+    const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
+    expect(second).toEqual(first);
+    expect(second.requestId).toBe(REQUEST_ID);
+  });
+
+  it("keeps the request id when the check runs out of time, so pressing again replays the reading", async () => {
+    vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValueOnce(REQUEST_ID).mockReturnValueOnce(SECOND_REQUEST_ID);
+    const realNow = Date.now.bind(Date);
+    let late = false;
+    vi.spyOn(Date, "now").mockImplementation(() => realNow() + (late ? 10 * 60 * 1000 : 0));
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(jsonResponse(consentStatus(true)))
+      .mockResolvedValueOnce(jsonResponse(birthPlaces()))
+      .mockImplementationOnce(async () => {
+        late = true;
+        return new Response("", { status: 504 });
+      })
+      .mockResolvedValueOnce(jsonResponse(createdReading()));
+    await startWithAcceptedConsent();
+    await reachReview("unknown");
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
+    expect(await screen.findByText(/생성 결과를 아직 확인하지 못했어요/)).toBeInTheDocument();
+    expect(screen.queryByText("크레딧은 차감되지 않았어요.")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
+    expect(JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body)).requestId).toBe(REQUEST_ID);
+  });
+
   it("keeps question and birth inputs when opening help in a new tab", async () => {
     vi.spyOn(globalThis, "fetch")
       .mockResolvedValueOnce(jsonResponse(consentStatus(true)))

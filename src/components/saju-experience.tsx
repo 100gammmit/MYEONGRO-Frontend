@@ -48,10 +48,16 @@ import {
   fetchSajuBirthPlaces,
   SajuBirthPlacesClientError,
 } from "@/infrastructure/backend/saju-birth-places-client";
+import { postReadingRequest } from "@/infrastructure/reading-creation-request";
 
 import { ReadingLoading } from "./reading-loading";
 import { ConsentGate } from "./consent-gate";
-import { ReadingCreditAccessNotice, readingCreationErrorMessage } from "./reading-credit-access-notice";
+import {
+  READING_RECOVERY_NOTE,
+  READING_UNRESOLVED_MESSAGE,
+  ReadingCreditAccessNotice,
+  readingCreationErrorMessage,
+} from "./reading-credit-access-notice";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReadingShell } from "./reading-shell";
 import { PrivacyNotice } from "./privacy-notice";
@@ -164,6 +170,14 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [creditUntouched, setCreditUntouched] = useState(false);
   const [carried, setCarried] = useState(false);
+  const [recovering, setRecovering] = useState(false);
+  // Strict Mode mounts twice, so each mount gets its own controller and its cleanup aborts only that one.
+  const unmountRef = useRef(new AbortController());
+  useEffect(() => {
+    const controller = new AbortController();
+    unmountRef.current = controller;
+    return () => controller.abort();
+  }, []);
   const requestIdRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
   const editingFromReviewRef = useRef(false);
@@ -339,16 +353,23 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
     setFieldErrors({});
     setGeneralError(null);
     setCreditUntouched(false);
+    setRecovering(false);
     setPhase("loading");
 
     try {
       const body = buildRequest(form, ensureRequestId(requestIdRef));
-      const response = await fetch("/api/saju/readings", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+      const outcome = await postReadingRequest("/api/saju/readings", body, {
+        onRecovering: () => setRecovering(true),
+        signal: unmountRef.current.signal,
       });
+      if (outcome.kind === "cancelled") return;
+      if (outcome.kind === "unresolved") {
+        // The request id stays, so pressing again replays the reading if it finished meanwhile.
+        setGeneralError(READING_UNRESOLVED_MESSAGE);
+        setPhase("review");
+        return;
+      }
+      const { response } = outcome;
       if (response.status === 401) {
         redirectToLogin();
         return;
@@ -566,7 +587,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
         totalSteps={TOTAL_STEPS}
         back={null}
       >
-        <ReadingLoading messages={LOADING_MESSAGES} />
+        <ReadingLoading messages={LOADING_MESSAGES} note={recovering ? READING_RECOVERY_NOTE : undefined} />
       </ReadingShell>
     );
   }
