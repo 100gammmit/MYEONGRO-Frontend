@@ -1,0 +1,123 @@
+/* Saju dictionary pages: the 640px reading column from .flow-page, with their own parts. */
+.page { padding-bottom: 110px; }
+.page p, .page li, .page td, .page dd { word-break: keep-all; }
+
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 44px; margin: 0 0 4px; padding: 0; list-style: none; color: var(--text-muted); font-size: 13px; }
+.crumbs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-secondary); }
+.crumbs a:hover { color: var(--text-primary); }
+.crumbs [aria-current="page"] { color: var(--text-primary); font-weight: 600; }
+.crumbItem { display: inline-flex; align-items: center; gap: 6px; }
+.crumbSep { color: var(--text-subtle); }
+
+.han { margin-left: 10px; color: var(--text-muted); font-size: .62em; font-weight: 300; }
+.editorial { margin: 18px 0 0; padding: 4px 0 4px 16px; border-left: 2px solid var(--accent-primary); color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+
+.box { margin-top: 30px; padding: 20px 22px; border: 1px solid var(--border-default); border-radius: var(--radius-md); background: var(--surface-tint-1); }
+.box h2 { margin: 0 0 12px; color: var(--text-accent-strong); font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.meta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; margin: 0; }
+.meta div { display: flex; flex-direction: column; gap: 2px; }
+.meta dt { color: var(--text-muted); font-size: 12px; }
+.meta dd { margin: 0; color: var(--text-primary); font-size: 14px; font-weight: 500; line-height: 1.6; }
+.meta a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 3px; }
+
+.toc { margin: 28px 0 0; padding: 16px 18px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
+.toc h2 { margin: 0 0 6px; color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.toc ol { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.toc a { display: flex; align-items: center; gap: 10px; min-height: 40px; color: var(--text-secondary); font-size: 14px; }
+.toc a:hover { color: var(--text-primary); }
+.tocNumber { width: 16px; color: var(--accent-cta); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.section { padding: 30px 0; border-bottom: 1px solid var(--border-hairline); scroll-margin-top: 96px; }
+.section > h2 { margin: 0 0 16px; font-size: 24px; font-weight: 400; line-height: 1.5; word-break: keep-all; }
+.sectionNumber { margin-right: 10px; color: var(--accent-cta); font-family: var(--font-sans, inherit); font-size: 15px; font-weight: 600; vertical-align: 3px; }
+.section > p { margin: 0; color: var(--text-secondary); font-size: 16px; line-height: 1.85; }
+.section > p + p { margin-top: 14px; }
+.caption { margin: 10px 0 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+
+.callout { margin-top: 16px; padding: 14px 16px; border-left: 2px solid var(--accent-cta); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-cta) 7%, transparent); color: var(--text-secondary); font-size: 15px; line-height: 1.8; }
+.callout strong { display: block; margin-bottom: 2px; color: var(--text-primary); font-size: 14px; }
+.callout a { color: var(--text-accent-strong); font-weight: 600; }
+
+.myths { display: grid; gap: 10px; margin: 16px 0 0; }
+.myths div { padding: 14px 16px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
+.myths dt { margin-bottom: 4px; color: var(--text-primary); font-size: 15px; font-weight: 600; }
+.mythLabel { margin-right: 6px; color: var(--text-muted); font-weight: 500; }
+.myths dd { margin: 0; color: var(--text-secondary); font-size: 15px; line-height: 1.8; }
+
+/* The judging table: five relations × yin-yang; every cell is the link to that ten god. */
+.tableWrap { margin-top: 18px; overflow-x: auto; }
+.judge { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--border-default); border-radius: var(--radius-md); font-size: 14px; }
+.judge th, .judge td { padding: 10px; border-bottom: 1px solid var(--border-hairline); text-align: center; }
+.judge tr:last-child th, .judge tr:last-child td { border-bottom: 0; }
+.judge thead th { background: var(--surface-tint-1); color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.judge tbody th { color: var(--text-secondary); font-size: 13px; font-weight: 500; text-align: left; }
+.judge td a { display: inline-flex; align-items: center; justify-content: center; min-width: 76px; min-height: 44px; padding: 0 10px; border: 1px solid var(--border-default); border-radius: var(--radius-xs); background: var(--surface-tint-1); color: var(--text-primary); font-weight: 600; }
+.judge td a:hover { border-color: var(--border-strong); }
+.judge td a[aria-current="page"] { border-color: var(--accent-cta); background: color-mix(in srgb, var(--accent-cta) 12%, transparent); color: var(--accent-cta-hover); }
+.judge td a.pair { border-color: color-mix(in srgb, var(--accent-strong) 60%, transparent); }
+
+.example { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin-top: 16px; padding: 0; list-style: none; }
+.example li { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 76px; padding: 10px 12px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); color: var(--text-muted); font-size: 12px; }
+.example li.hit { border-color: var(--accent-cta); background: color-mix(in srgb, var(--accent-cta) 10%, transparent); color: var(--accent-cta-hover); font-weight: 600; }
+.glyph { font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 26px; font-weight: 400; line-height: 1.2; }
+
+.byDay { width: 100%; margin-top: 16px; border-collapse: collapse; font-size: 14px; }
+.byDay th, .byDay td { padding: 8px 6px; border-bottom: 1px solid var(--border-hairline); text-align: left; }
+.byDay thead th { color: var(--text-muted); font-size: 12px; font-weight: 600; }
+.byDay td { color: var(--text-secondary); }
+.byDay .glyphCell { font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 17px; }
+
+.wood { color: #7fd3a8; }
+.fire { color: #f5a394; }
+.earth { color: #e8c06a; }
+.metal { color: #dfe4ee; }
+.water { color: #94bbf5; }
+
+.cycle { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; align-items: center; margin-top: 18px; }
+.cycleArt { display: block; width: 260px; height: 260px; max-width: 100%; }
+.legend { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; color: var(--text-secondary); font-size: 14px; line-height: 1.6; }
+.legendLine { display: inline-block; width: 22px; margin-right: 8px; vertical-align: 4px; border-top: 2px solid var(--accent-cta); }
+.legendLineDash { border-top: 2px dashed #94bbf5; }
+
+.groupHead { margin: 22px 0 8px; color: var(--text-muted); font-size: 13px; font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
+.grid a { display: flex; flex-direction: column; gap: 3px; height: 100%; min-height: 76px; padding: 14px 16px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
+.grid a:hover { border-color: var(--border-strong); }
+.gridName { color: var(--text-primary); font-size: 16px; font-weight: 600; }
+.gridName small { margin-left: 6px; color: var(--text-muted); font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 14px; font-weight: 400; }
+.gridDesc { color: var(--text-muted); font-size: 13px; line-height: 1.6; }
+.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.five a { align-items: center; text-align: center; }
+.five .glyph { font-size: 28px; }
+
+.related { padding: 30px 0 0; }
+.related h2, .browse h2 { margin: 0 0 12px; color: var(--text-muted); font-size: 15px; font-weight: 600; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.links a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--border-default); border-radius: var(--radius-pill); color: var(--text-secondary); font-size: 14px; }
+.links a:hover { color: var(--text-primary); border-color: var(--border-strong); }
+
+.browse { margin-top: 26px; padding: 18px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
+.browse ul { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.browse a { display: flex; align-items: center; justify-content: center; min-height: 44px; border: 1px solid var(--border-default); border-radius: var(--radius-xs); color: var(--text-secondary); font-size: 14px; }
+.browse a:hover { color: var(--text-primary); }
+.browse a[aria-current="page"] { border-color: var(--accent-cta); background: color-mix(in srgb, var(--accent-cta) 12%, transparent); color: var(--accent-cta-hover); font-weight: 700; }
+
+.ctas { display: flex; gap: 8px; margin-top: 28px; }
+.ctas a { flex: 1; }
+.ghost { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 18px; border: 1px solid color-mix(in srgb, var(--accent-cta) 60%, transparent); border-radius: var(--radius-sm); color: var(--accent-cta); font-size: 15px; font-weight: 600; }
+.ghost:hover { background: color-mix(in srgb, var(--accent-cta) 10%, transparent); }
+.disclaimer { margin: 22px 0 0; color: var(--text-subtle, var(--text-muted)); font-size: 13px; line-height: 1.75; }
+
+@media (max-width: 760px) {
+  .section > h2 { font-size: 21px; }
+  .section > p { font-size: 15.5px; }
+  .meta { grid-template-columns: 1fr; }
+  .judge { font-size: 13px; }
+  .judge th, .judge td { padding: 8px 5px; }
+  .judge td a { width: 100%; min-width: 0; padding: 0 4px; }
+  .cycle { grid-template-columns: 1fr; justify-items: center; }
+  .five { gap: 6px; }
+  .five a { min-height: 0; padding: 12px 4px; }
+  .five .gridDesc { display: none; }
+  .ctas { flex-direction: column; }
+}

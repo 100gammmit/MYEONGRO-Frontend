@@ -48,6 +48,7 @@ export default async function RootLayout({
               <FooterLink href="/faq">자주 묻는 질문</FooterLink>
               <FooterLink href="/guide/tarot">타로 사용 가이드</FooterLink>
               <FooterLink href="/guide/saju">사주 사용 가이드</FooterLink>
+              <FooterLink href="/saju/dictionary">사주 개념 사전</FooterLink>
               <FooterLink href="/about">명로 소개</FooterLink>
               <FooterLink href="/updates">업데이트 소식</FooterLink>
               <FooterLink href="/terms">서비스 이용약관</FooterLink>

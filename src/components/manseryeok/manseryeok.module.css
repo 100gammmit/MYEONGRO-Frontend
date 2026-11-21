@@ -101,6 +101,12 @@
 .elementCells { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; text-align: center; }
 .elementCells li { display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--text-secondary); font-size: 13px; }
 .elementCells strong { color: var(--text-primary); font-size: 18px; font-weight: 600; }
+.glossaryMore { margin: 12px 0 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; }
+.glossaryMore a { color: var(--text-accent-strong); font-weight: 600; }
+.elementLink { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 44px; min-height: 44px; padding: 4px 6px; border-radius: var(--radius-xs); color: inherit; }
+.elementLink:hover span { color: var(--text-primary); text-decoration: underline; text-underline-offset: 3px; }
+.termLink { text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 3px; }
+.termLink:hover { text-decoration-color: currentColor; }
 .pips { display: flex; flex-direction: column-reverse; gap: 4px; }
 .pips i { display: block; width: 22px; height: 10px; border-radius: 4px; background: currentColor; }
 .pips i.off { background: var(--surface-tint-3, rgba(230, 235, 247, .07)); }

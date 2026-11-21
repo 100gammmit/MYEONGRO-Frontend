@@ -6,6 +6,7 @@ import robots from "./robots";
 import { PRIVATE_PAGE_METADATA, SHARE_IMAGE, SITE_ORIGIN, publicPageMetadata } from "@/infrastructure/site-metadata";
 import routes from "@/infrastructure/site-routes.json";
 import { ZODIAC_SLUGS } from "@/domain/zodiac-fortune";
+import { ELEMENT_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary/slugs";
 import { metadata as accountMetadata } from "./account/layout";
 import { metadata as recordsMetadata } from "./records/layout";
 import { metadata as loginMetadata } from "./login/layout";
@@ -16,7 +17,11 @@ import { metadata as drawMetadata } from "./tarot/draw/layout";
 
 // Every routable page under src/app, each pre-rendered dynamic segment expanded to its slugs.
 const appRoot = path.join(process.cwd(), "src/app");
-const dynamicValues: Record<string, readonly string[]> = { "/zodiac/[sign]": ZODIAC_SLUGS };
+const dynamicValues: Record<string, readonly string[]> = {
+  "/zodiac/[sign]": ZODIAC_SLUGS,
+  "/saju/dictionary/ten-gods/[slug]": TEN_GOD_SLUGS,
+  "/saju/dictionary/elements/[slug]": ELEMENT_SLUGS,
+};
 function walk(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const name = path.join(directory, entry.name);

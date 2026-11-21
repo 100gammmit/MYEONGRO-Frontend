@@ -83,6 +83,10 @@ describe("ManseryeokExperience", () => {
     const firstPeriod = fixture.luckCycle.periods[0];
     expect(luck[0]).toHaveTextContent(`${firstPeriod.startYear}–${firstPeriod.endYear}${fixture.luckCycle.integerStartAge}${firstPeriod.stemTenGod}`);
     expect(screen.getByRole("list", { name: "대운 흐름" })).not.toHaveTextContent("세");
+    // Chart ten gods and element counts open their dictionary pages, read with a "뜻 보기" name.
+    const tenGodLinks = screen.getAllByRole("link", { name: / 뜻 보기$/ }).filter((link) => link.getAttribute("href")?.startsWith("/saju/dictionary/ten-gods/"));
+    expect(tenGodLinks.length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: /^목 \d개, 목 뜻 보기$/ })).toHaveAttribute("href", "/saju/dictionary/elements/wood");
     // Both sideways strips take keyboard focus so they can be scrolled without a pointer.
     expect(screen.getByRole("list", { name: "대운 흐름" })).toHaveAttribute("tabindex", "0");
     expect(screen.getByRole("list", { name: "세운" })).toHaveAttribute("tabindex", "0");
