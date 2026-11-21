@@ -171,6 +171,13 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   const [creditUntouched, setCreditUntouched] = useState(false);
   const [carried, setCarried] = useState(false);
   const [recovering, setRecovering] = useState(false);
+  // Strict Mode mounts twice, so each mount gets its own controller and its cleanup aborts only that one.
+  const unmountRef = useRef(new AbortController());
+  useEffect(() => {
+    const controller = new AbortController();
+    unmountRef.current = controller;
+    return () => controller.abort();
+  }, []);
   const requestIdRef = useRef<string | null>(null);
   const inFlightRef = useRef(false);
   const editingFromReviewRef = useRef(false);
@@ -351,7 +358,11 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
 
     try {
       const body = buildRequest(form, ensureRequestId(requestIdRef));
-      const outcome = await postReadingRequest("/api/saju/readings", body, { onRecovering: () => setRecovering(true) });
+      const outcome = await postReadingRequest("/api/saju/readings", body, {
+        onRecovering: () => setRecovering(true),
+        signal: unmountRef.current.signal,
+      });
+      if (outcome.kind === "cancelled") return;
       if (outcome.kind === "unresolved") {
         // The request id stays, so pressing again replays the reading if it finished meanwhile.
         setGeneralError(READING_UNRESOLVED_MESSAGE);

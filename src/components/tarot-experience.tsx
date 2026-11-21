@@ -122,6 +122,13 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
   const [requestId, setRequestId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recovering, setRecovering] = useState(false);
+  // Strict Mode mounts twice, so each mount gets its own controller and its cleanup aborts only that one.
+  const unmountRef = useRef(new AbortController());
+  useEffect(() => {
+    const controller = new AbortController();
+    unmountRef.current = controller;
+    return () => controller.abort();
+  }, []);
   const [inputErrorField, setInputErrorField] = useState<EditableInputField | null>(null);
   const [editingFromConfirm, setEditingFromConfirm] = useState(false);
   const inFlightRequestId = useRef<string | null>(null);
@@ -256,7 +263,11 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
     setPhase("loading");
 
     try {
-      const outcome = await postReadingRequest("/api/tarot/readings", body, { onRecovering: () => setRecovering(true) });
+      const outcome = await postReadingRequest("/api/tarot/readings", body, {
+        onRecovering: () => setRecovering(true),
+        signal: unmountRef.current.signal,
+      });
+      if (outcome.kind === "cancelled") return;
       if (outcome.kind === "unresolved") {
         // The request id stays, so pressing again replays the reading if it finished meanwhile.
         setError(READING_UNRESOLVED_MESSAGE);

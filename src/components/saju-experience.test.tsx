@@ -291,15 +291,18 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse(createdReading()));
     await startWithAcceptedConsent();
     await reachReview("unknown");
+    vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ["setTimeout"] });
     fireEvent.click(screen.getByRole("button", { name: /크레딧으로 사주 리딩 생성/ }));
     expect(await screen.findByText(/생성이 평소보다 오래 걸려 결과를 확인하고 있어요/)).toBeInTheDocument();
-    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"), { timeout: 5_000 });
+    await act(async () => { await vi.advanceTimersByTimeAsync(3_000); });
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
+    vi.useRealTimers();
     expect(screen.queryByText(/리딩 요청을 처리하지 못했어요/)).not.toBeInTheDocument();
     const first = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     const second = JSON.parse(String(fetchMock.mock.calls[3]?.[1]?.body));
     expect(second).toEqual(first);
     expect(second.requestId).toBe(REQUEST_ID);
-  }, 10_000);
+  });
 
   it("keeps the request id when the check runs out of time, so pressing again replays the reading", async () => {
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValueOnce(REQUEST_ID).mockReturnValueOnce(SECOND_REQUEST_ID);

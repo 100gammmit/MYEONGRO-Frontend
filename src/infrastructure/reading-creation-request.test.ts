@@ -67,6 +67,15 @@ describe("postReadingRequest", () => {
     expect(outcome.kind === "response" && outcome.response.status).toBe(500);
   });
 
+  it("stops checking once the screen has gone away", async () => {
+    const controller = new AbortController();
+    const h = harness([edge(504), json(200, { reading: { id: "r1" } })]);
+    const wait = vi.fn(async () => { controller.abort(); });
+    const outcome = await postReadingRequest("/api/saju/readings", BODY, { ...h, wait, signal: controller.signal });
+    expect(outcome).toEqual({ kind: "cancelled" });
+    expect(h.fetcher).toHaveBeenCalledTimes(1);
+  });
+
   it("gives up as unresolved before the backend fails a stuck generation", async () => {
     const answers = [edge(504), ...Array.from({ length: 200 }, () => json(409, { code: "READING_GENERATION_IN_PROGRESS" }))];
     const h = harness(answers);

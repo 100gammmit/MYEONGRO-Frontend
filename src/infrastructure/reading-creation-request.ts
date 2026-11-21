@@ -9,11 +9,15 @@
  */
 export type ReadingRequestOutcome =
   | { readonly kind: "response"; readonly response: Response }
-  | { readonly kind: "unresolved" };
+  | { readonly kind: "unresolved" }
+  /** The screen went away; nothing should be shown or navigated to. */
+  | { readonly kind: "cancelled" };
 
 export interface ReadingRequestOptions {
   /** Called once, when the first answer was lost and the request is being checked again. */
   readonly onRecovering?: () => void;
+  /** Aborted when the screen unmounts, so a left screen stops checking and never navigates. */
+  readonly signal?: AbortSignal;
   readonly fetcher?: typeof fetch;
   readonly wait?: (milliseconds: number) => Promise<void>;
   readonly now?: () => number;
@@ -30,7 +34,7 @@ const defaultWait = (milliseconds: number) => new Promise<void>((resolve) => set
 export async function postReadingRequest(
   url: string,
   body: unknown,
-  { onRecovering, fetcher = fetch, wait = defaultWait, now = Date.now }: ReadingRequestOptions = {},
+  { onRecovering, signal, fetcher = fetch, wait = defaultWait, now = Date.now }: ReadingRequestOptions = {},
 ): Promise<ReadingRequestOutcome> {
   const payload = JSON.stringify(body);
   const startedAt = now();
@@ -42,6 +46,7 @@ export async function postReadingRequest(
       headers: { "Content-Type": "application/json" },
       body: payload,
     });
+    if (signal?.aborted) return { kind: "cancelled" };
     const settled = !(await isLost(response)) && !(recovering && await isInProgress(response));
     if (settled) return { kind: "response", response };
     if (!recovering) {
@@ -50,6 +55,7 @@ export async function postReadingRequest(
     }
     if (now() - startedAt + RECOVERY_INTERVAL_MS > RECOVERY_DEADLINE_MS) return { kind: "unresolved" };
     await wait(RECOVERY_INTERVAL_MS);
+    if (signal?.aborted) return { kind: "cancelled" };
   }
 }
 

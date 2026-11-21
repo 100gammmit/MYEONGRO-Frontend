@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -531,15 +531,19 @@ describe("TarotExperience", () => {
     await chooseSpreadAndStart("relationship_three_card");
     selectSlots([5, 1, 3]);
 
+    vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ["setTimeout"] });
     await confirmAndCreate();
 
     expect(await screen.findByText(/생성이 평소보다 오래 걸려 결과를 확인하고 있어요/)).toBeInTheDocument();
-    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1"), { timeout: 8_000 });
+    await act(async () => { await vi.advanceTimersByTimeAsync(3_000); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(3_000); });
+    await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1"));
+    vi.useRealTimers();
     expect(fetchMock).toHaveBeenCalledTimes(3);
     const bodies = fetchMock.mock.calls.map((call) => String(call[1]?.body));
     expect(new Set(bodies).size).toBe(1);
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-  }, 12_000);
+  });
 
   it("shows the stable credit error and refreshes shared status after a 429", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({
