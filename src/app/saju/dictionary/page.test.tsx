@@ -45,17 +45,17 @@ describe("ten god page", () => {
 });
 
 describe("every dictionary page", () => {
-  it("runs between 1,500 and 4,500 characters of page text", async () => {
+  it("runs between 1,500 and 3,000 characters of page text", async () => {
     for (const slug of TEN_GOD_SLUGS) {
       const { unmount, container } = render(await TenGodPage(params(slug)));
       expect(container.textContent!.length, slug).toBeGreaterThan(1500);
-      expect(container.textContent!.length, slug).toBeLessThan(4500);
+      expect(container.textContent!.length, slug).toBeLessThan(3000);
       unmount();
     }
     for (const slug of ELEMENT_SLUGS) {
       const { unmount, container } = render(await ElementPage(params(slug)));
       expect(container.textContent!.length, slug).toBeGreaterThan(1500);
-      expect(container.textContent!.length, slug).toBeLessThan(4500);
+      expect(container.textContent!.length, slug).toBeLessThan(3000);
       unmount();
     }
   });
