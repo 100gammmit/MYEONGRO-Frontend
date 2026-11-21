@@ -105,7 +105,7 @@ export function ManseryeokResult({
             <dt>12운성</dt><dd>일간의 기운이 각 지지에서 어느 단계에 있는지를 열두 단계로 나타낸 것이에요.</dd>
             <dt>공망</dt><dd>일주나 연주를 기준으로 비어 있다고 보는 두 지지예요.</dd>
           </dl>
-          <p className={styles.glossaryMore}>십성 이름과 오행을 누르면 뜻을 볼 수 있어요. <Link href={DICTIONARY_PATH}>사주 개념 사전 전체 보기</Link></p>
+          <p className={styles.glossaryMore}>십성 이름과 오행을 누르면 뜻을 볼 수 있어요. <Link href={DICTIONARY_PATH} rel="noopener" target="_blank">사주 개념 사전 전체 보기</Link></p>
         </details>
       </Section>
 
@@ -296,12 +296,15 @@ function ChartTable({ chart, highlighted }: { chart: ManseryeokChart; highlighte
   );
 }
 
-/** A chart ten god that opens its dictionary page; "—" and unknown names stay plain text. */
+/**
+ * A chart ten god that opens its dictionary page in a new tab: the result is never stored, so leaving
+ * this tab would lose it. "—" and unknown names stay plain text.
+ */
 function TenGodText({ name }: { name: string | null | undefined }) {
   const slug = tenGodSlugOf(name);
   if (!slug) return <span className={styles.tenGod}>{name ?? "—"}</span>;
   return (
-    <Link className={`${styles.tenGod} ${styles.termLink}`} href={tenGodPath(slug)}>
+    <Link className={`${styles.tenGod} ${styles.termLink}`} href={tenGodPath(slug)} rel="noopener" target="_blank">
       {name}<span className="sr-only"> 뜻 보기</span>
     </Link>
   );
@@ -314,7 +317,7 @@ function ElementCells({ chart }: { chart: ManseryeokChart }) {
       {ELEMENT_ORDER.map((element) => (
         <li key={element}>
           {/* Each element opens its dictionary page; the label reads the count first, as the cells show. */}
-          <Link aria-label={`${ELEMENT_NAMES[element]} ${chart.fiveElements[element]}개, ${ELEMENT_NAMES[element]} 뜻 보기`} className={styles.elementLink} href={elementPath(element)}>
+          <Link aria-label={`${ELEMENT_NAMES[element]} ${chart.fiveElements[element]}개, ${ELEMENT_NAMES[element]} 뜻 보기`} className={styles.elementLink} href={elementPath(element)} rel="noopener" target="_blank">
             <span className={styles.pips} aria-hidden="true">
               {Array.from({ length: cells }, (_, index) => <i className={index < chart.fiveElements[element] ? styles[element] : styles.off} key={index} />)}
             </span>
