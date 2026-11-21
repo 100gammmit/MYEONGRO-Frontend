@@ -25,4 +25,16 @@ export const SERVICE_UPDATES = defineServiceUpdates([
     publishedDate: "2026-11-21", effectiveDate: "2026-11-21",
     links: [{ href: "/manseryeok", label: "무료 만세력 보기" }],
   },
+  {
+    id: "2026-11-22-saju-dictionary",
+    category: "release", noticeLevel: "routine",
+    title: "사주 개념 사전을 열었습니다",
+    summary: "만세력에 나오는 십성과 오행이 무엇을 뜻하고 어떻게 정해지는지 정리했습니다.",
+    changes: [
+      "십성 열 가지와 오행 다섯 가지를 한 편씩 설명합니다.",
+      "무료 만세력 결과에서 십성 이름이나 오행을 누르면 바로 해당 설명으로 이동합니다.",
+    ],
+    publishedDate: "2026-11-22", effectiveDate: "2026-11-22",
+    links: [{ href: "/saju/dictionary", label: "사주 개념 사전 보기" }],
+  },
 ]);
