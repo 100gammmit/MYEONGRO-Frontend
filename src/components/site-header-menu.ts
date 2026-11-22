@@ -24,7 +24,7 @@ export function readingCategories(zodiacYear?: number): readonly ReadingCategory
     id: "tarot",
     label: "타로",
     groups: [
-      { label: "이용하기", links: [{ href: "/tarot", label: "AI 타로 리딩" }, { href: "/tarot/daily", label: "오늘의 운세" }] },
+      { label: "서비스", links: [{ href: "/tarot", label: "AI 타로 리딩" }, { href: "/tarot/daily", label: "오늘의 운세" }] },
       { label: "읽을거리", links: [{ href: "/guide/tarot", label: "타로 사용 가이드" }, { href: "/guide/tarot/example", label: "리딩 예시" }] },
     ],
   },
@@ -33,7 +33,7 @@ export function readingCategories(zodiacYear?: number): readonly ReadingCategory
     label: "사주",
     groups: [
       {
-        label: "이용하기",
+        label: "서비스",
         links: [
           { href: "/saju", label: "AI 사주 리딩" },
           { href: "/manseryeok", label: "만세력 계산" },

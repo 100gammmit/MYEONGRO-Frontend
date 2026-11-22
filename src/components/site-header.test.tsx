@@ -126,7 +126,7 @@ describe("SiteHeader", () => {
       ["AI 사주 리딩", "/saju"], ["만세력 계산", "/manseryeok"], ["2027 띠별 신년운세", "/zodiac"],
       ["사주 개념 사전", "/saju/dictionary"], ["사주 사용 가이드", "/guide/saju"], ["한 해 리포트 읽는 법", "/guide/saju/annual-report"],
     ]);
-    expect(within(panel).getByText("이용하기")).toBeInTheDocument();
+    expect(within(panel).getByText("서비스")).toBeInTheDocument();
     expect(within(panel).getByText("읽을거리")).toBeInTheDocument();
 
     fireEvent.click(tarot);
