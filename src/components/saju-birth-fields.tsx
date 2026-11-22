@@ -141,7 +141,7 @@ export function SajuBirthFields({
           id={id("birth-date")}
           aria-describedby={[id("birth-date-hint"), dateError ? id("birth-date-error") : "", id("lunar")].filter(Boolean).join(" ")}
           aria-invalid={Boolean(dateError)}
-          autoComplete="bday"
+          autoComplete="off"
           disabled={disabled}
           maxLength={10}
           onChange={changeBirthDate}
