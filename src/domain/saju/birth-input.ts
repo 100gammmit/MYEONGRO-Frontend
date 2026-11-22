@@ -1,3 +1,4 @@
+import { birthDateProblem, birthDateProblemMessage } from "./birth-date";
 import type {
   BirthTimePrecision,
   LuckDirectionBasis,
@@ -73,7 +74,12 @@ export function birthTimeOf(values: SajuBirthValues): string | undefined {
 
 export function findMissingBirthFields(values: SajuBirthValues): Partial<Record<SajuBirthFieldKey, string>> {
   const missing: Partial<Record<SajuBirthFieldKey, string>> = {};
-  if (!values.birthDate) missing.birthDate = "양력 생년월일을 입력해 주세요.";
+  if (!values.birthDate) {
+    missing.birthDate = "양력 생년월일을 입력해 주세요.";
+  } else {
+    const problem = birthDateProblem(values.birthDate);
+    if (problem) missing.birthDate = birthDateProblemMessage(values.birthDate, problem);
+  }
   if (!values.birthTimePrecision) {
     missing.birthTimePrecision = "출생 시각의 정확도를 골라 주세요.";
   } else if (isBirthTimeKnown(values.birthTimePrecision)) {

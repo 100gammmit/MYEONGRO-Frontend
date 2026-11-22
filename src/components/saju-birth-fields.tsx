@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 
 import type { BirthTimePrecision, LuckDirectionBasis, SajuBirthPlacesResponse } from "@/domain/saju/contracts";
 import {
@@ -10,6 +10,8 @@ import {
   type SajuBirthFieldKey,
   type SajuBirthValues,
 } from "@/domain/saju/birth-input";
+
+import { birthDateConfirmation, birthDateProblem, birthDateProblemMessage, countDigits, formatBirthDateInput } from "@/domain/saju/birth-date";
 
 import { FieldError } from "./field-error";
 import styles from "./saju-birth-fields.module.css";
@@ -102,6 +104,33 @@ export function SajuBirthFields({
     ? <span className={styles.carried}>가져옴</span>
     : null;
   const update = (patch: Partial<SajuBirthValues>) => onChange({ ...values, ...patch });
+  // Eight digits shown as YYYY-MM-DD while typing. Deleting right after a hyphen takes the digit before
+  // it, and an edit in the middle keeps the caret next to the same digit once the hyphens move.
+  const changeBirthDate = (event: ChangeEvent<HTMLInputElement>) => {
+    const input = event.target;
+    const raw = input.value;
+    const caret = input.selectionStart ?? raw.length;
+    let digits = raw.replace(/\D/g, "");
+    let digitsBeforeCaret = countDigits(raw.slice(0, caret));
+    const previous = values.birthDate;
+    // Only a single deleted hyphen counts, so pasting or retyping a whole date never loses a digit.
+    const deletedHyphenOnly = raw.length === previous.length - 1 && previous[caret] === "-"
+      && previous.slice(0, caret) + previous.slice(caret + 1) === raw;
+    if (deletedHyphenOnly && digitsBeforeCaret > 0) {
+      digits = digits.slice(0, digitsBeforeCaret - 1) + digits.slice(digitsBeforeCaret);
+      digitsBeforeCaret -= 1;
+    }
+    const next = formatBirthDateInput(digits);
+    update({ birthDate: next });
+    if (caret < raw.length) {
+      const position = digitsBeforeCaret + (digitsBeforeCaret > 4 ? 1 : 0) + (digitsBeforeCaret > 6 ? 1 : 0);
+      requestAnimationFrame(() => input.setSelectionRange(position, position));
+    }
+  };
+  const dateComplete = countDigits(values.birthDate) === 8;
+  const liveProblem = dateComplete ? birthDateProblem(values.birthDate) : null;
+  const dateError = errors.birthDate ?? (liveProblem ? birthDateProblemMessage(values.birthDate, liveProblem) : undefined);
+  const confirmation = dateComplete && !dateError ? birthDateConfirmation(values.birthDate) : null;
   const timeErrorIds = [errors.birthHour ? id("birth-hour-error") : "", errors.birthMinute ? id("birth-minute-error") : ""].filter(Boolean);
 
   return (
@@ -110,19 +139,23 @@ export function SajuBirthFields({
         <label htmlFor={id("birth-date")}>양력 생년월일{carried("birthDate")}</label>
         <input
           id={id("birth-date")}
-          aria-describedby={errors.birthDate ? `${id("lunar")} ${id("birth-date-error")}` : id("lunar")}
-          aria-invalid={Boolean(errors.birthDate)}
+          aria-describedby={[id("birth-date-hint"), dateError ? id("birth-date-error") : "", id("lunar")].filter(Boolean).join(" ")}
+          aria-invalid={Boolean(dateError)}
+          autoComplete="bday"
           disabled={disabled}
-          max="2099-12-31"
-          min="1900-01-01"
-          onChange={(event) => update({ birthDate: event.target.value })}
-          type="date"
+          maxLength={10}
+          onChange={changeBirthDate}
+          placeholder="예: 1992-08-17"
+          type="text"
           value={values.birthDate}
         />
+        {confirmation
+          ? <p aria-live="polite" className={styles.dateConfirm} id={id("birth-date-hint")}>{confirmation}</p>
+          : <p aria-live="polite" className={styles.dateHint} id={id("birth-date-hint")}>숫자 8자리만 입력하면 돼요. 하이픈은 자동으로 들어가요.</p>}
         <p className={styles.lunar} id={id("lunar")}>
           음력 생일은 지원하지 않아요. <a href={LUNAR_CONVERTER_URL} rel="noopener noreferrer" target="_blank">한국천문연구원 음양력 변환</a>에서 양력으로 바꿔 입력해 주세요.
         </p>
-        <FieldError id={id("birth-date-error")} message={errors.birthDate} />
+        <FieldError id={id("birth-date-error")} message={dateError} />
       </div>
 
       <fieldset

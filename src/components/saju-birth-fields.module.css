@@ -3,6 +3,8 @@
 /* The global .field input rule would stretch the visually hidden radios to full width and push the page sideways. */
 .fields input:global(.sr-only) { width: 1px; height: 1px; padding: 0; }
 
+.dateHint { margin: 6px 0 0; color: var(--text-muted); font-size: 13px; line-height: 1.6; }
+.dateConfirm { margin: 8px 0 0; padding: 8px 12px; border-radius: var(--radius-sm); background: color-mix(in srgb, #7fd3a8 10%, transparent); color: #9fe0bd; font-size: 14px; }
 .lunar { margin: 8px 0 0; padding: 10px 12px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-primary) 10%, transparent); color: var(--text-secondary); font-size: 13px; line-height: 1.7; }
 .lunar a { color: var(--text-accent-strong); font-weight: 600; }
 
