@@ -171,7 +171,8 @@ main:focus { outline: none; }
 .reading-nav-link { position: relative; display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; color: var(--text-secondary); font-size: 14px; }
 .reading-nav-link.active { color: var(--text-primary); }
 /* The section in view carries a short rule in the same gold as the main action. */
-.reading-nav-link.active::after { content: ""; position: absolute; left: 50%; bottom: 6px; width: 16px; height: 2px; border-radius: 2px; background: var(--accent-cta); transform: translateX(-50%); }
+/* It runs under the whole label: from the left padding to just before the chevron (12px icon + 5px gap). */
+.reading-nav-link.active::after { content: ""; position: absolute; left: 14px; right: 31px; bottom: 6px; height: 2px; border-radius: 2px; background: var(--accent-cta); }
 /* 타로 and 사주 open a band across the screen under the header: the landing hero's rows on a dark wash. */
 button.reading-nav-link { gap: 5px; border: 0; background: transparent; font: inherit; font-size: 14px; cursor: pointer; }
 button.reading-nav-link[aria-expanded="true"] { color: var(--text-primary); }
@@ -903,6 +904,7 @@ label.signup-check-label { cursor: pointer; }
   .reading-nav { gap: 0; }
   .reading-nav-link { justify-content: center; min-width: 44px; padding: 0 9px; font-size: 13px; }
   button.reading-nav-link { font-size: 13px; }
+  .reading-nav-link.active::after { left: 9px; right: 26px; }
   /* Two columns in the header's phone width, without arrows. */
   .reading-menu-inner { width: calc(100% - 28px); grid-template-columns: 1fr 1fr; column-gap: 16px; padding: 20px 0 24px; }
   .reading-menu-group a { min-height: 50px; padding: 0 2px; font-size: 14px; }
