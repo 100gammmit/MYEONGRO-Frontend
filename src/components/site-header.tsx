@@ -131,7 +131,7 @@ function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?:
               {category.label}
               <svg aria-hidden="true" className="reading-menu-chevron" fill="none" height="12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" viewBox="0 0 24 24" width="12"><path d="M6 9l6 6 6-6" /></svg>
             </button>
-            <div className={expanded ? "reading-menu-panel open" : "reading-menu-panel"} data-category={category.id} id={panelId}>
+            <div className={expanded ? "reading-menu-panel open" : "reading-menu-panel"} id={panelId}>
               <div className="reading-menu-inner">
                 {category.groups.map((group) => (
                   <div className="reading-menu-group" key={group.label}>
