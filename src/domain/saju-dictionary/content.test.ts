@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  BASICS,
   ELEMENT_ENTRIES,
   ELEMENT_SLUGS,
   TEN_GODS,
@@ -84,6 +85,7 @@ describe("dictionary copy", () => {
   const pages = [
     ...TEN_GODS.map((entry) => ({ slug: entry.slug, text: [entry.lead, ...entry.principle, ...entry.meaning, ...entry.timing, ...entry.flow, ...entry.myths.flatMap((myth) => [myth.claim, myth.answer]), ...entry.pair, ...entry.find] })),
     ...ELEMENT_ENTRIES.map((entry) => ({ slug: entry.slug, text: [entry.lead, ...entry.nature, ...entry.cycle, ...entry.chars, ...entry.count, ...entry.read] })),
+    { slug: "basics", text: BASICS.steps.flatMap((step) => step.paragraphs) },
   ];
 
   it("never repeats a sentence across two pages", () => {

@@ -38,6 +38,8 @@ export function tenGodSlugOf(name: string | null | undefined): TenGodSlug | null
 
 export const DICTIONARY_PATH = "/saju/dictionary";
 
+export const BASICS_PATH = `${DICTIONARY_PATH}/basics`;
+
 export function tenGodPath(slug: TenGodSlug): string {
   return `${DICTIONARY_PATH}/ten-gods/${slug}`;
 }

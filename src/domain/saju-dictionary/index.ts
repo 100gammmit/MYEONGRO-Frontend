@@ -1,9 +1,13 @@
 export {
+  BASICS,
+  BASICS_EXAMPLE,
+  BASIC_STEP_IDS,
   DICTIONARY,
   ELEMENT_ENTRIES,
   TEN_GODS,
   getElement,
   getTenGod,
+  type BasicsCopy,
   type DictionaryCopy,
   type ElementEntry,
   type TenGodEntry,
@@ -25,6 +29,7 @@ export {
 } from "./rules";
 export { evenIf, isPolite, object, subject, topic, withAnd } from "./korean";
 export {
+  BASICS_PATH,
   DICTIONARY_PATH,
   ELEMENT_SLUGS,
   TEN_GOD_NAMES,

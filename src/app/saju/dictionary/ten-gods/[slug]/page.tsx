@@ -11,7 +11,6 @@ import {
   styles,
 } from "@/components/saju-dictionary/dictionary-parts";
 import {
-  DICTIONARY,
   DICTIONARY_PATH,
   TEN_GOD_NAMES,
   TEN_GOD_SLUGS,
@@ -140,7 +139,6 @@ export default async function TenGodPage({ params }: TenGodPageProps) {
       <Breadcrumbs trail={[{ label: "십성", href: `${DICTIONARY_PATH}#dictionary-ten-gods` }, { label: entry.name }]} />
       <h1>{entry.name}{" "}<span className={styles.han} lang="zh-Hant">{entry.hanja}</span></h1>
       <p className="flow-lead">{entry.lead}</p>
-      <p className={styles.editorial}>{DICTIONARY.editorialNote}</p>
 
       <section aria-labelledby="ten-god-glance" className={styles.box}>
         <h2 id="ten-god-glance">한눈에 보기</h2>

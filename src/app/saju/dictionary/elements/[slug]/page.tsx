@@ -9,7 +9,6 @@ import {
   styles,
 } from "@/components/saju-dictionary/dictionary-parts";
 import {
-  DICTIONARY,
   DICTIONARY_PATH,
   ELEMENT_SLUGS,
   elementAsGroup,
@@ -113,7 +112,6 @@ export default async function ElementPage({ params }: ElementPageProps) {
       <Breadcrumbs trail={[{ label: "오행", href: `${DICTIONARY_PATH}#dictionary-elements` }, { label: name }]} />
       <h1>{name}{" "}<span className={`${styles.han} ${styles[entry.slug]}`} lang="zh-Hant">{entry.hanja}</span></h1>
       <p className="flow-lead">{entry.lead}</p>
-      <p className={styles.editorial}>{DICTIONARY.editorialNote}</p>
 
       <section aria-labelledby="element-glance" className={styles.box}>
         <h2 id="element-glance">한눈에 보기</h2>

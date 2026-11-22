@@ -1,25 +1,45 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { ELEMENT_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary";
+import { BASIC_STEP_IDS, ELEMENT_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary";
 
+import SajuBasicsPage from "./basics/page";
 import ElementPage, { generateMetadata as elementMetadata } from "./elements/[slug]/page";
 import SajuDictionaryPage from "./page";
 import TenGodPage, { generateMetadata as tenGodMetadata } from "./ten-gods/[slug]/page";
 
 const params = (slug: string) => ({ params: Promise.resolve({ slug }) });
 
-describe("saju dictionary hub", () => {
-  it("links every written entry from the judging table and the lists, with no placeholders", () => {
+describe("saju dictionary first page", () => {
+  it("points the way: basics first, then every written entry by group, with no explanations or placeholders", () => {
     render(<SajuDictionaryPage />);
-    expect(screen.getByRole("heading", { level: 1, name: "만세력 용어, 하나씩 풀어 봅니다" })).toBeInTheDocument();
-    const table = screen.getByRole("table", { name: /십성 판정표/ });
-    expect(within(table).getAllByRole("link")).toHaveLength(10);
-    const list = screen.getByRole("region", { name: "십성 열 가지" });
-    expect(within(list).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(TEN_GOD_SLUGS.map((slug) => `/saju/dictionary/ten-gods/${slug}`));
-    const five = screen.getByRole("region", { name: "오행 다섯 가지" });
+    expect(screen.getByRole("heading", { level: 1, name: "사주 용어 찾아보기" })).toBeInTheDocument();
+    const headings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
+    expect(headings).toEqual(["기초 개념", "십성", "오행"]);
+    const basics = screen.getByRole("region", { name: "기초 개념" });
+    expect(within(basics).getAllByRole("listitem").map((item) => within(item).getByRole("link").getAttribute("href")))
+      .toEqual(BASIC_STEP_IDS.map((id) => `/saju/dictionary/basics#${id}`));
+    const ten = screen.getByRole("region", { name: "십성" });
+    expect(within(ten).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(TEN_GOD_SLUGS.map((slug) => `/saju/dictionary/ten-gods/${slug}`));
+    const five = screen.getByRole("region", { name: "오행" });
     expect(within(five).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(ELEMENT_SLUGS.map((slug) => `/saju/dictionary/elements/${slug}`));
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.queryByRole("search")).not.toBeInTheDocument();
+    expect(screen.getByText(/이 글은 AI로 만든 초안을 운영자가 검수했습니다\./)).toBeInTheDocument();
     expect(screen.queryByText(/준비 중/)).not.toBeInTheDocument();
+  });
+});
+
+describe("saju basics page", () => {
+  it("walks the six steps in order with the table and the cycle, and no editorial note", () => {
+    const { container } = render(<SajuBasicsPage />);
+    expect(screen.getByRole("heading", { level: 1, name: "사주 읽기 기초" })).toBeInTheDocument();
+    expect([...container.querySelectorAll("section[id]")].map((section) => section.id)).toEqual([...BASIC_STEP_IDS]);
+    expect(screen.getByRole("table", { name: /십성 판정표/ })).toBeInTheDocument();
+    expect(screen.getByText(/상생 · 목 → 화/)).toBeInTheDocument();
+    expect(screen.queryByText(/AI로 만든 초안/)).not.toBeInTheDocument();
+    expect(container.textContent!.length).toBeGreaterThan(1500);
+    expect(container.textContent!.length).toBeLessThan(3000);
   });
 });
 
@@ -32,7 +52,7 @@ describe("ten god page", () => {
     const table = screen.getByRole("table", { name: /십성 판정표/ });
     expect(within(table).getByRole("link", { name: "겁재" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("navigation", { name: "십성 열 가지" })).toBeInTheDocument();
-    expect(screen.getByText("이 글은 AI로 만든 초안을 운영자가 검수했습니다.")).toBeInTheDocument();
+    expect(screen.queryByText(/AI로 만든 초안/)).not.toBeInTheDocument();
     expect(screen.getByText(/사주 개념 사전은 전통 명리에서 쓰는 용어/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "무료 만세력으로 내 명식 보기" })).toHaveAttribute("href", "/manseryeok");
     expect(document.body.textContent!.length).toBeGreaterThan(1500);

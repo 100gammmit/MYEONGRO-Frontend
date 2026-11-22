@@ -108,7 +108,44 @@
 .ghost:hover { background: color-mix(in srgb, var(--accent-cta) 10%, transparent); }
 .disclaimer { margin: 22px 0 0; color: var(--text-subtle, var(--text-muted)); font-size: 13px; line-height: 1.75; }
 
+
+/* The first page: a compact guide, every entry within a screen or two. */
+.guide { padding-bottom: 80px; }
+.guideLead { margin: 10px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.7; }
+.guideSection { margin-top: 26px; scroll-margin-top: 96px; }
+.guideHead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.guideHead h2 { margin: 0; font-size: 20px; font-weight: 400; }
+.guideHead a { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent-cta); font-size: 14px; font-weight: 600; }
+.guideHead span { color: var(--text-muted); font-size: 13px; }
+.guideBasics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.guideBasics a { display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 12px; border: 1px solid color-mix(in srgb, var(--accent-cta) 32%, transparent); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-cta) 5%, transparent); color: var(--text-primary); font-size: 14.5px; font-weight: 600; }
+.guideNumber { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: var(--radius-pill); background: color-mix(in srgb, var(--accent-cta) 20%, transparent); color: var(--accent-cta-hover); font-size: 12px; font-weight: 700; }
+.guideTen { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.guideTen li { display: grid; grid-template-columns: minmax(0, 1.3fr) 1fr 1fr; gap: 6px; align-items: stretch; }
+.guideGroup { display: flex; flex-direction: column; justify-content: center; padding: 6px 4px; }
+.guideGroup b { color: var(--text-primary); font-size: 14.5px; font-weight: 600; }
+.guideGroup small { color: var(--text-muted); font-size: 12px; }
+.guideTen a, .guideFive a { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-tint-1); color: var(--text-primary); font-size: 15px; font-weight: 600; }
+.guideTen a:hover, .guideFive a:hover, .guideBasics a:hover { border-color: var(--border-strong); }
+.guideTen a small { color: var(--text-muted); font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 12.5px; font-weight: 400; }
+.guideFive { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.guideFive a { min-height: 50px; }
+.guideFive .glyph { font-size: 22px; }
+.guideFoot { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border-hairline); }
+.guideFoot .primary-button, .guideFoot a { display: flex; }
+
+/* The basics page's example chart: four pillars, two rows, one cell highlighted per step. */
+.exampleChart { display: grid; grid-template-columns: 52px repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 16px; }
+.chartLabel { display: flex; align-items: center; justify-content: center; min-height: 28px; color: var(--text-muted); font-size: 12px; }
+.chartGlyph { display: flex; align-items: center; justify-content: center; min-height: 52px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 24px; }
+.chartStem { border-color: var(--accent-cta); background: color-mix(in srgb, var(--accent-cta) 12%, transparent); }
+.chartBranch { border-color: color-mix(in srgb, var(--accent-strong) 60%, transparent); background: color-mix(in srgb, var(--accent-primary) 10%, transparent); }
+.chartDim { opacity: .35; }
+
 @media (max-width: 760px) {
+  .guideBasics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .guideHead span { display: none; }
+  .guideFive a { flex-direction: column; gap: 0; min-height: 58px; font-size: 13px; }
   .section > h2 { font-size: 21px; }
   .section > p { font-size: 15.5px; }
   .meta { grid-template-columns: 1fr; }
