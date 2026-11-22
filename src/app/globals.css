@@ -205,7 +205,7 @@ button.reading-nav-link[aria-expanded="true"] .reading-menu-chevron { transform:
 .reading-menu-pillar .cell.day { border-color: color-mix(in srgb, var(--accent-secondary) 80%, transparent); background: color-mix(in srgb, var(--accent-secondary) 18%, transparent); color: var(--text-primary); }
 .reading-menu-pillar .cell.unknown { gap: 2px; border-style: dashed; background: none; color: var(--text-subtle); font-family: inherit; font-size: 11px; }
 /* Dims the page under the band. While a menu is open the header rises above fixed action bars (z-index 20). */
-.site-header:has(.reading-menu-panel.open) { z-index: 40; }
+.site-header.menu-open { z-index: 40; }
 .reading-menu-scrim { position: fixed; top: var(--reading-menu-top, 68px); right: 0; bottom: 0; left: 0; z-index: 29; background: rgba(5, 5, 8, .5); }
 .account-menu { position: relative; display: flex; align-items: center; }
 .account-menu-button { display: none; }

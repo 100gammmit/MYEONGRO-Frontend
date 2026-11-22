@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { getDisplayedReadingCredits } from "@/domain/reading-credit";
 import { BrandMark } from "./brand-mark";
@@ -84,20 +84,37 @@ function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?:
       if (rootRef.current?.contains(document.activeElement)) buttonRefs.current[open]?.focus();
       setOpen(null);
     }
-    // The band is fixed to the viewport so it spans the screen without a sideways scrollbar; it follows
-    // the header's bottom edge while the page scrolls.
-    function place() {
-      const bottom = rootRef.current?.closest(".site-header")?.getBoundingClientRect().bottom;
-      if (bottom !== undefined) rootRef.current?.style.setProperty("--reading-menu-top", `${Math.max(0, bottom)}px`);
-    }
-    place();
     document.addEventListener("pointerdown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("scroll", place, { passive: true });
-    window.addEventListener("resize", place);
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  // The band is fixed to the viewport so it spans the screen without a sideways scrollbar. Placed before
+  // paint so it never shows at the fallback top, it follows the header's bottom edge while the page
+  // scrolls and closes once the header has scrolled away. The header gets a class to rise above fixed
+  // action bars while a menu is open.
+  useLayoutEffect(() => {
+    const header = rootRef.current?.closest(".site-header");
+    if (!open || !header) return;
+    function place() {
+      const { bottom, height } = header!.getBoundingClientRect();
+      // A header with no height has no layout yet (or none at all, as in tests); only a laid-out header
+      // above the viewport has scrolled away.
+      if (height > 0 && bottom <= 0) {
+        setOpen(null);
+        return;
+      }
+      rootRef.current?.style.setProperty("--reading-menu-top", `${Math.max(0, bottom)}px`);
+    }
+    place();
+    header.classList.add("menu-open");
+    window.addEventListener("scroll", place, { passive: true });
+    window.addEventListener("resize", place);
+    return () => {
+      header.classList.remove("menu-open");
       window.removeEventListener("scroll", place);
       window.removeEventListener("resize", place);
     };
@@ -122,6 +139,7 @@ function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?:
           <div className="reading-menu" key={category.id}>
             <button
               aria-controls={panelId}
+              aria-current={here === category.id ? "true" : undefined}
               aria-expanded={expanded}
               className={here === category.id ? "reading-nav-link active" : "reading-nav-link"}
               onClick={() => setOpen((current) => (current === category.id ? null : category.id))}

@@ -95,7 +95,9 @@ describe("SiteHeader", () => {
     const saju = screen.getByRole("button", { name: "사주" });
     const tarot = screen.getByRole("button", { name: "타로" });
     expect(saju).toHaveClass("active");
+    expect(saju).toHaveAttribute("aria-current", "true");
     expect(tarot).not.toHaveClass("active");
+    expect(tarot).not.toHaveAttribute("aria-current");
     expect(saju).toHaveAttribute("aria-expanded", "false");
   });
 
@@ -179,6 +181,8 @@ describe("SiteHeader", () => {
     expect(container.querySelector(".reading-menu-art")).toBeNull();
 
     fireEvent.click(saju);
+    // The header rises above fixed action bars only while a band is open.
+    expect(container.querySelector(".site-header")).toHaveClass("menu-open");
     const art = container.querySelector(".reading-menu-art.saju");
     expect(art).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByRole("link", { name: "만세력 계산" })).toBeInTheDocument();
@@ -186,6 +190,7 @@ describe("SiteHeader", () => {
     fireEvent.click(container.querySelector(".reading-menu-scrim")!);
     expect(saju).toHaveAttribute("aria-expanded", "false");
     expect(container.querySelector(".reading-menu-scrim")).toBeNull();
+    expect(container.querySelector(".site-header")).not.toHaveClass("menu-open");
   });
 
   it("marks only the most specific link as the current page", () => {
