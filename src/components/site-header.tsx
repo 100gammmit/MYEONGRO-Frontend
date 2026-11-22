@@ -13,7 +13,12 @@ import { ReturnAwareLoginLink } from "./return-aware-login-link";
 import { currentCategory, currentLinkHref, readingCategories, type ReadingCategory } from "./site-header-menu";
 import { tarotCardImageSrc } from "./tarot-card-face";
 
-const FOOL_SRC = tarotCardImageSrc("major-00-fool") ?? "";
+// A renamed card asset should fail loudly here, not as an empty image in the menu.
+const FOOL_SRC: string = (() => {
+  const src = tarotCardImageSrc("major-00-fool");
+  if (!src) throw new Error("Unknown tarot card id in the header menu: major-00-fool");
+  return src;
+})();
 
 export function SiteHeader({ authenticated, zodiacYear }: { authenticated: boolean; zodiacYear?: number }) {
   const credits = useReadingCredits();
@@ -150,8 +155,9 @@ function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?:
           </div>
         );
       })}
-      {/* Dims the page under the band; a press on it closes the menu. */}
-      {open && <div aria-hidden="true" className="reading-menu-scrim" onPointerDown={() => setOpen(null)} />}
+      {/* Dims the page under the band. It closes on click, not pointerdown, so it is still there to take the
+          tap's click instead of the element beneath it. */}
+      {open && <div aria-hidden="true" className="reading-menu-scrim" onClick={() => setOpen(null)} />}
     </nav>
   );
 }

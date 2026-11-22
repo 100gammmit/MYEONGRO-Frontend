@@ -183,7 +183,7 @@ describe("SiteHeader", () => {
     expect(art).toHaveAttribute("aria-hidden", "true");
     expect(screen.getByRole("link", { name: "만세력 계산" })).toBeInTheDocument();
 
-    fireEvent.pointerDown(container.querySelector(".reading-menu-scrim")!);
+    fireEvent.click(container.querySelector(".reading-menu-scrim")!);
     expect(saju).toHaveAttribute("aria-expanded", "false");
     expect(container.querySelector(".reading-menu-scrim")).toBeNull();
   });
