@@ -172,22 +172,40 @@ main:focus { outline: none; }
 .reading-nav-link.active { color: var(--text-primary); }
 /* The section in view carries a short rule in the same gold as the main action. */
 .reading-nav-link.active::after { content: ""; position: absolute; left: 50%; bottom: 6px; width: 16px; height: 2px; border-radius: 2px; background: var(--accent-cta); transform: translateX(-50%); }
-/* 타로 and 사주 open a plain menu on click: names only, one column per group, so more groups widen it. */
-.reading-menu { position: relative; }
+/* 타로 and 사주 open a band across the screen under the header: the landing hero's rows on a dark wash. */
 button.reading-nav-link { gap: 5px; border: 0; background: transparent; font: inherit; font-size: 14px; cursor: pointer; }
 button.reading-nav-link[aria-expanded="true"] { color: var(--text-primary); }
 .reading-menu-chevron { transition: transform .2s ease; }
 button.reading-nav-link[aria-expanded="true"] .reading-menu-chevron { transform: rotate(180deg); }
 .reading-menu-panel { display: none; }
-.reading-menu-panel.open { position: absolute; top: calc(100% + 4px); left: 0; z-index: 30; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(168px, auto); padding: 6px 0; border: 1px solid var(--border-default); border-radius: 10px; background: var(--surface-sticky); box-shadow: 0 12px 28px rgba(0, 0, 0, .4); backdrop-filter: blur(12px); }
-.reading-menu-group { padding: 6px 8px; }
-.reading-menu-group + .reading-menu-group { border-left: 1px solid var(--border-hairline); }
-.reading-menu-group p { margin: 4px 10px; color: var(--text-subtle, var(--text-muted)); font-size: 11.5px; font-weight: 600; }
-.reading-menu-group ul { margin: 0; padding: 0; list-style: none; }
-.reading-menu-group a { display: flex; align-items: center; min-height: 44px; padding: 0 10px; border-radius: 7px; color: var(--text-primary); font-size: 14.5px; white-space: nowrap; }
-.reading-menu-group a:hover { background: var(--surface-tint-1); }
-.reading-menu-group a[aria-current="page"] { color: var(--accent-cta-hover); font-weight: 600; }
-.reading-menu-group a[aria-current="page"]::before { content: ""; width: 4px; height: 4px; margin-right: 8px; border-radius: 50%; background: var(--accent-cta); }
+/* Fixed to the viewport so it spans the screen without a sideways scrollbar; the header sets its top. */
+.reading-menu-panel.open { position: fixed; top: var(--reading-menu-top, 68px); left: 0; right: 0; z-index: 30; display: block; overflow: hidden; border-bottom: 1px solid var(--border-default); background: linear-gradient(180deg, color-mix(in srgb, var(--accent-secondary) 9%, #0d0e13), color-mix(in srgb, var(--accent-secondary) 5%, #0b0c10)); box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .7); }
+.reading-menu-panel.open::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .42; background-image: var(--background-star-field); background-position: 12px 18px, 70px 55px, 0 0; background-size: 150px 150px, 230px 230px, 90px 90px; }
+.reading-menu-panel[data-category="tarot"] { --reading-menu-eyebrow: var(--text-accent); }
+.reading-menu-panel[data-category="saju"] { --reading-menu-eyebrow: color-mix(in srgb, var(--accent-secondary) 55%, var(--text-primary)); }
+/* The same width as the header, so the first column starts under the logo. */
+.reading-menu-inner { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 300px)) 1fr; column-gap: 48px; width: min(var(--w-page), calc(100% - 64px)); margin: 0 auto; padding: 30px 0 36px; }
+.reading-menu-group p { margin: 0 0 10px; color: var(--reading-menu-eyebrow); font-size: 12px; font-weight: 600; }
+.reading-menu-group ul { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--border-default); }
+.reading-menu-group a { display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 0 4px; border-bottom: 1px solid var(--border-default); color: var(--text-primary); font-size: 15px; font-weight: 600; }
+.reading-menu-group a:hover { background: var(--surface-tint-2); }
+.reading-menu-arrow { flex: none; margin-left: auto; opacity: .55; }
+.reading-menu-group a:hover .reading-menu-arrow { opacity: 1; }
+.reading-menu-group a[aria-current="page"] { color: var(--accent-cta-hover); }
+.reading-menu-group a[aria-current="page"]::before { content: ""; width: 5px; height: 5px; margin-right: -4px; border-radius: 50%; background: var(--accent-cta); }
+/* The landing's own pictures, decoration only, at the right end. */
+.reading-menu-art { position: relative; justify-self: end; align-self: stretch; width: 280px; }
+.reading-menu-card-back, .reading-menu-card-face { position: absolute; border-radius: 9px; box-shadow: 0 18px 36px rgba(0, 0, 0, .55); }
+.reading-menu-card-back { right: 118px; top: 6px; width: 104px; height: 178px; transform: rotate(-9deg); }
+.reading-menu-card-face { right: 20px; top: -4px; width: 112px; height: 192px; transform: rotate(5deg); }
+.reading-menu-art.saju { display: flex; justify-content: flex-end; align-items: flex-start; gap: 9px; }
+.reading-menu-pillar { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.reading-menu-pillar small { color: var(--text-subtle); font-size: 11px; }
+.reading-menu-pillar .cell { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; width: 50px; height: 132px; border: 1px solid color-mix(in srgb, var(--accent-secondary) 45%, transparent); border-radius: 9px; background: color-mix(in srgb, var(--accent-secondary) 8%, transparent); color: color-mix(in srgb, var(--accent-secondary) 30%, var(--text-primary)); font-family: "Noto Serif KR Variable", Georgia, serif; font-size: 21px; }
+.reading-menu-pillar .cell.day { border-color: color-mix(in srgb, var(--accent-secondary) 80%, transparent); background: color-mix(in srgb, var(--accent-secondary) 18%, transparent); color: var(--text-primary); }
+.reading-menu-pillar .cell.unknown { gap: 2px; border-style: dashed; background: none; color: var(--text-subtle); font-family: inherit; font-size: 11px; }
+/* Dims the page under the band. */
+.reading-menu-scrim { position: fixed; top: var(--reading-menu-top, 68px); right: 0; bottom: 0; left: 0; z-index: 29; background: rgba(5, 5, 8, .5); }
 .account-menu { position: relative; display: flex; align-items: center; }
 .account-menu-button { display: none; }
 .account-menu-panel { display: flex; align-items: center; gap: 6px; }
@@ -885,11 +903,10 @@ label.signup-check-label { cursor: pointer; }
   .reading-nav { gap: 0; }
   .reading-nav-link { justify-content: center; min-width: 44px; padding: 0 9px; font-size: 13px; }
   button.reading-nav-link { font-size: 13px; }
-  /* On a phone the menu spans the screen under the header, still one column per group. */
-  .reading-menu { position: static; }
-  /* Anchored to the header (the nearest positioned box), widened by its 14px side gutters. */
-  .reading-menu-panel.open { position: absolute; top: 100%; left: -14px; right: -14px; grid-auto-columns: minmax(0, 1fr); border-width: 0 0 1px; border-radius: 0 0 10px 10px; }
-  .reading-menu-group a { font-size: 14px; white-space: normal; }
+  /* Two columns in the header's phone width, without arrows. */
+  .reading-menu-inner { width: calc(100% - 28px); grid-template-columns: 1fr 1fr; column-gap: 16px; padding: 20px 0 24px; }
+  .reading-menu-group a { min-height: 50px; padding: 0 2px; font-size: 14px; }
+  .reading-menu-arrow, .reading-menu-art, .reading-menu-art.saju { display: none; }
   .credit-indicator { margin-right: 0; font-size: 12px; }
   .account-menu-button { display: grid; place-content: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; }
   .account-menu-panel { display: none; }

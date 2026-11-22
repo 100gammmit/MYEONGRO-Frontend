@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 
 // A computed sample chart, drawn as decoration on the home page. It is the chart shared by the
 // active saju preview cases (ai-preview cases/saju): year 임신, month 무신, day 갑진, hour unknown.
-const SAMPLE_PILLARS = [
+export const SAMPLE_PILLARS = [
   { label: "시주", stem: null, branch: null },
   { label: "일주", stem: "갑", branch: "진" },
   { label: "월주", stem: "무", branch: "신" },

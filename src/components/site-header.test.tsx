@@ -171,6 +171,23 @@ describe("SiteHeader", () => {
     expect(tarot).toHaveAttribute("aria-expanded", "false");
   });
 
+  it("dims the page only while a band is open, keeps its art out of the link names, and closes on the dim", () => {
+    navigation.pathname = "/";
+    const { container } = render(<SiteHeader authenticated={false} />);
+    const saju = screen.getByRole("button", { name: "사주" });
+    expect(container.querySelector(".reading-menu-scrim")).toBeNull();
+    expect(container.querySelector(".reading-menu-art")).toBeNull();
+
+    fireEvent.click(saju);
+    const art = container.querySelector(".reading-menu-art.saju");
+    expect(art).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByRole("link", { name: "만세력 계산" })).toBeInTheDocument();
+
+    fireEvent.pointerDown(container.querySelector(".reading-menu-scrim")!);
+    expect(saju).toHaveAttribute("aria-expanded", "false");
+    expect(container.querySelector(".reading-menu-scrim")).toBeNull();
+  });
+
   it("marks only the most specific link as the current page", () => {
     navigation.pathname = "/saju/dictionary/ten-gods/sanggwan";
     render(<SiteHeader authenticated={false} />);

@@ -1,14 +1,19 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 
 import { getDisplayedReadingCredits } from "@/domain/reading-credit";
 import { BrandMark } from "./brand-mark";
+import { SAMPLE_PILLARS } from "./home-saju-chart";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReturnAwareLoginLink } from "./return-aware-login-link";
 import { currentCategory, currentLinkHref, readingCategories, type ReadingCategory } from "./site-header-menu";
+import { tarotCardImageSrc } from "./tarot-card-face";
+
+const FOOL_SRC = tarotCardImageSrc("major-00-fool") ?? "";
 
 export function SiteHeader({ authenticated, zodiacYear }: { authenticated: boolean; zodiacYear?: number }) {
   const credits = useReadingCredits();
@@ -48,8 +53,8 @@ export function SiteHeader({ authenticated, zodiacYear }: { authenticated: boole
 }
 
 /**
- * 타로 and 사주 open small menus on click (never on hover), one at a time. Escape returns focus to the
- * button; an outside press, a followed link or a new page closes them.
+ * 타로 and 사주 open a full-width band under the header on click (never on hover), one at a time. Escape
+ * returns focus to the button; an outside press, a followed link or a new page closes it.
  */
 function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?: number }) {
   const [open, setOpen] = useState<ReadingCategory["id"] | null>(null);
@@ -74,11 +79,22 @@ function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?:
       if (rootRef.current?.contains(document.activeElement)) buttonRefs.current[open]?.focus();
       setOpen(null);
     }
+    // The band is fixed to the viewport so it spans the screen without a sideways scrollbar; it follows
+    // the header's bottom edge while the page scrolls.
+    function place() {
+      const bottom = rootRef.current?.closest(".site-header")?.getBoundingClientRect().bottom;
+      if (bottom !== undefined) rootRef.current?.style.setProperty("--reading-menu-top", `${Math.max(0, bottom)}px`);
+    }
+    place();
     document.addEventListener("pointerdown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", place, { passive: true });
+    window.addEventListener("resize", place);
     return () => {
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", place);
+      window.removeEventListener("resize", place);
     };
   }, [open]);
 
@@ -110,26 +126,65 @@ function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?:
               {category.label}
               <svg aria-hidden="true" className="reading-menu-chevron" fill="none" height="12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" viewBox="0 0 24 24" width="12"><path d="M6 9l6 6 6-6" /></svg>
             </button>
-            <div className={expanded ? "reading-menu-panel open" : "reading-menu-panel"} id={panelId}>
-              {category.groups.map((group) => (
-                <div className="reading-menu-group" key={group.label}>
-                  <p>{group.label}</p>
-                  <ul>
-                    {group.links.map((link) => (
-                      <li key={link.href}>
-                        <Link aria-current={link.href === currentHref ? "page" : undefined} href={link.href} onClick={() => setOpen(null)}>
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+            <div className={expanded ? "reading-menu-panel open" : "reading-menu-panel"} data-category={category.id} id={panelId}>
+              <div className="reading-menu-inner">
+                {category.groups.map((group) => (
+                  <div className="reading-menu-group" key={group.label}>
+                    <p>{group.label}</p>
+                    <ul>
+                      {group.links.map((link) => (
+                        <li key={link.href}>
+                          <Link aria-current={link.href === currentHref ? "page" : undefined} href={link.href} onClick={() => setOpen(null)}>
+                            {link.label}
+                            <svg aria-hidden="true" className="reading-menu-arrow" fill="none" height="14" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="14"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+                {/* The art loads only once a menu is opened, so the first page view fetches no extra image. */}
+                {expanded && <MenuArt category={category.id} />}
+              </div>
             </div>
           </div>
         );
       })}
+      {/* Dims the page under the band; a press on it closes the menu. */}
+      {open && <div aria-hidden="true" className="reading-menu-scrim" onPointerDown={() => setOpen(null)} />}
     </nav>
+  );
+}
+
+/** The landing page's own pictures, as decoration at the band's right end on wide screens. */
+function MenuArt({ category }: { category: ReadingCategory["id"] }) {
+  if (category === "tarot") {
+    return (
+      <span aria-hidden="true" className="reading-menu-art tarot">
+        <span className="reading-menu-card-back tarot-back-art" />
+        <Image alt="" className="reading-menu-card-face" height={773} src={FOOL_SRC} unoptimized width={480} />
+      </span>
+    );
+  }
+  return (
+    <span aria-hidden="true" className="reading-menu-art saju">
+      {SAMPLE_PILLARS.map((pillar) => (
+        <span className="reading-menu-pillar" key={pillar.label}>
+          <small>{pillar.label}</small>
+          {pillar.stem ? (
+            <span className={pillar.label === "일주" ? "cell day" : "cell"}>
+              <span>{pillar.stem}</span>
+              <span>{pillar.branch}</span>
+            </span>
+          ) : (
+            <span className="cell unknown">
+              <span>시각</span>
+              <span>모름</span>
+            </span>
+          )}
+        </span>
+      ))}
+    </span>
   );
 }
 
