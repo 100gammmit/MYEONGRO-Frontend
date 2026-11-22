@@ -8,13 +8,10 @@ import { getDisplayedReadingCredits } from "@/domain/reading-credit";
 import { BrandMark } from "./brand-mark";
 import { useReadingCredits } from "./reading-credit-provider";
 import { ReturnAwareLoginLink } from "./return-aware-login-link";
+import { currentCategory, currentLinkHref, readingCategories, type ReadingCategory } from "./site-header-menu";
 
-const READING_LINKS = [
-  { href: "/tarot", label: "타로" },
-  { href: "/saju", label: "사주" },
-] as const;
 
-export function SiteHeader({ authenticated }: { authenticated: boolean }) {
+export function SiteHeader({ authenticated, zodiacYear }: { authenticated: boolean; zodiacYear?: number }) {
   const credits = useReadingCredits();
   const pathname = usePathname();
   return (
@@ -24,22 +21,7 @@ export function SiteHeader({ authenticated }: { authenticated: boolean }) {
           <BrandMark seal size={26} />
           <span>명로</span>
         </Link>
-        <nav aria-label="리딩" className="reading-nav">
-          {READING_LINKS.map((link) => {
-            // Everything under a reading (spreads, daily fortune, results) belongs to that section.
-            const current = pathname === link.href || pathname.startsWith(`${link.href}/`);
-            return (
-              <Link
-                aria-current={current ? "page" : undefined}
-                className={current ? "reading-nav-link active" : "reading-nav-link"}
-                href={link.href}
-                key={link.href}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+        <ReadingMenus pathname={pathname} zodiacYear={zodiacYear} />
       </div>
       <div className="site-header-end">
         {authenticated ? (
@@ -63,6 +45,81 @@ export function SiteHeader({ authenticated }: { authenticated: boolean }) {
         )}
       </div>
     </header>
+  );
+}
+
+/**
+ * 타로 and 사주 open small menus on click (never on hover), one at a time. Escape returns focus to the
+ * button; an outside press, a followed link or a new page closes them.
+ */
+function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?: number }) {
+  const [open, setOpen] = useState<ReadingCategory["id"] | null>(null);
+  const rootRef = useRef<HTMLElement>(null);
+  const buttonRefs = useRef<Partial<Record<ReadingCategory["id"], HTMLButtonElement | null>>>({});
+  const categories = readingCategories(zodiacYear);
+  const here = currentCategory(pathname);
+  const currentHref = currentLinkHref(pathname);
+
+  useEffect(() => {
+    setOpen(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    function handlePointerDown(event: PointerEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(null);
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== "Escape" || !open) return;
+      buttonRefs.current[open]?.focus();
+      setOpen(null);
+    }
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <nav aria-label="리딩" className="reading-nav" ref={rootRef}>
+      {categories.map((category) => {
+        const expanded = open === category.id;
+        const panelId = `reading-menu-${category.id}`;
+        return (
+          <div className="reading-menu" key={category.id}>
+            <button
+              aria-controls={panelId}
+              aria-expanded={expanded}
+              className={here === category.id ? "reading-nav-link active" : "reading-nav-link"}
+              onClick={() => setOpen((current) => (current === category.id ? null : category.id))}
+              ref={(node) => { buttonRefs.current[category.id] = node; }}
+              type="button"
+            >
+              {category.label}
+              <svg aria-hidden="true" className="reading-menu-chevron" fill="none" height="12" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.4" viewBox="0 0 24 24" width="12"><path d="M6 9l6 6 6-6" /></svg>
+            </button>
+            <div className={expanded ? "reading-menu-panel open" : "reading-menu-panel"} id={panelId}>
+              {category.groups.map((group) => (
+                <div className="reading-menu-group" key={group.label}>
+                  <p>{group.label}</p>
+                  <ul>
+                    {group.links.map((link) => (
+                      <li key={link.href}>
+                        <Link aria-current={link.href === currentHref ? "page" : undefined} href={link.href} onClick={() => setOpen(null)}>
+                          {link.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </nav>
   );
 }
 

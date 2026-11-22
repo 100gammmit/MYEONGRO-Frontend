@@ -5,6 +5,7 @@ import { FooterLink } from "@/components/footer-link";
 import { ReadingCreditProvider } from "@/components/reading-credit-provider";
 import { ServiceUpdateBanner } from "@/components/service-update-banner";
 import { SiteHeader } from "@/components/site-header";
+import { ZODIAC_YEAR_CONTENT } from "@/domain/zodiac-fortune";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
 import "@kfonts/maruburi";
@@ -37,7 +38,7 @@ export default async function RootLayout({
         <ReadingCreditProvider authenticated={authenticated}>
           {/* Keyboard users jump past the header straight to the page's own content. */}
           <a className="skip-link" href="#main">본문 바로가기</a>
-          <SiteHeader authenticated={authenticated} />
+          <SiteHeader authenticated={authenticated} zodiacYear={ZODIAC_YEAR_CONTENT.year} />
           <ServiceUpdateBanner />
           <main id="main" tabIndex={-1}>{children}</main>
           <footer className="site-footer">
@@ -46,9 +47,6 @@ export default async function RootLayout({
             </p>
             <div>
               <FooterLink href="/faq">자주 묻는 질문</FooterLink>
-              <FooterLink href="/guide/tarot">타로 사용 가이드</FooterLink>
-              <FooterLink href="/guide/saju">사주 사용 가이드</FooterLink>
-              <FooterLink href="/saju/dictionary">사주 개념 사전</FooterLink>
               <FooterLink href="/about">명로 소개</FooterLink>
               <FooterLink href="/updates">업데이트 소식</FooterLink>
               <FooterLink href="/terms">서비스 이용약관</FooterLink>

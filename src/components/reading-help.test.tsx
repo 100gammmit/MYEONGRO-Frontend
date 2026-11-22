@@ -6,7 +6,7 @@ import FaqPage, { metadata as faqMetadata } from "@/app/faq/page";
 import TarotGuidePage, { metadata as tarotMetadata } from "@/app/guide/tarot/page";
 import SajuGuidePage, { metadata as sajuMetadata } from "@/app/guide/saju/page";
 import { FAQ_GROUPS, SAJU_GUIDE, TAROT_GUIDE } from "@/content/reading-help";
-import { ReadingGuideLink, ReadingHelpEntry } from "./reading-help-links";
+import { ReadingGuideLink } from "./reading-help-links";
 
 const originalScroll = Object.getOwnPropertyDescriptor(Element.prototype, "scrollIntoView");
 afterEach(() => {
@@ -82,9 +82,7 @@ describe("public reading help", () => {
     }
   });
 
-  it("connects the home entry to all three public pages and provides metadata", () => {
-    render(<ReadingHelpEntry />);
-    expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(["/guide/tarot", "/guide/saju", "/faq", "/guide/tarot/example", "/guide/saju/annual-report"]);
+  it("gives the FAQ and both guides their own metadata", () => {
     for (const metadata of [faqMetadata, tarotMetadata, sajuMetadata]) {
       expect(metadata.title).toMatch(/명로/);
       expect(metadata.description).toBeTruthy();

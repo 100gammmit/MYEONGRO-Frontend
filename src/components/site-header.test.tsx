@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, vi } from "vitest";
 
 const navigation = vi.hoisted(() => ({
@@ -87,25 +87,82 @@ describe("SiteHeader", () => {
     expect(credits.refresh).toHaveBeenCalledTimes(1);
   });
 
-  it("offers tarot and saju to everyone and marks the section in view", () => {
+  it("offers tarot and saju as menu buttons and marks the section in view", () => {
     navigation.pathname = "/saju/results/reading-1";
 
-    render(<SiteHeader authenticated={false} />);
+    render(<SiteHeader authenticated={false} zodiacYear={2027} />);
 
-    expect(screen.getByRole("link", { name: "사주" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "타로" })).toHaveAttribute("href", "/tarot");
-    expect(screen.getByRole("link", { name: "타로" })).not.toHaveAttribute("aria-current");
+    const saju = screen.getByRole("button", { name: "사주" });
+    const tarot = screen.getByRole("button", { name: "타로" });
+    expect(saju).toHaveClass("active");
+    expect(tarot).not.toHaveClass("active");
+    expect(saju).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("keeps the daily fortune under tarot but not look-alike paths", () => {
-    navigation.pathname = "/tarot/daily";
-    const { unmount } = render(<SiteHeader authenticated={false} />);
-    expect(screen.getByRole("link", { name: "타로" })).toHaveAttribute("aria-current", "page");
-    unmount();
+  it("marks 사주 for pages outside /saju that belong to it, and skips look-alike paths", () => {
+    for (const [path, active] of [
+      ["/manseryeok", "사주"], ["/zodiac/rat", "사주"], ["/saju/dictionary/elements/wood", "사주"], ["/guide/saju/annual-report", "사주"],
+      ["/tarot/daily", "타로"], ["/guide/tarot", "타로"], ["/tarotology", null], ["/faq", null],
+    ] as const) {
+      navigation.pathname = path;
+      const { unmount } = render(<SiteHeader authenticated={false} />);
+      expect(screen.getByRole("button", { name: "사주" }).classList.contains("active"), path).toBe(active === "사주");
+      expect(screen.getByRole("button", { name: "타로" }).classList.contains("active"), path).toBe(active === "타로");
+      unmount();
+    }
+  });
 
-    navigation.pathname = "/tarotology";
+  it("opens one category at a time with its groups and links, and closes on a second press", () => {
+    navigation.pathname = "/";
+    render(<SiteHeader authenticated={false} zodiacYear={2027} />);
+    const saju = screen.getByRole("button", { name: "사주" });
+    const tarot = screen.getByRole("button", { name: "타로" });
+
+    fireEvent.click(saju);
+    expect(saju).toHaveAttribute("aria-expanded", "true");
+    const panel = document.getElementById(saju.getAttribute("aria-controls")!)!;
+    expect(panel).toHaveClass("open");
+    expect(within(panel).getAllByRole("link").map((link) => [link.textContent, link.getAttribute("href")])).toEqual([
+      ["AI 사주 리딩", "/saju"], ["만세력 계산", "/manseryeok"], ["2027 띠별 신년운세", "/zodiac"],
+      ["사주 개념 사전", "/saju/dictionary"], ["사주 사용 가이드", "/guide/saju"], ["한 해 리포트 읽는 법", "/guide/saju/annual-report"],
+    ]);
+    expect(within(panel).getByText("이용하기")).toBeInTheDocument();
+    expect(within(panel).getByText("읽을거리")).toBeInTheDocument();
+
+    fireEvent.click(tarot);
+    expect(tarot).toHaveAttribute("aria-expanded", "true");
+    expect(saju).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(tarot);
+    expect(tarot).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("closes the category menu with Escape (back to its button), an outside press or a followed link", () => {
+    navigation.pathname = "/";
     render(<SiteHeader authenticated={false} />);
-    expect(screen.getByRole("link", { name: "타로" })).not.toHaveAttribute("aria-current");
+    const tarot = screen.getByRole("button", { name: "타로" });
+
+    fireEvent.click(tarot);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(tarot).toHaveAttribute("aria-expanded", "false");
+    expect(tarot).toHaveFocus();
+
+    fireEvent.click(tarot);
+    fireEvent.pointerDown(document.body);
+    expect(tarot).toHaveAttribute("aria-expanded", "false");
+
+    fireEvent.click(tarot);
+    fireEvent.click(screen.getByRole("link", { name: "오늘의 운세" }));
+    expect(tarot).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("marks only the most specific link as the current page", () => {
+    navigation.pathname = "/saju/dictionary/ten-gods/sanggwan";
+    render(<SiteHeader authenticated={false} />);
+    fireEvent.click(screen.getByRole("button", { name: "사주" }));
+    expect(screen.getByRole("link", { name: "사주 개념 사전" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "AI 사주 리딩" })).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("link", { name: "띠별 신년운세" })).toHaveAttribute("href", "/zodiac");
   });
 
   it("opens the account menu and closes it with Escape or an outside press", () => {

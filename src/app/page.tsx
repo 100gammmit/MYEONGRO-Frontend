@@ -2,7 +2,6 @@ import { publicPageMetadata } from "@/infrastructure/site-metadata";
 import Image from "next/image";
 import Link from "next/link";
 import { HomeSajuChart } from "@/components/home-saju-chart";
-import { ReadingHelpEntry } from "@/components/reading-help-links";
 import { TarotCardCaption, tarotCardImageSrc } from "@/components/tarot-card-face";
 import { ZODIAC_YEAR_CONTENT } from "@/domain/zodiac-fortune";
 
@@ -211,7 +210,6 @@ export default function HomePage() {
         </Link>
       </section>
 
-      <ReadingHelpEntry />
       <section className="landing-closing page-width" aria-labelledby="landing-closing-title">
         <h2 id="landing-closing-title">오늘은 어떤 마음인가요?</h2>
         <Link href="/tarot/daily" className="primary-button closing-cta">

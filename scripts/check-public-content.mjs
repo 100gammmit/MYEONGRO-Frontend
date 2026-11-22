@@ -172,11 +172,14 @@ try {
     await page.getByRole("heading", { name: "개인정보 보호책임자와 문의처", exact: true }).scrollIntoViewIfNeeded();
     await page.screenshot({ path: `${output}/privacy-contact-${width}.png` });
     await page.goto(base);
-    await page.getByRole("navigation", { name: "리딩 예시와 해설" }).getByRole("link").first().click();
+    // The header's 타로 menu leads to the reading example, at every width.
+    await page.getByRole("button", { name: "타로" }).click();
+    await page.getByRole("link", { name: "리딩 예시" }).click();
     await page.waitForURL(`${base}${articles[0]}`);
     for (const [guide, article] of [["/guide/tarot", articles[0]], ["/guide/saju", articles[1]]]) {
       await page.goto(`${base}${guide}`);
-      await page.locator(`a[href="${article}"]`).click();
+      // The header menu holds the same link, hidden until opened; the guide's own link is in main.
+      await page.locator(`main a[href="${article}"]`).click();
       await page.waitForURL(`${base}${article}`);
     }
     for (const path of ["/zodiac", "/zodiac/rat", "/manseryeok"]) {
