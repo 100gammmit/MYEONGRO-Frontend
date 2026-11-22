@@ -7,7 +7,7 @@
 .summary ul, .section ul { padding-left: 22px; margin-block: 12px; }
 .summary li, .section li { margin-block: 10px; line-height: 1.8; color: var(--text-secondary); }
 .toc { display: grid; gap: 0; padding: 24px 0; border-bottom: 1px solid var(--border-default); }
-.toc a, .links a, .answer a, .entry a, .inline a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 4px; line-height: 1.7; }
+.toc a, .links a, .answer a, .inline a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 4px; line-height: 1.7; }
 /* Stand-alone link lists are tap targets of their own, unlike links inside a sentence. */
 .toc a, .links a, .answer > a { display: inline-flex; align-items: center; min-height: 44px; }
 .section { padding-block: 32px; border-bottom: 1px solid var(--border-hairline); scroll-margin-top: 100px; }

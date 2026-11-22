@@ -142,10 +142,25 @@ describe("SiteHeader", () => {
     render(<SiteHeader authenticated={false} />);
     const tarot = screen.getByRole("button", { name: "타로" });
 
+    tarot.focus();
     fireEvent.click(tarot);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(tarot).toHaveAttribute("aria-expanded", "false");
     expect(tarot).toHaveFocus();
+
+    // Escape with focus already elsewhere closes the menu but leaves focus where it is.
+    const login = screen.getByRole("link", { name: "로그인" });
+    fireEvent.click(tarot);
+    login.focus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(tarot).toHaveAttribute("aria-expanded", "false");
+    expect(login).toHaveFocus();
+
+    // Tabbing out of the menu closes it.
+    tarot.focus();
+    fireEvent.click(tarot);
+    fireEvent.blur(tarot, { relatedTarget: login });
+    expect(tarot).toHaveAttribute("aria-expanded", "false");
 
     fireEvent.click(tarot);
     fireEvent.pointerDown(document.body);

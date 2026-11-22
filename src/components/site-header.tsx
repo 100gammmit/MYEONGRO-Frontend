@@ -10,7 +10,6 @@ import { useReadingCredits } from "./reading-credit-provider";
 import { ReturnAwareLoginLink } from "./return-aware-login-link";
 import { currentCategory, currentLinkHref, readingCategories, type ReadingCategory } from "./site-header-menu";
 
-
 export function SiteHeader({ authenticated, zodiacYear }: { authenticated: boolean; zodiacYear?: number }) {
   const credits = useReadingCredits();
   const pathname = usePathname();
@@ -71,7 +70,8 @@ function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?:
     }
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key !== "Escape" || !open) return;
-      buttonRefs.current[open]?.focus();
+      // Bring focus home only when it is still in the menu; elsewhere on the page it stays put.
+      if (rootRef.current?.contains(document.activeElement)) buttonRefs.current[open]?.focus();
       setOpen(null);
     }
     document.addEventListener("pointerdown", handlePointerDown);
@@ -83,7 +83,17 @@ function ReadingMenus({ pathname, zodiacYear }: { pathname: string; zodiacYear?:
   }, [open]);
 
   return (
-    <nav aria-label="리딩" className="reading-nav" ref={rootRef}>
+    <nav
+      aria-label="리딩"
+      className="reading-nav"
+      // Tabbing past the last link closes the menu so it does not linger over the page. A blur with no
+      // new focus target (Safari clicking a link) is left alone so the click still lands.
+      onBlur={(event) => {
+        const next = event.relatedTarget as Node | null;
+        if (next && !rootRef.current?.contains(next)) setOpen(null);
+      }}
+      ref={rootRef}
+    >
       {categories.map((category) => {
         const expanded = open === category.id;
         const panelId = `reading-menu-${category.id}`;
