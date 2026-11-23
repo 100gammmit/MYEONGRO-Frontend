@@ -226,7 +226,8 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
     const controller = new AbortController();
     const key = detailKey;
     requestedDetailKeyRef.current = key;
-    const birth = formRef.current.birth;
+    // The render's own form: the ref is synced by a later effect and can still hold the previous input here.
+    const birth = form.birth;
     setDetailCheck({ key, status: "loading" });
     const options = calculationOptionsOf(birth);
     void fetchAnnualDetailLevel(
@@ -247,7 +248,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
       controller.abort();
       if (requestedDetailKeyRef.current === key) requestedDetailKeyRef.current = null;
     };
-  }, [phase, isAnnual, detailKey, detailReady, redirectToLogin]);
+  }, [phase, isAnnual, detailKey, detailReady, form.birth, redirectToLogin]);
 
   const loadBirthPlaces = useCallback(async () => {
     setCatalogStatus("loading");
