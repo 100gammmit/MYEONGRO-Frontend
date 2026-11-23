@@ -142,6 +142,31 @@
 .chartBranch { border-color: color-mix(in srgb, var(--accent-strong) 60%, transparent); background: color-mix(in srgb, var(--accent-primary) 10%, transparent); }
 .chartDim { opacity: .35; }
 
+/* Stems and branches: ten day-stem chips, relation wheels, the zodiac card. */
+.dayChips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 16px 0 0; padding: 0; list-style: none; }
+.dayChips li { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
+.dayChips li.dayChipCurrent { border-color: var(--accent-cta); background: color-mix(in srgb, var(--accent-cta) 10%, transparent); }
+.dayChipGlyph { font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 22px; line-height: 1.2; }
+.dayChipDay { color: var(--text-muted); font-size: 12px; }
+.dayChips a { display: inline-flex; align-items: center; min-height: 32px; color: var(--text-primary); font-size: 14px; font-weight: 600; text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 4px; }
+.wheels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+.wheelSingle { grid-template-columns: minmax(0, 320px); justify-content: center; }
+.wheel { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0; padding: 14px 10px 12px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
+.wheelTitle { color: var(--text-muted); font-size: 13px; font-weight: 600; }
+.wheelArt { display: block; width: 100%; max-width: 290px; height: auto; font-family: inherit; }
+.wheelCaption { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.6; text-align: center; }
+.zodiacCard { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; padding: 16px 18px; border: 1px solid color-mix(in srgb, var(--accent-cta) 35%, transparent); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-cta) 5%, transparent); }
+.zodiacCard b { display: block; color: var(--text-primary); font-size: 15px; }
+.zodiacCard small { color: var(--text-muted); font-size: 13px; }
+.zodiacCard a { display: inline-flex; flex: none; align-items: center; min-height: 44px; color: var(--accent-cta-hover); font-size: 14px; font-weight: 600; }
+.guideStems { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.guideBranches { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
+.guideStems a, .guideBranches a { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 58px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-tint-1); color: var(--text-primary); font-size: 13px; font-weight: 600; }
+.guideStems a:hover, .guideBranches a:hover { border-color: var(--border-strong); }
+.guideStems .glyph, .guideBranches .glyph { font-size: 20px; }
+.guideBranches small { color: var(--text-muted); font-size: 11px; font-weight: 500; }
+.browse.browseTwelve ul { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+
 @media (max-width: 760px) {
   .guideBasics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .guideHead span { display: none; }
@@ -157,4 +182,8 @@
   .five a { min-height: 0; padding: 12px 4px; }
   .five .gridDesc { display: none; }
   .ctas { flex-direction: column; }
+  .wheels { grid-template-columns: 1fr; }
+  .wheelSingle { grid-template-columns: 1fr; }
+  .guideStems { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .zodiacCard { flex-direction: column; align-items: flex-start; }
 }

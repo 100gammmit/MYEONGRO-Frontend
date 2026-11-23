@@ -1,11 +1,12 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { BASIC_STEP_IDS, ELEMENT_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary";
+import { BASIC_STEP_IDS, ELEMENT_SLUGS, STEM_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary";
 
 import SajuBasicsPage from "./basics/page";
 import ElementPage, { generateMetadata as elementMetadata } from "./elements/[slug]/page";
 import SajuDictionaryPage from "./page";
+import StemPage, { generateMetadata as stemMetadata } from "./stems/[slug]/page";
 import TenGodPage, { generateMetadata as tenGodMetadata } from "./ten-gods/[slug]/page";
 
 const params = (slug: string) => ({ params: Promise.resolve({ slug }) });
@@ -15,7 +16,7 @@ describe("saju dictionary first page", () => {
     render(<SajuDictionaryPage />);
     expect(screen.getByRole("heading", { level: 1, name: "사주 용어 찾아보기" })).toBeInTheDocument();
     const headings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
-    expect(headings).toEqual(["기초 개념", "십성", "오행"]);
+    expect(headings).toEqual(["기초 개념", "십성", "오행", "천간"]);
     const basics = screen.getByRole("region", { name: "기초 개념" });
     expect(within(basics).getAllByRole("listitem").map((item) => within(item).getByRole("link").getAttribute("href")))
       .toEqual(BASIC_STEP_IDS.map((id) => `/saju/dictionary/basics#${id}`));
@@ -23,6 +24,8 @@ describe("saju dictionary first page", () => {
     expect(within(ten).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(TEN_GOD_SLUGS.map((slug) => `/saju/dictionary/ten-gods/${slug}`));
     const five = screen.getByRole("region", { name: "오행" });
     expect(within(five).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(ELEMENT_SLUGS.map((slug) => `/saju/dictionary/elements/${slug}`));
+    const stems = screen.getByRole("region", { name: "천간" });
+    expect(within(stems).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(STEM_SLUGS.map((slug) => `/saju/dictionary/stems/${slug}`));
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.queryByRole("search")).not.toBeInTheDocument();
     expect(screen.getByText(/이 글은 AI로 만든 초안을 운영자가 검수했습니다\./)).toBeInTheDocument();
@@ -72,6 +75,12 @@ describe("every dictionary page", () => {
       expect(container.textContent!.length, slug).toBeLessThan(3000);
       unmount();
     }
+    for (const slug of STEM_SLUGS) {
+      const { unmount, container } = render(await StemPage(params(slug)));
+      expect(container.textContent!.length, slug).toBeGreaterThan(1500);
+      expect(container.textContent!.length, slug).toBeLessThan(3000);
+      unmount();
+    }
     for (const slug of ELEMENT_SLUGS) {
       const { unmount, container } = render(await ElementPage(params(slug)));
       expect(container.textContent!.length, slug).toBeGreaterThan(1500);
@@ -90,5 +99,25 @@ describe("element page", () => {
     expect(screen.getByRole("navigation", { name: "오행 다섯 가지" })).toBeInTheDocument();
     expect(document.body.textContent!.length).toBeGreaterThan(1500);
     expect(await elementMetadata(params("water"))).toMatchObject({ alternates: { canonical: "/saju/dictionary/elements/water" } });
+  });
+});
+
+describe("stem page", () => {
+  it("shows the ten god for every day stem, the combination and clash wheel, and links its pair", async () => {
+    render(await StemPage(params("gap")));
+    expect(screen.getByRole("heading", { level: 1, name: /갑/ })).toBeInTheDocument();
+    const chips = screen.getByRole("list", { name: "일간마다 갑이 갖는 십성" });
+    expect(within(chips).getAllByRole("link").map((link) => link.textContent)).toEqual(["비견", "겁재", "편인", "정인", "편관", "정관", "편재", "정재", "식신", "상관"]);
+    expect(screen.getByRole("img", { name: "갑의 합과 충: 합 · 기(己)와 묶임 · 충 · 경(庚)과 마주 봄" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "을(乙)" })[0]).toHaveAttribute("href", "/saju/dictionary/stems/eul");
+    expect(screen.getByRole("navigation", { name: "천간 열 글자" })).toBeInTheDocument();
+    expect(screen.queryByText(/AI로 만든 초안/)).not.toBeInTheDocument();
+  });
+
+  it("says when a stem has no clash, and titles itself with the Hanja", async () => {
+    render(await StemPage(params("mu")));
+    expect(screen.getByRole("img", { name: /충을 이루는 천간 없음/ })).toBeInTheDocument();
+    expect(await stemMetadata(params("sin"))).toMatchObject({ title: "천간 신(辛)의 뜻: 사주 개념 사전 | 명로", alternates: { canonical: "/saju/dictionary/stems/sin" } });
+    expect(await stemMetadata(params("nope"))).toEqual({});
   });
 });

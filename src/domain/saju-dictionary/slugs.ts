@@ -47,3 +47,49 @@ export function tenGodPath(slug: TenGodSlug): string {
 export function elementPath(slug: ElementSlug): string {
   return `${DICTIONARY_PATH}/elements/${slug}`;
 }
+
+/** The ten stems in order. Paths split stems/ and branches/, so 辛 and 申 may both be "sin". */
+export const STEM_SLUGS = ["gap", "eul", "byeong", "jeong", "mu", "gi", "gyeong", "sin", "im", "gye"] as const;
+export type StemSlug = (typeof STEM_SLUGS)[number];
+const STEM_HANJA = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"] as const;
+
+/** The twelve branches in order, 子 first, the same order as the zodiac signs. */
+export const BRANCH_SLUGS = ["ja", "chuk", "in", "myo", "jin", "sa", "o", "mi", "sin", "yu", "sul", "hae"] as const;
+export type BranchSlug = (typeof BRANCH_SLUGS)[number];
+const BRANCH_HANJA = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"] as const;
+
+export function isStemSlug(value: string): value is StemSlug {
+  return (STEM_SLUGS as readonly string[]).includes(value);
+}
+
+export function isBranchSlug(value: string): value is BranchSlug {
+  return (BRANCH_SLUGS as readonly string[]).includes(value);
+}
+
+export function stemHanja(slug: StemSlug): string {
+  return STEM_HANJA[STEM_SLUGS.indexOf(slug)];
+}
+
+export function branchHanja(slug: BranchSlug): string {
+  return BRANCH_HANJA[BRANCH_SLUGS.indexOf(slug)];
+}
+
+/** The dictionary slug for a stem character from a chart, e.g. "甲" → "gap". */
+export function stemSlugOf(hanja: string | null | undefined): StemSlug | null {
+  const index = hanja ? (STEM_HANJA as readonly string[]).indexOf(hanja) : -1;
+  return index < 0 ? null : STEM_SLUGS[index];
+}
+
+/** The dictionary slug for a branch character from a chart, e.g. "子" → "ja". */
+export function branchSlugOf(hanja: string | null | undefined): BranchSlug | null {
+  const index = hanja ? (BRANCH_HANJA as readonly string[]).indexOf(hanja) : -1;
+  return index < 0 ? null : BRANCH_SLUGS[index];
+}
+
+export function stemPath(slug: StemSlug): string {
+  return `${DICTIONARY_PATH}/stems/${slug}`;
+}
+
+export function branchPath(slug: BranchSlug): string {
+  return `${DICTIONARY_PATH}/branches/${slug}`;
+}

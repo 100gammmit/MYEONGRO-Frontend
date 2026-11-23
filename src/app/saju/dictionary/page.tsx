@@ -7,11 +7,14 @@ import {
   DICTIONARY,
   DICTIONARY_PATH,
   ELEMENT_ENTRIES,
+  STEM_SLUGS,
   TEN_GODS,
   TEN_GOD_GROUPS,
   elementFacts,
   elementPath,
   groupOf,
+  stemFacts,
+  stemPath,
   tenGodPath,
 } from "@/domain/saju-dictionary";
 import { generatedShareImage, publicPageMetadata } from "@/infrastructure/site-metadata";
@@ -21,7 +24,7 @@ const TITLE = "사주 개념 사전";
 export const metadata = publicPageMetadata(
   DICTIONARY_PATH,
   `${TITLE}: 십성과 오행 뜻 찾아보기 | 명로`,
-  "만세력에 나오는 사주 용어를 기초 개념부터 십성 열 가지, 오행 다섯 가지까지 한 페이지에서 찾아볼 수 있어요.",
+  "만세력에 나오는 사주 용어를 기초 개념부터 십성 열 가지, 오행 다섯 가지, 천간 열 글자까지 한 페이지에서 찾아볼 수 있어요.",
   generatedShareImage(DICTIONARY_PATH, TITLE),
 );
 
@@ -78,6 +81,26 @@ export default function SajuDictionaryPage() {
               </Link>
             </li>
           ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="dictionary-stems" className={styles.guideSection}>
+        <div className={styles.guideHead}>
+          <h2 id="dictionary-stems">천간</h2>
+          <span>명식의 위 글자 열 개</span>
+        </div>
+        <ul className={styles.guideStems}>
+          {STEM_SLUGS.map((slug) => {
+            const { glyph } = stemFacts(slug);
+            return (
+              <li key={slug}>
+                <Link href={stemPath(slug)}>
+                  <span aria-hidden="true" className={`${styles.glyph} ${styles[glyph.element]}`}>{glyph.hanja}</span>
+                  {glyph.korean}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </section>
 

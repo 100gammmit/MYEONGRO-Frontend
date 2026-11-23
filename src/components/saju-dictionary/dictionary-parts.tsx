@@ -9,6 +9,7 @@ import {
   TEN_GOD_SLUGS,
   pairOf,
   tenGodPath,
+  type DayTenGod,
   type Glyph,
   type TenGodSlug,
 } from "@/domain/saju-dictionary";
@@ -69,6 +70,21 @@ export function NumberedSections({ sections }: { sections: readonly DetailSectio
 
 export function Paragraphs({ items }: { items: readonly string[] }) {
   return <>{items.map((item) => <p key={item}>{item}</p>)}</>;
+}
+
+/** Ten chips, one per day stem: what this glyph is to that day stem, each linking to the ten god's page. */
+export function DayTenGodChips({ items, current, label }: { items: readonly DayTenGod[]; current?: string; label: string }) {
+  return (
+    <ul aria-label={label} className={styles.dayChips}>
+      {items.map(({ day, tenGod }) => (
+        <li className={day.hanja === current ? styles.dayChipCurrent : undefined} key={day.hanja}>
+          <span aria-hidden="true" className={`${styles.dayChipGlyph} ${styles[day.element]}`}>{day.hanja}</span>
+          <span className={styles.dayChipDay}>{day.korean} 일간</span>
+          <Link href={tenGodPath(tenGod)}>{TEN_GOD_NAMES[tenGod]}</Link>
+        </li>
+      ))}
+    </ul>
+  );
 }
 
 /** The judging table. On a ten god page its cell is marked current and its pair outlined. */
