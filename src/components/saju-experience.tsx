@@ -526,7 +526,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
               {([['birth_annual_question', '종합 사주', '나의 성향과 연간 흐름, 질문을 함께 읽습니다.'], ['annual_monthly', '한 해 리포트', '연간 개요와 12개월의 흐름을 다시 찾아 읽습니다.']] as const).map(([value, label, description]) => (
                 <label className="choice-card" key={value}>
                   <input className="sr-only" type="radio" name="report-type" checked={form.reportType === value} onChange={() => updateForm({ reportType: value })} />
-                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong><span className="choice-price">{value === "annual_monthly" ? annualPriceLabel(annualFull, annualBrief) : `${creditData?.costs.saju ?? "…"}크레딧`}</span></span>
+                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong><span className="choice-price">{value === "annual_monthly" ? annualPriceRange(annualFull, annualBrief) : `${creditData?.costs.saju ?? "…"}크레딧`}</span></span>
                   <span className="choice-desc">{description}</span>
                 </label>
               ))}
@@ -711,6 +711,14 @@ type DetailCheck =
 // Only what decides the format: the birth profile and the calculation options.
 function detailCheckKey(birth: SajuBirthValues): string {
   return JSON.stringify([birthProfileOf(birth), calculationOptionsOf(birth) ?? null]);
+}
+
+// The card keeps the same one-line shape as the other report's price; the guidance below names each format.
+function annualPriceRange(full: number | null, brief: number | null): string {
+  if (full === null || brief === null) return "…크레딧";
+  const low = Math.min(full, brief);
+  const high = Math.max(full, brief);
+  return low === high ? `${low}크레딧` : `${low}~${high}크레딧`;
 }
 
 function annualPriceLabel(full: number | null, brief: number | null): string {

@@ -459,7 +459,7 @@ describe("SajuExperience", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
     await startWithAcceptedConsent();
     expect(within(screen.getByRole("radio", { name: /종합 사주/ }).closest("label")!).getByText("4크레딧")).toBeInTheDocument();
-    expect(within(screen.getByRole("radio", { name: /한 해 리포트/ }).closest("label")!).getByText("상세형 6 · 간략형 4크레딧")).toBeInTheDocument();
+    expect(within(screen.getByRole("radio", { name: /한 해 리포트/ }).closest("label")!).getByText("4~6크레딧")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("radio", { name: /한 해 리포트/ }));
     fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
     expect(screen.getByRole("button", { name: "다음" })).toBeEnabled();
