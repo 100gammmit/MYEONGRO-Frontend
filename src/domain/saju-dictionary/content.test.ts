@@ -145,8 +145,9 @@ describe("stem copy", () => {
     for (const entry of STEM_ENTRIES) {
       const facts = stemFacts(entry.slug);
       const relations = entry.relations.join(" ");
-      if (facts.combination) expect(relations, entry.slug).toContain(facts.combination.korean);
-      if (facts.clash) expect(relations, entry.slug).toContain(facts.clash.korean);
+      // The relations paragraph names each partner with its Hanja, so a wrong partner cannot pass by sharing a syllable.
+      if (facts.combination) expect(relations, entry.slug).toContain(`(${facts.combination.hanja})`);
+      if (facts.clash) expect(relations, entry.slug).toContain(`(${facts.clash.hanja})`);
       // Every "X 일간에게 … Y" example must match the computed ten god.
       for (const match of entry.tenGods.join(" ").matchAll(/([가-힣]) 일간에게(?: [가-힣]+)?(?:는)? (?:[^,.]*?)(비견|겁재|식신|상관|편재|정재|편관|정관|편인|정인)/g)) {
         const day = facts.byDay.find((item) => item.day.korean === match[1]);
