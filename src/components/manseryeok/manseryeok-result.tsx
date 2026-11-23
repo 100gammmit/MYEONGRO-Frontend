@@ -239,8 +239,8 @@ function GlyphCell({ glyph: value, href }: { glyph: Glyph; href?: string | null 
   );
   if (!href) return <span className={styles.glyph}>{body}</span>;
   return (
-    <Link className={`${styles.glyph} ${styles.glyphLink}`} href={href} rel="noopener" target="_blank">
-      {body}<span className="sr-only"> 뜻 보기</span>
+    <Link aria-label={`${value.korean}(${value.hanja}) 뜻 보기`} className={`${styles.glyph} ${styles.glyphLink}`} href={href} rel="noopener" target="_blank">
+      {body}
     </Link>
   );
 }
