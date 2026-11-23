@@ -158,7 +158,8 @@ export function ElementCycle() {
 /** The closing block every detail page shares: related reads, the whole set, both starts and the disclaimer. */
 export function DetailFooter({ related, browse }: {
   related: readonly { label: string; href: string }[];
-  browse: { title: string; items: readonly { label: string; href: string; current: boolean }[] };
+  /** wide lays twelve items out six to a row. */
+  browse: { title: string; wide?: boolean; items: readonly { label: string; href: string; current: boolean }[] };
 }) {
   return (
     <>
@@ -168,7 +169,7 @@ export function DetailFooter({ related, browse }: {
           {related.map((item) => <li key={item.href}><Link href={item.href}>{item.label}</Link></li>)}
         </ul>
       </section>
-      <nav aria-labelledby="dictionary-browse" className={styles.browse}>
+      <nav aria-labelledby="dictionary-browse" className={browse.wide ? `${styles.browse} ${styles.browseTwelve}` : styles.browse}>
         <h2 id="dictionary-browse">{browse.title}</h2>
         <ul>
           {browse.items.map((item) => (

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   BASICS,
+  BRANCH_ENTRIES,
   BRANCH_SLUGS,
   ELEMENT_ENTRIES,
   ELEMENT_SLUGS,
@@ -159,11 +160,34 @@ describe("stem copy", () => {
   });
 });
 
+describe("branch copy", () => {
+  it("names the computed month, solar term, main stem, relations and ten god examples", () => {
+    for (const entry of BRANCH_ENTRIES) {
+      const facts = branchFacts(entry.slug);
+      const calendar = entry.calendar.join(" ");
+      expect(calendar, entry.slug).toContain(`${facts.month}월`);
+      expect(calendar, entry.slug).toContain(facts.term);
+      // 신 is written 辛 to keep it apart from the branch 申.
+      const hidden = entry.hidden.join(" ");
+      expect(hidden.includes(facts.hidden[0].korean) || hidden.includes(facts.hidden[0].hanja), entry.slug).toBe(true);
+      const relations = entry.relations.join(" ");
+      for (const relation of [...facts.harmony, ...facts.tension]) {
+        for (const partner of relation.partners) expect(relations.includes(partner.korean) || relations.includes(partner.hanja), `${entry.slug} ${relation.kind} ${partner.hanja}`).toBe(true);
+      }
+      for (const match of entry.tenGods.join(" ").matchAll(/([가-힣]) 일간에게(?:는)? (?:[^,.]*?)(비견|겁재|식신|상관|편재|정재|편관|정관|편인|정인)/g)) {
+        const day = facts.byDay.find((item) => item.day.korean === match[1]);
+        expect(day && TEN_GOD_NAMES[day.tenGod], `${entry.slug}: ${match[0]}`).toBe(match[2]);
+      }
+    }
+  });
+});
+
 describe("dictionary copy", () => {
   const pages = [
     ...TEN_GODS.map((entry) => ({ slug: entry.slug, text: [entry.lead, ...entry.principle, ...entry.meaning, ...entry.timing, ...entry.flow, ...entry.myths.flatMap((myth) => [myth.claim, myth.answer]), ...entry.pair, ...entry.find] })),
     ...ELEMENT_ENTRIES.map((entry) => ({ slug: entry.slug, text: [entry.lead, ...entry.nature, ...entry.cycle, ...entry.chars, ...entry.count, ...entry.read] })),
     ...STEM_ENTRIES.map((entry) => ({ slug: `stem-${entry.slug}`, text: [entry.lead, ...entry.place, ...entry.cycle, ...entry.tenGods, ...entry.relations, ...entry.find] })),
+    ...BRANCH_ENTRIES.map((entry) => ({ slug: `branch-${entry.slug}`, text: [entry.lead, ...entry.calendar, ...entry.hidden, ...entry.tenGods, ...entry.relations, ...entry.find] })),
     { slug: "basics", text: BASICS.steps.flatMap((step) => step.paragraphs) },
   ];
 

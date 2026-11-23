@@ -6,7 +6,7 @@ import robots from "./robots";
 import { PRIVATE_PAGE_METADATA, SHARE_IMAGE, SITE_ORIGIN, publicPageMetadata } from "@/infrastructure/site-metadata";
 import routes from "@/infrastructure/site-routes.json";
 import { ZODIAC_SLUGS } from "@/domain/zodiac-fortune";
-import { ELEMENT_SLUGS, STEM_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary/slugs";
+import { BRANCH_SLUGS, ELEMENT_SLUGS, STEM_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary/slugs";
 import { metadata as accountMetadata } from "./account/layout";
 import { metadata as recordsMetadata } from "./records/layout";
 import { metadata as loginMetadata } from "./login/layout";
@@ -22,6 +22,7 @@ const dynamicValues: Record<string, readonly string[]> = {
   "/saju/dictionary/ten-gods/[slug]": TEN_GOD_SLUGS,
   "/saju/dictionary/elements/[slug]": ELEMENT_SLUGS,
   "/saju/dictionary/stems/[slug]": STEM_SLUGS,
+  "/saju/dictionary/branches/[slug]": BRANCH_SLUGS,
 };
 function walk(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {

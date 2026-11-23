@@ -5,7 +5,7 @@ import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } fro
 
 import { birthPlaceName, birthTimeSummary, formatBirthDate, isBirthTimeKnown, luckBasisSummary, type SajuBirthValues } from "@/domain/saju/birth-input";
 import type { SajuBirthPlacesResponse } from "@/domain/saju/contracts";
-import { DICTIONARY_PATH, elementPath, tenGodPath, tenGodSlugOf } from "@/domain/saju-dictionary/slugs";
+import { DICTIONARY_PATH, branchPath, branchSlugOf, elementPath, stemPath, stemSlugOf, tenGodPath, tenGodSlugOf } from "@/domain/saju-dictionary/slugs";
 import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
 import {
   CHART_COLUMNS,
@@ -105,7 +105,7 @@ export function ManseryeokResult({
             <dt>12운성</dt><dd>일간의 기운이 각 지지에서 어느 단계에 있는지를 열두 단계로 나타낸 것이에요.</dd>
             <dt>공망</dt><dd>일주나 연주를 기준으로 비어 있다고 보는 두 지지예요.</dd>
           </dl>
-          <p className={styles.glossaryMore}>십성 이름과 오행을 누르면 뜻을 볼 수 있어요. <Link href={DICTIONARY_PATH} rel="noopener" target="_blank">사주 개념 사전 전체 보기</Link></p>
+          <p className={styles.glossaryMore}>천간·지지 글자와 십성 이름, 오행을 누르면 뜻을 볼 수 있어요. <Link href={DICTIONARY_PATH} rel="noopener" target="_blank">사주 개념 사전 전체 보기</Link></p>
         </details>
       </Section>
 
@@ -226,16 +226,33 @@ function GlyphChar({ glyph: value, large = false }: { glyph: Glyph; large?: bool
   return <span className={`${large ? styles.hanLarge : styles.han} ${value.element ? styles[value.element] : ""}`} title={value.korean}>{value.hanja}</span>;
 }
 
-function GlyphCell({ glyph: value }: { glyph: Glyph }) {
-  return (
-    <span className={styles.glyph}>
+/** A chart glyph; with href it opens the glyph's dictionary page in a new tab, like the ten god links. */
+function GlyphCell({ glyph: value, href }: { glyph: Glyph; href?: string | null }) {
+  const body = (
+    <>
       <GlyphChar glyph={value} large />
       <span className={styles.glyphKey}>
         <span>{value.korean}</span>
         {value.element ? <small className={styles[value.element]}>{value.sign}{ELEMENT_NAMES[value.element]}</small> : null}
       </span>
-    </span>
+    </>
   );
+  if (!href) return <span className={styles.glyph}>{body}</span>;
+  return (
+    <Link className={`${styles.glyph} ${styles.glyphLink}`} href={href} rel="noopener" target="_blank">
+      {body}<span className="sr-only"> 뜻 보기</span>
+    </Link>
+  );
+}
+
+function stemHref(hanja: string): string | null {
+  const slug = stemSlugOf(hanja);
+  return slug ? stemPath(slug) : null;
+}
+
+function branchHref(hanja: string): string | null {
+  const slug = branchSlugOf(hanja);
+  return slug ? branchPath(slug) : null;
 }
 
 function ChartTable({ chart, highlighted }: { chart: ManseryeokChart; highlighted: Set<string> }) {
@@ -263,13 +280,13 @@ function ChartTable({ chart, highlighted }: { chart: ManseryeokChart; highlighte
           <tr>
             <th scope="row">천간</th>
             {CHART_COLUMNS.filter((position) => !blank(position)).map((position) => (
-              <td className={cell(position, highlighted.has(`${position}-stem`) ? styles.hit : "")} key={position}><GlyphCell glyph={glyph(pillars[position]!.stem.hanja, "stem")} /></td>
+              <td className={cell(position, highlighted.has(`${position}-stem`) ? styles.hit : "")} key={position}><GlyphCell glyph={glyph(pillars[position]!.stem.hanja, "stem")} href={stemHref(pillars[position]!.stem.hanja)} /></td>
             ))}
           </tr>
           <tr>
             <th scope="row">지지</th>
             {CHART_COLUMNS.filter((position) => !blank(position)).map((position) => (
-              <td className={cell(position, highlighted.has(`${position}-branch`) ? styles.hit : "")} key={position}><GlyphCell glyph={glyph(pillars[position]!.branch.hanja, "branch")} /></td>
+              <td className={cell(position, highlighted.has(`${position}-branch`) ? styles.hit : "")} key={position}><GlyphCell glyph={glyph(pillars[position]!.branch.hanja, "branch")} href={branchHref(pillars[position]!.branch.hanja)} /></td>
             ))}
           </tr>
           <tr>

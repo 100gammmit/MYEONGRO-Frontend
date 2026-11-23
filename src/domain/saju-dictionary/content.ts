@@ -2,18 +2,22 @@ import { z } from "zod";
 
 import rawBasics from "./content/basics.json";
 import rawDictionary from "./content/dictionary.json";
+import rawBranches from "./content/branches.json";
 import rawElements from "./content/elements.json";
 import rawStems from "./content/stems.json";
 import rawTenGods from "./content/ten-gods.json";
 import { STEMS } from "./rules";
 import {
+  BRANCH_SLUGS,
   ELEMENT_SLUGS,
   STEM_SLUGS,
   TEN_GOD_NAMES,
   TEN_GOD_SLUGS,
+  isBranchSlug,
   isElementSlug,
   isStemSlug,
   isTenGodSlug,
+  type BranchSlug,
   type ElementSlug,
   type StemSlug,
   type TenGodSlug,
@@ -63,6 +67,16 @@ const stemSchema = z.object({
 }).strict();
 
 
+const branchSchema = z.object({
+  slug: z.enum(BRANCH_SLUGS),
+  lead: text,
+  calendar: paragraphs,
+  hidden: paragraphs,
+  tenGods: paragraphs,
+  relations: paragraphs,
+  find: paragraphs,
+}).strict();
+
 const dictionarySchema = z.object({
   editorialNote: text,
   disclaimer: text,
@@ -85,10 +99,12 @@ export type TenGodEntry = z.infer<typeof tenGodSchema>;
 export type ElementEntry = z.infer<typeof elementSchema>;
 export type DictionaryCopy = z.infer<typeof dictionarySchema>;
 export type StemEntry = z.infer<typeof stemSchema>;
+export type BranchEntry = z.infer<typeof branchSchema>;
 
 export const TEN_GODS: readonly TenGodEntry[] = z.array(tenGodSchema).length(TEN_GOD_SLUGS.length).parse(rawTenGods);
 export const ELEMENT_ENTRIES: readonly ElementEntry[] = z.array(elementSchema).length(ELEMENT_SLUGS.length).parse(rawElements);
 export const STEM_ENTRIES: readonly StemEntry[] = z.array(stemSchema).length(STEM_SLUGS.length).parse(rawStems);
+export const BRANCH_ENTRIES: readonly BranchEntry[] = z.array(branchSchema).length(BRANCH_SLUGS.length).parse(rawBranches);
 export const DICTIONARY: DictionaryCopy = dictionarySchema.parse(rawDictionary);
 export const BASICS: BasicsCopy = basicsSchema.parse(rawBasics);
 
@@ -113,6 +129,9 @@ TEN_GODS.forEach((entry, index) => {
 STEM_ENTRIES.forEach((entry, index) => {
   if (entry.slug !== STEM_SLUGS[index]) throw new Error(`천간 본문 순서가 올바르지 않습니다: ${entry.slug}`);
 });
+BRANCH_ENTRIES.forEach((entry, index) => {
+  if (entry.slug !== BRANCH_SLUGS[index]) throw new Error(`지지 본문 순서가 올바르지 않습니다: ${entry.slug}`);
+});
 ELEMENT_ENTRIES.forEach((entry, index) => {
   if (entry.slug !== ELEMENT_SLUGS[index]) throw new Error(`오행 본문 순서가 올바르지 않습니다: ${entry.slug}`);
   if (entry.related.includes(entry.slug)) throw new Error(`오행이 자기 자신을 관련 항목으로 둡니다: ${entry.slug}`);
@@ -130,4 +149,8 @@ export function getStem(slug: string): StemEntry | null {
   return isStemSlug(slug) ? STEM_ENTRIES[STEM_SLUGS.indexOf(slug)] : null;
 }
 
-export type { ElementSlug, StemSlug, TenGodSlug };
+export function getBranch(slug: string): BranchEntry | null {
+  return isBranchSlug(slug) ? BRANCH_ENTRIES[BRANCH_SLUGS.indexOf(slug)] : null;
+}
+
+export type { BranchSlug, ElementSlug, StemSlug, TenGodSlug };

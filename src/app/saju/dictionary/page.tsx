@@ -4,11 +4,14 @@ import { styles } from "@/components/saju-dictionary/dictionary-parts";
 import {
   BASICS,
   BASICS_PATH,
+  BRANCH_SLUGS,
   DICTIONARY,
   DICTIONARY_PATH,
   ELEMENT_ENTRIES,
   STEM_SLUGS,
   TEN_GODS,
+  branchFacts,
+  branchPath,
   TEN_GOD_GROUPS,
   elementFacts,
   elementPath,
@@ -17,14 +20,15 @@ import {
   stemPath,
   tenGodPath,
 } from "@/domain/saju-dictionary";
+import { ZODIAC_SIGNS } from "@/domain/zodiac-fortune";
 import { generatedShareImage, publicPageMetadata } from "@/infrastructure/site-metadata";
 
 const TITLE = "사주 개념 사전";
 
 export const metadata = publicPageMetadata(
   DICTIONARY_PATH,
-  `${TITLE}: 십성과 오행 뜻 찾아보기 | 명로`,
-  "만세력에 나오는 사주 용어를 기초 개념부터 십성 열 가지, 오행 다섯 가지, 천간 열 글자까지 한 페이지에서 찾아볼 수 있어요.",
+  `${TITLE}: 십성·오행·천간·지지 뜻 찾아보기 | 명로`,
+  "만세력에 나오는 사주 용어를 기초 개념부터 십성 열 가지, 오행 다섯 가지, 천간 열 글자, 지지 열두 글자까지 한 페이지에서 찾아볼 수 있어요.",
   generatedShareImage(DICTIONARY_PATH, TITLE),
 );
 
@@ -97,6 +101,27 @@ export default function SajuDictionaryPage() {
                 <Link href={stemPath(slug)}>
                   <span aria-hidden="true" className={`${styles.glyph} ${styles[glyph.element]}`}>{glyph.hanja}</span>
                   {glyph.korean}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <section aria-labelledby="dictionary-branches" className={styles.guideSection}>
+        <div className={styles.guideHead}>
+          <h2 id="dictionary-branches">지지</h2>
+          <span>명식의 아래 글자 열두 개</span>
+        </div>
+        <ul className={styles.guideBranches}>
+          {BRANCH_SLUGS.map((slug, index) => {
+            const { glyph } = branchFacts(slug);
+            return (
+              <li key={slug}>
+                <Link href={branchPath(slug)}>
+                  <span aria-hidden="true" className={`${styles.glyph} ${styles[glyph.element]}`}>{glyph.hanja}</span>
+                  {glyph.korean}
+                  <small>{ZODIAC_SIGNS[index].shortName}</small>
                 </Link>
               </li>
             );

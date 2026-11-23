@@ -1,9 +1,10 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { BASIC_STEP_IDS, ELEMENT_SLUGS, STEM_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary";
+import { BASIC_STEP_IDS, BRANCH_SLUGS, ELEMENT_SLUGS, STEM_SLUGS, TEN_GOD_SLUGS } from "@/domain/saju-dictionary";
 
 import SajuBasicsPage from "./basics/page";
+import BranchPage, { generateMetadata as branchMetadata } from "./branches/[slug]/page";
 import ElementPage, { generateMetadata as elementMetadata } from "./elements/[slug]/page";
 import SajuDictionaryPage from "./page";
 import StemPage, { generateMetadata as stemMetadata } from "./stems/[slug]/page";
@@ -16,7 +17,7 @@ describe("saju dictionary first page", () => {
     render(<SajuDictionaryPage />);
     expect(screen.getByRole("heading", { level: 1, name: "사주 용어 찾아보기" })).toBeInTheDocument();
     const headings = screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent);
-    expect(headings).toEqual(["기초 개념", "십성", "오행", "천간"]);
+    expect(headings).toEqual(["기초 개념", "십성", "오행", "천간", "지지"]);
     const basics = screen.getByRole("region", { name: "기초 개념" });
     expect(within(basics).getAllByRole("listitem").map((item) => within(item).getByRole("link").getAttribute("href")))
       .toEqual(BASIC_STEP_IDS.map((id) => `/saju/dictionary/basics#${id}`));
@@ -26,6 +27,8 @@ describe("saju dictionary first page", () => {
     expect(within(five).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(ELEMENT_SLUGS.map((slug) => `/saju/dictionary/elements/${slug}`));
     const stems = screen.getByRole("region", { name: "천간" });
     expect(within(stems).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(STEM_SLUGS.map((slug) => `/saju/dictionary/stems/${slug}`));
+    const branches = screen.getByRole("region", { name: "지지" });
+    expect(within(branches).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual(BRANCH_SLUGS.map((slug) => `/saju/dictionary/branches/${slug}`));
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.queryByRole("search")).not.toBeInTheDocument();
     expect(screen.getByText(/이 글은 AI로 만든 초안을 운영자가 검수했습니다\./)).toBeInTheDocument();
@@ -81,6 +84,12 @@ describe("every dictionary page", () => {
       expect(container.textContent!.length, slug).toBeLessThan(3000);
       unmount();
     }
+    for (const slug of BRANCH_SLUGS) {
+      const { unmount, container } = render(await BranchPage(params(slug)));
+      expect(container.textContent!.length, slug).toBeGreaterThan(1500);
+      expect(container.textContent!.length, slug).toBeLessThan(3000);
+      unmount();
+    }
     for (const slug of ELEMENT_SLUGS) {
       const { unmount, container } = render(await ElementPage(params(slug)));
       expect(container.textContent!.length, slug).toBeGreaterThan(1500);
@@ -119,5 +128,26 @@ describe("stem page", () => {
     expect(screen.getByRole("img", { name: /충을 이루는 천간 없음/ })).toBeInTheDocument();
     expect(await stemMetadata(params("sin"))).toMatchObject({ title: "천간 신(辛)의 뜻: 사주 개념 사전 | 명로", alternates: { canonical: "/saju/dictionary/stems/sin" } });
     expect(await stemMetadata(params("nope"))).toEqual({});
+  });
+});
+
+describe("branch page", () => {
+  it("shows the calendar, the hidden stems, the ten god per day stem, both relation wheels and the zodiac link", async () => {
+    render(await BranchPage(params("ja")));
+    expect(screen.getByRole("heading", { level: 1, name: /자/ })).toBeInTheDocument();
+    expect(screen.getByText("음력 11월(대설부터) · 23~1시")).toBeInTheDocument();
+    const chips = screen.getByRole("list", { name: "일간마다 자가 갖는 십성" });
+    expect(within(chips).getAllByRole("link").map((link) => link.textContent)).toEqual(["정인", "편인", "정관", "편관", "정재", "편재", "상관", "식신", "겁재", "비견"]);
+    expect(screen.getByRole("img", { name: "자가 묶이는 지지: 육합 축 · 삼합 진·신 · 방합 축·해" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "자가 마주 보거나 어긋나는 지지: 충 오 · 형 묘 · 원진 미 · 해 미 · 파 유" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "보러 가기 →" })).toHaveAttribute("href", "/zodiac/rat");
+    expect(screen.getByRole("navigation", { name: "지지 열두 글자" })).toBeInTheDocument();
+  });
+
+  it("names a three-stem branch's main stem and titles itself with the Hanja", async () => {
+    render(await BranchPage(params("chuk")));
+    expect(screen.getByRole("list", { name: "축의 숨은 천간" }).textContent).toBe("己기 · 본기癸계辛신");
+    expect(await branchMetadata(params("sin"))).toMatchObject({ title: "지지 신(申)의 뜻: 사주 개념 사전 | 명로", alternates: { canonical: "/saju/dictionary/branches/sin" } });
+    expect(await branchMetadata(params("nope"))).toEqual({});
   });
 });

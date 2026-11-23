@@ -239,6 +239,8 @@ export interface BranchFacts {
   readonly byDay: readonly DayTenGod[];
   readonly harmony: readonly BranchRelation[];
   readonly tension: readonly BranchRelation[];
+  /** The five 60갑자 pillars this branch sits under: only stems of its own yin-yang pair with it. */
+  readonly pillars: readonly Glyph[];
 }
 
 function relationsOf(index: number, kinds: readonly ZodiacRelationKind[]): BranchRelation[] {
@@ -266,5 +268,6 @@ export function branchFacts(slug: BranchSlug): BranchFacts {
     byDay: STEMS.map((day) => ({ day: stem(day), tenGod: tenGodOf(day, main) })),
     harmony: relationsOf(index, HARMONY),
     tension: relationsOf(index, TENSION),
+    pillars: STEMS.map(stem).filter((candidate) => candidate.yang === branch(hanja).yang),
   };
 }

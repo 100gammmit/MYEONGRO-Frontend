@@ -11,6 +11,8 @@ import {
   getZodiacSign,
   type ZodiacSign,
 } from "@/domain/zodiac-fortune";
+import { symbolInfo } from "@/domain/saju/exploration";
+import { BRANCH_SLUGS, branchHanja, branchPath } from "@/domain/saju-dictionary/slugs";
 import { generatedShareImage, publicPageMetadata } from "@/infrastructure/site-metadata";
 
 export const dynamicParams = false;
@@ -101,10 +103,18 @@ export default async function ZodiacSignPage({ params }: ZodiacSignPageProps) {
           <Link href="/zodiac">{YEAR.year}년 띠별 신년운세 전체</Link>
           <Link href="/guide/saju/annual-report">한 해 사주 리포트 읽는 법</Link>
           <Link href="/manseryeok">무료 만세력으로 내 명식 보기</Link>
+          <BranchLink slug={sign.slug} />
         </div>
       </section>
       <Link className={`primary-button ${styles.start}`} href="/saju?report=annual">사주 한 해 리포트 보기</Link>
       <p className={styles.disclaimer}>{YEAR.disclaimer}</p>
     </article>
   );
+}
+
+/** The sign's branch page in the saju dictionary; signs and branches share one order, 자 (rat) first. */
+function BranchLink({ slug }: { slug: (typeof ZODIAC_SLUGS)[number] }) {
+  const branch = BRANCH_SLUGS[ZODIAC_SLUGS.indexOf(slug)];
+  const hanja = branchHanja(branch);
+  return <Link href={branchPath(branch)}>지지 {symbolInfo(hanja, "branch")?.korean}({hanja}) 뜻 보기</Link>;
 }

@@ -90,6 +90,10 @@ describe("ManseryeokExperience", () => {
     for (const link of tenGodLinks) expect(link).toHaveAttribute("target", "_blank");
     expect(screen.getByRole("link", { name: /^목 \d개, 목 뜻 보기$/ })).toHaveAttribute("href", "/saju/dictionary/elements/wood");
     expect(screen.getByRole("link", { name: /^목 \d개, 목 뜻 보기$/ })).toHaveAttribute("target", "_blank");
+    // Every chart stem and branch opens its own dictionary page in a new tab too.
+    const glyphLinks = screen.getAllByRole("link", { name: / 뜻 보기$/ }).filter((link) => /\/saju\/dictionary\/(stems|branches)\//.test(link.getAttribute("href") ?? ""));
+    expect(glyphLinks.length).toBeGreaterThanOrEqual(6);
+    for (const link of glyphLinks) expect(link).toHaveAttribute("target", "_blank");
     // Both sideways strips take keyboard focus so they can be scrolled without a pointer.
     expect(screen.getByRole("list", { name: "대운 흐름" })).toHaveAttribute("tabindex", "0");
     expect(screen.getByRole("list", { name: "세운" })).toHaveAttribute("tabindex", "0");

@@ -42,6 +42,7 @@ describe("ZodiacSignPage", () => {
     ]);
     expect(screen.getByRole("img", { name: /쥐 자리와 올해의 양 자리 사이: 원진·해/ })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "사주 한 해 리포트 보기" })).toHaveAttribute("href", "/saju?report=annual");
+    expect(screen.getByRole("link", { name: "지지 자(子) 뜻 보기" })).toHaveAttribute("href", "/saju/dictionary/branches/ja");
     expect(screen.getByText("이 내용은 오락과 자기 성찰을 위한 것으로 전문적인 조언을 대신하지 않아요.")).toBeInTheDocument();
   });
 
