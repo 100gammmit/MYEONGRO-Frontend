@@ -13,6 +13,8 @@ export interface ReadingCreditStatus {
     tarot: Record<AiTarotSpreadType, number>;
     saju: number;
     sajuAnnual?: number;
+    /** The brief annual report, served when the birth time leaves the day master open. */
+    sajuAnnualBrief?: number;
   };
 }
 

@@ -49,6 +49,7 @@ import {
   SajuBirthPlacesClientError,
 } from "@/infrastructure/backend/saju-birth-places-client";
 import { postReadingRequest } from "@/infrastructure/reading-creation-request";
+import { fetchAnnualDetailLevel, type AnnualDetailLevel } from "@/infrastructure/backend/saju-detail-level-client";
 
 import { ReadingLoading } from "./reading-loading";
 import { ConsentGate } from "./consent-gate";
@@ -171,6 +172,8 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   const [creditUntouched, setCreditUntouched] = useState(false);
   const [carried, setCarried] = useState(false);
   const [recovering, setRecovering] = useState(false);
+  // The annual format for the reviewed birth input, keyed by that input so an edit asks again.
+  const [detailCheck, setDetailCheck] = useState<DetailCheck | null>(null);
   // Strict Mode mounts twice, so each mount gets its own controller and its cleanup aborts only that one.
   const unmountRef = useRef(new AbortController());
   useEffect(() => {
@@ -188,22 +191,63 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   const poppedRef = useRef(false);
   const displayedCredits = getDisplayedReadingCredits(credits.state);
   const creditData = displayedCredits.data;
-  const reportCosts = {
-    birth_annual_question: creditData?.costs.saju ?? null,
-    annual_monthly: creditData?.costs.sajuAnnual ?? null,
-  };
-  const creditCost = reportCosts[form.reportType];
-  const submitLabel = form.reportType === "annual_monthly" ? "한 해 리포트 생성" : "사주 리딩 생성";
+  const annualFull = creditData?.costs.sajuAnnual ?? null;
+  // An older price list has no brief price; the full price then stands for both.
+  const annualBrief = creditData?.costs.sajuAnnualBrief ?? annualFull;
+  const annualCheapest = annualFull === null || annualBrief === null ? null : Math.min(annualFull, annualBrief);
+  const isAnnual = form.reportType === "annual_monthly";
+  const detailKey = isAnnual ? detailCheckKey(form.birth) : null;
+  const detail = detailCheck && detailCheck.key === detailKey ? detailCheck : null;
+  // Before the format is known (the first step, or a failed check) the cheaper format gates entry; the reading
+  // itself charges the format it calculates.
+  const creditCost = !isAnnual
+    ? creditData?.costs.saju ?? null
+    : phase === "review" && detail?.status === "ready" ? detail.creditCost : annualCheapest;
+  const submitLabel = isAnnual ? "한 해 리포트 생성" : "사주 리딩 생성";
   const creditAccess = getReadingCreditAccess(
     creditData,
     credits.state.status === "idle" || displayedCredits.loading,
     creditCost,
   );
+  const detailReady = detail?.status === "ready";
+  const checkingDetail = isAnnual && phase === "review" && detail?.status !== "ready" && detail?.status !== "failed";
   const questionReady = isQuestionReady(form);
 
   const redirectToLogin = useCallback(() => {
     router.push("/login?next=%2Fsaju");
   }, [router]);
+
+  // Entering review with an annual report asks once per birth input which format it gets, so a brief report
+  // and its price are known before any credit is spent. A failure never blocks the reading.
+  const requestedDetailKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (phase !== "review" || !isAnnual || detailKey === null || detailReady
+      || requestedDetailKeyRef.current === detailKey) return;
+    const controller = new AbortController();
+    const key = detailKey;
+    requestedDetailKeyRef.current = key;
+    const birth = formRef.current.birth;
+    setDetailCheck({ key, status: "loading" });
+    const options = calculationOptionsOf(birth);
+    void fetchAnnualDetailLevel(
+      { birthProfile: birthProfileOf(birth), ...(options ? { calculationOptions: options } : {}) },
+      controller.signal,
+    ).then((outcome) => {
+      if (controller.signal.aborted) return;
+      if (outcome.kind === "unauthenticated") {
+        redirectToLogin();
+        return;
+      }
+      setDetailCheck(outcome.kind === "ok"
+        ? { key, status: "ready", detailLevel: outcome.detailLevel, creditCost: outcome.creditCost }
+        : { key, status: "failed" });
+    });
+    // Leaving review, editing the input or a Strict Mode remount drops this request, so it is asked again.
+    return () => {
+      controller.abort();
+      if (requestedDetailKeyRef.current === key) requestedDetailKeyRef.current = null;
+    };
+  }, [phase, isAnnual, detailKey, detailReady, redirectToLogin]);
 
   const loadBirthPlaces = useCallback(async () => {
     setCatalogStatus("loading");
@@ -481,12 +525,12 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
               {([['birth_annual_question', '종합 사주', '나의 성향과 연간 흐름, 질문을 함께 읽습니다.'], ['annual_monthly', '한 해 리포트', '연간 개요와 12개월의 흐름을 다시 찾아 읽습니다.']] as const).map(([value, label, description]) => (
                 <label className="choice-card" key={value}>
                   <input className="sr-only" type="radio" name="report-type" checked={form.reportType === value} onChange={() => updateForm({ reportType: value })} />
-                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong><span className="choice-price">{reportCosts[value] ?? "…"}크레딧</span></span>
+                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong><span className="choice-price">{value === "annual_monthly" ? annualPriceLabel(annualFull, annualBrief) : `${creditData?.costs.saju ?? "…"}크레딧`}</span></span>
                   <span className="choice-desc">{description}</span>
                 </label>
               ))}
             </div>
-            {form.reportType === "annual_monthly" ? <p className="field-guidance">출생 시각을 모르면 나를 읽는 기준(일간)을 확정하지 못해 간략형으로 제공될 수 있어요. 상세형과 간략형 모두 {creditCost ?? "…"}크레딧이며, 저장된 리포트는 추가 차감 없이 다시 읽을 수 있습니다.</p> : null}
+            {form.reportType === "annual_monthly" ? <p className="field-guidance">출생 시각에 따라 상세형({annualFull ?? "…"}크레딧) 또는 간략형({annualBrief ?? "…"}크레딧)으로 제공돼요. 어느 쪽인지는 생성 전 확인 화면에서 알려 드려요. 저장된 리포트는 추가 차감 없이 다시 읽을 수 있습니다.</p> : null}
           </fieldset>
           <label className="field" htmlFor="saju-target-year">
             <span id="saju-target-year-label">살펴볼 연도</span>
@@ -607,13 +651,23 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
       back={{ label: "이전", onClick: () => leaveReview("birth", false), disabled: submitting }}
       actions={(
         <>
+          {isAnnual && detail?.status === "ready" && detail.detailLevel === "brief" ? (
+            <p className="credit-notice" role="status">입력한 출생 시각으로는 나를 읽는 기준(일간)이 하나로 정해지지 않아 간략형으로 제공돼요. 연간 개요와 월별 요약, 적용 구간을 담고 {detail.creditCost}크레딧이 차감돼요.</p>
+          ) : null}
+          {isAnnual && detail?.status === "failed" ? (
+            <p className="credit-notice" role="status">제공 형식을 미리 확인하지 못했어요. 생성할 때 형식에 맞는 크레딧이 차감돼요.</p>
+          ) : null}
           <ReadingCreditAccessNotice access={creditAccess} onRetry={() => void credits.refresh()} />
           <button
             className="primary-button full-button"
-            disabled={submitting || creditAccess.status !== "allowed"}
+            disabled={submitting || checkingDetail || creditAccess.status !== "allowed"}
             onClick={() => void submitReading()}
             type="button"
-          >{creditCost ?? "…"}크레딧으로 {submitLabel}</button>
+          >{checkingDetail
+            ? "제공 형식을 확인하고 있어요"
+            : isAnnual && detail?.status !== "ready"
+              ? `${submitLabel} · ${annualPriceLabel(annualFull, annualBrief)}`
+              : `${creditCost ?? "…"}크레딧으로 ${submitLabel}`}</button>
         </>
       )}
     >
@@ -629,6 +683,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
         <ReviewGroup id="review-question" title="리딩 내용" onEdit={() => leaveReview("question", true)} disabled={submitting}>
           <dl className="saju-review-list">
           <div><dt>리포트 종류</dt><dd>{form.reportType === "annual_monthly" ? "한 해 리포트" : "종합 사주"}</dd></div>
+          {isAnnual ? <div><dt>리포트 형식</dt><dd>{detailSummary(detail)}</dd></div> : null}
           <div><dt>리딩 연도</dt><dd>{form.targetYear}년</dd></div>
           <div><dt>관심 분야</dt><dd>{focus?.label}</dd></div>
           <div><dt>질문</dt><dd>{form.question.trim() || "입력하지 않음"}</dd></div>
@@ -646,6 +701,25 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
       </div>
     </ReadingShell>
   );
+}
+
+type DetailCheck =
+  | { readonly key: string; readonly status: "loading" | "failed" }
+  | { readonly key: string; readonly status: "ready"; readonly detailLevel: AnnualDetailLevel; readonly creditCost: number };
+
+// Only what decides the format: the birth profile and the calculation options.
+function detailCheckKey(birth: SajuBirthValues): string {
+  return JSON.stringify([birthProfileOf(birth), calculationOptionsOf(birth) ?? null]);
+}
+
+function annualPriceLabel(full: number | null, brief: number | null): string {
+  if (full === null || brief === null) return "…크레딧";
+  return full === brief ? `${full}크레딧` : `상세형 ${full} · 간략형 ${brief}크레딧`;
+}
+
+function detailSummary(detail: DetailCheck | null): string {
+  if (detail?.status === "ready") return `${detail.detailLevel === "full" ? "상세형" : "간략형"} · ${detail.creditCost}크레딧`;
+  return detail?.status === "failed" ? "생성할 때 정해져요" : "확인하고 있어요";
 }
 
 function buildRequest(form: SajuFormState, requestId: string): SajuReadingCreateRequest {

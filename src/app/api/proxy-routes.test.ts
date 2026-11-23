@@ -13,6 +13,7 @@ import * as readingCredits from "./reading-credits/route";
 import * as readingCreditPricing from "./reading-credits/pricing/route";
 import * as readings from "./readings/route";
 import * as sajuReadings from "./saju/readings/route";
+import * as sajuDetailLevel from "./saju/readings/detail-level/route";
 import * as signup from "./signup/route";
 import * as dailyCardSelections from "./tarot/daily-card-selections/route";
 import * as tarotReadings from "./tarot/readings/route";
@@ -31,6 +32,7 @@ describe("pass-through API routes", () => {
     ["GET", "/api/reading-credits/pricing", readingCreditPricing.GET, "/api/reading-credits/pricing"],
     ["GET", "/api/readings", readings.GET, "/api/readings"],
     ["POST", "/api/saju/readings", sajuReadings.POST, "/api/saju/readings"],
+    ["POST", "/api/saju/readings/detail-level", sajuDetailLevel.POST, "/api/saju/readings/detail-level"],
     ["GET", "/api/signup", signup.GET, "/api/signup"],
     ["POST", "/api/signup", signup.POST, "/api/signup"],
     ["DELETE", "/api/signup", signup.DELETE, "/api/signup"],
