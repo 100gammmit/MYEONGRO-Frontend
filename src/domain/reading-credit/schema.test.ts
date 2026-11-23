@@ -23,6 +23,13 @@ const status = {
 };
 
 describe("reading credit contract", () => {
+
+  it("keeps annual and general saju prices independent in both endpoints", () => {
+    const costs = { tarot: { mind_three_card: 3, relationship_three_card: 3, choice_five_card: 4 }, saju: 4, sajuAnnual: 6 };
+    expect(parseReadingCreditStatus({ ...status, costs }).costs).toEqual(costs);
+    expect(parseReadingCreditPricing({ dailyFreeGrant: 10, costs }).costs).toEqual(costs);
+    expect(() => parseReadingCreditPricing({ dailyFreeGrant: 10, costs: { ...costs, sajuAnnual: 0 } })).toThrow();
+  });
   it("accepts the complete backend response", () => {
     expect(parseReadingCreditStatus(status)).toEqual(status);
   });

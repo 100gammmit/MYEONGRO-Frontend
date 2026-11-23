@@ -20,6 +20,7 @@ const credits = vi.hoisted(() => ({
           choice_five_card: 3,
         },
         saju: 4,
+        sajuAnnual: 6,
       },
     },
   },
@@ -221,6 +222,7 @@ describe("SajuExperience", () => {
       .mockResolvedValueOnce(jsonResponse({ reading: { ...createdReading().reading, schemaVersion: 7 } }));
     await startWithAcceptedConsent();
     fireEvent.click(screen.getByRole("radio", { name: /한 해 리포트/ }));
+    expect(screen.getByText(/상세형과 간략형 모두 6크레딧/)).toBeInTheDocument();
     expect(screen.getByText(/출생 시각을 모르면 나를 읽는 기준\(일간\)을 확정하지 못해/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("radio", { name: /일·진로/ }));
     expect(screen.getByRole("textbox", { name: /질문 \(선택\)/ })).toHaveValue("");
@@ -233,7 +235,7 @@ describe("SajuExperience", () => {
     expect(screen.getByRole("radio", { name: /한 해 리포트/ })).toBeChecked();
     fireEvent.click(screen.getByRole("button", { name: "다음" }));
     expect(screen.queryByRole("button", { name: /크레딧으로 사주 리딩 생성/ })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /크레딧으로 한 해 리포트 생성/ }));
+    fireEvent.click(screen.getByRole("button", { name: "6크레딧으로 한 해 리포트 생성" }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
     const body = JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body));
     expect(body.reportType).toBe("annual_monthly");
@@ -444,6 +446,20 @@ describe("SajuExperience", () => {
     fillQuestion();
     expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
     expect(screen.queryByLabelText("양력 생년월일")).not.toBeInTheDocument();
+  });
+
+  it("uses the independent annual price for the balance gate instead of the general saju price", async () => {
+    credits.state.data.balance = { free: 4, paid: 0, total: 4 };
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(jsonResponse(consentStatus(true)));
+    await startWithAcceptedConsent();
+    expect(within(screen.getByRole("radio", { name: /종합 사주/ }).closest("label")!).getByText("4크레딧")).toBeInTheDocument();
+    expect(within(screen.getByRole("radio", { name: /한 해 리포트/ }).closest("label")!).getByText("6크레딧")).toBeInTheDocument();
+    fillQuestion();
+    expect(screen.getByRole("button", { name: "다음" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("radio", { name: /한 해 리포트/ }));
+    expect(screen.getByText(/상세형과 간략형 모두 6크레딧/)).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("크레딧이 부족합니다");
+    expect(screen.getByRole("button", { name: "다음" })).toBeDisabled();
   });
 
   it("locks the question step while another reading is generating", async () => {

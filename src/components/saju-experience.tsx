@@ -188,7 +188,11 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
   const poppedRef = useRef(false);
   const displayedCredits = getDisplayedReadingCredits(credits.state);
   const creditData = displayedCredits.data;
-  const creditCost = (form.reportType === "annual_monthly" ? creditData?.costs.sajuAnnual ?? creditData?.costs.saju : creditData?.costs.saju) ?? null;
+  const reportCosts = {
+    birth_annual_question: creditData?.costs.saju ?? null,
+    annual_monthly: creditData?.costs.sajuAnnual ?? null,
+  };
+  const creditCost = reportCosts[form.reportType];
   const submitLabel = form.reportType === "annual_monthly" ? "한 해 리포트 생성" : "사주 리딩 생성";
   const creditAccess = getReadingCreditAccess(
     creditData,
@@ -477,12 +481,12 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
               {([['birth_annual_question', '종합 사주', '나의 성향과 연간 흐름, 질문을 함께 읽습니다.'], ['annual_monthly', '한 해 리포트', '연간 개요와 12개월의 흐름을 다시 찾아 읽습니다.']] as const).map(([value, label, description]) => (
                 <label className="choice-card" key={value}>
                   <input className="sr-only" type="radio" name="report-type" checked={form.reportType === value} onChange={() => updateForm({ reportType: value })} />
-                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong><span className="choice-price">{creditCost ?? "…"}크레딧</span></span>
+                  <span className="choice-head"><span aria-hidden="true" className="choice-dot" /><strong>{label}</strong><span className="choice-price">{reportCosts[value] ?? "…"}크레딧</span></span>
                   <span className="choice-desc">{description}</span>
                 </label>
               ))}
             </div>
-            {form.reportType === "annual_monthly" ? <p className="field-guidance">출생 시각을 모르면 나를 읽는 기준(일간)을 확정하지 못해 간략형으로 제공될 수 있어요. 상세형과 간략형 모두 {creditCost ?? 4}크레딧이며, 저장된 리포트는 추가 차감 없이 다시 읽을 수 있습니다.</p> : null}
+            {form.reportType === "annual_monthly" ? <p className="field-guidance">출생 시각을 모르면 나를 읽는 기준(일간)을 확정하지 못해 간략형으로 제공될 수 있어요. 상세형과 간략형 모두 {creditCost ?? "…"}크레딧이며, 저장된 리포트는 추가 차감 없이 다시 읽을 수 있습니다.</p> : null}
           </fieldset>
           <label className="field" htmlFor="saju-target-year">
             <span id="saju-target-year-label">살펴볼 연도</span>
