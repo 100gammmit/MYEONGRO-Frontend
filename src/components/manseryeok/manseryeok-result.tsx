@@ -105,7 +105,10 @@ export function ManseryeokResult({
             <dt>12운성</dt><dd>일간의 기운이 각 지지에서 어느 단계에 있는지를 열두 단계로 나타낸 것이에요.</dd>
             <dt>공망</dt><dd>일주나 연주를 기준으로 비어 있다고 보는 두 지지예요.</dd>
           </dl>
-          <p className={styles.glossaryMore}>천간·지지 글자와 십성 이름, 오행을 누르면 뜻을 볼 수 있어요. <Link href={DICTIONARY_PATH} rel="noopener" target="_blank">사주 개념 사전 전체 보기</Link></p>
+          <p className={styles.glossaryMore}>
+            <span>천간·지지 글자와 십성 이름, 오행을 누르면 뜻을 볼 수 있어요.</span>
+            <Link href={DICTIONARY_PATH} rel="noopener" target="_blank">사주 개념 사전 전체 보기 <span aria-hidden="true">→</span></Link>
+          </p>
         </details>
       </Section>
 
