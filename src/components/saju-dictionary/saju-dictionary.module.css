@@ -3,7 +3,7 @@
 .page p, .page li, .page td, .page dd { word-break: keep-all; }
 
 .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 44px; margin: 0 0 4px; padding: 0; list-style: none; color: var(--text-muted); font-size: 13px; }
-.crumbs a { display: inline-flex; align-items: center; min-height: 44px; color: var(--text-secondary); }
+.crumbs a { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; min-height: 44px; padding: 0 2px; color: var(--text-secondary); }
 .crumbs a:hover { color: var(--text-primary); }
 .crumbs [aria-current="page"] { color: var(--text-primary); font-weight: 600; }
 .crumbItem { display: inline-flex; align-items: center; gap: 6px; }
@@ -23,7 +23,7 @@
 .toc { margin: 28px 0 0; padding: 16px 18px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
 .toc h2 { margin: 0 0 6px; color: var(--text-muted); font-size: 12px; font-weight: 600; }
 .toc ol { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.toc a { display: flex; align-items: center; gap: 10px; min-height: 40px; color: var(--text-secondary); font-size: 14px; }
+.toc a { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--text-secondary); font-size: 14px; }
 .toc a:hover { color: var(--text-primary); }
 .tocNumber { width: 16px; color: var(--accent-cta); font-weight: 600; font-variant-numeric: tabular-nums; }
 
@@ -148,7 +148,7 @@
 .dayChips li.dayChipCurrent { border-color: var(--accent-cta); background: color-mix(in srgb, var(--accent-cta) 10%, transparent); }
 .dayChipGlyph { font-family: "Noto Serif KR Variable", "마루 부리", serif; font-size: 22px; line-height: 1.2; }
 .dayChipDay { color: var(--text-muted); font-size: 12px; }
-.dayChips a { display: inline-flex; align-items: center; min-height: 32px; color: var(--text-primary); font-size: 14px; font-weight: 600; text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 4px; }
+.dayChips a { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; color: var(--text-primary); font-size: 14px; font-weight: 600; text-decoration: underline; text-decoration-color: var(--border-strong); text-underline-offset: 4px; }
 .wheels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
 .wheelSingle { grid-template-columns: minmax(0, 320px); justify-content: center; }
 .wheel { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 0; padding: 14px 10px 12px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); }

@@ -117,6 +117,8 @@ describe("stem page", () => {
     expect(screen.getByRole("heading", { level: 1, name: /갑/ })).toBeInTheDocument();
     const chips = screen.getByRole("list", { name: "일간마다 갑이 갖는 십성" });
     expect(within(chips).getAllByRole("link").map((link) => link.textContent)).toEqual(["비견", "겁재", "편인", "정인", "편관", "정관", "편재", "정재", "식신", "상관"]);
+    // Each chip link carries its day stem, so the ten links stay apart when read out of context.
+    expect(within(chips).getByRole("link", { name: "경 일간에게 편재" })).toHaveAttribute("href", "/saju/dictionary/ten-gods/pyeonjae");
     expect(screen.getByRole("img", { name: "갑의 합과 충: 합 · 기(己)와 묶임 · 충 · 경(庚)과 마주 봄" })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "을(乙)" })[0]).toHaveAttribute("href", "/saju/dictionary/stems/eul");
     expect(screen.getByRole("navigation", { name: "천간 열 글자" })).toBeInTheDocument();

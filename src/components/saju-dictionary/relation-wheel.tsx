@@ -104,7 +104,7 @@ export function RelationWheel({ glyphs, self, lines, shape, title, caption, labe
                 stroke={own ? "#e8b54a" : tone ? TONE_COLOR[tone] : "rgba(230,235,247,.1)"}
                 strokeWidth={own ? 2 : tone ? 1.5 : 1}
               />
-              <text className={styles[glyph.element]} fill="currentColor" fillOpacity={own || tone ? 1 : 0.35} fontFamily="Noto Serif KR Variable, serif" fontSize="18" textAnchor="middle" x={x} y={y + 6.5}>{glyph.hanja}</text>
+              <text className={styles[glyph.element]} fill="currentColor" fillOpacity={own || tone ? 1 : 0.55} fontFamily="Noto Serif KR Variable, serif" fontSize="18" textAnchor="middle" x={x} y={y + 6.5}>{glyph.hanja}</text>
             </g>
           );
         })}

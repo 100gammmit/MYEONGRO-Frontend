@@ -80,7 +80,8 @@ export function DayTenGodChips({ items, current, label }: { items: readonly DayT
         <li className={day.hanja === current ? styles.dayChipCurrent : undefined} key={day.hanja}>
           <span aria-hidden="true" className={`${styles.dayChipGlyph} ${styles[day.element]}`}>{day.hanja}</span>
           <span className={styles.dayChipDay}>{day.korean} 일간</span>
-          <Link href={tenGodPath(tenGod)}>{TEN_GOD_NAMES[tenGod]}</Link>
+          {/* The day stem in the name keeps ten links that share a ten god's name apart. */}
+          <Link aria-label={`${day.korean} 일간에게 ${TEN_GOD_NAMES[tenGod]}`} href={tenGodPath(tenGod)}>{TEN_GOD_NAMES[tenGod]}</Link>
         </li>
       ))}
     </ul>
