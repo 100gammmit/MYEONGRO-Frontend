@@ -37,4 +37,17 @@ export const SERVICE_UPDATES = defineServiceUpdates([
     publishedDate: "2026-11-22", effectiveDate: "2026-11-22",
     links: [{ href: "/saju/dictionary", label: "사주 개념 사전 보기" }],
   },
+  {
+    id: "2026-11-25-saju-dictionary-stems-branches",
+    category: "release", noticeLevel: "routine",
+    title: "사주 개념 사전에 천간과 지지를 추가했습니다",
+    summary: "명식의 위아래 글자인 천간 열 글자와 지지 열두 글자가 각각 무엇이고 어떻게 읽히는지 정리했습니다.",
+    changes: [
+      "글자마다 일간에 따라 달라지는 십성과 다른 글자와의 관계를 그림으로 보여 드립니다.",
+      "무료 만세력 명식표에서 천간·지지 글자를 누르면 바로 해당 설명으로 이동합니다.",
+      "띠별 신년운세에서 내 띠의 지지 설명으로 이어 볼 수 있습니다.",
+    ],
+    publishedDate: "2026-11-25", effectiveDate: "2026-11-25",
+    links: [{ href: "/saju/dictionary", label: "사주 개념 사전 보기" }],
+  },
 ]);
