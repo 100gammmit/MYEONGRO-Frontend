@@ -45,7 +45,6 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>("input");
   const [birth, setBirth] = useState<SajuBirthValues>(EMPTY_BIRTH_VALUES);
-  const [confirmed, setConfirmed] = useState(false);
   const [catalog, setCatalog] = useState<SajuBirthPlacesResponse | null>(null);
   const [catalogStatus, setCatalogStatus] = useState<BirthPlaceCatalogStatus>("loading");
   const [errors, setErrors] = useState<Partial<Record<SajuBirthFieldKey, string>>>({});
@@ -231,7 +230,6 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
 
   function startOver() {
     setBirth((current) => ({ ...EMPTY_BIRTH_VALUES, dayBoundary: current.dayBoundary, equationOfTime: current.equationOfTime }));
-    setConfirmed(false);
     chartGenerationRef.current += 1;
     setChart(null);
     editInput();
@@ -282,14 +280,10 @@ export function ManseryeokExperience({ calculateEndpoint, birthPlacesEndpoint }:
           values={birth}
         />
         <div className={styles.consent}>
-          <label className={styles.check}>
-            <input checked={confirmed} disabled={calculating} onChange={(event) => setConfirmed(event.target.checked)} type="checkbox" />
-            <span>만 14세 이상이에요. 다른 사람의 정보라면 그 사람의 동의를 받고 입력해요.</span>
-          </label>
           <p>입력한 생년월일·시각·지역은 계산에만 쓰고 저장하지 않아요. 짧은 시간에 요청이 많으면 잠시 이용이 제한될 수 있어요. <Link href="/privacy">개인정보 처리방침</Link></p>
         </div>
         <StatusNotice notice={notice} />
-        <button className={`primary-button full-button ${styles.submit}`} disabled={!confirmed || locked} type="submit">
+        <button className={`primary-button full-button ${styles.submit}`} disabled={locked} type="submit">
           {calculating ? (notice === "retrying" ? "다시 시도하는 중이에요" : "계산하는 중이에요") : "만세력 계산하기"}
         </button>
       </form>

@@ -7,8 +7,6 @@
 .consent { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; padding: 16px 18px; border: 1px solid color-mix(in srgb, var(--accent-cta) 35%, transparent); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--accent-cta) 5%, transparent); }
 .consent p { margin: 0; color: var(--text-secondary); font-size: 13px; line-height: 1.75; }
 .consent a { color: var(--text-accent-strong); }
-.check { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; color: var(--text-primary); font-size: 14px; line-height: 1.6; cursor: pointer; }
-.check input { width: 20px; height: 20px; flex: none; margin-top: 2px; accent-color: var(--accent-cta); }
 .submit { margin-top: 20px; }
 .notice { margin-top: 16px; padding: 14px 16px; border: 1px solid var(--border-default); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
 .notice strong { display: block; margin-bottom: 4px; font-size: 15px; }

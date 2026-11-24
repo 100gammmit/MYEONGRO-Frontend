@@ -45,14 +45,23 @@ afterEach(() => {
 });
 
 describe("ManseryeokExperience", () => {
-  it("opens the calculate button only after the age and consent check", async () => {
+  it("reports a missing birth date on submit instead of sending an empty request", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(json(places));
+    renderPage();
+    await screen.findByLabelText("출생 시·도");
+    fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
+    expect((await screen.findAllByText("양력 생년월일을 입력해 주세요.")).length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { level: 1, name: "만세력 계산" })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("calculates without an age or consent checkbox, since nothing typed is stored", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(json(places));
     renderPage();
     await fillExact();
-    const button = screen.getByRole("button", { name: "만세력 계산하기" });
-    expect(button).toBeDisabled();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
-    expect(button).toBeEnabled();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "만세력 계산하기" })).toBeEnabled();
+    expect(screen.getByText(/입력한 생년월일·시각·지역은 계산에만 쓰고 저장하지 않아요/)).toBeInTheDocument();
   });
 
   it("calculates this year without a reference year and shows the result without birth data in the address", async () => {
@@ -61,7 +70,6 @@ describe("ManseryeokExperience", () => {
       .mockResolvedValueOnce(json(fixture));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
 
     expect(await screen.findByRole("heading", { level: 1, name: "만세력 결과" })).toBeInTheDocument();
@@ -106,7 +114,6 @@ describe("ManseryeokExperience", () => {
       .mockResolvedValueOnce(json({ ...fixture, referenceYear: 2027, monthlyCalendar: { ...fixture.monthlyCalendar, targetYear: 2027, months: fixture.monthlyCalendar.months.map((month) => ({ ...month, periods: month.periods.map((period) => ({ ...period, startInclusive: period.startInclusive.replace(/^2026|^2027/, (y) => String(Number(y) + 1)), endExclusive: period.endExclusive.replace(/^2026|^2027/, (y) => String(Number(y) + 1)) })) })) } }));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
     await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
 
@@ -128,7 +135,6 @@ describe("ManseryeokExperience", () => {
       .mockImplementationOnce(() => new Promise<Response>(() => {}));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
     await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
     fireEvent.click(screen.getByRole("button", { name: /2027년 · 내년/ }));
@@ -150,7 +156,6 @@ describe("ManseryeokExperience", () => {
       .mockResolvedValueOnce(json(fixture));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
     await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
 
@@ -158,7 +163,7 @@ describe("ManseryeokExperience", () => {
     fireEvent.popState(window, { state: null });
     expect(await screen.findByRole("heading", { level: 1, name: "만세력 계산" })).toBeInTheDocument();
     expect(screen.getByLabelText("양력 생년월일")).toHaveValue("");
-    expect(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ })).not.toBeChecked();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
   it("says it is retrying when the server is busy and shows the result once it frees up", async () => {
@@ -168,7 +173,6 @@ describe("ManseryeokExperience", () => {
       .mockResolvedValueOnce(json(fixture));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
 
     expect(await screen.findByText("요청이 몰려 잠깐 기다리고 있어요")).toBeInTheDocument();
@@ -190,7 +194,6 @@ describe("ManseryeokExperience", () => {
     renderPage();
     fireEvent.change(screen.getByLabelText("양력 생년월일"), { target: { value: "1992-08-17" } });
     fireEvent.click(screen.getByRole("radio", { name: /몰라요/ }));
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
 
     await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
@@ -218,7 +221,6 @@ describe("ManseryeokExperience", () => {
       .mockResolvedValueOnce(json(fixture));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
     await screen.findByRole("heading", { level: 1, name: "만세력 결과" });
 
@@ -236,7 +238,6 @@ describe("ManseryeokExperience", () => {
       .mockResolvedValueOnce(new Response(null, { status: 404 }));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("계산하지 못했어요");
     expect(screen.getByRole("heading", { level: 1, name: "만세력 계산" })).toBeInTheDocument();
@@ -249,7 +250,6 @@ describe("ManseryeokExperience", () => {
       .mockResolvedValueOnce(json({ code: "SAJU_CALCULATION_RATE_LIMITED" }, 429));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
 
     const alert = await screen.findByRole("alert");
@@ -264,7 +264,6 @@ describe("ManseryeokExperience", () => {
       .mockResolvedValueOnce(json({ code: "INVALID_BIRTH_DATE", field: "birthProfile.birthDate", error: "1900년부터 2099년 사이의 날짜만 계산할 수 있어요." }, 400));
     renderPage();
     await fillExact();
-    fireEvent.click(screen.getByRole("checkbox", { name: /만 14세 이상이에요/ }));
     fireEvent.click(screen.getByRole("button", { name: "만세력 계산하기" }));
 
     const summary = await screen.findByRole("alert");

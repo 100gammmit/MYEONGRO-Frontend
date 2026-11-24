@@ -194,7 +194,8 @@ try {
     await page.getByRole("radio", { name: /정확히 알아요/ }).check({ force: true });
     await page.getByLabel("출생 시·도").selectOption("11");
     assert.equal(await page.getByLabel("출생 시·군·구 (선택)").isEnabled(), true);
-    assert.equal(await page.getByRole("button", { name: "만세력 계산하기" }).isDisabled(), true);
+    // No age or consent checkbox gates the button; missing input is reported on submit.
+    assert.equal(await page.getByRole("button", { name: "만세력 계산하기" }).isEnabled(), true);
     await page.goto(`${base}/zodiac`);
     await page.getByLabel("태어난 해").selectOption("1996");
     await page.getByRole("button", { name: "띠 찾기" }).click();
