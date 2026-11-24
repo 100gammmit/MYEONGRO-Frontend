@@ -143,6 +143,8 @@ describe("branch page", () => {
     expect(screen.getByRole("img", { name: "자가 묶이는 지지: 육합 축 · 삼합 진·신 · 방합 축·해" })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "자가 마주 보거나 어긋나는 지지: 충 오 · 형 묘 · 원진 미 · 해 미 · 파 유" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "보러 가기 →" })).toHaveAttribute("href", "/zodiac/rat");
+    expect(screen.getByText("목 일간 인성 · 화 일간 관성 · 토 일간 재성 · 금 일간 식상 · 수 일간 비겁")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "내 일간 기준 십성 보기" })).toHaveAttribute("href", "#ten-gods");
     expect(screen.getByRole("navigation", { name: "지지 열두 글자" })).toBeInTheDocument();
   });
 

@@ -18,6 +18,7 @@ import {
   branchFacts,
   branchPath,
   branchSlugOf,
+  elementAsGroup,
   elementPath,
   getBranch,
   object,
@@ -176,6 +177,10 @@ export default async function BranchPage({ params }: BranchPageProps) {
       body: (
         <>
           <Paragraphs items={entry.tenGods} />
+          <p className={styles.callout}>
+            <strong>본기 {main.korean} 기준 십성 묶음</strong>
+            {elementAsGroup(main.element).map(({ day, group }) => `${ELEMENT_NAMES[day]} 일간 ${group.name}`).join(" · ")}
+          </p>
           <DayTenGodChips current={main.hanja} items={facts.byDay} label={`일간마다 ${glyph.korean}${subject(glyph.korean)} 갖는 십성`} />
           <p className={styles.caption}>본기 {main.korean}{object(main.korean)} 기준으로 한 일간별 십성이에요.</p>
         </>
@@ -249,6 +254,8 @@ export default async function BranchPage({ params }: BranchPageProps) {
           </div>
           <div><dt>충</dt><dd>{clash ? <Link href={branchPath(branchSlugOf(clash.hanja)!)}>{named(clash)}</Link> : "없음"}</dd></div>
         </dl>
+        {/* Readers who arrive from a chart cell want this glyph's ten god for their own day stem first. */}
+        <a className={styles.glanceJump} href="#ten-gods">내 일간 기준 십성 보기 <span aria-hidden="true">↓</span></a>
       </section>
 
       <NumberedSections sections={sections} />

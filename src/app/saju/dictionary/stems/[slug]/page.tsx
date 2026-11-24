@@ -175,6 +175,8 @@ export default async function StemPage({ params }: StemPageProps) {
             </dd>
           </div>
         </dl>
+        {/* Readers who arrive from a chart cell want this glyph's ten god for their own day stem first. */}
+        <a className={styles.glanceJump} href="#ten-gods">내 일간 기준 십성 보기 <span aria-hidden="true">↓</span></a>
       </section>
 
       <NumberedSections sections={sections} />

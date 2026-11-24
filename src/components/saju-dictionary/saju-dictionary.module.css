@@ -19,6 +19,8 @@
 .meta dt { color: var(--text-muted); font-size: 12px; }
 .meta dd { margin: 0; color: var(--text-primary); font-size: 14px; font-weight: 500; line-height: 1.6; }
 .meta a { color: var(--text-accent-strong); text-decoration: underline; text-underline-offset: 3px; }
+.glanceJump { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin-top: 8px; color: var(--accent-cta-hover); font-size: 14px; font-weight: 600; }
+.glanceJump:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .toc { margin: 28px 0 0; padding: 16px 18px; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); background: var(--surface-tint-1); }
 .toc h2 { margin: 0 0 6px; color: var(--text-muted); font-size: 12px; font-weight: 600; }
