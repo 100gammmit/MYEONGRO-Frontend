@@ -114,9 +114,9 @@
 /* The first page: a compact guide, every entry within a screen or two. */
 .guide { padding-bottom: 80px; }
 .guideLead { margin: 10px 0 0; color: var(--text-secondary); font-size: 15px; line-height: 1.7; }
-.guideSection { margin-top: 26px; scroll-margin-top: 96px; }
-.guideHead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-.guideHead h2 { margin: 0; font-size: 20px; font-weight: 400; }
+.guideSection { margin-top: 32px; scroll-margin-top: 96px; }
+.guideHead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.guideHead h2 { margin: 0; color: var(--text-accent-strong); font-size: 24px; font-weight: 500; }
 .guideHead a { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent-cta); font-size: 14px; font-weight: 600; }
 .guideHead span { color: var(--text-muted); font-size: 13px; }
 .guideBasics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -170,6 +170,7 @@
 .browse.browseTwelve ul { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 
 @media (max-width: 760px) {
+  .guideHead h2 { font-size: 22px; }
   .guideBasics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .guideHead span { display: none; }
   .guideFive a { flex-direction: column; gap: 0; min-height: 58px; font-size: 13px; }
