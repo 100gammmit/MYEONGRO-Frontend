@@ -82,7 +82,7 @@ describe("advertising disclosure", () => {
   it("names Google as the direct collector and keeps ads out of personal screens without a new consent", () => {
     expect(ADVERTISING_DISCLOSURE.collector.name).toBe("Google LLC");
     expect(ADVERTISING_DISCLOSURE.placement).toMatch(/공개 안내 페이지/);
-    for (const screen of ["리딩 결과", "기록", "계정", "동의", "로그인", "가입", "카드 선택"]) {
+    for (const screen of ["AI 타로·사주 시작 화면", "만세력", "개인정보 처리방침", "리딩 결과", "기록", "계정", "동의", "로그인", "가입"]) {
       expect(ADVERTISING_DISCLOSURE.placement).toContain(screen);
     }
     expect(ADVERTISING_DISCLOSURE.purpose).toContain("맞춤형 광고");

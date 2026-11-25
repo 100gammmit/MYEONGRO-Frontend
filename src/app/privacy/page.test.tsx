@@ -4,8 +4,8 @@ import PrivacyPage from "./page";
 describe("PrivacyPage", () => {
   it("discloses Google's ad cookies, the excluded screens and how to refuse personalised ads", () => {
     render(<PrivacyPage />);
-    const heading = screen.getByRole("heading", { name: "광고와 행태정보" });
-    const details = heading.nextElementSibling?.nextElementSibling as HTMLElement;
+    expect(screen.getByRole("heading", { name: "광고와 행태정보" })).toBeInTheDocument();
+    const details = screen.getByText("광고 게재 범위", { selector: "dt" }).closest("dl") as HTMLElement;
     for (const label of ["광고 게재 범위", "수집하는 사업자", "수집 항목", "수집 방법", "수집 목적", "보유·이용 기간", "거부 방법", "거부 효과"]) {
       expect(within(details).getByText(label, { selector: "dt" })).toBeInTheDocument();
     }
