@@ -1,4 +1,5 @@
 import {
+  ADVERTISING_DISCLOSURE,
   AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
   AWS_PROCESSING_DISCLOSURE,
   OPENAI_DOMESTIC_PROCESSING_COUNTRIES,
@@ -265,7 +266,8 @@ export function ConsentDocumentContent({
       </p>
       <Heading>로그인 세션 쿠키</Heading>
       <p>명로는 로그인·가입 상태를 유지하기 위해 <code>MYEONGRO_SESSION</code> 쿠키를 자동으로 생성합니다. 이 쿠키에는 계정정보 자체가 아니라 서버의 세션을 찾기 위한 임의 식별값만 들어가며, 세션은 30분 동안 사용하지 않으면 만료됩니다. 운영 환경의 쿠키에는 HttpOnly, Secure와 SameSite=Lax 보호 설정을 적용합니다.</p>
-      <p>브라우저 설정에서 쿠키 저장을 거부하거나 기존 쿠키를 삭제할 수 있습니다. 다만 이 경우 로그인, 가입, AI 리딩 생성과 저장 기록 조회 등 인증이 필요한 기능을 이용할 수 없습니다. 명로는 광고 또는 행태 추적 쿠키를 사용하지 않으며, 무료 오늘의 카드 값은 쿠키가 아닌 현재 브라우저 저장소에만 보관합니다. 무료 만세력에서 AI 사주로 넘어갈 때의 입력값은 현재 탭의 저장소에 잠시 보관했다가 로그인과 AI 사주 이용 동의를 마치면 삭제합니다.</p>
+      <p>브라우저 설정에서 쿠키 저장을 거부하거나 기존 쿠키를 삭제할 수 있습니다. 다만 이 경우 로그인, 가입, AI 리딩 생성과 저장 기록 조회 등 인증이 필요한 기능을 이용할 수 없습니다. 무료 오늘의 카드 값은 쿠키가 아닌 현재 브라우저 저장소에만 보관합니다. 무료 만세력에서 AI 사주로 넘어갈 때의 입력값은 현재 탭의 저장소에 잠시 보관했다가 로그인과 AI 사주 이용 동의를 마치면 삭제합니다. 광고 쿠키와 행태정보는 아래 광고와 행태정보 항목을 따릅니다.</p>
+      <AdvertisingDetails headingLevel={headingLevel} />
       <Heading>개인정보 보호책임자와 문의처</Heading>
       <dl>
         <div><dt>개인정보 보호책임자</dt><dd>{LEGAL_METADATA.operatorName}</dd></div>
@@ -308,6 +310,49 @@ function DocumentMeta({ version, effectiveDate = LEGAL_METADATA.effectiveDate }:
     <p className="consent-document-meta">
       문서 버전 {version} · 시행일 {effectiveDate}
     </p>
+  );
+}
+
+function AdvertisingDetails({
+  headingLevel,
+}: {
+  headingLevel: "h2" | "h3";
+}) {
+  const Heading = headingLevel;
+  const { collector, sourceUrls } = ADVERTISING_DISCLOSURE;
+
+  return (
+    <>
+      <Heading>광고와 행태정보</Heading>
+      <p>
+        명로는 공개 안내 페이지에 Google AdSense 광고를 게재합니다. 광고를 보여 주는 과정에서 Google이 자동 수집 장치(쿠키 등)로
+        이용자의 웹 이용 기록 같은 행태정보를 직접 수집합니다. 명로는 이 정보를 받거나 저장하지 않으며, 명로의 계정·리딩·출생정보를
+        Google에 보내지 않습니다.
+      </p>
+      <dl>
+        <div><dt>광고 게재 범위</dt><dd>{ADVERTISING_DISCLOSURE.placement}</dd></div>
+        <div><dt>수집하는 사업자</dt><dd>{collector.name} ({collector.address})</dd></div>
+        <div><dt>수집 항목</dt><dd>{ADVERTISING_DISCLOSURE.items}</dd></div>
+        <div><dt>수집 방법</dt><dd>{ADVERTISING_DISCLOSURE.method}</dd></div>
+        <div><dt>수집 목적</dt><dd>{ADVERTISING_DISCLOSURE.purpose}</dd></div>
+        <div><dt>보유·이용 기간</dt><dd>{ADVERTISING_DISCLOSURE.retention}</dd></div>
+        <div><dt>거부 방법</dt><dd>{ADVERTISING_DISCLOSURE.refusalMethod}</dd></div>
+        <div><dt>거부 효과</dt><dd>{ADVERTISING_DISCLOSURE.refusalEffect}</dd></div>
+      </dl>
+      <p>
+        맞춤 광고는{" "}
+        <a href={sourceUrls.myAdCenter} rel="noreferrer" target="_blank">Google 내 광고 센터</a>
+        에서 끌 수 있습니다. Google이 정보를 수집·이용하는 방식은{" "}
+        <a href={sourceUrls.partnerSites} rel="noreferrer" target="_blank">Google 서비스를 사용하는 사이트의 정보 사용 방식</a>
+        과{" "}
+        <a href={sourceUrls.adTechnologies} rel="noreferrer" target="_blank">Google의 광고 기술 사용 방식</a>
+        에서 확인할 수 있습니다.
+      </p>
+      <p>
+        {ADVERTISING_DISCLOSURE.consentRegions}에서 접속한 이용자에게는 Google의 동의 메시지가 표시되며, 이용자가 선택한 범위에서만
+        맞춤 광고가 제공됩니다. 광고 정보 최종 확인일은 {ADVERTISING_DISCLOSURE.verifiedAt}입니다.
+      </p>
+    </>
   );
 }
 

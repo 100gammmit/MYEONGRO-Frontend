@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  ADVERTISING_DISCLOSURE,
   AWS_PROCESSING_DISCLOSURE,
   CONSENT_DOCUMENT_VERSIONS,
   OPENAI_DOMESTIC_PROCESSING_COUNTRIES,
@@ -74,6 +75,21 @@ describe("privacy inquiry email processing", () => {
     expect(processingRoles[2].condition).toContain("명시적으로 허용");
     expect(processingRoles[3].countries).toEqual(["인도", "필리핀", "미국"]);
     expect(processingRoles[3].condition).toContain("의심스러운 검색어");
+  });
+});
+
+describe("advertising disclosure", () => {
+  it("names Google as the direct collector and keeps ads out of personal screens without a new consent", () => {
+    expect(ADVERTISING_DISCLOSURE.collector.name).toBe("Google LLC");
+    expect(ADVERTISING_DISCLOSURE.placement).toMatch(/공개 안내 페이지/);
+    for (const screen of ["리딩 결과", "기록", "계정", "동의", "로그인", "가입", "카드 선택"]) {
+      expect(ADVERTISING_DISCLOSURE.placement).toContain(screen);
+    }
+    expect(ADVERTISING_DISCLOSURE.purpose).toContain("맞춤형 광고");
+    expect(ADVERTISING_DISCLOSURE.refusalMethod).toContain("Google 내 광고 센터");
+    expect(Object.values(ADVERTISING_DISCLOSURE.sourceUrls).every((url) => url.startsWith("https://"))).toBe(true);
+    // Ads are disclosed in the privacy notice, not added to the consents a user must accept.
+    expect(Object.keys(CONSENT_DOCUMENT_VERSIONS)).toEqual(["terms", "ai-overseas-transfer"]);
   });
 });
 

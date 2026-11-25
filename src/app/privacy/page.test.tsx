@@ -2,6 +2,22 @@ import { render, screen, within } from "@testing-library/react";
 import PrivacyPage from "./page";
 
 describe("PrivacyPage", () => {
+  it("discloses Google's ad cookies, the excluded screens and how to refuse personalised ads", () => {
+    render(<PrivacyPage />);
+    const heading = screen.getByRole("heading", { name: "광고와 행태정보" });
+    const details = heading.nextElementSibling?.nextElementSibling as HTMLElement;
+    for (const label of ["광고 게재 범위", "수집하는 사업자", "수집 항목", "수집 방법", "수집 목적", "보유·이용 기간", "거부 방법", "거부 효과"]) {
+      expect(within(details).getByText(label, { selector: "dt" })).toBeInTheDocument();
+    }
+    expect(within(details).getByText(/리딩 결과·기록·계정·동의·로그인·가입 화면.*광고를 표시하지 않음/)).toBeInTheDocument();
+    expect(within(details).getByText(/Google LLC/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Google 내 광고 센터" }))
+      .toHaveAttribute("href", "https://myadcenter.google.com/");
+    expect(screen.getByRole("link", { name: "Google의 광고 기술 사용 방식" }))
+      .toHaveAttribute("href", expect.stringContaining("policies.google.com/technologies/ads"));
+    expect(screen.getByText(/유럽경제지역\(EEA\)·영국·스위스에서 접속한 이용자에게는 Google의 동의 메시지/)).toBeInTheDocument();
+  });
+
   it("separates the general contact from the rights request address", () => {
     render(<PrivacyPage />);
     for (const [label, address] of [
@@ -154,7 +170,7 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/MYEONGRO_SESSION/)).toBeInTheDocument();
     expect(screen.getByText(/HttpOnly, Secure와 SameSite=Lax/)).toBeInTheDocument();
-    expect(screen.getByText(/광고 또는 행태 추적 쿠키를 사용하지 않/)).toBeInTheDocument();
+    expect(screen.queryByText(/광고 또는 행태 추적 쿠키를 사용하지 않/)).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 보호책임자와 문의처" }))
       .toBeInTheDocument();
     expect(screen.getByText("백민하")).toBeInTheDocument();
