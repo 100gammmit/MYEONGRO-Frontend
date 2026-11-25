@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { LEGAL_METADATA } from "@/domain/consent/legal-metadata";
 import { SHARE_IMAGE, SHARE_TWITTER, SITE_ORIGIN } from "@/infrastructure/site-metadata";
-import { AdSenseScript } from "@/components/adsense-script";
 import { FooterLink } from "@/components/footer-link";
-import { adsenseClient } from "@/infrastructure/adsense";
 import { ReadingCreditProvider } from "@/components/reading-credit-provider";
 import { ServiceUpdateBanner } from "@/components/service-update-banner";
 import { SiteHeader } from "@/components/site-header";
 import { ZODIAC_YEAR_CONTENT } from "@/domain/zodiac-fortune";
+import { adsenseClient } from "@/infrastructure/adsense";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
 import "@kfonts/maruburi";
@@ -29,15 +28,20 @@ export default async function RootLayout({
   const authenticated = Boolean(
     await getSpringSessionUser(await getBackendCookieHeader()),
   );
+  const adsensePublisher = adsenseClient();
 
   // globals.css scrolls in-page links smoothly; the attribute tells Next.js that is intended, so it
   // keeps jumping straight to the top on route changes (and stays that way after Next.js 16).
   return (
     <html lang="ko" data-theme="dark" data-scroll-behavior="smooth">
+      {adsensePublisher && (
+        <head>
+          <meta name="google-adsense-account" content={adsensePublisher} />
+        </head>
+      )}
       <body>
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
-        <AdSenseScript client={adsenseClient()} />
         <ReadingCreditProvider authenticated={authenticated}>
           {/* Keyboard users jump past the header straight to the page's own content. */}
           <a className="skip-link" href="#main">본문 바로가기</a>

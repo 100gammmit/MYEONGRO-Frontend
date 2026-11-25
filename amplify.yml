@@ -9,6 +9,7 @@ frontend:
       commands:
         - test -n "$BACKEND_API_URL"
         - printf 'BACKEND_API_URL=%s\n' "$BACKEND_API_URL" > .env.production
+        - printf 'NEXT_PUBLIC_ADSENSE_CLIENT=%s\n' "${NEXT_PUBLIC_ADSENSE_CLIENT:-}" >> .env.production
         - npm run lint
         - npm run typecheck
         - npm test

@@ -36,34 +36,6 @@ export const AWS_PROCESSING_DISCLOSURE = {
     `AWS 인프라는 명로 서비스 제공에 필수이므로 국외 처리를 거부하면 명로의 웹 서비스 전체를 이용할 수 없음. 다만 개인정보 권리행사 이메일(${LEGAL_METADATA.privacyEmail})을 통한 권리행사와 계정 삭제 요청은 가능`,
 } as const;
 
-// Google collects this itself through the AdSense script; Myeongro neither receives nor stores it.
-export const ADVERTISING_DISCLOSURE = {
-  verifiedAt: "2026-11-25",
-  collector: {
-    name: "Google LLC",
-    address: "1600 Amphitheatre Parkway, Mountain View, CA 94043, 미국",
-  },
-  sourceUrls: {
-    partnerSites: "https://policies.google.com/technologies/partner-sites?hl=ko",
-    adTechnologies: "https://policies.google.com/technologies/ads?hl=ko",
-    myAdCenter: "https://myadcenter.google.com/",
-  },
-  placement:
-    "홈, 명로 소개, 자주 묻는 질문, 사용 가이드, 띠별 운세, 사주 개념 사전, 업데이트 소식 같은 공개 안내 페이지. AI 타로·사주 시작 화면, 무료 오늘의 카드와 만세력, 이용약관·개인정보 처리방침, 리딩 결과·기록·계정·동의·로그인·가입 화면에는 광고를 표시하지 않음",
-  items:
-    "광고 쿠키와 광고 식별자, 방문한 페이지 주소, 브라우저·기기 정보, IP 주소, 광고 노출·클릭 기록",
-  method:
-    "광고를 표시하는 페이지를 방문할 때 Google 광고 스크립트가 이용자의 브라우저에서 자동으로 수집. 광고가 없는 화면으로 이동하면 페이지를 새로 불러와 광고 스크립트가 남지 않음",
-  purpose:
-    "광고 게재, 이용자의 관심사에 맞춘 맞춤형 광고, 광고 성과 측정과 부정 클릭 방지",
-  retention: "Google의 개인정보처리방침과 광고 기술 정책에 따름",
-  refusalMethod:
-    "Google 내 광고 센터에서 맞춤 광고를 끄거나, 브라우저 설정에서 제3자 쿠키를 차단",
-  refusalEffect:
-    "거부해도 명로의 모든 기능을 그대로 이용할 수 있음. 광고는 맞춤형이 아닌 형태로 표시될 수 있음",
-  consentRegions: "유럽경제지역(EEA)·영국·스위스",
-} as const;
-
 export const PRIVACY_INQUIRY_EMAIL_PROCESSING = {
   verifiedAt: "2026-10-06",
   sourceUpdatedAt: "2026-07-23",
