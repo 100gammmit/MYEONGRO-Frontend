@@ -45,8 +45,18 @@ export function AdSenseScript({ client }: { client: string | null }) {
       const path = internalLinkPath(event);
       if (path !== null && !isAdRoute(path)) event.stopImmediatePropagation();
     }
+    // Back/forward has already changed the URL; reload it before Next.js restores the screen.
+    function onPopState(event: PopStateEvent) {
+      if (!loaded.current || isAdRoute(window.location.pathname)) return;
+      event.stopImmediatePropagation();
+      window.location.reload();
+    }
     window.addEventListener("click", onClick, true);
-    return () => window.removeEventListener("click", onClick, true);
+    window.addEventListener("popstate", onPopState, true);
+    return () => {
+      window.removeEventListener("click", onClick, true);
+      window.removeEventListener("popstate", onPopState, true);
+    };
   }, []);
 
   return adRoute && client ? (

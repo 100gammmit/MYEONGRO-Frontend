@@ -31,7 +31,16 @@ describe("AdSenseScript", () => {
   }
 
   function stubReload() {
-    Object.defineProperty(window, "location", { configurable: true, value: { ...originalLocation, reload } });
+    // Live getters keep pathname in step with history.pushState; only reload is replaced.
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: {
+        reload,
+        get href() { return originalLocation.href; },
+        get origin() { return originalLocation.origin; },
+        get pathname() { return originalLocation.pathname; },
+      },
+    });
   }
 
   it("loads nothing without a publisher ID", () => {
@@ -83,6 +92,28 @@ describe("AdSenseScript", () => {
       }
     } finally {
       document.removeEventListener("click", clientRouter);
+    }
+  });
+
+  it("reloads on back/forward to an ad-free screen before the router restores it", () => {
+    stubReload();
+    navigation.pathname = "/zodiac";
+    render(<AdSenseScript client={CLIENT} />);
+    const clientRouter = vi.fn();
+    window.addEventListener("popstate", clientRouter);
+    try {
+      window.history.pushState({}, "", "/faq");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+      expect(reload).not.toHaveBeenCalled();
+      expect(clientRouter).toHaveBeenCalledTimes(1);
+
+      window.history.pushState({}, "", "/records");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+      expect(reload).toHaveBeenCalledTimes(1);
+      expect(clientRouter).toHaveBeenCalledTimes(1);
+    } finally {
+      window.removeEventListener("popstate", clientRouter);
+      window.history.pushState({}, "", "/");
     }
   });
 
