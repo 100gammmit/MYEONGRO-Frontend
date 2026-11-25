@@ -16,9 +16,19 @@ describe("AdSenseScript", () => {
   const originalLocation = window.location;
 
   afterEach(() => {
+    document.querySelectorAll("body > a").forEach((link) => link.remove());
     reload.mockReset();
     Object.defineProperty(window, "location", { configurable: true, value: originalLocation });
   });
+
+  // Plain anchors stand in for rendered links; Next.js Link handles clicks after the capture phase.
+  function addLink(href: string, text: string): HTMLAnchorElement {
+    const link = document.createElement("a");
+    link.href = href;
+    link.textContent = text;
+    document.body.append(link);
+    return link;
+  }
 
   function stubReload() {
     Object.defineProperty(window, "location", { configurable: true, value: { ...originalLocation, reload } });
@@ -53,6 +63,40 @@ describe("AdSenseScript", () => {
     navigation.pathname = "/records";
     rerender(<AdSenseScript client={CLIENT} />);
     expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("lets links to ad-free screens load natively once the script is loaded", () => {
+    navigation.pathname = "/zodiac";
+    render(<AdSenseScript client={CLIENT} />);
+    addLink("/records", "기록");
+    addLink("/faq", "FAQ");
+    addLink("/records", "새 탭").target = "_blank";
+    const clientRouter = vi.fn();
+    document.addEventListener("click", clientRouter);
+    try {
+      for (const [name, expected] of [["기록", 0], ["FAQ", 1], ["새 탭", 1]] as const) {
+        clientRouter.mockClear();
+        const link = [...document.querySelectorAll("a")].find((a) => a.textContent === name)!;
+        link.addEventListener("click", (event) => event.preventDefault(), { once: true });
+        link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }));
+        expect(clientRouter).toHaveBeenCalledTimes(expected);
+      }
+    } finally {
+      document.removeEventListener("click", clientRouter);
+    }
+  });
+
+  it("does not intercept links before any script was loaded", () => {
+    navigation.pathname = "/tarot";
+    render(<AdSenseScript client={CLIENT} />);
+    addLink("/records", "기록");
+    const clientRouter = vi.fn();
+    document.addEventListener("click", clientRouter);
+    const link = [...document.querySelectorAll("a")].find((a) => a.textContent === "기록")!;
+    link.addEventListener("click", (event) => event.preventDefault(), { once: true });
+    link.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }));
+    document.removeEventListener("click", clientRouter);
+    expect(clientRouter).toHaveBeenCalledTimes(1);
   });
 
   it("does not reload on ad-free screens when no script was ever loaded", () => {
