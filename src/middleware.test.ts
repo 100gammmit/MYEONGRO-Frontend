@@ -79,6 +79,7 @@ describe("session middleware", () => {
     "/images/og.png",
     "/robots.txt",
     "/sitemap.xml",
+    "/ads.txt",
     "/assets/poster.avif",
     "/assets/site.webmanifest",
     "/media/intro.mp4",

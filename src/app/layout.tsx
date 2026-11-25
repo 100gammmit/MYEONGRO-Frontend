@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { LEGAL_METADATA } from "@/domain/consent/legal-metadata";
 import { SHARE_IMAGE, SHARE_TWITTER, SITE_ORIGIN } from "@/infrastructure/site-metadata";
+import { AdSenseScript } from "@/components/adsense-script";
 import { FooterLink } from "@/components/footer-link";
+import { adsenseClient } from "@/infrastructure/adsense";
 import { ReadingCreditProvider } from "@/components/reading-credit-provider";
 import { ServiceUpdateBanner } from "@/components/service-update-banner";
 import { SiteHeader } from "@/components/site-header";
@@ -35,6 +37,7 @@ export default async function RootLayout({
       <body>
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
+        <AdSenseScript client={adsenseClient()} />
         <ReadingCreditProvider authenticated={authenticated}>
           {/* Keyboard users jump past the header straight to the page's own content. */}
           <a className="skip-link" href="#main">본문 바로가기</a>
