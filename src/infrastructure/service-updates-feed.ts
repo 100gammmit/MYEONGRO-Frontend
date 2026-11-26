@@ -3,8 +3,8 @@ import { SERVICE_UPDATES_FEED_PATH, SITE_ORIGIN } from "@/infrastructure/site-me
 
 const XML_ESCAPES: Readonly<Record<string, string>> = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" };
 
-// Control characters other than tab and newlines are illegal in XML 1.0 and would void the whole feed.
-const XML_ILLEGAL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g;
+// C0 control characters other than tab and newlines are illegal in XML 1.0 and would void the whole feed.
+const XML_ILLEGAL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g;
 
 function escapeXml(value: string): string {
   return value.replace(XML_ILLEGAL, "").replace(/[&<>"']/g, (character) => XML_ESCAPES[character]);
