@@ -56,6 +56,11 @@ describe("serviceUpdatesFeed", () => {
     expect(feed).toContain("<description>&quot;따옴표&quot; &apos;x&apos;</description>");
   });
 
+  it("drops control characters XML cannot carry", () => {
+    const feed = serviceUpdatesFeed([update({ id: "control", publishedDate: "2026-11-20", summary: "앞\u0008뒤\u000B끝" })], "2026-11-26");
+    expect(feed).toContain("<description>앞뒤끝</description>");
+  });
+
   it("is a well-formed channel with no items before any notice is published", () => {
     const feed = serviceUpdatesFeed([], "2026-11-26");
     expect(items(feed)).toEqual([]);
