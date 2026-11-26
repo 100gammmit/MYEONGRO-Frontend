@@ -59,6 +59,7 @@ describe("search discovery boundaries", () => {
       images: [SHARE_IMAGE],
     });
     expect(metadata.twitter).toMatchObject({ card: "summary_large_image", images: [SHARE_IMAGE] });
+    expect(metadata.alternates).toEqual({ canonical: "/faq", types: { "application/rss+xml": "/rss.xml" } });
   });
 
   it("rejects metadata for an unregistered public route", () => {

@@ -4,6 +4,9 @@ import routes from "./site-routes.json";
 // Production redirects the apex domain to www; discovery URLs must use the same host.
 export const SITE_ORIGIN = routes.origin;
 
+// Served by src/app/rss.xml/route.ts.
+export const SERVICE_UPDATES_FEED_PATH = "/rss.xml";
+
 // One share image for every page. A page that sets its own openGraph replaces the inherited one,
 // so the image is named explicitly instead of relying on the root-only file convention.
 export const SHARE_IMAGE = {
@@ -36,7 +39,8 @@ export function publicPageMetadata(path: string, title: string, description: str
   return {
     title,
     description,
-    alternates: { canonical: path },
+    // Advertises the notices feed so crawlers that read RSS (Naver) can find it from any public page.
+    alternates: { canonical: path, types: { "application/rss+xml": SERVICE_UPDATES_FEED_PATH } },
     openGraph: {
       title,
       description,
