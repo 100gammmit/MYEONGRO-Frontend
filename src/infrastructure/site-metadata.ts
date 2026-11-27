@@ -54,6 +54,26 @@ export function publicPageMetadata(path: string, title: string, description: str
   };
 }
 
+// A page reached only through a link someone shared: it previews well in messengers but stays out of
+// search, and it is not a canonical page of its own.
+export function sharedPageMetadata(path: string, title: string, description: string, image: ShareImage): Metadata {
+  return {
+    title,
+    description,
+    robots: { index: false, follow: true },
+    openGraph: {
+      title,
+      description,
+      url: path,
+      siteName: "명로",
+      locale: "ko_KR",
+      type: "website",
+      images: [image],
+    },
+    twitter: { ...SHARE_TWITTER, images: [image], title, description },
+  };
+}
+
 export const PRIVATE_PAGE_METADATA: Metadata = {
   robots: { index: false, follow: false },
 };

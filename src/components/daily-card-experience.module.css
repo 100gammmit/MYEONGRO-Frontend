@@ -37,6 +37,27 @@
   background: var(--surface-tint-2);
 }
 
+/* The share button leads the actions under a result; the status line keeps its height so the
+   "copied" note does not push the next button down. */
+.share {
+  display: grid;
+  gap: 6px;
+  max-width: var(--w-read);
+  margin: 20px auto 10px;
+}
+
+.share :global(.primary-button) {
+  gap: 8px;
+}
+
+.shareStatus {
+  min-height: 1.5em;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-align: center;
+}
+
 @media (max-width: 760px) {
   .cards {
     gap: 0.35rem;

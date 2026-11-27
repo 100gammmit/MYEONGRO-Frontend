@@ -71,6 +71,7 @@ describe("DailyCardExperience", () => {
 
     expect(await screen.findByText("오늘의 카드 · 태양")).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).not.toHaveBeenCalled());
+    expect(screen.getByRole("button", { name: "오늘의 카드 공유하기" })).toBeInTheDocument();
   });
 
   it("does not restore a guest result for an authenticated user", async () => {

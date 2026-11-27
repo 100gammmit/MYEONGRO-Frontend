@@ -73,6 +73,7 @@
     "/signup",
     "/account",
     "/records",
+    "/tarot/daily/[id]",
     "/tarot/draw",
     "/tarot/results",
     "/saju/results"

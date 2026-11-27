@@ -50,4 +50,16 @@ export const SERVICE_UPDATES = defineServiceUpdates([
     publishedDate: "2026-11-25", effectiveDate: "2026-11-25",
     links: [{ href: "/saju/dictionary", label: "사주 개념 사전 보기" }],
   },
+  {
+    id: "2026-11-27-daily-card-share",
+    category: "release", noticeLevel: "routine",
+    title: "오늘의 카드를 공유할 수 있습니다",
+    summary: "오늘 뽑은 카드와 해설을 링크로 친구에게 보낼 수 있습니다.",
+    changes: [
+      "결과 화면의 공유하기 버튼을 누르면 휴대폰의 공유 창이 열리고, 컴퓨터에서는 링크가 복사됩니다.",
+      "링크를 받은 사람은 같은 카드와 해설을 보고, 로그인 없이 자신의 오늘의 카드도 뽑을 수 있습니다.",
+    ],
+    publishedDate: "2026-11-27", effectiveDate: "2026-11-27",
+    links: [{ href: "/tarot/daily", label: "오늘의 카드 뽑기" }],
+  },
 ]);

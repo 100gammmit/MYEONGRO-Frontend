@@ -17,7 +17,8 @@ import {
 } from "@/domain/daily-card-free";
 import { ReadingShell } from "./reading-shell";
 import styles from "./daily-card-experience.module.css";
-import { TarotCardFace } from "./tarot-card-face";
+import { DailyCardResultCard } from "./daily-card-result-card";
+import { DailyCardShareButton } from "./daily-card-share-button";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
 
 const SLOT_COUNT = 5;
@@ -152,17 +153,8 @@ export function DailyCardExperience({
   if (state.status === "result" && content) {
     return (
       <ReadingShell eyebrow="무료 오늘의 운세" title={content.title} back={{ href: "/tarot", label: "타로" }} focusOnChange={false}>
-        <article className={`wizard-card ${styles.result}`}>
-          {/* The line beneath names the card, so the front itself is shown without a caption. */}
-          <div className={styles.cardImage}>
-            <TarotCardFace cardId={state.stored.cardId} />
-          </div>
-          <p className={styles.cardName}>오늘의 카드 · {content.cardName}</p>
-          <h2 ref={resultHeadingRef} tabIndex={-1}>{content.today.heading}</h2>
-          <p>{content.today.body}</p>
-          <p className={styles.guidance}>{content.guidance[0]}</p>
-          <small>{content.disclaimer}</small>
-        </article>
+        <DailyCardResultCard cardId={state.stored.cardId} content={content} headingRef={resultHeadingRef} />
+        <DailyCardShareButton cardId={state.stored.cardId} content={content} variantIndex={state.stored.variantIndex} />
         <Link className="secondary-button full-button" href="/tarot">
           다른 타로 리딩 살펴보기
         </Link>

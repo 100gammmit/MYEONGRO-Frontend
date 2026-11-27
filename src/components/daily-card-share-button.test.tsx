@@ -1,0 +1,100 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { getDailyCardContent } from "@/domain/daily-card-free";
+
+import { DailyCardShareButton } from "./daily-card-share-button";
+
+const content = getDailyCardContent("major-17-star", 2)!;
+const SHARE_PATH = "/tarot/daily/AbCdEf1234";
+
+function renderButton() {
+  render(<DailyCardShareButton cardId="major-17-star" content={content} variantIndex={2} />);
+  return screen.getByRole("button", { name: "오늘의 카드 공유하기" });
+}
+
+function mockShareApi(response: Response = Response.json({ path: SHARE_PATH })) {
+  return vi.spyOn(globalThis, "fetch").mockResolvedValue(response);
+}
+
+function setNavigator(key: "share" | "clipboard", value: unknown) {
+  Object.defineProperty(navigator, key, { configurable: true, value });
+}
+
+describe("DailyCardShareButton", () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    setNavigator("share", undefined);
+    setNavigator("clipboard", undefined);
+  });
+
+  afterEach(() => {
+    setNavigator("share", undefined);
+    setNavigator("clipboard", undefined);
+  });
+
+  it("asks for this result's link and opens the phone's share sheet", async () => {
+    const fetchMock = mockShareApi();
+    const share = vi.fn().mockResolvedValue(undefined);
+    setNavigator("share", share);
+
+    fireEvent.click(renderButton());
+
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toEqual({ cardId: "major-17-star", variantIndex: 2 });
+    expect(share).toHaveBeenCalledWith({
+      title: "오늘의 카드: 별",
+      text: `오늘의 카드: 별 · ${content.title}`,
+      url: `${window.location.origin}${SHARE_PATH}`,
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("treats closing the share sheet as no error", async () => {
+    mockShareApi();
+    setNavigator("share", vi.fn().mockRejectedValue(new DOMException("closed", "AbortError")));
+
+    const button = renderButton();
+    fireEvent.click(button);
+
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("copies the link where there is no share sheet", async () => {
+    mockShareApi();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    setNavigator("clipboard", { writeText });
+
+    fireEvent.click(renderButton());
+
+    expect(await screen.findByText("링크를 복사했어요")).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${SHARE_PATH}`);
+  });
+
+  it("says so when the link cannot be made", async () => {
+    mockShareApi(Response.json({ message: "지원하지 않는 오늘의 카드입니다." }, { status: 400 }));
+    const share = vi.fn();
+    setNavigator("share", share);
+
+    fireEvent.click(renderButton());
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("공유 링크를 만들지 못했어요.");
+    expect(share).not.toHaveBeenCalled();
+  });
+
+  it("asks for the link once while a request is in flight", async () => {
+    let resolve: (response: Response) => void = () => undefined;
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockReturnValue(new Promise((done) => { resolve = done; }));
+    setNavigator("share", vi.fn().mockResolvedValue(undefined));
+
+    const button = renderButton();
+    fireEvent.click(button);
+    fireEvent.click(button);
+    expect(button).toBeDisabled();
+    resolve(Response.json({ path: SHARE_PATH }));
+
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});

@@ -8,6 +8,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      // Next resolves server-only to a no-op on the server; tests exercise server modules directly.
+      "server-only": path.resolve(__dirname, "node_modules/server-only/empty.js"),
     },
   },
   test: {
