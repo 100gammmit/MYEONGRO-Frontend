@@ -9,6 +9,11 @@ import {
 } from "@/domain/daily-card-free";
 import { DailyCardExperience } from "./daily-card-experience";
 
+// The share button fetches its link on its own (covered in its tests); here only the draw API counts.
+vi.mock("./daily-card-share-button", () => ({
+  DailyCardShareButton: () => <button type="button">오늘의 카드 공유하기</button>,
+}));
+
 const drawId = "82ed11d5-2269-438c-9815-42e6f13735f4";
 const guestStorageKey = getDailyCardStorageKey("guest");
 

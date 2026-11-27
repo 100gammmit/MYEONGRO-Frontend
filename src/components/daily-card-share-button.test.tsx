@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getDailyCardContent } from "@/domain/daily-card-free";
@@ -50,6 +50,34 @@ describe("DailyCardShareButton", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
+  it("fetches the link as the result shows, so the click opens the sheet at once", async () => {
+    const fetchMock = mockShareApi();
+    const share = vi.fn().mockResolvedValue(undefined);
+    setNavigator("share", share);
+
+    const button = renderButton();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await act(async () => undefined);
+    fireEvent.click(button);
+
+    // Called inside the click itself, while the browser still counts it as the user's gesture.
+    expect(share).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("copies the link when the share sheet is refused", async () => {
+    mockShareApi();
+    setNavigator("share", vi.fn().mockRejectedValue(new DOMException("no gesture", "NotAllowedError")));
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    setNavigator("clipboard", { writeText });
+
+    fireEvent.click(renderButton());
+
+    expect(await screen.findByText("링크를 복사했어요")).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${SHARE_PATH}`);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("treats closing the share sheet as no error", async () => {
     mockShareApi();
     setNavigator("share", vi.fn().mockRejectedValue(new DOMException("closed", "AbortError")));
@@ -70,6 +98,7 @@ describe("DailyCardShareButton", () => {
 
     expect(await screen.findByText("링크를 복사했어요")).toBeInTheDocument();
     expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${SHARE_PATH}`);
+    await waitFor(() => expect(screen.queryByText("링크를 복사했어요")).not.toBeInTheDocument(), { timeout: 4000 });
   });
 
   it("says so when the link cannot be made", async () => {
