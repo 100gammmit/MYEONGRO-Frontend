@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   analyticsLocation,
@@ -12,13 +12,26 @@ const ORIGIN = "https://www.myeongro.com";
 const READING_ID = "6f1c2a9e-3b4d-4e5f-8a7b-9c0d1e2f3a4b";
 
 describe("gaMeasurementId", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("accepts a GA4 measurement ID", () => {
     expect(gaMeasurementId(" G-AB12CD34EF ")).toBe("G-AB12CD34EF");
   });
 
-  it("rejects empty, missing and non-GA4 values", () => {
+  it("reads the environment when no value is passed", () => {
+    vi.stubEnv("NEXT_PUBLIC_GA_MEASUREMENT_ID", "G-AB12CD34EF");
+    expect(gaMeasurementId()).toBe("G-AB12CD34EF");
+  });
+
+  it("returns null when the environment has no ID", () => {
+    vi.stubEnv("NEXT_PUBLIC_GA_MEASUREMENT_ID", "");
+    expect(gaMeasurementId()).toBeNull();
+  });
+
+  it("rejects empty and non-GA4 values", () => {
     expect(gaMeasurementId("")).toBeNull();
-    expect(gaMeasurementId(undefined)).toBeNull();
     expect(gaMeasurementId("UA-12345-1")).toBeNull();
     expect(gaMeasurementId("G-ab12\"><script>")).toBeNull();
   });
