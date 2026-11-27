@@ -154,6 +154,7 @@ describe("TarotExperience", () => {
     vi.restoreAllMocks();
     navigation.push.mockReset();
     navigation.replace.mockReset();
+    window.gtag = vi.fn();
     consent.autoComplete = true;
     consent.unauthenticated = false;
     window.history.replaceState(null, "", "/tarot");
@@ -416,6 +417,9 @@ describe("TarotExperience", () => {
     expect(body).not.toHaveProperty("cardIds");
     expect(body).not.toHaveProperty("candidateSets");
     expect(navigation.push).toHaveBeenCalledWith("/tarot/results/reading-1");
+    const analyticsParams = { reading_type: "tarot", spread_type: "relationship_three_card" };
+    expect(window.gtag).toHaveBeenCalledWith("event", "reading_start", analyticsParams);
+    expect(window.gtag).toHaveBeenCalledWith("event", "reading_complete", analyticsParams);
   });
 
   it("waits on the same brand-mark loading screen as saju", async () => {
@@ -511,6 +515,9 @@ describe("TarotExperience", () => {
     const first = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
     const second = JSON.parse(String(fetchMock.mock.calls[1][1]?.body));
     expect(second.requestId).toBe(first.requestId);
+    // The retry continues the same reading, so it counts as one start.
+    const starts = vi.mocked(window.gtag!).mock.calls.filter((call) => call[1] === "reading_start");
+    expect(starts).toHaveLength(1);
   });
 
   it("falls back to a generic message when the error response has no message", async () => {

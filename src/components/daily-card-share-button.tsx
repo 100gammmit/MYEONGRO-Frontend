@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { DailyCardContent } from "@/domain/daily-card-free";
+import { trackEvent } from "@/infrastructure/analytics-client";
 
 import styles from "./daily-card-experience.module.css";
 
@@ -82,6 +83,7 @@ export function DailyCardShareButton({
     if (prefersShareSheet()) {
       try {
         await navigator.share({ title: `오늘의 카드: ${content.cardName}`, text: `오늘의 카드: ${content.cardName} · ${content.title}`, url });
+        trackEvent({ name: "share", params: { method: "share_sheet", content_type: "daily_card" } });
         setStatus("idle");
         return;
       } catch (error) {
@@ -93,6 +95,7 @@ export function DailyCardShareButton({
       }
     }
     await navigator.clipboard.writeText(url);
+    trackEvent({ name: "share", params: { method: "copy_link", content_type: "daily_card" } });
     setStatus("copied");
   }
 

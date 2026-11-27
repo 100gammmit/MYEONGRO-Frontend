@@ -1,8 +1,8 @@
 import { LEGAL_METADATA } from "./legal-metadata";
 
 export const TERMS_DOCUMENT_VERSION = "2026-09-27";
-export const PRIVACY_DOCUMENT_VERSION = "2026-11-21";
-export const PRIVACY_DOCUMENT_EFFECTIVE_DATE = "2026-11-21";
+export const PRIVACY_DOCUMENT_VERSION = "2026-11-27";
+export const PRIVACY_DOCUMENT_EFFECTIVE_DATE = "2026-11-27";
 export const AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION = "2026-09-25";
 
 export const AWS_PROCESSING_DISCLOSURE = {
@@ -34,6 +34,36 @@ export const AWS_PROCESSING_DISCLOSURE = {
     `서비스 이용 전에는 접속을 중단하고, 이용 중에는 계정 설정에서 계정을 삭제하거나 개인정보 권리행사 이메일(${LEGAL_METADATA.privacyEmail})로 요청`,
   refusalEffect:
     `AWS 인프라는 명로 서비스 제공에 필수이므로 국외 처리를 거부하면 명로의 웹 서비스 전체를 이용할 수 없음. 다만 개인정보 권리행사 이메일(${LEGAL_METADATA.privacyEmail})을 통한 권리행사와 계정 삭제 요청은 가능`,
+} as const;
+
+// Google Analytics 4 visit statistics. The Front sends only cleaned addresses and fixed event names
+// (src/infrastructure/analytics.ts, analytics-client.ts); the property keeps Google signals and ad
+// personalisation off and event data for 2 months.
+export const GOOGLE_ANALYTICS_DISCLOSURE = {
+  verifiedAt: "2026-11-27",
+  processor: {
+    name: "Google LLC",
+    country: "미국",
+    address: "1600 Amphitheatre Parkway, Mountain View, CA 94043, USA",
+    contactUrl: "https://support.google.com/policies/contact/general_privacy_form",
+  },
+  sourceUrls: {
+    partnerSites: "https://policies.google.com/technologies/partner-sites",
+    optOut: "https://tools.google.com/dlpage/gaoptout",
+    dataCenters: "https://datacenters.google/locations/",
+  },
+  purpose: "방문자 수, 유입 경로와 주요 기능 이용 횟수 등 서비스 이용 통계 분석",
+  items:
+    "Google Analytics 쿠키(_ga 등)의 임의 식별값, 방문한 페이지 주소(리딩·기록 식별자는 일반화하고 캠페인 태그 외 쿼리 제외)와 제목, 유입 경로(이전 사이트 주소의 도메인, 캠페인 태그), 기기·브라우저·운영체제·화면 정보, 접속 IP로 추정한 국가·지역(IP 주소는 Google Analytics에 저장되지 않음), 오늘의 카드 뽑기·공유, 띠별 운세 열람, AI 리딩 시작·완료 등 행동 종류와 발생 시각",
+  excluded:
+    "질문·선택지·관심 분야, 출생정보, 리딩·기록 식별자, 명로 사용자 식별자와 이메일은 Google Analytics로 보내지 않음",
+  processingLocation: "미국 등 Google이 데이터센터를 운영하는 국가",
+  method: "이용자가 명로 페이지를 열거나 위 기능을 사용할 때 이용자의 브라우저에서 Google로 암호화된 네트워크를 통해 전송",
+  retention:
+    "Google Analytics의 이벤트 단위 데이터는 수집 후 2개월이 지나면 자동 삭제. 개인을 식별할 수 없는 집계 보고서는 그 이후에도 남을 수 있음. 쿠키는 마지막 방문부터 최대 2년간 브라우저에 남으며 이용자가 언제든 삭제할 수 있음",
+  refusalMethod:
+    "브라우저 설정에서 쿠키를 차단하거나 삭제하고, Google이 제공하는 Google Analytics 차단 브라우저 부가기능을 설치해 수집을 거부",
+  refusalEffect: "방문 통계 수집을 거부해도 명로의 모든 기능을 그대로 이용할 수 있음",
 } as const;
 
 export const PRIVACY_INQUIRY_EMAIL_PROCESSING = {

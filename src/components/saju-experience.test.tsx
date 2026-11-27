@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SajuExperience } from "./saju-experience";
 import { getSajuCurrentYear } from "@/domain/saju/monthly-calendar";
@@ -103,7 +103,12 @@ function createDeferred<T>() {
   return { promise, resolve };
 }
 
+beforeEach(() => {
+  window.gtag = vi.fn();
+});
+
 afterEach(() => {
+  delete window.gtag;
   vi.useRealTimers();
   vi.restoreAllMocks();
   window.history.replaceState(null, "", "/");
@@ -239,6 +244,9 @@ describe("SajuExperience", () => {
     // The birth input did not change, so the format is not asked again.
     fireEvent.click(await screen.findByRole("button", { name: "4크레딧으로 한 해 리포트 생성" }));
     await waitFor(() => expect(navigation.push).toHaveBeenCalledWith("/saju/results/reading-1"));
+    const analyticsParams = { reading_type: "saju", report_type: "annual_monthly" };
+    expect(window.gtag).toHaveBeenCalledWith("event", "reading_start", analyticsParams);
+    expect(window.gtag).toHaveBeenCalledWith("event", "reading_complete", analyticsParams);
     expect(fetchMock.mock.calls[2]?.[0]).toBe("/api/saju/readings/detail-level");
     expect(JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body))).toEqual({
       birthProfile: expect.objectContaining({ birthDate: "1992-08-17", birthTimePrecision: "unknown" }),

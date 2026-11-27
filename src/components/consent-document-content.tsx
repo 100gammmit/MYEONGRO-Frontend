@@ -1,6 +1,7 @@
 import {
   AI_OVERSEAS_TRANSFER_DOCUMENT_VERSION,
   AWS_PROCESSING_DISCLOSURE,
+  GOOGLE_ANALYTICS_DISCLOSURE,
   OPENAI_DOMESTIC_PROCESSING_COUNTRIES,
   OPENAI_OVERSEAS_PROCESSING_COUNTRIES,
   OPENAI_PUBLISHED_PROCESSING_COUNTRIES,
@@ -177,6 +178,12 @@ export function ConsentDocumentContent({
               <td data-label="보유기간·삭제 기준">1분 후 자동 삭제. 비영속 Redis 재시작 시 삭제</td>
             </tr>
             <tr>
+              <th scope="row">방문 통계 분석(Google Analytics)</th>
+              <td data-label="처리 항목">{GOOGLE_ANALYTICS_DISCLOSURE.items}. {GOOGLE_ANALYTICS_DISCLOSURE.excluded}</td>
+              <td data-label="처리 근거">개인정보 보호법 제15조 제1항 제6호에 따른 서비스 이용 통계 분석과 개선의 정당한 이익</td>
+              <td data-label="보유기간·삭제 기준">{GOOGLE_ANALYTICS_DISCLOSURE.retention}</td>
+            </tr>
+            <tr>
               <th scope="row">OpenAI를 통한 AI 리딩 생성</th>
               <td data-label="처리 항목">질문·선택지·관심 분야, 카드 선택정보, 최소 사주 계산정보</td>
               <td data-label="처리 근거"><OverseasTransferConsentBasis /></td>
@@ -215,6 +222,11 @@ export function ConsentDocumentContent({
               <td data-label="위탁업무">{PRIVACY_INQUIRY_EMAIL_PROCESSING.processors.google.purpose}</td>
               <td data-label="보유·이용기간">아래 문의 이메일(일반 문의·개인정보 권리행사) 국외 처리 항목의 명로 보유기간과 Google 복구·삭제 기준에 따름</td>
             </tr>
+            <tr>
+              <th scope="row">{GOOGLE_ANALYTICS_DISCLOSURE.processor.name}</th>
+              <td data-label="위탁업무">{GOOGLE_ANALYTICS_DISCLOSURE.purpose}(Google Analytics)</td>
+              <td data-label="보유·이용기간">아래 Google Analytics 방문 통계의 국외 처리 항목의 보유·이용 기간에 따름</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -248,6 +260,36 @@ export function ConsentDocumentContent({
         에서 확인할 수 있습니다. AWS 정보 최종 확인일은 {AWS_PROCESSING_DISCLOSURE.verifiedAt}입니다.
       </p>
       <PrivacyInquiryEmailOverseasDetails headingLevel={headingLevel} />
+      <Heading>Google Analytics 방문 통계의 국외 처리</Heading>
+      <p>명로는 방문자 수와 유입 경로, 주요 기능의 이용 횟수를 파악해 서비스를 개선하기 위해 Google Analytics를 사용합니다. 이용자가 명로 페이지를 열면 브라우저가 Google Analytics 쿠키를 저장하고 아래 정보를 Google로 직접 전송합니다. 명로는 Google 신호와 광고 개인화 기능을 사용하지 않으며, Google Analytics 정보를 광고에 이용하지 않습니다.</p>
+      <dl>
+        <div><dt>이전받는 자(수탁자)</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.processor.name}</dd></div>
+        <div><dt>주소</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.processor.address}</dd></div>
+        <div><dt>개인정보 문의</dt><dd><a href={GOOGLE_ANALYTICS_DISCLOSURE.processor.contactUrl} rel="noreferrer" target="_blank">Google 개인정보 문의 양식</a></dd></div>
+        <div><dt>이전 국가</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.processingLocation}</dd></div>
+        <div><dt>이전 항목</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.items}</dd></div>
+        <div><dt>보내지 않는 정보</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.excluded}</dd></div>
+        <div><dt>시기·방법</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.method}</dd></div>
+        <div><dt>목적</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.purpose}</dd></div>
+        <div><dt>보유·이용 기간</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.retention}</dd></div>
+        <div><dt>거부 방법·절차</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.refusalMethod}</dd></div>
+        <div><dt>거부 효과</dt><dd>{GOOGLE_ANALYTICS_DISCLOSURE.refusalEffect}</dd></div>
+      </dl>
+      <p>
+        Google이 이 정보를 처리하는 방식은 {" "}
+        <a href={GOOGLE_ANALYTICS_DISCLOSURE.sourceUrls.partnerSites} rel="noreferrer" target="_blank">
+          Google 서비스를 사용하는 사이트의 정보 이용 방식
+        </a>
+        에서, Google의 데이터센터 위치는 {" "}
+        <a href={GOOGLE_ANALYTICS_DISCLOSURE.sourceUrls.dataCenters} rel="noreferrer" target="_blank">
+          Google 데이터센터 위치
+        </a>
+        에서 확인할 수 있습니다. 수집 거부용 부가기능은 {" "}
+        <a href={GOOGLE_ANALYTICS_DISCLOSURE.sourceUrls.optOut} rel="noreferrer" target="_blank">
+          Google Analytics 차단 브라우저 부가기능
+        </a>
+        에서 설치할 수 있습니다. Google Analytics 정보 최종 확인일은 {GOOGLE_ANALYTICS_DISCLOSURE.verifiedAt}입니다.
+      </p>
       <Heading>OpenAI AI 리딩 국외이전</Heading>
       <p>AI 리딩 생성에는 OpenAI OpCo, LLC의 Global API를 사용합니다. 아래 국외이전 세부 내용은 로그인하지 않아도 언제든 확인할 수 있습니다.</p>
       <AiOverseasTransferDetails headingLevel={headingLevel} />
@@ -263,9 +305,10 @@ export function ConsentDocumentContent({
         <a href="https://privacy.kisa.or.kr" rel="noreferrer" target="_blank">개인정보침해 신고센터</a>
         를 이용할 수 있습니다.
       </p>
-      <Heading>로그인 세션 쿠키</Heading>
+      <Heading>쿠키</Heading>
       <p>명로는 로그인·가입 상태를 유지하기 위해 <code>MYEONGRO_SESSION</code> 쿠키를 자동으로 생성합니다. 이 쿠키에는 계정정보 자체가 아니라 서버의 세션을 찾기 위한 임의 식별값만 들어가며, 세션은 30분 동안 사용하지 않으면 만료됩니다. 운영 환경의 쿠키에는 HttpOnly, Secure와 SameSite=Lax 보호 설정을 적용합니다.</p>
-      <p>브라우저 설정에서 쿠키 저장을 거부하거나 기존 쿠키를 삭제할 수 있습니다. 다만 이 경우 로그인, 가입, AI 리딩 생성과 저장 기록 조회 등 인증이 필요한 기능을 이용할 수 없습니다. 명로는 광고 또는 행태 추적 쿠키를 사용하지 않으며, 무료 오늘의 카드 값은 쿠키가 아닌 현재 브라우저 저장소에만 보관합니다. 무료 만세력에서 AI 사주로 넘어갈 때의 입력값은 현재 탭의 저장소에 잠시 보관했다가 로그인과 AI 사주 이용 동의를 마치면 삭제합니다.</p>
+      <p>브라우저 설정에서 쿠키 저장을 거부하거나 기존 쿠키를 삭제할 수 있습니다. 다만 이 경우 로그인, 가입, AI 리딩 생성과 저장 기록 조회 등 인증이 필요한 기능을 이용할 수 없습니다.</p>
+      <p>명로는 방문 통계를 위해 Google Analytics 쿠키(<code>_ga</code> 등)를 사용합니다. 이 쿠키는 브라우저를 구분하는 임의 식별값만 담고, 마지막 방문부터 최대 2년간 남습니다. 이 쿠키를 차단하거나 삭제해도 명로의 모든 기능을 그대로 이용할 수 있으며, 세부 내용과 거부 방법은 위 Google Analytics 방문 통계의 국외 처리 항목을 따릅니다. 명로는 광고 쿠키를 사용하지 않으며, 무료 오늘의 카드 값은 쿠키가 아닌 현재 브라우저 저장소에만 보관합니다. 무료 만세력에서 AI 사주로 넘어갈 때의 입력값은 현재 탭의 저장소에 잠시 보관했다가 로그인과 AI 사주 이용 동의를 마치면 삭제합니다.</p>
       <Heading>개인정보 보호책임자와 문의처</Heading>
       <dl>
         <div><dt>개인정보 보호책임자</dt><dd>{LEGAL_METADATA.operatorName}</dd></div>

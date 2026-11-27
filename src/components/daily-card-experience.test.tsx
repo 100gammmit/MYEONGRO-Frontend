@@ -22,10 +22,12 @@ describe("DailyCardExperience", () => {
     vi.restoreAllMocks();
     localStorage.clear();
     vi.spyOn(globalThis.crypto, "randomUUID").mockReturnValue(drawId);
+    window.gtag = vi.fn();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    delete window.gtag;
   });
 
   it("calls the lightweight API once only after confirmation and saves the result", async () => {
@@ -59,6 +61,7 @@ describe("DailyCardExperience", () => {
       throw new Error("Expected fixture content to exist.");
     }
     expect(screen.getByRole("heading", { name: expectedContent.today.heading })).toHaveFocus();
+    expect(window.gtag).toHaveBeenCalledWith("event", "daily_card_draw", {});
   });
 
   it("restores today's result without another API call", async () => {
@@ -77,6 +80,7 @@ describe("DailyCardExperience", () => {
     expect(await screen.findByText("오늘의 카드 · 태양")).toBeInTheDocument();
     await waitFor(() => expect(fetchMock).not.toHaveBeenCalled());
     expect(screen.getByRole("button", { name: "오늘의 카드 공유하기" })).toBeInTheDocument();
+    expect(window.gtag).not.toHaveBeenCalled();
   });
 
   it("does not restore a guest result for an authenticated user", async () => {

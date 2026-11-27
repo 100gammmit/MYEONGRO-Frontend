@@ -32,12 +32,14 @@ describe("DailyCardShareButton", () => {
     setNavigator("share", undefined);
     setNavigator("clipboard", undefined);
     setTouchDevice(true);
+    window.gtag = vi.fn();
   });
 
   afterEach(() => {
     setNavigator("share", undefined);
     setNavigator("clipboard", undefined);
     vi.unstubAllGlobals();
+    delete window.gtag;
   });
 
   it("copies the link on a desktop even when the browser offers a share sheet", async () => {
@@ -53,6 +55,7 @@ describe("DailyCardShareButton", () => {
     expect(await screen.findByText("링크를 복사했어요")).toBeInTheDocument();
     expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${SHARE_PATH}`);
     expect(share).not.toHaveBeenCalled();
+    expect(window.gtag).toHaveBeenCalledWith("event", "share", { method: "copy_link", content_type: "daily_card" });
   });
 
   it("asks for this result's link and opens the phone's share sheet", async () => {
@@ -70,6 +73,9 @@ describe("DailyCardShareButton", () => {
       url: `${window.location.origin}${SHARE_PATH}`,
     });
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await waitFor(() => expect(window.gtag).toHaveBeenCalledWith(
+      "event", "share", { method: "share_sheet", content_type: "daily_card" },
+    ));
   });
 
   it("fetches the link as the result shows, so the click opens the sheet at once", async () => {
@@ -109,6 +115,7 @@ describe("DailyCardShareButton", () => {
 
     await waitFor(() => expect(button).toBeEnabled());
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(window.gtag).not.toHaveBeenCalled();
   });
 
   it("copies the link where there is no share sheet", async () => {

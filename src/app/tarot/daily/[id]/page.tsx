@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import styles from "@/components/daily-card-experience.module.css";
 import { DailyCardResultCard } from "@/components/daily-card-result-card";
 import { ReadingShell } from "@/components/reading-shell";
+import { TrackOnView } from "@/components/track-on-view";
 import { getDailyCardContent } from "@/domain/daily-card-free";
 import { DAILY_CARD_SHARE_IDS, dailyCardFromShareId, dailyCardSharePath } from "@/domain/daily-card-free/share-ids.server";
 import { generatedShareImage, sharedPageMetadata } from "@/infrastructure/site-metadata";
@@ -49,6 +50,7 @@ export default async function SharedDailyCardPage({ params }: SharedDailyCardPag
       description="누군가 뽑은 오늘의 카드예요."
       back={{ href: "/tarot", label: "타로" }}
     >
+      <TrackOnView event={{ name: "daily_card_share_view" }} />
       <DailyCardResultCard cardId={card.cardId} content={card.content} />
       <div className="reading-actions">
         <Link className="primary-button full-button" href="/tarot/daily">나도 오늘의 카드 뽑기</Link>

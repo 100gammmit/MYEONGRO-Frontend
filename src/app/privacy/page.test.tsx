@@ -21,14 +21,16 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스에서는 즉시 삭제되며 서비스에서 개별 복구할 수 없습니다.*재해복구용 자동 백업에는 최대 7일간 잔존/))
       .toBeInTheDocument();
-    expect(screen.getByText("문서 버전 2026-11-21 · 시행일 2026-11-21")).toBeInTheDocument();
+    expect(screen.getByText("문서 버전 2026-11-27 · 시행일 2026-11-27")).toBeInTheDocument();
     expect(screen.getByText(/OpenAI OpCo, LLC의 Global API/)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "개인정보 처리 항목과 보유기간" }))
       .toBeInTheDocument();
     const table = screen.getByRole("table", { name: "명로 개인정보 처리 항목과 보유기간" });
     expect(within(table).getAllByRole("columnheader").map((cell) => cell.textContent))
       .toEqual(["처리 목적", "처리 항목", "처리 근거", "보유기간·삭제 기준"]);
-    expect(within(table).getAllByRole("rowheader")).toHaveLength(16);
+    expect(within(table).getAllByRole("rowheader")).toHaveLength(17);
+    expect(within(table).getByRole("row", { name: /방문 통계 분석\(Google Analytics\).*IP 주소는 Google Analytics에 저장되지 않음.*2개월/ }))
+      .toBeInTheDocument();
     const abuseLimitRow = within(table).getByRole("row", { name: /로그인과 무료 만세력 요청 남용 방지/ });
     expect(abuseLimitRow).toHaveTextContent("IP 주소 자체는 저장하지 않음");
     expect(abuseLimitRow).toHaveTextContent("1분 후 자동 삭제");
@@ -70,7 +72,7 @@ describe("PrivacyPage", () => {
       name: /OpenAI OpCo, LLC.*AI 타로·사주 리딩 생성.*OpenAI 국외이전/,
     })).toBeInTheDocument();
     expect(within(directProcessorTable).getAllByRole("rowheader").map((cell) => cell.textContent))
-      .toEqual(["Amazon Web Services Korea LLC", "OpenAI OpCo, LLC", "Google Asia Pacific Pte. Ltd."]);
+      .toEqual(["Amazon Web Services Korea LLC", "OpenAI OpCo, LLC", "Google Asia Pacific Pte. Ltd.", "Google LLC"]);
     expect(within(directProcessorTable).getByRole("row", {
       name: /Google Asia Pacific Pte. Ltd..*문의 이메일\(일반 문의·개인정보 권리행사\)·첨부파일·답변.*Google 복구·삭제 기준/,
     })).toBeInTheDocument();
@@ -150,11 +152,17 @@ describe("PrivacyPage", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/운영 데이터베이스의 관련 레코드를 복구 유예 없이 영구 삭제/))
       .toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "로그인 세션 쿠키" }))
+    expect(screen.getByRole("heading", { name: "쿠키" }))
       .toBeInTheDocument();
     expect(screen.getByText(/MYEONGRO_SESSION/)).toBeInTheDocument();
     expect(screen.getByText(/HttpOnly, Secure와 SameSite=Lax/)).toBeInTheDocument();
-    expect(screen.getByText(/광고 또는 행태 추적 쿠키를 사용하지 않/)).toBeInTheDocument();
+    expect(screen.getByText(/방문 통계를 위해 Google Analytics 쿠키/)).toHaveTextContent("명로는 광고 쿠키를 사용하지 않으며");
+    expect(screen.getByRole("heading", { name: "Google Analytics 방문 통계의 국외 처리" }))
+      .toBeInTheDocument();
+    expect(screen.getAllByText(/리딩·기록 식별자, 명로 사용자 식별자와 이메일은 Google Analytics로 보내지 않음/).length)
+      .toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "Google Analytics 차단 브라우저 부가기능" }))
+      .toHaveAttribute("href", "https://tools.google.com/dlpage/gaoptout");
     expect(screen.getByRole("heading", { name: "개인정보 보호책임자와 문의처" }))
       .toBeInTheDocument();
     expect(screen.getByText("백민하")).toBeInTheDocument();

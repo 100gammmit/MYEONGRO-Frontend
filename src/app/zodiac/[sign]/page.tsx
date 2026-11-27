@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Chevron, ZodiacNav, ZodiacYears } from "@/components/zodiac/zodiac-parts";
+import { TrackOnView } from "@/components/track-on-view";
 import { ZodiacWheel } from "@/components/zodiac/zodiac-wheel";
 import styles from "@/components/zodiac/zodiac.module.css";
 import {
@@ -56,6 +57,7 @@ export default async function ZodiacSignPage({ params }: ZodiacSignPageProps) {
 
   return (
     <article className={`flow-page page-width ${styles.page}`}>
+      <TrackOnView event={{ name: "zodiac_fortune_view", params: { zodiac_sign: sign.slug } }} />
       <Link className={styles.back} href="/zodiac"><span aria-hidden="true">←</span> 띠별 신년운세</Link>
       <ZodiacNav current={sign.slug} />
       <h1>{YEAR.year} {sign.name} 신년운세: {headline(sign)}</h1>

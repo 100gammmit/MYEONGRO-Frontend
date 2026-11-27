@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { LEGAL_METADATA } from "@/domain/consent/legal-metadata";
 import { SHARE_IMAGE, SHARE_TWITTER, SITE_ORIGIN } from "@/infrastructure/site-metadata";
+import { Analytics } from "@/components/analytics";
 import { FooterLink } from "@/components/footer-link";
 import { ReadingCreditProvider } from "@/components/reading-credit-provider";
 import { ServiceUpdateBanner } from "@/components/service-update-banner";
 import { SiteHeader } from "@/components/site-header";
 import { ZODIAC_YEAR_CONTENT } from "@/domain/zodiac-fortune";
 import { adsenseClient } from "@/infrastructure/adsense";
+import { gaMeasurementId } from "@/infrastructure/analytics";
 import { getBackendCookieHeader } from "@/infrastructure/backend/request-cookies";
 import { getSpringSessionUser } from "@/infrastructure/backend/session-auth";
 import "@kfonts/maruburi";
@@ -29,6 +31,7 @@ export default async function RootLayout({
     await getSpringSessionUser(await getBackendCookieHeader()),
   );
   const adsensePublisher = adsenseClient();
+  const analyticsId = gaMeasurementId();
 
   // globals.css scrolls in-page links smoothly; the attribute tells Next.js that is intended, so it
   // keeps jumping straight to the top on route changes (and stays that way after Next.js 16).
@@ -40,6 +43,8 @@ export default async function RootLayout({
         </head>
       )}
       <body>
+        {/* First in the tree so its effect sets the cleaned page address before any page event. */}
+        {analyticsId && <Analytics measurementId={analyticsId} />}
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
         <ReadingCreditProvider authenticated={authenticated}>

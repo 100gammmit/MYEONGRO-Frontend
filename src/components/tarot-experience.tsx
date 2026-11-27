@@ -22,6 +22,7 @@ import {
   DIRECT_IDENTIFIER_INPUT_MESSAGE,
 } from "@/domain/reading/direct-identifier";
 import { getDisplayedReadingCredits, getReadingCreditAccess } from "@/domain/reading-credit";
+import { trackEvent } from "@/infrastructure/analytics-client";
 import { postReadingRequest } from "@/infrastructure/reading-creation-request";
 import { ConsentGate } from "./consent-gate";
 import { stoneForSlot, TarotStone } from "./tarot-stone";
@@ -257,6 +258,9 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
     }
 
     inFlightRequestId.current = nextRequestId;
+    // A kept request id is a retry of the same reading, not a new start.
+    const analyticsParams = { reading_type: "tarot", spread_type: spreadType } as const;
+    if (!requestId) trackEvent({ name: "reading_start", params: analyticsParams });
     setRequestId(nextRequestId);
     setError(null);
     setRecovering(false);
@@ -319,6 +323,7 @@ export function TarotExperience({ initialSpread }: { initialSpread?: AiTarotSpre
       );
       setRequestId(null);
       void credits.refresh();
+      trackEvent({ name: "reading_complete", params: analyticsParams });
       router.push(`/tarot/results/${encodeURIComponent(validated.readingId)}`);
     } catch (readingError) {
       setError(

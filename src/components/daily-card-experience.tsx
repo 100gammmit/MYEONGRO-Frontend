@@ -15,6 +15,8 @@ import {
   type DailyCardStorageScope,
   type StoredDailyCard,
 } from "@/domain/daily-card-free";
+import { trackEvent } from "@/infrastructure/analytics-client";
+
 import { ReadingShell } from "./reading-shell";
 import styles from "./daily-card-experience.module.css";
 import { DailyCardResultCard } from "./daily-card-result-card";
@@ -136,6 +138,7 @@ export function DailyCardExperience({
         }
       }
       setState({ status: "result", stored });
+      trackEvent({ name: "daily_card_draw" });
     } catch (error) {
       setState({
         status: "error",

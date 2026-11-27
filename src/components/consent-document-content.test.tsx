@@ -5,7 +5,7 @@ import { ConsentDocumentContent } from "./consent-document-content";
 
 describe("legal document effective dates", () => {
   it.each([
-    ["privacy", "2026-11-21", "2026-11-21"],
+    ["privacy", "2026-11-27", "2026-11-27"],
     ["terms", "2026-09-27", "2026-10-02"],
     ["ai-overseas-transfer", "2026-09-25", "2026-10-02"],
   ] as const)("uses the independent date for %s without changing consent documents", (documentType, version, date) => {

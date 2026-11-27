@@ -48,6 +48,7 @@ import {
   fetchSajuBirthPlaces,
   SajuBirthPlacesClientError,
 } from "@/infrastructure/backend/saju-birth-places-client";
+import { trackEvent } from "@/infrastructure/analytics-client";
 import { postReadingRequest } from "@/infrastructure/reading-creation-request";
 import { fetchAnnualDetailLevel, type AnnualDetailLevel } from "@/infrastructure/backend/saju-detail-level-client";
 
@@ -406,7 +407,11 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
     setPhase("loading");
 
     try {
+      // A kept request id is a retry of the same reading, not a new start.
+      const isNewReading = requestIdRef.current === null;
       const body = buildRequest(form, ensureRequestId(requestIdRef));
+      const analyticsParams = { reading_type: "saju", report_type: form.reportType } as const;
+      if (isNewReading) trackEvent({ name: "reading_start", params: analyticsParams });
       const outcome = await postReadingRequest("/api/saju/readings", body, {
         onRecovering: () => setRecovering(true),
         signal: unmountRef.current.signal,
@@ -436,6 +441,7 @@ export function SajuExperience({ initialReportType = "birth_annual_question" }: 
       }
       const created = parseSajuReadingCreatedResponse(await response.json());
       void credits.refresh();
+      trackEvent({ name: "reading_complete", params: analyticsParams });
       router.push(`/saju/results/${encodeURIComponent(created.reading.id)}`);
     } catch (error) {
       setGeneralError(
