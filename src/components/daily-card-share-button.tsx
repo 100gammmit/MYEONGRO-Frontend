@@ -27,7 +27,13 @@ function isAbort(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-// Phones open their own share sheet; elsewhere the link is copied instead. Browsers allow both only
+// Desktop browsers also offer a share sheet, but it rarely lists the messengers people paste links
+// into there, so only touch-first devices get it; everywhere else the link is copied.
+function prefersShareSheet(): boolean {
+  return typeof navigator.share === "function" && window.matchMedia?.("(pointer: coarse)").matches === true;
+}
+
+// Phones and tablets open their own share sheet; elsewhere the link is copied instead. Browsers allow both only
 // while the click's user activation lasts, so the link is fetched as soon as the result shows and
 // the click hands it over without waiting on the network.
 export function DailyCardShareButton({
@@ -73,7 +79,7 @@ export function DailyCardShareButton({
   }, [status]);
 
   async function handOver(url: string) {
-    if (typeof navigator.share === "function") {
+    if (prefersShareSheet()) {
       try {
         await navigator.share({ title: `오늘의 카드: ${content.cardName}`, text: `오늘의 카드: ${content.cardName} · ${content.title}`, url });
         setStatus("idle");

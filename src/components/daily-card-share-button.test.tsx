@@ -21,16 +21,38 @@ function setNavigator(key: "share" | "clipboard", value: unknown) {
   Object.defineProperty(navigator, key, { configurable: true, value });
 }
 
+// Touch-first screens match "(pointer: coarse)"; a mouse-driven desktop does not.
+function setTouchDevice(touch: boolean) {
+  vi.stubGlobal("matchMedia", (query: string) => ({ matches: query === "(pointer: coarse)" && touch }));
+}
+
 describe("DailyCardShareButton", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     setNavigator("share", undefined);
     setNavigator("clipboard", undefined);
+    setTouchDevice(true);
   });
 
   afterEach(() => {
     setNavigator("share", undefined);
     setNavigator("clipboard", undefined);
+    vi.unstubAllGlobals();
+  });
+
+  it("copies the link on a desktop even when the browser offers a share sheet", async () => {
+    setTouchDevice(false);
+    mockShareApi();
+    const share = vi.fn().mockResolvedValue(undefined);
+    setNavigator("share", share);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    setNavigator("clipboard", { writeText });
+
+    fireEvent.click(renderButton());
+
+    expect(await screen.findByText("링크를 복사했어요")).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith(`${window.location.origin}${SHARE_PATH}`);
+    expect(share).not.toHaveBeenCalled();
   });
 
   it("asks for this result's link and opens the phone's share sheet", async () => {
